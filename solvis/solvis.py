@@ -5,6 +5,9 @@ from zipfile import Path
 #from solvis.config import WORK_PATH
 from config import WORK_PATH
 import pandas as pd
+import geopandas as gpd
+
+from shapely.geometry import Polygon
 
 class Solution:
 
@@ -19,11 +22,17 @@ class Solution:
         self._rupture_props = None
         self._rupture_sections = None
         self._indices = None
+        self._fault_sections = None
         self._rs_with_rates = None
 
     def _get_dataframe(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
             prop = pd.read_csv(Path(self._archive_path, at=path).open()).convert_dtypes()
+        return prop
+
+    def _get_geojson(self, prop, path):
+        if not isinstance(prop, pd.DataFrame):
+            prop = gpd.read_file(Path(self._archive_path, at=path).open())
         return prop
 
     @property
@@ -38,6 +47,11 @@ class Solution:
     @property
     def indices(self):
         return self._get_dataframe(self._indices, 'ruptures/indices.csv')
+
+    @property
+    def fault_sections(self):
+        return self._get_geojson(self._fault_sections, 'ruptures/fault_sections.geojson' )
+
 
     @property
     def rupture_sections(self):
@@ -75,8 +89,10 @@ sol = Solution(PurePath(WORK_PATH,  name))
 
 if __name__ == "__main__":
 
-    sr = sol.rs_with_rates
 
+    print(sol.fault_sections)
+
+    sr = sol.rs_with_rates
     print("rupture_sections")
     print(sol.rupture_sections)
 
@@ -95,4 +111,19 @@ if __name__ == "__main__":
     print(sr[(sr['Annual Rate']>=1e-9) & (sr['Magnitude']<7.5)].count())
     print()
 
+    acton_sects = sol.fault_sections[sol.fault_sections['ParentName']=="Whitemans Valley"]
+    qry = gpd.GeoDataFrame(sr.join(acton_sects, 'section', how='inner'))
+    print(qry)
 
+    print("qry[(qry['Annual Rate']>=1e-9) & (qry['Magnitude']<7.5)]")
+    print(qry[(qry['Annual Rate']>=1e-9) & (qry['Magnitude']<7.5)])
+    print()
+
+
+    #Geometry based query
+    wlg_poly = Polygon([(0,0), (2,0), (2,2), (0,2)])
+    whitemans_0 = Polygon([(174.892,-41.3), (174.9, -41.345), (174.91, -41.33), (174.922, -41.32), (174.9360, -41.298)])
+
+    print("Near Whitemans Valley Polygon")
+    print(qry[(qry['Annual Rate']>=1e-9) & (qry['Magnitude']<7.5) & (qry['geometry'].intersects(whitemans_0))])
+    print()
