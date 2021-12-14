@@ -2,7 +2,7 @@
 
 a demo to try some techniques for analysis of opensha modular solution files.
 
- - opensha modular  documentation
+ - opensha modular documentation
  - pandas, geopanda references
 
 ## goals
@@ -26,6 +26,6 @@ of the solution and rupture set characteristics. Features:
 
  - create a MFD histogram in 0.01 bins from 7.0 to 7.30 (3O bins) for the WHV fault system
  - find all ruptures between 7.75 and 8.25, involving the TVZ, grouped by the number of parent faults, ordered by rupture-length (reverse)
- - given a user-defined-function udfRuptureComplexity(rupture) rank ruptures in Region X by complexity, then by magnitudee
+ - given a user-defined-function udfRuptureComplexity(rupture) rank ruptures in Region X by complexity, then by magnitude
  
 
