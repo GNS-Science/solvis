@@ -1,11 +1,6 @@
-from pathlib import PurePath
 from zipfile import Path
-import os
 import pandas as pd
 import geopandas as gpd
-#import numpy as np
-
-#from shapely.geometry import Polygon
 
 class InversionSolution:
 
@@ -88,3 +83,18 @@ class InversionSolution:
             return self._ruptures_with_rates
         self._ruptures_with_rates = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
         return self._ruptures_with_rates
+
+    #return get the rupture ids for any ruptures intersecting the polygon
+    def get_ruptures_intersecting(self, polygon):
+        q0 = gpd.GeoDataFrame(self.fault_sections)
+        q1 = q0[q0['geometry'].intersects(polygon)] #whitemans_0)]
+        sr = self.rs_with_rates
+        qdf = sr.join(q1, 'section', how='inner')
+        return qdf.rupture.unique()
+
+    def get_ruptures_for_parent_fault(self, parent_fault_name: str):
+        # sr = sol.rs_with_rates
+        # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
+        sects = self.fault_sections[self.fault_sections['ParentName']==parent_fault_name]
+        qdf = self.rupture_sections.join(sects, 'section', how='inner')
+        return qdf.rupture.unique()
