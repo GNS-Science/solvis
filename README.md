@@ -12,10 +12,10 @@ of the solution and rupture set characteristics. Features:
 
  - [ ] user can choose from regions already defined in the solution
  - user can select ruptures matching 
-    - [ ] parent fault
+    - [x] parent fault
     - [ ] named fault (fault system)
     - [ ] constraint region (from TargetMFDs)
- - [ ] user can create new region polygons 
+ - [x] user can create new region polygons
  - [ ] user can compare selections (e.g. Wellington East vs Wellington CBD vs Hutt Valley) 
  - for a given query result show me dimensions...
     - mag, length, area, rate, section count, parent fault count, jump-length, jump angles, slip (various), partication, nucleation 
@@ -25,7 +25,13 @@ of the solution and rupture set characteristics. Features:
 ## From here the user can answer questions like ....
 
  - create a MFD histogram in 0.01 bins from 7.0 to 7.30 (3O bins) for the WHV fault system
- - find all ruptures between 7.75 and 8.25, involving the TVZ, grouped by the number of parent faults, ordered by rupture-length (reverse)
+ - list all ruptures between 7.75 and 8.25, involving the TVZ, ordered by rupture-length
  - given a user-defined-function udfRuptureComplexity(rupture) rank ruptures in Region X by complexity, then by magnitude
- 
+
+  - regional MFD
+      - [x] participation (sum of rate) for every rupture though a point
+      - [ ] nucleation/blame/culpability rate summed over the region
+           normalised by the area of an area (region, named fault)
+
+
 
