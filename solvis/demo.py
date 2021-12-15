@@ -89,7 +89,19 @@ def demo_polygon_to_geojson(polygon=None, rate_threshold=1e-8):
     export_geojson(gpd.GeoDataFrame(wsp1), f"wlg_hex_polygon_60m_rate_above_{rate_threshold}.geojson")
 
 
+def demo_mfd_comparison(rate_threshold=1e-8):
+
+    print(f"compare raw, with rate_above_{rate_threshold}")
+    print("========================================")
+
+    rr = sol.ruptures_with_rates
+    mfd0 = mfd_hist(rr)
+    mfd1 = mfd_hist(rr[rr['Annual Rate']>rate_threshold])
+    print(mfd0.compare(mfd1))
+
+
 def demo_all_nz_to_geojson(rate_threshold=1e-8):
+    ##BROKEN (BRAin fade)
     sr = sol.rs_with_rates
     #sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate']>0)]
     sp0 = sr.join(sol.fault_sections, 'section', how='inner')
@@ -107,6 +119,8 @@ if __name__ == "__main__":
     # print("=========")
     # demo_all_nz_to_geojson(rate_threshold=1e-8)
     # print()
+
+    demo_mfd_comparison()
 
     # # print("Done")
     print(f"Demo 0")
