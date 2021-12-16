@@ -5,7 +5,6 @@ from pathlib import PurePath
 from shapely.geometry import Polygon
 from solvis import *
 
-
 def demo1():
     sr = sol.rs_with_rates
     print("Query: Query: sections with rate (sr) where sr['rupture']==5]")
@@ -64,8 +63,7 @@ name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTc1MlBDZllC.zip"
 
 WORK_PATH = os.getenv('NZSHM22_SCRIPT_WORK_PATH', PurePath(os.getcwd(), "tmp"))
 
-sol = InversionSolution(PurePath(WORK_PATH,  name))
-
+sol = InversionSolution().from_archive(PurePath(WORK_PATH,  name))
 
 def demo_polygon_to_mfd():
     riw = sol.get_ruptures_intersecting(wlg_hex_polygon)
@@ -113,14 +111,23 @@ def demo_all_nz_to_geojson(rate_threshold=1e-8):
     export_geojson(gpd.GeoDataFrame(sp1), f"all_nz_60m_rate_above_{rate_threshold}.geojson")
 
 
+def demo_clone_filter(polygon, rate_threshold):
+    riw = sol.get_ruptures_intersecting(polygon)
+    wlg_sol = new_sol(sol, riw)
+
+    above = rupt_ids_above_rate(wlg_sol, 1e-7)
+    #wlg_above_sol == new_sol(wlg_sol, above)
+    wsp0 = section_participation(wlg_sol, above)
+
+    export_geojson(gpd.GeoDataFrame(wsp0), f"region_in_poly_above-{rate_threshold}.geojson")
+
+
 if __name__ == "__main__":
 
     # print(f"Demo 5")
     # print("=========")
     # demo_all_nz_to_geojson(rate_threshold=1e-8)
     # print()
-
-    demo_mfd_comparison()
 
     # # print("Done")
     print(f"Demo 0")
@@ -148,4 +155,13 @@ if __name__ == "__main__":
     demo_parent_fault_mfd()
     print()
 
+    print(f"Demo 5")
+    print("=========")
+    demo_mfd_comparison()
+    print()
 
+    print(f"Demo 6")
+    print("=========")
+    demo_clone_filter(wlg_hex_polygon, 1e-6)
+
+    print("Done")

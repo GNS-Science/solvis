@@ -4,12 +4,19 @@ import geopandas as gpd
 
 class InversionSolution:
 
-    def __init__(self, archive_path):
+    def __init__(self):
         """
-        create an opensha modular archive, given a full archive path
+        create an opensha modular archive
         """
+        self._init_props()
+
+    def from_archive(self, archive_path):
+        self._init_props()
         assert Path(archive_path, at='ruptures/indices.csv').exists()
         self._archive_path = archive_path
+        return self
+
+    def _init_props(self):
         self._rates = None
         self._ruptures = None
         self._rupture_props = None
@@ -19,33 +26,40 @@ class InversionSolution:
         self._rs_with_rates = None
         self._ruptures_with_rates = None
 
-    def _get_dataframe(self, prop, path):
+    def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
             prop = pd.read_csv(Path(self._archive_path, at=path).open()).convert_dtypes()
         return prop
 
-    def _get_geojson(self, prop, path):
+    def _geodataframe_from_geojson(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
             prop = gpd.read_file(Path(self._archive_path, at=path).open())
         return prop
 
     @property
     def rates(self):
-        return self._get_dataframe(self._rates, 'solution/rates.csv')
+        return self._dataframe_from_csv(self._rates, 'solution/rates.csv')
 
     @property
     def ruptures(self):
-        return self._get_dataframe(self._ruptures, 'ruptures/properties.csv')
+        return self._dataframe_from_csv(self._ruptures, 'ruptures/properties.csv')
 
 
     @property
     def indices(self):
-        return self._get_dataframe(self._indices, 'ruptures/indices.csv')
+        return self._dataframe_from_csv(self._indices, 'ruptures/indices.csv')
 
     @property
     def fault_sections(self):
-        return self._get_geojson(self._fault_sections, 'ruptures/fault_sections.geojson' )
+        return self._geodataframe_from_geojson(self._fault_sections, 'ruptures/fault_sections.geojson' )
 
+
+    def set_props(self, rates, ruptures, indices, fault_sections):
+        self._init_props()
+        self._rates = rates
+        self._ruptures = ruptures
+        self._fault_sections = fault_sections
+        self._indices = indices
 
     @property
     def rupture_sections(self):
@@ -53,7 +67,7 @@ class InversionSolution:
         if not  self._rupture_sections is None:
             return self._rupture_sections
 
-        rs = self.indices #_get_dataframe(self._rupture_sections, 'ruptures/indices.csv').copy()
+        rs = self.indices #_dataframe_from_csv(self._rupture_sections, 'ruptures/indices.csv').copy()
 
         #remove "Rupture Index, Num Sections" column
         df_table = rs.drop(rs.iloc[:, :2], axis=1)

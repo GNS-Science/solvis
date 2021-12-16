@@ -7,7 +7,7 @@ import pandas as pd
 import geopandas as gpd
 import numpy as np
 from shapely.geometry import Polygon
-from inversion_solution import InversionSolution
+from solvis.inversion_solution import InversionSolution
 
 # def sections_rates_for_ruptures(ruptures: pd.Series):
 #     #https://stackoverflow.com/questions/50655370/filtering-the-dataframe-based-on-the-column-value-of-another-dataframe
@@ -45,3 +45,19 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename):
     f.write(gdf.to_json())
     f.close()
 
+def new_sol(sol: InversionSolution, rupture_ids: np.array):
+    rr = sol.ruptures
+    ra = sol.rates
+    ri = sol.indices
+    ruptures = rr[rr["Rupture Index"].isin(list(rupture_ids))].copy()
+    rates = ra[ra["Rupture Index"].isin(list(rupture_ids))].copy()
+    indices = ri[ri["Rupture Index"].isin(list(rupture_ids))].copy()
+
+    #all other props are derived from these ones
+    ns =  InversionSolution()
+    ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
+    return ns
+
+def rupt_ids_above_rate(sol: InversionSolution, rate: float):
+    rr = sol.ruptures_with_rates
+    return rr[rr['Annual Rate']> rate]["Rupture Index"].unique()
