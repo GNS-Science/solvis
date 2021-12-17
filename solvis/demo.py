@@ -121,6 +121,11 @@ def demo_clone_filter(polygon, rate_threshold):
 
     export_geojson(gpd.GeoDataFrame(wsp0), f"region_in_poly_above-{rate_threshold}.geojson")
 
+    #write the solution
+    print("write the wlg data as a new solution file: demo_solution.zip")
+    base_archive = PurePath(WORK_PATH,  name)
+    wlg_sol.to_archive("demo_solution.zip", str(base_archive))
+
 
 if __name__ == "__main__":
 
@@ -163,5 +168,5 @@ if __name__ == "__main__":
     print(f"Demo 6")
     print("=========")
     demo_clone_filter(wlg_hex_polygon, 1e-6)
-
+    print()
     print("Done")

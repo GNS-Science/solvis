@@ -34,7 +34,18 @@ of the solution and rupture set characteristics. Features:
            normalised by the area of an area (region, named fault)
 
 
+## install
 
+```
+git clone
+pip3 install .
+```
+
+## Run
+
+```
+python3 -m solvis.demo
+```
 
 ## Plotting
 

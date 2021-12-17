@@ -1,8 +1,22 @@
-from zipfile import Path
+import zipfile
 import pandas as pd
 import geopandas as gpd
+import time
+import io
+import shutil
+
+def data_to_zip_direct(z, data, name):
+    import time
+    zinfo = zipfile.ZipInfo(name, time.localtime( )[:6])
+    zinfo.compress_type = zipfile.ZIP_DEFLATED
+    z.writestr(zinfo, data)
 
 class InversionSolution:
+
+    RATES_PATH = 'solution/rates.csv'
+    RUPTS_PATH = 'ruptures/properties.csv'
+    INDICES_PATH = 'ruptures/indices.csv'
+    FAULTS_PATH = 'ruptures/fault_sections.geojson'
 
     def __init__(self):
         """
@@ -12,9 +26,31 @@ class InversionSolution:
 
     def from_archive(self, archive_path):
         self._init_props()
-        assert Path(archive_path, at='ruptures/indices.csv').exists()
+        assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         self._archive_path = archive_path
         return self
+
+    def to_archive(self, archive_path, base_archive_path=None):
+        """
+        Writes the current solution to a new zip archive, optionally cloning data from a base archive
+        Note this is not well tested, use with caution!
+
+        """
+        zout = zipfile.ZipFile (archive_path, 'w', zipfile.ZIP_DEFLATED)
+
+        if base_archive_path:
+            #this copies in memory, skipping the datframe files we want to overwrite
+            zin = zipfile.ZipFile (base_archive_path, 'r')
+            for item in zin.infolist():
+                if (item.filename in [self.RATES_PATH, self.RUPTS_PATH, self.INDICES_PATH]):
+                    continue
+                buffer = zin.read(item.filename)
+                zout.writestr(item, buffer)
+
+        #write out the `self` dataframes
+        data_to_zip_direct(zout, self._rates.to_csv(), self.RATES_PATH)
+        data_to_zip_direct(zout, self._ruptures.to_csv(), self.RUPTS_PATH)
+        data_to_zip_direct(zout, self._indices.to_csv(), self.INDICES_PATH)
 
     def _init_props(self):
         self._rates = None
@@ -28,31 +64,29 @@ class InversionSolution:
 
     def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
-            prop = pd.read_csv(Path(self._archive_path, at=path).open()).convert_dtypes()
+            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open()).convert_dtypes()
         return prop
 
     def _geodataframe_from_geojson(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
-            prop = gpd.read_file(Path(self._archive_path, at=path).open())
+            prop = gpd.read_file(zipfile.Path(self._archive_path, at=path).open())
         return prop
 
     @property
     def rates(self):
-        return self._dataframe_from_csv(self._rates, 'solution/rates.csv')
+        return self._dataframe_from_csv(self._rates, self.RATES_PATH)
 
     @property
     def ruptures(self):
-        return self._dataframe_from_csv(self._ruptures, 'ruptures/properties.csv')
-
+        return self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH)
 
     @property
     def indices(self):
-        return self._dataframe_from_csv(self._indices, 'ruptures/indices.csv')
+        return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
 
     @property
     def fault_sections(self):
-        return self._geodataframe_from_geojson(self._fault_sections, 'ruptures/fault_sections.geojson' )
-
+        return self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
 
     def set_props(self, rates, ruptures, indices, fault_sections):
         self._init_props()
