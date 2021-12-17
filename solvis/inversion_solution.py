@@ -11,6 +11,20 @@ def data_to_zip_direct(z, data, name):
     zinfo.compress_type = zipfile.ZIP_DEFLATED
     z.writestr(zinfo, data)
 
+WARNING = """
+# Attention
+
+This Inversion Solution archive has been modified
+using the solvis python library.
+
+Data may have been filtered out of an original
+Inversion Solution archive file:
+ - 'solution/rates.csv'
+ - 'ruptures/properties.csv'
+ - 'ruptures/indices.csv'
+
+"""
+
 class InversionSolution:
 
     RATES_PATH = 'solution/rates.csv'
@@ -51,6 +65,9 @@ class InversionSolution:
         data_to_zip_direct(zout, self._rates.to_csv(), self.RATES_PATH)
         data_to_zip_direct(zout, self._ruptures.to_csv(), self.RUPTS_PATH)
         data_to_zip_direct(zout, self._indices.to_csv(), self.INDICES_PATH)
+
+        #and the warning notice
+        data_to_zip_direct(zout, WARNING, "WARNING.md")
 
     def _init_props(self):
         self._rates = None

@@ -44,7 +44,9 @@ pip3 install .
 ## Run
 
 ```
-python3 -m solvis.demo
+python3 -m demo
+
+or python3 demo.py
 ```
 
 ## Plotting
