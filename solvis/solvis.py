@@ -6,7 +6,12 @@ from pathlib import PurePath
 import pandas as pd
 import geopandas as gpd
 import numpy as np
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point
+
+import pyproj
+from shapely import geometry
+from shapely.ops import transform
+
 from solvis.inversion_solution import InversionSolution
 
 # def sections_rates_for_ruptures(ruptures: pd.Series):
@@ -16,17 +21,20 @@ from solvis.inversion_solution import InversionSolution
 
 
 #filtered_rupture_sections (with gemoetry)
-def section_participation(sol: InversionSolution, df_ruptures: pd.DataFrame):
+def section_participation(sol: InversionSolution, df_ruptures: pd.DataFrame = None):
     sr = sol.rs_with_rates
-    filtered_sections_with_rates_df = sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate']>0)]
+    if not df_ruptures is None:
+        filtered_sections_with_rates_df = sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate']>0)]
+    else:
+        filtered_sections_with_rates_df = sr
+
     # print("Pivot table (note precision is not lost!!)")
     # participation (sum of rate) for every rupture though a point
     section_sum_of_rates_df = filtered_sections_with_rates_df.pivot_table(values='Annual Rate', index= ['section'], aggfunc=np.sum)
     q0 = gpd.GeoDataFrame(sol.fault_sections)
-    print (q0)
-    print(section_sum_of_rates_df)
-    df6 = section_sum_of_rates_df.join(q0, 'section', how='inner')
-    return df6
+    # print (q0)
+    # print(section_sum_of_rates_df)
+    return section_sum_of_rates_df.join(q0, 'section', how='inner')
 
 
 def mfd_hist(ruptures_df: pd.DataFrame):
@@ -61,3 +69,29 @@ def new_sol(sol: InversionSolution, rupture_ids: np.array):
 def rupt_ids_above_rate(sol: InversionSolution, rate: float):
     rr = sol.ruptures_with_rates
     return rr[rr['Annual Rate']> rate]["Rupture Index"].unique()
+
+
+def circle_polygon(radius_m: int, lat: float, lon: float):
+    #based on https://gis.stackexchange.com/a/359748
+
+    center = Point(float(lon), float(lat))
+
+    local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format( lat, lon )
+
+    wgs84_to_aeqd = partial(
+        pyproj.transform,
+        pyproj.Proj("+proj=longlat +datum=WGS84 +no_defs"),
+        pyproj.Proj(local_azimuthal_projection),
+    )
+
+    aeqd_to_wgs84 = partial(
+        pyproj.transform,
+        pyproj.Proj(local_azimuthal_projection),
+        pyproj.Proj("+proj=longlat +datum=WGS84 +no_defs"),
+    )
+
+    point_transformed = transform(wgs84_to_aeqd, center)
+    buffer = point_transformed.buffer(radius_m)
+    # Get the polygon with lat lon coordinates
+    return transform(aeqd_to_wgs84, buffer)
+
