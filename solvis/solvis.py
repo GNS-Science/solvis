@@ -2,6 +2,7 @@
 
 import os
 from pathlib import PurePath
+from functools import partial
 
 import pandas as pd
 import geopandas as gpd
