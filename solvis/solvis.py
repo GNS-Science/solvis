@@ -68,7 +68,9 @@ def new_sol(sol: InversionSolution, rupture_ids: np.array):
     return ns
 
 def rupt_ids_above_rate(sol: InversionSolution, rate: float):
-    rr = sol.ruptures_with_rates
+    rr = sol.rates
+    if rate:
+        return rr["Rupture Index"].unique()
     return rr[rr['Annual Rate']> rate]["Rupture Index"].unique()
 
 

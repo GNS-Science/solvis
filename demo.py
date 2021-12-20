@@ -112,12 +112,18 @@ def demo_all_nz_to_geojson(rate_threshold=1e-8):
 
 
 def demo_clone_filter(polygon, rate_threshold):
-    riw = sol.get_ruptures_intersecting(polygon)
-    wlg_sol = new_sol(sol, riw)
+    # riw = sol.get_ruptures_intersecting(polygon)
+    # wlg_sol = new_sol(sol, riw)
+    # above = rupt_ids_above_rate(wlg_sol, 1e-7)
+    # #wlg_above_sol == new_sol(wlg_sol, above)
+    # wsp0 = section_participation(wlg_sol, above)
 
-    above = rupt_ids_above_rate(wlg_sol, 1e-7)
-    #wlg_above_sol == new_sol(wlg_sol, above)
-    wsp0 = section_participation(wlg_sol, above)
+    ri = sol.get_ruptures_intersecting(polygon)
+    ri_sol = new_sol(sol, ri)
+
+    if rate_threshold:
+        ri= rupt_ids_above_rate(ri_sol, rate_threshold)
+        ri_sol = new_sol(ri_sol, ri)
 
     export_geojson(gpd.GeoDataFrame(wsp0), f"region_in_poly_above-{rate_threshold}.geojson")
 
