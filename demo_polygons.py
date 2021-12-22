@@ -28,11 +28,13 @@ def process(sol, location, radius_m, rate_threshold=None):
 
     # #write the solution
     base_archive = PurePath(WORK_PATH,  name)
-    new_archive = PurePath(WORK_PATH, f"{location[0]}_ruptures_radius({radius})_rate_filter({rate_threshold})_solution.zip")
-    print(f"write new solution file: {new_archive}")
-    print(f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rates[ri_sol.rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}")
 
-    ri_sol.to_archive(str(new_archive), str(base_archive))
+    for compat in [True, False]:
+        new_archive = PurePath(WORK_PATH, f"{location[0]}_ruptures_radius({radius})_rate_filter({rate_threshold})_{compat}_solution.zip")
+        print(f"write new solution file: {new_archive}")
+        print(f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rates[ri_sol.rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}")
+
+        ri_sol.to_archive(str(new_archive), str(base_archive), compat)
 
 
 if __name__ == "__main__":
@@ -40,8 +42,8 @@ if __name__ == "__main__":
 
     locations = dict(
         AK = ["Auckland", -36.848461, 174.763336],
-        WN = ["Wellington", -41.276825, 174.777969], #-41.288889, 174.777222], OAkley
-        GN = ["Gisborne", -38.662334, 178.017654],
+        # WN = ["Wellington", -41.276825, 174.777969], #-41.288889, 174.777222], OAkley
+        # GN = ["Gisborne", -38.662334, 178.017654],
         CC = ["Christchurch", -43.525650, 172.639847],
     )
 
@@ -56,10 +58,11 @@ if __name__ == "__main__":
     print()
     print(f"with {sol.ruptures_with_rates[sol.ruptures_with_rates['Annual Rate']>0].size} ruptures with rate>0.")
     print()
-    for key, loc in locations.items():
-        print(key, loc)
-        for threshold in rate_filters:
-            radii = [2e5, 3e5, 4e5] #km
+
+    for threshold in rate_filters:
+        for key, loc in locations.items():
+            print(key, loc)
+            radii = [2e4,]# 3e5, 4e5] #km
             for radius_m in radii:
                 print ('process', sol, loc, radius_m, threshold)
                 process(sol, loc, radius_m, threshold)

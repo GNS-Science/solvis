@@ -95,6 +95,16 @@ def circle_polygon(radius_m: int, lat: float, lon: float):
 
     point_transformed = transform(wgs84_to_aeqd, center)
     buffer = point_transformed.buffer(radius_m)
+
     # Get the polygon with lat lon coordinates
-    return transform(aeqd_to_wgs84, buffer)
+    polygon = transform(aeqd_to_wgs84, buffer)
+
+    #Adding 360 to all negative longitudes
+    ext = np.asarray(polygon.exterior.coords)
+    points = []
+    for x, y in ext[:][:]:
+        if x < 0:
+            x += 360
+        points.append(Point(x,y))
+    return Polygon(points)
 

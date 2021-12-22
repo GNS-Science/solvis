@@ -31,6 +31,7 @@ class InversionSolution:
     RUPTS_PATH = 'ruptures/properties.csv'
     INDICES_PATH = 'ruptures/indices.csv'
     FAULTS_PATH = 'ruptures/fault_sections.geojson'
+    METADATA_PATH = 'metadata.json'
 
     def __init__(self):
         """
@@ -42,9 +43,63 @@ class InversionSolution:
         self._init_props()
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         self._archive_path = archive_path
+        #self._metadata = json.load(METADATA_PATH)
         return self
 
-    def to_archive(self, archive_path, base_archive_path=None):
+    def to_archive(self, archive_path, base_archive_path, compat=True):
+        """
+        Writes the current solution to a new zip archive, optionally cloning data from a base archive
+        Note this is not well tested, use with caution!
+
+        """
+        if compat:
+            self._to_fat_archive(archive_path, base_archive_path)
+        else:
+            self._to_slim_archive(archive_path, base_archive_path)
+
+    def _to_fat_archive(self, archive_path, base_archive_path):
+
+        zout = zipfile.ZipFile (archive_path, 'w', zipfile.ZIP_DEFLATED)
+
+        #this copies in memory, skipping the datframe files we want to overwrite
+        zin = zipfile.ZipFile (base_archive_path, 'r')
+
+        for item in zin.infolist():
+            if (item.filename in [self.RATES_PATH]):
+                continue
+            buffer = zin.read(item.filename)
+            zout.writestr(item, buffer)
+
+        #rebuild rates
+        base_archive = InversionSolution().from_archive(base_archive_path)
+        base_rates_df = base_archive.rates.copy()
+        # print('base before reset:', base_rates_df[base_rates_df['Annual Rate']>0])
+        # print()
+
+        #set all base rates to zero (slow)
+        for row in base_rates_df.itertuples(name=None):
+            base_rates_df.iat[row[0],1] = 0
+
+        print('self._rates', self.rates[self.rates['Annual Rate']>0])
+        print()
+
+        #copy rates into new rates_df
+        for row in self.rates.itertuples(name=None):
+            # old_rate = str(base_rates_df.iat[row[0],1])
+            base_rates_df.iat[row[0],1] = row[2]
+            # print("replacing: ", old_rate, row[2], row)
+
+        print('base_after reset:', base_rates_df[base_rates_df['Annual Rate']>0])
+        # print()
+        assert base_rates_df[base_rates_df['Annual Rate']>0].size == self.rates[self.rates['Annual Rate']>0].size
+        self._rates = base_rates_df
+
+        #write out the `self` dataframes
+        data_to_zip_direct(zout, self._rates.to_csv(index=False), self.RATES_PATH)
+        #and the warning notice
+        data_to_zip_direct(zout, WARNING, "WARNING.md")
+
+    def _to_slim_archive(self, archive_path, base_archive_path):
         """
         Writes the current solution to a new zip archive, optionally cloning data from a base archive
         Note this is not well tested, use with caution!
@@ -52,46 +107,18 @@ class InversionSolution:
         """
         zout = zipfile.ZipFile (archive_path, 'w', zipfile.ZIP_DEFLATED)
 
-        if base_archive_path:
-            #this copies in memory, skipping the datframe files we want to overwrite
-            zin = zipfile.ZipFile (base_archive_path, 'r')
-            for item in zin.infolist():
-                if (item.filename in [self.RATES_PATH]): #, self.RUPTS_PATH, self.INDICES_PATH]):
-                    continue
-                buffer = zin.read(item.filename)
-                zout.writestr(item, buffer)
-
-            #rebuild rates
-            base_archive = InversionSolution().from_archive(base_archive_path)
-            base_rates_df = base_archive.rates.copy()
-            # print('base before reset:', base_rates_df[base_rates_df['Annual Rate']>0])
-            # print()
-
-            #set all base rates to zero (slow)
-            for row in base_rates_df.itertuples(name=None):
-                base_rates_df.iat[row[0],1] = 0
-
-            print('self._rates', self.rates[self.rates['Annual Rate']>0])
-            print()
-
-            #copy rates into new rates_df
-            for row in self.rates.itertuples(name=None):
-                # old_rate = str(base_rates_df.iat[row[0],1])
-                base_rates_df.iat[row[0],1] = row[2]
-                # print("replacing: ", old_rate, row[2], row)
-
-            print('base_after reset:', base_rates_df[base_rates_df['Annual Rate']>0])
-            # print()
-            assert base_rates_df[base_rates_df['Annual Rate']>0].size == self.rates[self.rates['Annual Rate']>0].size
-            self._rates = base_rates_df
-            # print( self.rates[self.rates['Annual Rate']>0] )
-            # print()
-            # print( self._rates)
+        #this copies in memory, skipping the datframe files we want to overwrite
+        zin = zipfile.ZipFile (base_archive_path, 'r')
+        for item in zin.infolist():
+            if item.filename in [self.RATES_PATH, self.RUPTS_PATH, self.INDICES_PATH]:
+                continue
+            buffer = zin.read(item.filename)
+            zout.writestr(item, buffer)
 
         #write out the `self` dataframes
         data_to_zip_direct(zout, self._rates.to_csv(index=False), self.RATES_PATH)
-        #data_to_zip_direct(zout, self._ruptures.to_csv(), self.RUPTS_PATH)
-        #data_to_zip_direct(zout, self._indices.to_csv(), self.INDICES_PATH)
+        data_to_zip_direct(zout, self._ruptures.to_csv(), self.RUPTS_PATH)
+        data_to_zip_direct(zout, self._indices.to_csv(), self.INDICES_PATH)
 
         #and the warning notice
         data_to_zip_direct(zout, WARNING, "WARNING.md")
