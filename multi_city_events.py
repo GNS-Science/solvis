@@ -51,7 +51,7 @@ def sum_above(key_combo, cities, limit):
 
 def city_combinations(cities, pop_impacted=1e6, combo_max=5):
     combos = []
-    for rng in range(2, max(len(cities),combo_max)):
+    for rng in range(1, min(len(cities), combo_max)):
         combos.extend(sum_above([c for c in itertools.combinations(cities, rng)], cities, pop_impacted))
     return combos
 
@@ -69,7 +69,7 @@ def pre_process(sol, cities, site_keys, radii):
             location['radius'][radius] = {}
             polygon = circle_polygon(radius_m=radius, lat=location['info'][1], lon=location['info'][2])
             rupts = sol.get_ruptures_intersecting(polygon)
-            print(f"city: {site_key}, radius: {radius} , Pop: {location['info'][3]}, ruptures: {len(rupts)}")
+            #print(f"city: {site_key}, radius: {radius} , Pop: {location['info'][3]}, ruptures: {len(rupts)}")
             location['radius'][radius]['ruptures'] = rupts
     return locations
 
@@ -93,29 +93,28 @@ if __name__ == "__main__":
         AK = ["Auckland", -36.848461, 174.763336, 2e6],
     )
 
-    combos = city_combinations(cities, 0)
-    #combos.reverse()
-    # combos = random.Random().choices(combos, k=10)
-
+    combos = city_combinations(cities, 0, 12)
     print(f"city combos: {len(combos)}")
-    print(combos)
 
     #name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTg4OG1nWFRY.zip"
     name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTkzMHJ0YWJU.zip" #60hrs!
+
     #60hr
     WORK_PATH = "/home/chrisbc/DEV/GNS/opensha-modular/solvis"
     #os.getenv('NZSHM22_SCRIPT_WORK_PATH', PurePath(os.getcwd(), "tmp"))
 
     sol = InversionSolution().from_archive(PurePath(WORK_PATH,  name))
+
+    sol = new_sol(sol, rupt_ids_above_rate(sol, 0))
+
     solutions = [("60hr-J0YWJU.zip", sol)]
-    radii = [100e3, 60e3, ]#30e3,60e3,100e3] #AK could be larger ??
+    radii = [10e3,30e3,60e3,100e3] #AK could be larger ??
     rate_thresholds = [0,1e-15,1e-12,1e-9,1e-6]
+
     radii.reverse()
     rate_thresholds.reverse()
 
-
     city_radius_ruptures = pre_process(sol, cities, cities.keys(), radii)
-    #print(city_radius_ruptures)
 
     rupture_radius_site_sets = {}
     site_set_rupts = {}
@@ -129,26 +128,24 @@ if __name__ == "__main__":
                 events = set(city_radius_ruptures[site]['radius'][radius]['ruptures']).intersection(events)
 
             if len(events):
-                ra = sol.rates
-                rates = ra[ra["Rupture Index"].isin(list(events))]
-                hits = rates[rates['Annual Rate'] >0]
-                print(site_set, radius, len(events), hits.shape[0])
-                if hits.shape[0] > 0:
-                    for row in hits.itertuples():
-                        rupture_idx = row[0]
-                        current = rupture_radius_site_sets.get(rupture_idx, {}).get(radius)
-                        if not current:
-                            pass
-                        elif len(current) < len(site_set):
-                            print("update ", rupture_idx, radius, "from", current, "to", site_set)
-                        else:
-                            continue
-                        if not rupture_radius_site_sets.get(rupture_idx):
-                            rupture_radius_site_sets[rupture_idx] = {}
-                        rupture_radius_site_sets[rupture_idx][radius] = site_set
+                #print(site_set, radius, len(events))
+                #update rupture dict
+                for rupture_idx in events:
+                    current = rupture_radius_site_sets.get(rupture_idx, {}).get(radius)
+                    if not current:
+                        pass
+                    elif len(current) < len(site_set):
+                        print("update ", rupture_idx, radius, "from", current, "to", site_set)
+                    else:
+                        continue
+                    if not rupture_radius_site_sets.get(rupture_idx):
+                        rupture_radius_site_sets[rupture_idx] = {}
+                    rupture_radius_site_sets[rupture_idx][radius] = site_set
 
-            else:
-                print(site_set, radius, None)
+                #update site_set
 
-    print(rupture_radius_site_sets[426336])
+            #else:
+            #    print(site_set, radius, None)
+
+    print(426336, rupture_radius_site_sets[426336])
     print("Done")
