@@ -7,15 +7,19 @@ import random
 from pathlib import PurePath
 import threading
 import concurrent.futures
+import csv
 
 from solvis import *
 
 
 polygon_query_cache = {}
-polygon_lock = threading.Lock()
 combo_cache = {}
-combo_lock = threading.Lock()
 
+polygon_lock = threading.Lock()
+combo_lock = threading.Lock()
+writer_lock = threading.Lock()
+
+"""
 def export(sol):
     # #wlg_above_sol == new_sol(ri_sol, above)
     # sp0 = section_participation(ri_sol, ri)
@@ -33,6 +37,7 @@ def export(sol):
     #  print(f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rates[ri_sol.rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}")
 
     ri_sol.to_archive(str(new_archive), str(base_archive))
+"""
 
 
 def sum_above(key_combo, cities, limit):
@@ -49,7 +54,6 @@ def city_combinations(cities, pop_impacted=1e6, combo_max=5):
     for rng in range(2, max(len(cities),combo_max)):
         combos.extend(sum_above([c for c in itertools.combinations(cities, rng)], cities, pop_impacted))
     return combos
-
 
 
 def process(sol, cities, site_keys, radius):
@@ -84,7 +88,9 @@ def process(sol, cities, site_keys, radius):
     return new_sol(sol, rupts_in_all_locs)
 
 
-def proc_radius(site_set, radius, rate_thresholds):
+def proc_radius(args):
+
+    sol, site_set, radius, rate_thresholds, writer = args[:]
 
     #cache the query result
     key = ".".join(site_set[:-1])
@@ -111,11 +117,11 @@ def proc_radius(site_set, radius, rate_thresholds):
             for idx in idxs:
                 if not idx in unique_events:
                     # for site in site_set:
-                    yield (i, sol[0], site_set, radius, idx)
+                    #print (i, sol[0], site_set, radius, idx)
+                    with writer_lock:
+                        writer.writerow((sol[0], site_set, radius, threshold, idx))
         else:
             return
-
-
 
 
 if __name__ == "__main__":
@@ -162,24 +168,34 @@ if __name__ == "__main__":
 
      #_df = pd.DataFrame(columns=['City Code', 'Site Radius', 'Rupture Index'])
     out_file = f"DATA/rupts_sol({sol[0]}).csv"
-    site_rupts = []
-    i, writes = 0, 0
 
-    for sol in solutions:
-        for site_set in combos:
-            print(f"{site_set}")
-            site_radius_rupts = []
-            for radius in radii:
-                for row in proc_radius(site_set, radius, rate_thresholds):
-                    site_radius_rupts.append(row)
-                    i+=1
+    writer = csv.writer(open(out_file, 'w'), quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(['Solution ID', 'City Codes', 'Site Radius', 'Threshold', 'Rupture Index'])
 
-            #site_set dataframe
-            df = pd.DataFrame(site_radius_rupts, columns=["Index", 'Solution ID', 'City Codes', 'Site Radius', 'Rupture Index'])
-            if writes == 0:
-                df.to_csv(out_file)
-            else:
-                df.to_csv(out_file, mode='a', header=False)
-            writes +=1
+    # site_rupts = []
+    # i, writes = 0, 0
 
+    def generate_args():
+        for sol in solutions:
+            for site_set in combos:
+                for radius in radii:
+                    yield (sol, site_set, radius, rate_thresholds, writer)
 
+    #Parallelize it
+    with concurrent.futures.ThreadPoolExecutor(12) as executor:
+        #executor.map(proc_radius, generate_args()
+        for res in executor.map(proc_radius, generate_args()):
+            pass
+        # if res:
+        #     print(f"A result is {res.result()}")
+        # # for row in res:
+        #     print(row)
+        #     #     i+=1
+
+        #site_set dataframe
+        # df = pd.DataFrame(site_radius_rupts, columns=["Index", 'Solution ID', 'City Codes', 'Site Radius', 'Rupture Index'])
+        # if writes == 0:
+        #     df.to_csv(out_file)
+        # else:
+        #     df.to_csv(out_file, mode='a', header=False)
+        # writes +=1

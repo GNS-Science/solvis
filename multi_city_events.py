@@ -93,7 +93,7 @@ if __name__ == "__main__":
         AK = ["Auckland", -36.848461, 174.763336, 2e6],
     )
 
-    combos = city_combinations(cities, 0, 12)
+    combos = city_combinations(cities, 0, 14)
     print(f"city combos: {len(combos)}")
 
     #name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTg4OG1nWFRY.zip"
@@ -119,33 +119,40 @@ if __name__ == "__main__":
     rupture_radius_site_sets = {}
     site_set_rupts = {}
 
-    for site_set in combos:
-        for radius in radii:
-            events = set(sol.ruptures['Rupture Index'])
-            if len(events) == 0:
-                continue
-            for site in site_set:
-                events = set(city_radius_ruptures[site]['radius'][radius]['ruptures']).intersection(events)
+    def process(args):
+        sol, site_set, radius = args[:]
+        events = set(sol.ruptures['Rupture Index'])
+        if len(events) == 0:
+            return
 
-            if len(events):
-                #print(site_set, radius, len(events))
-                #update rupture dict
-                for rupture_idx in events:
-                    current = rupture_radius_site_sets.get(rupture_idx, {}).get(radius)
-                    if not current:
-                        pass
-                    elif len(current) < len(site_set):
-                        print("update ", rupture_idx, radius, "from", current, "to", site_set)
-                    else:
-                        continue
+        for site in site_set:
+            events = set(city_radius_ruptures[site]['radius'][radius]['ruptures']).intersection(events)
+
+        if len(events):
+            #print(site_set, radius, len(events))
+            #update rupture dict
+            for rupture_idx in events:
+                current = rupture_radius_site_sets.get(rupture_idx, {}).get(radius)
+                if not current:
+                    pass
+                elif len(current) < len(site_set):
+                    print("update ", rupture_idx, radius, "from", current, "to", site_set)
+                else:
+                    continue
+
+                with combo_lock:
                     if not rupture_radius_site_sets.get(rupture_idx):
                         rupture_radius_site_sets[rupture_idx] = {}
                     rupture_radius_site_sets[rupture_idx][radius] = site_set
 
-                #update site_set
+    def generate_args(sol):
+        for site_set in combos:
+            for radius in radii:
+                yield (sol, site_set, radius)
 
-            #else:
-            #    print(site_set, radius, None)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        for res in executor.map(process, generate_args(sol)):
+            pass
 
     print(426336, rupture_radius_site_sets[426336])
     print("Done")
