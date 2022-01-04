@@ -6,6 +6,9 @@ from solvis import *
 CITY_CODE_LENGTH = 3
 
 def where_n_cities_are_within_d_km(df, n, d):
+    """
+    calculates number of cities based on the city_code string length
+    """
     return df[f'r{int(d)}km'].apply(lambda x: len(x) if x else 0) > (CITY_CODE_LENGTH*n)
 
 
@@ -24,10 +27,8 @@ df = pd.read_json('multi_city_ruptures_60hr.json')
 #     where_n_cities_are_within_d_km(df, 3, 30) &\
 #     (df['Annual Rate'] >=1e-6)])
 
-
 idxs = list(df[
-    where_city_within_d_km(df, 'HLZ', 50) &\
-    (df['Annual Rate'] >=1e-6)]['Rupture Index'])
+    where_city_within_d_km(df, 'WLG', 20) & (df['Annual Rate'] >=1e-6)]['Rupture Index'])
     # where_n_cities_are_within_d_km(df, 3, 50) &\
 
 print( len(idxs) )

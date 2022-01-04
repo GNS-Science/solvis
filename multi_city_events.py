@@ -24,7 +24,6 @@ def sum_above(key_combo, cities, limit):
         if pop >= limit:
             yield kc
 
-
 def city_combinations(cities, pop_impacted=1e6, combo_max=5):
     combos = []
     for rng in range(1, min(len(cities), combo_max)):
