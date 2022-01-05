@@ -21,11 +21,15 @@ URL = 'https://github.com/GNS-Science/nshm-nz-opensha'
 EMAIL = 'chrisbc@artisan.co.nz'
 AUTHOR = 'GNS NSHM programme'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
  'numpy',
+ 'pandas',
+ 'geopandas',
+ 'pyproj',
+ 'Shapely'
 ]
 
 # What packages are optional?
