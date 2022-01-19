@@ -53,11 +53,13 @@ class InversionSolution:
 
         """
         if compat:
-            self._to_fat_archive(archive_path, base_archive_path)
+            self._to_compatible_archive(archive_path, base_archive_path)
         else:
-            self._to_slim_archive(archive_path, base_archive_path)
+            self._to_non_compatible_archive(archive_path, base_archive_path)
 
-    def _to_fat_archive(self, archive_path, base_archive_path):
+
+
+    def _to_compatible_archive(self, archive_path, base_archive_path):
 
         zout = zipfile.ZipFile (archive_path, 'w', zipfile.ZIP_DEFLATED)
 
@@ -99,8 +101,11 @@ class InversionSolution:
         #and the warning notice
         data_to_zip_direct(zout, WARNING, "WARNING.md")
 
-    def _to_slim_archive(self, archive_path, base_archive_path):
+    def _to_non_compatible_archive(self, archive_path, base_archive_path):
         """
+        It' non-compatible because it does not reindex the tables from 0 as required by opensha. So it cannot be
+        used to produce opensha reports etc.
+
         Writes the current solution to a new zip archive, optionally cloning data from a base archive
         Note this is not well tested, use with caution!
 
@@ -153,6 +158,16 @@ class InversionSolution:
 
     @property
     def indices(self):
+        """
+        Rupture Index,Num Sections,# 1,# 2,# 3,# 4,# 5,# 6,# 7,# 8,# 9,# 10,# 11,# 12,# 13,# 14,# 15,# 16,# 17,# 18,# 19,# 20,# 21,# 22,# 23,# 24,# 25,# 26,# 27,# 28,# 29,# 30,# 31,# 32,# 33,# 34,# 35,# 36,# 37,# 38,# 39,# 40,# 41,# 42,# 43,# 44,# 45,# 46,# 47,# 48,# 49,# 50,# 51,# 52,# 53,# 54,# 55,# 56,# 57,# 58,# 59,# 60,# 61,# 62,# 63,# 64,# 65,# 66,# 67,# 68,# 69,# 70,# 71,# 72,# 73,# 74,# 75,# 76,# 77,# 78,# 79,# 80,# 81,# 82,# 83,# 84,# 85,# 86,# 87,# 88,# 89,# 90,# 91,# 92,# 93,# 94,# 95,# 96,# 97,# 98,# 99,# 100,# 101,# 102,# 103,# 104,# 105,# 106,# 107,# 108,# 109
+        0,2,0,1
+        1,4,0,1,1081,1080
+        2,5,0,1,1081,1080,1079
+        3,7,0,1,1081,1080,1079,1078,1077
+        4,8,0,1,1081,1080,1079,1078,1077,1076
+        5,9,0,1,1081,1080,1079,1078,1077,1076,1075
+        etc
+        """
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
 
     @property

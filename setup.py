@@ -21,7 +21,7 @@ URL = 'https://github.com/GNS-Science/nshm-nz-opensha'
 EMAIL = 'chrisbc@artisan.co.nz'
 AUTHOR = 'GNS NSHM programme'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -127,7 +127,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
     ],
