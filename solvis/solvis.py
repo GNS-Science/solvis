@@ -64,7 +64,7 @@ def new_sol(sol: InversionSolution, rupture_ids: np.array):
 
     #all other props are derived from these ones
     ns =  InversionSolution()
-    ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
+    ns.set_props(rates, ruptures, indices, sol.fault_sections.copy(), sol.fault_polys.copy())
     return ns
 
 def rupt_ids_above_rate(sol: InversionSolution, rate: float):
