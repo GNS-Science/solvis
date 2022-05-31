@@ -38,7 +38,19 @@ of the solution and rupture set characteristics. Features:
 
 ```
 git clone
-pip3 install .
+pip3 install -r requirements
+```
+
+### Windows Installation
+
+You will have to delete the fiona and shapely lines from requirements.txt, then run the following lines:
+
+```commandline
+pip install pipwin
+pipwin install gdal
+pipwin install fiona
+pipwin install shapely
+pip install -r requirements.txt
 ```
 
 ## Run
