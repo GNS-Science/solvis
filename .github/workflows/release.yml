@@ -9,16 +9,17 @@ on:
     tags:
       - 'v*'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "release"
+  # Allows you to run this workflow manually from the Actions tab
+  call-test-workflow:
+    #https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
+    uses: ./.github/workflows/run-tests.yaml
+
   release:
     name: Create Release
+    needs: call-test-workflow
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         python-versions: [3.8, 3.9]
