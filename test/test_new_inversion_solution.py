@@ -1,10 +1,12 @@
 #!python3 test_new_inversion_solution.py
 
 import os
-import unittest
 import pathlib
-import solvis
 import tempfile
+import unittest
+
+import solvis
+
 
 def setUpModule():
     global temp_dir
@@ -13,11 +15,12 @@ def setUpModule():
     print('gettempdir():', tempfile.gettempdir())
     print('gettempprefix():', tempfile.gettempprefix())
 
+
 def tearDownModule():
     pass
 
-class TestNewInversionSolution(unittest.TestCase):
 
+class TestNewInversionSolution(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
@@ -53,7 +56,6 @@ class TestNewInversionSolution(unittest.TestCase):
         self.assertNotEquals(sol.ruptures.shape, new_sol.ruptures.shape)
         self.assertNotEquals(sol.rates.shape, new_sol.rates.shape)
 
-
     def test_filter_writes_attribs_non_compatible_mode(self):
         """
         With non-compatible mode redundnat rows can be removed but the rupture indices are as original.
@@ -67,15 +69,14 @@ class TestNewInversionSolution(unittest.TestCase):
 
         folder = str(TestNewInversionSolution.temp_dir.name)
         new_path = pathlib.Path(folder, 'test_non_compatible_archive.zip')
-        #new_path = pathlib.Path('./', 'test_non_compatible_archive.zip')
+        # new_path = pathlib.Path('./', 'test_non_compatible_archive.zip')
 
         new_sol.to_archive(str(new_path), TestNewInversionSolution.original_archive, compat=False)
-        read_sol =  solvis.InversionSolution().from_archive(new_path)
+        read_sol = solvis.InversionSolution().from_archive(new_path)
 
         self.assertEquals(read_sol.indices.shape[0], len(ruptures))
         self.assertEquals(read_sol.rates.shape[0], len(ruptures))
         self.assertEquals(read_sol.ruptures.shape[0], len(ruptures))
-
 
     @unittest.skip("feature incomplete")
     def test_filter_writes_attribs_compatible_mode(self):
@@ -94,7 +95,7 @@ class TestNewInversionSolution(unittest.TestCase):
         # new_path = pathlib.Path('./', 'test_compatible_archive.zip')
 
         new_sol.to_archive(str(new_path), TestNewInversionSolution.original_archive, compat=True)
-        read_sol =  solvis.InversionSolution().from_archive(new_path)
+        read_sol = solvis.InversionSolution().from_archive(new_path)
 
         self.assertEquals(read_sol.indices.shape[0], len(ruptures))
         self.assertEquals(read_sol.rates.shape[0], len(ruptures))

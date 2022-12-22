@@ -1,0 +1,85 @@
+[
+  {
+    "level": {
+      "name": "Fault Regime",
+      "shortName": "Fault Regime",
+      "enumClass": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.FaultRegime"
+    },
+    "value": {
+      "name": "Fault Regime",
+      "shortName": "Fault Regime",
+      "weight": 0.0,
+      "enumClass": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.FaultRegime",
+      "enumName": "CRUSTAL"
+    }
+  },
+  {
+    "level": {
+      "name": "NZSHM22_SpatialSeisPDF",
+      "shortName": "NZSHM22_SpatialSeisPDF",
+      "enumClass": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.NZSHM22_SpatialSeisPDF"
+    },
+    "value": {
+      "name": "NZSHM22_1346",
+      "shortName": "1346",
+      "prefix": "",
+      "weight": 0.0,
+      "enumClass": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.NZSHM22_SpatialSeisPDF",
+      "enumName": "NZSHM22_1346"
+    }
+  },
+  {
+    "level": {
+      "name": "Slip Along Rupture Model (Dsr)",
+      "shortName": "Dsr",
+      "enumClass": "scratch.UCERF3.enumTreeBranches.SlipAlongRuptureModels"
+    },
+    "value": {
+      "name": "Uniform",
+      "shortName": "Uni",
+      "prefix": "DsrUni",
+      "weight": 0.5,
+      "enumClass": "scratch.UCERF3.enumTreeBranches.SlipAlongRuptureModels",
+      "enumName": "UNIFORM"
+    }
+  },
+  {
+    "level": {
+      "name": "NZSHM22_ScalingRelationship",
+      "shortName": "NZSHM22_ScalingRelationship",
+      "class": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.NZSHM22_ScalingRelationshipNode$Level"
+    },
+    "value": {
+      "name": "NZSHM22_ScalingRelationship",
+      "shortName": "NZSHM22_ScalingRelationship",
+      "weight": 0.0,
+      "adapterValue": {
+        "adapterClass": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.NZSHM22_ScalingRelationshipNode$Adapter",
+        "adapterData": {
+          "scale": {
+            "adapterClass": "nz.cri.gns.NZSHM22.opensha.calc.SimplifiedScalingRelationship$Adapter",
+            "adapterData": {
+              "regime": "CRUSTAL",
+              "cValue": 4.2,
+              "strikeSlipCValue": 4.2
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "level": {
+      "name": "NZSHM22_DeformationModel",
+      "shortName": "NZSHM22_DeformationModel",
+      "enumClass": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.NZSHM22_DeformationModel"
+    },
+    "value": {
+      "name": "Fault Model",
+      "shortName": "Fault Model",
+      "weight": 0.0,
+      "enumClass": "nz.cri.gns.NZSHM22.opensha.enumTreeBranches.NZSHM22_DeformationModel",
+      "enumName": "FAULT_MODEL"
+    }
+  }
+]

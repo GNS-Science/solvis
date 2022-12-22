@@ -1,0 +1,11 @@
+This is an OpenSHA Fault System Solution zip file.
+
+The file format is described in detail at https://opensha.org/Modular-Fault-System-Solution
+
+Rupture information is stored in the 'ruptures/' sub-directory. Optional files may exist, but the core (required) files are:
+ - ruptures/fault_sections.geojson: GeoJSON file listing the fault trace and properties of each fault section
+ - ruptures/indices.csv: CSV file listing the fault section indices that comprise each rupture
+ - ruptures/properties.csv: CSV file listing the properties of each rupture, including magnitude and rake
+
+Rate information is stored in the 'solution/' sub-directory. Optional files may exist, but there is only one required file:
+ - solution/rates.csv: CSV file giving the annual rate of occurence for each rupture

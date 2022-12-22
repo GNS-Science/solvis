@@ -38,7 +38,7 @@ of the solution and rupture set characteristics. Features:
 
 ```
 git clone
-pip3 install .
+poetry install
 ```
 
 ## Run

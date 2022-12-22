@@ -1,0 +1,13 @@
+name: Dev workflow
+
+on:
+  pull_request:
+    branches: [main]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  call-test-workflow:
+    #https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
+    uses: ./.github/workflows/run-tests.yml
