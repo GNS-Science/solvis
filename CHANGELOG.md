@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.0] - 2022-12-22
+## [0.3.1] - 2022-12-22
 
 ## Changed
  - refactored project structure for packaging
