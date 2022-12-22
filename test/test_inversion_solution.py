@@ -1,12 +1,13 @@
 #!python3 test_inversion_solution.py
 
 import os
-import unittest
 import pathlib
+import unittest
+
 from solvis import InversionSolution
 
-class TestInversionSolution(unittest.TestCase):
 
+class TestInversionSolution(unittest.TestCase):
     def test_load_from_archive(self):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")

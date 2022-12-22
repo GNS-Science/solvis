@@ -1,16 +1,15 @@
 #!python3
 
-import os
-from pathlib import PurePath
 from functools import partial
+from pathlib import Path
+from typing import Union
 
-import pandas as pd
 import geopandas as gpd
 import numpy as np
-from shapely.geometry import Polygon, Point
-
+import numpy.typing as npt
+import pandas as pd
 import pyproj
-from shapely import geometry
+from shapely.geometry import Point, Polygon
 from shapely.ops import transform
 
 from solvis.inversion_solution import InversionSolution
@@ -21,17 +20,19 @@ from solvis.inversion_solution import InversionSolution
 #     return sr[sr.rupture.isin(list(ruptures))]
 
 
-#filtered_rupture_sections (with gemoetry)
+# filtered_rupture_sections (with gemoetry)
 def section_participation(sol: InversionSolution, df_ruptures: pd.DataFrame = None):
     sr = sol.rs_with_rates
-    if not df_ruptures is None:
-        filtered_sections_with_rates_df = sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate']>0)]
+    if df_ruptures is not None:
+        filtered_sections_with_rates_df = sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate'] > 0)]
     else:
         filtered_sections_with_rates_df = sr
 
     # print("Pivot table (note precision is not lost!!)")
     # participation (sum of rate) for every rupture though a point
-    section_sum_of_rates_df = filtered_sections_with_rates_df.pivot_table(values='Annual Rate', index= ['section'], aggfunc=np.sum)
+    section_sum_of_rates_df = filtered_sections_with_rates_df.pivot_table(
+        values='Annual Rate', index=['section'], aggfunc=np.sum
+    )
     q0 = gpd.GeoDataFrame(sol.fault_sections)
     # print (q0)
     # print(section_sum_of_rates_df)
@@ -39,8 +40,8 @@ def section_participation(sol: InversionSolution, df_ruptures: pd.DataFrame = No
 
 
 def mfd_hist(ruptures_df: pd.DataFrame):
-    #https://stackoverflow.com/questions/45273731/binning-a-column-with-python-pandas
-    bins = [round(x/100, 2) for x in range(500, 910, 10)]
+    # https://stackoverflow.com/questions/45273731/binning-a-column-with-python-pandas
+    bins = [round(x / 100, 2) for x in range(500, 910, 10)]
     mfd = ruptures_df.groupby(pd.cut(ruptures_df.Magnitude, bins=bins)).sum()['Annual Rate']
     vals = np.asarray(mfd)
     for i in range(mfd.index.size):
@@ -48,38 +49,40 @@ def mfd_hist(ruptures_df: pd.DataFrame):
     return mfd
 
 
-def export_geojson(gdf: gpd.GeoDataFrame, filename):
+def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path]):
     print(f"Exporting to {filename}")
     f = open(filename, 'w')
     f.write(gdf.to_json())
     f.close()
 
-def new_sol(sol: InversionSolution, rupture_ids: np.array):
+
+def new_sol(sol: InversionSolution, rupture_ids: npt.ArrayLike) -> InversionSolution:
     rr = sol.ruptures
     ra = sol.rates
     ri = sol.indices
-    ruptures = rr[rr["Rupture Index"].isin(list(rupture_ids))].copy()
-    rates = ra[ra["Rupture Index"].isin(list(rupture_ids))].copy()
-    indices = ri[ri["Rupture Index"].isin(list(rupture_ids))].copy()
+    ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
+    rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
+    indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
 
-    #all other props are derived from these ones
-    ns =  InversionSolution()
+    # all other props are derived from these ones
+    ns = InversionSolution()
     ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
     return ns
+
 
 def rupt_ids_above_rate(sol: InversionSolution, rate: float):
     rr = sol.rates
     if not rate:
         return rr["Rupture Index"].unique()
-    return rr[rr['Annual Rate']> rate]["Rupture Index"].unique()
+    return rr[rr['Annual Rate'] > rate]["Rupture Index"].unique()
 
 
 def circle_polygon(radius_m: int, lat: float, lon: float):
-    #based on https://gis.stackexchange.com/a/359748
+    # based on https://gis.stackexchange.com/a/359748
 
     center = Point(float(lon), float(lat))
 
-    local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format( lat, lon )
+    local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
 
     wgs84_to_aeqd = partial(
         pyproj.transform,
@@ -99,12 +102,12 @@ def circle_polygon(radius_m: int, lat: float, lon: float):
     # Get the polygon with lat lon coordinates
     polygon = transform(aeqd_to_wgs84, buffer)
 
-    #Adding 360 to all negative longitudes
+    # Adding 360 to all negative longitudes
     ext = np.asarray(polygon.exterior.coords)
     points = []
     for x, y in ext[:][:]:
         if x < 0:
             x += 360
-        points.append(Point(x,y))
-    return Polygon(points)
+        points.append(Point(x, y))
 
+    return Polygon(points)

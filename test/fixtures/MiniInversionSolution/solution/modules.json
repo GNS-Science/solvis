@@ -1,0 +1,26 @@
+[
+  {
+    "name": "OpenSHA Build Information",
+    "className": "org.opensha.sha.earthquake.faultSysSolution.modules.BuildInfoModule",
+    "path": "solution/",
+    "assets": [
+      "build_info.json"
+    ]
+  },
+  {
+    "name": "Annealing Progress",
+    "className": "org.opensha.sha.earthquake.faultSysSolution.inversion.sa.completion.AnnealingProgress",
+    "path": "solution/",
+    "assets": [
+      "annealing_progress.csv"
+    ]
+  },
+  {
+    "name": "Sub-Seismogenic On-Fault MFDs",
+    "className": "org.opensha.sha.earthquake.faultSysSolution.modules.SubSeismoOnFaultMFDs",
+    "path": "solution/",
+    "assets": [
+      "sub_seismo_on_fault_mfds.csv"
+    ]
+  }
+]
