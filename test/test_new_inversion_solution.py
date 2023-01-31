@@ -38,7 +38,7 @@ class TestNewInversionSolution(unittest.TestCase):
         ruptures_med = solvis.rupt_ids_above_rate(sol, 1e-10)
         ruptures_big = solvis.rupt_ids_above_rate(sol, 1e-6)
 
-        self.assertEquals(ruptures_all, sol.ruptures.shape[0])
+        self.assertEqual(ruptures_all, sol.ruptures.shape[0])
         self.assertLess(len(ruptures_small), len(ruptures_all))
         self.assertLess(len(ruptures_med), len(ruptures_small))
         self.assertLess(len(ruptures_big), len(ruptures_med))
@@ -50,11 +50,11 @@ class TestNewInversionSolution(unittest.TestCase):
         ruptures = solvis.rupt_ids_above_rate(sol, 1e-5)
         new_sol = solvis.new_sol(sol, ruptures)
 
-        self.assertEquals(new_sol.ruptures.shape[0], len(ruptures))
-        self.assertEquals(new_sol.ruptures['Rupture Index'].to_list(), ruptures)
+        self.assertEqual(new_sol.ruptures.shape[0], len(ruptures))
+        self.assertEqual(new_sol.ruptures['Rupture Index'].to_list(), ruptures)
 
-        self.assertNotEquals(sol.ruptures.shape, new_sol.ruptures.shape)
-        self.assertNotEquals(sol.rates.shape, new_sol.rates.shape)
+        self.assertNotEqual(sol.ruptures.shape, new_sol.ruptures.shape)
+        self.assertNotEqual(sol.rates.shape, new_sol.rates.shape)
 
     def test_filter_writes_attribs_non_compatible_mode(self):
         """
@@ -74,9 +74,9 @@ class TestNewInversionSolution(unittest.TestCase):
         new_sol.to_archive(str(new_path), TestNewInversionSolution.original_archive, compat=False)
         read_sol = solvis.InversionSolution().from_archive(new_path)
 
-        self.assertEquals(read_sol.indices.shape[0], len(ruptures))
-        self.assertEquals(read_sol.rates.shape[0], len(ruptures))
-        self.assertEquals(read_sol.ruptures.shape[0], len(ruptures))
+        self.assertEqual(read_sol.indices.shape[0], len(ruptures))
+        self.assertEqual(read_sol.rates.shape[0], len(ruptures))
+        self.assertEqual(read_sol.ruptures.shape[0], len(ruptures))
 
     @unittest.skip("feature incomplete")
     def test_filter_writes_attribs_compatible_mode(self):
@@ -97,6 +97,6 @@ class TestNewInversionSolution(unittest.TestCase):
         new_sol.to_archive(str(new_path), TestNewInversionSolution.original_archive, compat=True)
         read_sol = solvis.InversionSolution().from_archive(new_path)
 
-        self.assertEquals(read_sol.indices.shape[0], len(ruptures))
-        self.assertEquals(read_sol.rates.shape[0], len(ruptures))
-        self.assertEquals(read_sol.ruptures.shape[0], len(ruptures))
+        self.assertEqual(read_sol.indices.shape[0], len(ruptures))
+        self.assertEqual(read_sol.rates.shape[0], len(ruptures))
+        self.assertEqual(read_sol.ruptures.shape[0], len(ruptures))

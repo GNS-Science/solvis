@@ -1,6 +1,6 @@
 #!python3
 
-from functools import partial
+# from functools import partial
 from pathlib import Path
 from typing import Union
 
@@ -9,8 +9,10 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pyproj
+
+# from shapely.ops import transform
+from pyproj import Transformer
 from shapely.geometry import Point, Polygon
-from shapely.ops import transform
 
 from solvis.inversion_solution import InversionSolution
 
@@ -76,35 +78,26 @@ def rupt_ids_above_rate(sol: InversionSolution, rate: float):
 
 def circle_polygon(radius_m: int, lat: float, lon: float):
     # based on https://gis.stackexchange.com/a/359748
-
-    center = Point(float(lon), float(lat))
+    # updated with https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1
 
     local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
+    wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
 
-    wgs84_to_aeqd = partial(
-        pyproj.transform,
-        pyproj.Proj("+proj=longlat +datum=WGS84 +no_defs"),
-        pyproj.Proj(local_azimuthal_projection),
-    )
+    transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
+    point_transformed = transformer.transform(lon, lat)
 
-    aeqd_to_wgs84 = partial(
-        pyproj.transform,
-        pyproj.Proj(local_azimuthal_projection),
-        pyproj.Proj("+proj=longlat +datum=WGS84 +no_defs"),
-    )
+    buffer = Point(point_transformed).buffer(radius_m)
 
-    point_transformed = transform(wgs84_to_aeqd, center)
-    buffer = point_transformed.buffer(radius_m)
+    # Get polygon with lat lon coordinates
+    transformer2 = Transformer.from_crs(local_azimuthal_projection, wgs84_projection)
+    lons, lats = transformer2.transform(*buffer.exterior.xy)
 
-    # Get the polygon with lat lon coordinates
-    polygon = transform(aeqd_to_wgs84, buffer)
-
-    # Adding 360 to all negative longitudes
-    ext = np.asarray(polygon.exterior.coords)
+    # Add 360 to all negative longitudes
     points = []
-    for x, y in ext[:][:]:
-        if x < 0:
-            x += 360
-        points.append(Point(x, y))
+    for i in range(len(lons)):
+        lon = lons[i]
+        if lon < 0:
+            lon += 360
+        points.append(Point(lon, lats[i]))
 
     return Polygon(points)
