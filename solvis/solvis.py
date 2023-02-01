@@ -8,9 +8,6 @@ import geopandas as gpd
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import pyproj
-
-# from shapely.ops import transform
 from pyproj import Transformer
 from shapely.geometry import Point, Polygon
 
