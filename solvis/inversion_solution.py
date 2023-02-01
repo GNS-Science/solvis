@@ -174,11 +174,16 @@ class InversionSolution:
 
     @property
     def fault_sections(self):
-        return self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        return fault_sections
 
     @property
     def fault_surfaces(self):
         if not isinstance(self._fault_surfaces, pd.DataFrame):
+
+            # Subduction solutions do not have a DipDir attribute, we'll need to build it here
+            if "DipDir" not in self.fault_sections.columns:
+                raise Exception("OK, we cant create fault_surfaces yet")
 
             def create_section_surface(section):
                 return create_surface(
