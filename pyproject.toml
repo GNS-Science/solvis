@@ -18,6 +18,8 @@ click-plugins = "^1.1.1"
 geopandas = "^0.12.2"
 pytz = "2021.3"
 pyproj = "^3.3"
+geometry3d = "^0.2.4"
+pyvista = "^0.37.0"
 
 [tool.poetry.extras]
 test = [
@@ -46,6 +48,8 @@ pytest = { version = "^6.2.4"}
 pytest-cov  = { version = "^2.12.0"}
 tox = { version = "^3.20.1"}
 twine = "^4.0.2"
+nzshm-common = "^0.4.0"
+matplotlib = "^3.6.3"
 
 [tool.black]
 line-length = 120

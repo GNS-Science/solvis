@@ -196,7 +196,7 @@ class InversionSolution:
 
         # remove the headings column
         df2.drop(df2.iloc[:, 1:2], inplace=True, axis=1)
-        df2.set_axis(['rupture', 'section'], axis='columns', inplace=True)
+        df2 = df2.set_axis(['rupture', 'section'], axis='columns', copy=False)
 
         # set property
         self._rupture_sections = df2
