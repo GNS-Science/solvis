@@ -92,7 +92,6 @@ class TestPyvistaDistanceIntegration(unittest.TestCase):
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
-        # trace = transformer.transform(*q0.geometry[SECTION_IDX].coords.xy)
         print(f'trace coords: {q0.geometry[SECTION_IDX].coords.xy}')
         trace = transformer.transform(*q0.geometry[SECTION_IDX].coords.xy)
         print(f'trace offsets: {trace} (in metres relative to datum)')
