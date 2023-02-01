@@ -41,6 +41,22 @@ git clone
 poetry install
 ```
 
+### Windows Installation with pipwin (CHECK)
+
+This information predates poetry and has not been check since ...
+
+You will have to delete the fiona and shapely lines from requirements.txt, then run the following lines:
+pip3 install -r requirements
+
+```commandline
+pip install pipwin
+pipwin install gdal
+pipwin install fiona
+pipwin install shapely
+pip install -r requirements.txt
+>>>>>>> feature/surface_polygons
+```
+
 ## Run
 
 ```

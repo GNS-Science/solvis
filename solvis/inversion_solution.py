@@ -4,6 +4,8 @@ import zipfile
 import geopandas as gpd
 import pandas as pd
 
+from solvis.geometry import create_surface
+
 
 def data_to_zip_direct(z, data, name):
     zinfo = zipfile.ZipInfo(name, time.localtime()[:6])
@@ -134,6 +136,7 @@ class InversionSolution:
         self._rupture_sections = None
         self._indices = None
         self._fault_sections = None
+        self._fault_surfaces = None
         self._rs_with_rates = None
         self._ruptures_with_rates = None
 
@@ -173,11 +176,26 @@ class InversionSolution:
     def fault_sections(self):
         return self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
 
-    def set_props(self, rates, ruptures, indices, fault_sections):
+    @property
+    def fault_surfaces(self):
+        if not isinstance(self._fault_surfaces, pd.DataFrame):
+
+            def create_section_surface(section):
+                return create_surface(
+                    section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
+                )
+
+            polys = [create_section_surface(section) for i, section in self.fault_sections.iterrows()]
+            self._fault_surfaces = self.fault_sections.set_geometry(polys)
+
+        return self._fault_surfaces
+
+    def set_props(self, rates, ruptures, indices, fault_sections, fault_surfaces):
         self._init_props()
         self._rates = rates
         self._ruptures = ruptures
         self._fault_sections = fault_sections
+        self._fault_surfaces = fault_surfaces
         self._indices = indices
 
     @property
