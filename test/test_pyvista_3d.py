@@ -1,14 +1,14 @@
-# import os
-# import pathlib
+import os
+import pathlib
 import unittest
 
+import geopandas as gpd
 import numpy as np
-
-# from pyproj import Transformer
 import pyvista as pv
+from nzshm_common.location.location import location_by_id
+from pyproj import Transformer
 
-# from nzshm_common.location.location import location_by_id
-# from solvis import InversionSolution
+from solvis import InversionSolution
 
 
 class TestPyvistaDistances(unittest.TestCase):
@@ -26,7 +26,7 @@ class TestPyvistaDistances(unittest.TestCase):
         d_exact = np.linalg.norm(mesh0.points - closest_points, axis=1)
 
         print(closest_cells)
-        print(closest_points)
+        # print(closest_points)
         print(d_exact)
         assert closest_cells == [0]
         assert d_exact[0] == 1
@@ -44,7 +44,7 @@ class TestPyvistaDistances(unittest.TestCase):
         d_exact = np.linalg.norm(mesh0.points - closest_points, axis=1)
 
         print(closest_cells)
-        print(closest_points)
+        # print(closest_points)
         print(d_exact)
         assert closest_cells == [0]
         assert d_exact[0] == 2.0
@@ -62,61 +62,55 @@ class TestPyvistaDistances(unittest.TestCase):
         d_exact = np.linalg.norm(mesh0.points - closest_points, axis=1)
 
         print(closest_cells)
-        print(closest_points)
+        # print(closest_points)
         print(d_exact)
         assert closest_cells == [2]
         assert d_exact[0] > 5
 
-    # def test_basic_2(self):
-    #         p0 = g3d.Point(10, 1, 0) # 1st top-trace point
-    #         p1 = g3d.Point(10, 10, 0) # 2nd top-trace point
-    #         p2 = g3d.Point(5, 1, 10) # closer at depth
-    #         plane = g3d.Plane(p0, p1, p2)
-    #         assert plane.distance(g3d.origin()) < 10.0
 
-    # @unittest.skip('this shows us it ain\'t gonna work using a plane')
-    # def test_basic_3(self):
-    #         p0 = g3d.Point(10, 1, 0) # 1st top-trace point
-    #         p1 = g3d.Point(10, 10, 0) # 2nd top-trace point
-    #         p2 = g3d.Point(15, 1, 10) # further at depth = closer above ground == no good
-    #         plane = g3d.Plane(p0, p1, p2)
-    #         assert plane.distance(g3d.origin()) > 10.0
+class TestPyvistaDistanceIntegration(unittest.TestCase):
+    def test_calc_distance_to_a_fault_section(self):
 
-    # @unittest.skip('this does\'t help/work')
-    # def test_can_we_get_intersection_of_rect_and_plane(self):
-    #         p0 = g3d.Point(10, 1, 0) # 1st top-trace point
-    #         p1 = g3d.Point(10, 10, 0) # 2nd top-trace point
-    #         p2 = g3d.Point(10.000333, 1, 10) # further at depth = closer above ground == no good
+        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
+        filename = pathlib.PurePath(
+            folder, "fixtures/AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
+        )
+        sol = InversionSolution().from_archive(str(filename))
 
-    #         plane = g3d.Plane(p0, p1, p2)
-    #         rect = g3d.Parallelogram(p0, g3d.Vector(p0, p1), g3d.Vector(p0, p2))
+        q0 = gpd.GeoDataFrame(sol.fault_sections)
 
-    #         plane_rect = plane.intersection(rect)
-    #         print( plane_rect)
+        SECTION_IDX = 43
+        print(q0.geometry[SECTION_IDX], q0.UpDepth[SECTION_IDX], q0.LowDepth[SECTION_IDX])
 
-    #         print(plane.distance(g3d.origin()))
-    #         print(g3d.origin().distance(plane))
-    #         assert 0
+        # # set up WLG as our datum
+        WLG = location_by_id('WLG')
+        lon, lat = WLG['longitude'], WLG['latitude']
+        print(f'datum: {WLG}')
+        origin = pv.PolyData([0, 0, 0])
 
+        wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
+        local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
+        transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
-# def main():
-#     # This posp up a matplotlib window showing nothimg :(
-#     r = g3d.Renderer(backend='matplotlib')
-#     p0 = g3d.Point(0, 0, 0)
-#     p1 = g3d.Point(0, 1, 0)
-#     p2 = g3d.Point(0, 0, 1)
-#     p = g3d.Plane(p0, p1, p2)
-#     r.add((p, 'b', 1))
+        # trace = transformer.transform(*q0.geometry[SECTION_IDX].coords.xy)
+        print(f'trace coords: {q0.geometry[SECTION_IDX].coords.xy}')
+        trace = transformer.transform(*q0.geometry[SECTION_IDX].coords.xy)
+        print(f'trace offsets: {trace} (in metres relative to datum)')
 
-#     b = g3d.Circle(g3d.origin(), g3d.y_unit_vector(), 10, 20)
-#     a = g3d.Circle(g3d.origin(), g3d.x_unit_vector(), 10, 20)
-#     c = g3d.Circle(g3d.origin(), g3d.z_unit_vector(), 10, 20)
-#     r.add((a, 'g', 3), 10)
-#     r.add((b, 'b', 3), 10)
-#     r.add((c, 'r', 3), 10)
+        # TODO calculate lower trace lat & lon based on dip_direction
+        surface = pv.PolyData(
+            [
+                [trace[0][0], trace[1][0], int(q0.UpDepth[SECTION_IDX] * 1000)],  # OK
+                [trace[0][1], trace[1][1], int(q0.UpDepth[SECTION_IDX] * 1000)],  # OK
+                [trace[0][0], trace[1][0], int(q0.LowDepth[SECTION_IDX] * 1000)],  # nope, but ok for basic test
+                [trace[0][1], trace[1][1], int(q0.LowDepth[SECTION_IDX] * 1000)],  # nope
+            ]
+        )
 
-#     r.show()
+        closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
+        d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
 
-
-# if __name__ == '__main__':
-#     main()
+        print(closest_cells)
+        print(d_exact)
+        assert d_exact[0] <= 50000
+        # assert 0
