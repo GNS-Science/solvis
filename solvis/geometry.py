@@ -68,7 +68,56 @@ def bearing(point_a: Point, point_b: Point) -> float:
     Computes the bearing in degrees from the point A(a1,a2) to
     the point B(b1,b2).
 
+    Note that A and B are given in decimal.degrees
+
+    :param point_a: the first point
+    :param point_b: the second point
+    """
+    """
+    ref:  https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+    Formula to find Bearing, when two different points latitude, longitude is given:
+
+    Bearing from point A to B, can be calculated as,
+
+    β = atan2(X,Y),
+
+    where, X and Y are two quantities and can be calculated as:
+
+    X = cos θb * sin ∆L
+
+    Y = cos θa * sin θb – sin θa * cos θb * cos ∆L
+
+    Lets us take an example to calculate bearing between the two different points with the formula:
+
+    ∆L is never explained. It's actually = ( Longitude B – Longitude A)
+
+    """
+
+    if point_a == point_b:
+        raise ValueError("cannot compute bearing, points A & B are identical")
+
+    # to radians ...
+    lat_a = point_a.x * math.pi / 180.0
+    lon_a = point_a.y * math.pi / 180.0
+    lat_b = point_b.x * math.pi / 180.0
+    lon_b = point_b.y * math.pi / 180.0
+    delta_lon = lon_b - lon_a
+
+    x = math.cos(lat_b) * math.sin(delta_lon)
+    y = math.cos(lat_a) * math.sin(lat_b) - math.sin(lat_a) * math.cos(lat_b) * math.cos(delta_lon)
+
+    theta = math.atan2(x, y)
+    return theta * 180.0 / math.pi  # from radians
+
+
+def bearing_naive(point_a: Point, point_b: Point) -> float:
+    """
+    Computes the bearing in degrees from the point A(a1,a2) to
+    the point B(b1,b2).
+
     Note that A and B are given assuming a flat surface projection
+    :param point_a: the first point
+    :param point_b: the second point
     """
     TWOPI = 6.2831853071795865
     RAD2DEG = 57.2957795130823209
@@ -82,6 +131,26 @@ def bearing(point_a: Point, point_b: Point) -> float:
     if theta < 0.0:
         theta += TWOPI
     return RAD2DEG * theta
+
+
+# def strike(point_a: Point, point_b: Point) -> float:
+#     return bearing( point_b, point_a) if point_a.y <= point_b.y else bearing( point_a, point_b)
+
+strike = bearing
+
+
+def dip_direction(point_a: Point, point_b: Point) -> float:
+    """
+    Computes the dip_direction in degrees from the points A & B
+
+    Note that A and B are given assuming a flat surface projection
+
+    :param point_a: the first point
+    :param point_b: the second point
+    """
+    dip_dir = strike(point_a, point_b) + 90
+    dip_dir = dip_dir + 360 if dip_dir < 0 else dip_dir
+    return dip_dir
 
 
 def circle_polygon(radius_m: int, lat: float, lon: float):
