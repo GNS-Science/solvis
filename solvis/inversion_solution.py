@@ -3,8 +3,10 @@ import zipfile
 
 import geopandas as gpd
 import pandas as pd
+from shapely import get_coordinates
+from shapely.geometry import LineString, Point
 
-from solvis.geometry import create_surface
+from solvis.geometry import create_surface, dip_direction, refine_dip_direction
 
 
 def data_to_zip_direct(z, data, name):
@@ -136,7 +138,7 @@ class InversionSolution:
         self._rupture_sections = None
         self._indices = None
         self._fault_sections = None
-        self._fault_surfaces = None
+        # self._fault_surfaces = None
         self._rs_with_rates = None
         self._ruptures_with_rates = None
 
@@ -177,30 +179,58 @@ class InversionSolution:
         fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
         return fault_sections
 
-    @property
-    def fault_surfaces(self):
-        if not isinstance(self._fault_surfaces, pd.DataFrame):
+    def fault_surfaces(self, refine_dip_dir: bool = False):
+        def create_subduction_section_surface(section):
+            def calc_dip_dir(section) -> float:
+                assert type(section.geometry) == LineString
+                flat_geom = LineString(get_coordinates(section.geometry))
 
-            # Subduction solutions do not have a DipDir attribute, we'll need to build it here
-            if "DipDir" not in self.fault_sections.columns:
-                raise Exception("OK, we cant create fault_surfaces yet")
+                point_a = Point(reversed(flat_geom.coords[0]))
+                point_b = Point(reversed(flat_geom.coords[-1]))
 
-            def create_section_surface(section):
+                return dip_direction(point_a, point_b)
+
+            return create_surface(
+                section["geometry"], calc_dip_dir(section), section["DipDeg"], section["UpDepth"], section["LowDepth"]
+            )
+
+        def create_crustal_section_surface(section):
+            def recalc_dip_dir(section) -> float:
+                assert type(section.geometry) == LineString
+                points = section.geometry.coords
+                point_a = tuple(reversed(points[0]))  # need lat/lon order
+                point_b = tuple(reversed(points[-1]))
+                return refine_dip_direction(Point(*point_a), Point(*point_b), section.DipDir)
+
+            if refine_dip_dir:
                 return create_surface(
-                    section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
+                    section["geometry"],
+                    recalc_dip_dir(section),
+                    section["DipDeg"],
+                    section["UpDepth"],
+                    section["LowDepth"],
                 )
 
-            polys = [create_section_surface(section) for i, section in self.fault_sections.iterrows()]
-            self._fault_surfaces = self.fault_sections.set_geometry(polys)
+            return create_surface(
+                section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
+            )
 
-        return self._fault_surfaces
+        # Subduction solutions do not have a DipDir attribute, we'll need to build it here
+        if "DipDir" not in self.fault_sections.columns:
+            # raise Exception("OK, we cant create fault_surfaces yet")
+            # replace geojson with new fault surface geometry
+            return self.fault_sections.set_geometry(
+                [create_subduction_section_surface(section) for i, section in self.fault_sections.iterrows()]
+            )
 
-    def set_props(self, rates, ruptures, indices, fault_sections, fault_surfaces):
+        polys = [create_crustal_section_surface(section) for i, section in self.fault_sections.iterrows()]
+        return self.fault_sections.set_geometry(polys)
+
+    def set_props(self, rates, ruptures, indices, fault_sections):
         self._init_props()
         self._rates = rates
         self._ruptures = ruptures
         self._fault_sections = fault_sections
-        self._fault_surfaces = fault_surfaces
         self._indices = indices
 
     @property

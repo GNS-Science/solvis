@@ -60,7 +60,7 @@ def new_sol(sol: InversionSolution, rupture_ids: npt.ArrayLike) -> InversionSolu
 
     # all other props are derived from these ones
     ns = InversionSolution()
-    ns.set_props(rates, ruptures, indices, sol.fault_sections.copy(), sol.fault_surfaces.copy())
+    ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
     return ns
 
 

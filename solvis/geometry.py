@@ -2,6 +2,7 @@ import math
 from functools import partial
 
 from pyproj import Transformer
+from shapely import get_coordinates
 from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
@@ -59,6 +60,8 @@ def create_surface(trace: LineString, dip_dir: float, dip_deg: float, upper_dept
     depth = lower_depth - upper_depth
     width = depth / math.tan(math.radians(dip_deg))
     transformation = partial(translate_horizontally, dip_dir, width)
+
+    trace = LineString(get_coordinates(trace))
     bottom_edge = reverse_geom(transform(transformation, trace))
     return Polygon([x for x in trace.coords] + [x for x in bottom_edge.coords])
 
@@ -107,7 +110,8 @@ def bearing(point_a: Point, point_b: Point) -> float:
     y = math.cos(lat_a) * math.sin(lat_b) - math.sin(lat_a) * math.cos(lat_b) * math.cos(delta_lon)
 
     theta = math.atan2(x, y)
-    return theta * 180.0 / math.pi  # from radians
+    bearing = theta * 180.0 / math.pi  # from radians
+    return bearing + 360 if bearing < 0 else bearing
 
 
 strike = bearing  # alias for bearing function

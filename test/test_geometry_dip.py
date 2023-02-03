@@ -71,19 +71,19 @@ class TestDipDirection(unittest.TestCase):
         point_b = Point(1, 1)
         self.assertAlmostEqual(dip_direction(point_a, point_b), 45.0 + 90, 2)
 
-    #@unittest.skip('wip')
+    # @unittest.skip('wip')
     def test_simple_90(self):
         point_a = Point(0, 0)
         point_b = Point(0, 1)
         assert dip_direction(point_a, point_b) == 90.0 + 90
 
-    #@unittest.skip('wip')
+    # @unittest.skip('wip')
     def test_simple_180(self):
         point_a = Point(0, 0)
         point_b = Point(-1, 0)
         assert dip_direction(point_a, point_b) == 180.0 + 90
 
-    #@unittest.skip('wip')
+    # @unittest.skip('wip')
     def test_simple_135(self):
         point_a = Point(0, 0)
         point_b = Point(-1, 1)
