@@ -221,6 +221,19 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "eq-fault-geom"
+version = "0.1"
+description = "Python tools for manipulation of fault sources for the NSHM"
+category = "main"
+optional = false
+python-versions = "*"
+develop = false
+
+[package.source]
+type = "directory"
+url = "../../MISC/eq-fault-geom"
+
+[[package]]
 name = "filelock"
 version = "3.9.0"
 description = "A platform independent file lock."
@@ -1155,7 +1168,7 @@ test = []
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4.0"
-content-hash = "2967e905e3de8a3c4e6f6c1ff54d9c6640bc8d67b48ad0b50201ac9c8be4bba3"
+content-hash = "2d81adec251be74dbb2a4973a2435e3e5953bba321d508a3ba6582e96f1d4f78"
 
 [metadata.files]
 appdirs = [
@@ -1514,6 +1527,7 @@ docutils = [
     {file = "docutils-0.19-py3-none-any.whl", hash = "sha256:5e1de4d849fee02c63b040a4a3fd567f4ab104defd8a5511fbbc24a8a017efbc"},
     {file = "docutils-0.19.tar.gz", hash = "sha256:33995a6753c30b7f577febfc2c50411fec6aac7f7ffeb7c4cfe5991072dcf9e6"},
 ]
+eq-fault-geom = []
 filelock = [
     {file = "filelock-3.9.0-py3-none-any.whl", hash = "sha256:f58d535af89bb9ad5cd4df046f741f8553a418c01a7856bf0d173bbc9f6bd16d"},
     {file = "filelock-3.9.0.tar.gz", hash = "sha256:7b319f24340b51f55a2bf7a12ac0755a9b03e718311dac567a0f4f7fabd2f5de"},
