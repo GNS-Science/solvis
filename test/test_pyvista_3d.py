@@ -67,8 +67,34 @@ class TestPyvistaDistances(unittest.TestCase):
         assert closest_cells == [2]
         assert d_exact[0] > 5
 
+    def test_calc_distance_345_line(self):
+        origin = pv.PolyData([0, 0, 0])
+        surface = pv.PolyData([[3, 0, 4], [3, 1, 4]])
+        closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
+        d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
+
+        print(closest_cells)
+        print(d_exact)
+        assert d_exact[0] == 5
+
+    def test_calc_distance_345_surface(self):
+        origin = pv.PolyData([0, 0, 0])
+        surface = pv.PolyData([
+            [3, 0, 4],
+            [15, 0, 4],
+            [15, 1, 10],
+            [3, 1, 10]
+            ])
+        closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
+        d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
+
+        print(closest_cells)
+        print(d_exact)
+        assert d_exact[0] == 5
+
 
 class TestPyvistaDistanceIntegration(unittest.TestCase):
+
     def test_calc_distance_to_a_fault_section(self):
 
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
@@ -77,7 +103,7 @@ class TestPyvistaDistanceIntegration(unittest.TestCase):
         )
         sol = InversionSolution().from_archive(str(filename))
 
-        q0 = gpd.GeoDataFrame(sol.fault_sections)
+        q0 = gpd.GeoDataFrame(sol.fault_surfaces())
 
         SECTION_IDX = 43
         print(q0.geometry[SECTION_IDX], q0.UpDepth[SECTION_IDX], q0.LowDepth[SECTION_IDX])
@@ -92,8 +118,8 @@ class TestPyvistaDistanceIntegration(unittest.TestCase):
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
-        print(f'trace coords: {q0.geometry[SECTION_IDX].coords.xy}')
-        trace = transformer.transform(*q0.geometry[SECTION_IDX].coords.xy)
+        print(f'trace coords: {q0.geometry[SECTION_IDX].exterior.coords.xy}')
+        trace = transformer.transform(*q0.geometry[SECTION_IDX].exterior.coords.xy)
         print(f'trace offsets: {trace} (in metres relative to datum)')
 
         # TODO calculate lower trace lat & lon based on dip_direction
@@ -106,10 +132,12 @@ class TestPyvistaDistanceIntegration(unittest.TestCase):
             ]
         )
 
+        print('surface', surface)
+
         closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
         d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
 
         print(closest_cells)
         print(d_exact)
         assert d_exact[0] <= 50000
-        # assert 0
+
