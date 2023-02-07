@@ -51,17 +51,7 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path]):
 
 
 def new_sol(sol: InversionSolution, rupture_ids: npt.ArrayLike) -> InversionSolution:
-    rr = sol.ruptures
-    ra = sol.rates
-    ri = sol.indices
-    ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
-    rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
-    indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
-
-    # all other props are derived from these ones
-    ns = InversionSolution()
-    ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
-    return ns
+    return InversionSolution.new_solution(sol, rupture_ids)
 
 
 def rupt_ids_above_rate(sol: InversionSolution, rate: float):

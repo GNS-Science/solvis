@@ -15,6 +15,7 @@ class TestInversionSolution(unittest.TestCase):
         filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
         sol = InversionSolution().from_archive(str(filename))
         assert isinstance(sol, InversionSolution)
+        assert sol.fault_regime == 'CRUSTAL'
 
     def test_load_subduction_from_archive(self):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
@@ -23,6 +24,7 @@ class TestInversionSolution(unittest.TestCase):
         )
         sol = InversionSolution().from_archive(str(filename))
         assert isinstance(sol, InversionSolution)
+        assert sol.fault_regime == 'SUBDUCTION'
 
     def test_ruptures_intersecting_crustal(self):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
@@ -38,3 +40,16 @@ class TestInversionSolution(unittest.TestCase):
 
         self.assertTrue(len(sol.ruptures) > len(ruptures))
         self.assertTrue(set(all_rupture_ids).issuperset(set(ruptures)))
+
+    def test_new_subduction_solution(self):
+        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
+        filename = pathlib.PurePath(
+            folder, "fixtures/AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
+        )
+        sol = InversionSolution().from_archive(str(filename))
+
+        new_sol = InversionSolution.new_solution(sol, sol.ruptures)
+
+        assert isinstance(new_sol, InversionSolution)
+        assert sol.fault_regime == 'SUBDUCTION'
+        assert new_sol.fault_regime == 'SUBDUCTION'
