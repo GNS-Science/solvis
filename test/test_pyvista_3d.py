@@ -79,12 +79,7 @@ class TestPyvistaDistances(unittest.TestCase):
 
     def test_calc_distance_345_surface(self):
         origin = pv.PolyData([0, 0, 0])
-        surface = pv.PolyData([
-            [3, 0, 4],
-            [15, 0, 4],
-            [15, 1, 10],
-            [3, 1, 10]
-            ])
+        surface = pv.PolyData([[3, 0, 4], [15, 0, 4], [15, 1, 10], [3, 1, 10]])
         closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
         d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
 
@@ -94,7 +89,6 @@ class TestPyvistaDistances(unittest.TestCase):
 
 
 class TestPyvistaDistanceIntegration(unittest.TestCase):
-
     def test_calc_distance_to_a_fault_section(self):
 
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
@@ -140,4 +134,3 @@ class TestPyvistaDistanceIntegration(unittest.TestCase):
         print(closest_cells)
         print(d_exact)
         assert d_exact[0] <= 50000
-

@@ -43,10 +43,10 @@ def mfd_hist(ruptures_df: pd.DataFrame):
     return mfd
 
 
-def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path]):
+def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
     print(f"Exporting to {filename}")
     f = open(filename, 'w')
-    f.write(gdf.to_json())
+    f.write(gdf.to_json(**kwargs))
     f.close()
 
 

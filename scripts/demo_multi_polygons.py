@@ -44,14 +44,14 @@ def sum_above(key_combo, cities, limit):
     for kc in key_combo:
         pop = 0
         for key in kc:
-            pop += cities[key][3] #sum population
+            pop += cities[key][3]  # sum population
         if pop >= limit:
             yield kc
 
 
 def city_combinations(cities, pop_impacted=1e6, combo_max=5):
     combos = []
-    for rng in range(2, max(len(cities),combo_max)):
+    for rng in range(2, max(len(cities), combo_max)):
         combos.extend(sum_above([c for c in itertools.combinations(cities, rng)], cities, pop_impacted))
     return combos
 
@@ -59,7 +59,7 @@ def city_combinations(cities, pop_impacted=1e6, combo_max=5):
 def process(sol, cities, site_keys, radius):
     rupts_in_all_locs = set(sol.ruptures['Rupture Index'])
 
-    #global polygon_query_cache
+    # global polygon_query_cache
     locations = {}
     for sk in site_keys:
         locations[sk] = cities[sk]
@@ -68,11 +68,11 @@ def process(sol, cities, site_keys, radius):
     # assert 0
 
     for key, location in locations.items():
-        #print(location)
+        # print(location)
 
         polygon = circle_polygon(radius_m=radius, lat=location[1], lon=location[2])
 
-        #cache the query result
+        # cache the query result
         rupts = polygon_query_cache.get(f'{key}:{radius}', None)
         if rupts is None:
             rupts = sol.get_ruptures_intersecting(polygon)
@@ -92,10 +92,10 @@ def proc_radius(args):
 
     sol, site_set, radius, rate_thresholds, writer = args[:]
 
-    #cache the query result
+    # cache the query result
     key = ".".join(site_set[:-1])
     rupts = combo_cache.get(f'{key}:{radius}', None)
-    if rupts  == 0:
+    if rupts == 0:
         print('skip cause no rupts here')
         return
     else:
@@ -110,14 +110,14 @@ def proc_radius(args):
 
     for threshold in rate_thresholds:
         unique_events = set()
-        rated_events = rates[rates['Annual Rate']>threshold]
-        if rated_events.shape[0] >0:
-            print (f"{rated_events.shape[0]} events with rate > {threshold} for {site_set} ")
+        rated_events = rates[rates['Annual Rate'] > threshold]
+        if rated_events.shape[0] > 0:
+            print(f"{rated_events.shape[0]} events with rate > {threshold} for {site_set} ")
             idxs = list(rated_events["Rupture Index"])
             for idx in idxs:
                 if not idx in unique_events:
                     # for site in site_set:
-                    #print (i, sol[0], site_set, radius, idx)
+                    # print (i, sol[0], site_set, radius, idx)
                     with writer_lock:
                         writer.writerow((sol[0], site_set, radius, threshold, idx))
         else:
@@ -127,20 +127,20 @@ def proc_radius(args):
 if __name__ == "__main__":
 
     cities = dict(
-        WN = ["Wellington", -41.276825, 174.777969, 2e5],
-        GN = ["Gisborne", -38.662334, 178.017654, 5e4],
-        CC = ["Christchurch", -43.525650, 172.639847, 3e5],
-        IN = ["Invercargill", -46.413056, 168.3475, 8e4],
-        DN = ["Dunedin", -45.8740984, 170.5035755, 1e5],
-        NP = ["Napier", -39.4902099, 176.917839, 8e4],
-        NY = ["New Plymouth", -39.0579941, 174.0806474, 8e4],
-        PN = ["Palmerston North", -40.356317, 175.6112388, 7e4],
-        NL = ["Nelson", -41.2710849, 173.2836756, 8e4],
-        BL = ["Blenheim", -41.5118691, 173.9545856, 5e4],
-        WK = ["Whakatane", -37.9519223, 176.9945977, 5e4],
-        GR = ["Greymouth", -42.4499469, 171.2079875, 3e4],
-        QN = ["Greymouth", -45.03, 168.66, 15e3],
-        AK = ["Auckland", -36.848461, 174.763336, 2e6],
+        WN=["Wellington", -41.276825, 174.777969, 2e5],
+        GN=["Gisborne", -38.662334, 178.017654, 5e4],
+        CC=["Christchurch", -43.525650, 172.639847, 3e5],
+        IN=["Invercargill", -46.413056, 168.3475, 8e4],
+        DN=["Dunedin", -45.8740984, 170.5035755, 1e5],
+        NP=["Napier", -39.4902099, 176.917839, 8e4],
+        NY=["New Plymouth", -39.0579941, 174.0806474, 8e4],
+        PN=["Palmerston North", -40.356317, 175.6112388, 7e4],
+        NL=["Nelson", -41.2710849, 173.2836756, 8e4],
+        BL=["Blenheim", -41.5118691, 173.9545856, 5e4],
+        WK=["Whakatane", -37.9519223, 176.9945977, 5e4],
+        GR=["Greymouth", -42.4499469, 171.2079875, 3e4],
+        QN=["Greymouth", -45.03, 168.66, 15e3],
+        AK=["Auckland", -36.848461, 174.763336, 2e6],
     )
 
     combos = city_combinations(cities, 0)
@@ -148,25 +148,25 @@ if __name__ == "__main__":
 
     print(f"city combos: {len(combos)}")
 
-    #name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTg4OG1nWFRY.zip"
-    name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTkzMHJ0YWJU.zip" #60hrs!
-    #60hr
+    # name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTg4OG1nWFRY.zip"
+    name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTkzMHJ0YWJU.zip"  # 60hrs!
+    # 60hr
     WORK_PATH = "/home/chrisbc/DEV/GNS/opensha-modular/solvis"
-    #os.getenv('NZSHM22_SCRIPT_WORK_PATH', PurePath(os.getcwd(), "tmp"))
+    # os.getenv('NZSHM22_SCRIPT_WORK_PATH', PurePath(os.getcwd(), "tmp"))
 
-    sol = InversionSolution().from_archive(PurePath(WORK_PATH,  name))
+    sol = InversionSolution().from_archive(PurePath(WORK_PATH, name))
     solutions = [("60hr-J0YWJU.zip", sol)]
-    radii = [10e3,30e3,60e3,100e3] #AK could be larger ??
-    rate_thresholds = [0,1e-15,1e-12,1e-9,1e-6]
+    radii = [10e3, 30e3, 60e3, 100e3]  # AK could be larger ??
+    rate_thresholds = [0, 1e-15, 1e-12, 1e-9, 1e-6]
     radii.reverse()
     rate_thresholds.reverse()
 
     count = 0
     for (sol, site_set, radius, rate_threshold) in itertools.product(solutions, combos, radii, rate_thresholds):
-        count +=1
+        count += 1
     print(f"{count} permutations")
 
-     #_df = pd.DataFrame(columns=['City Code', 'Site Radius', 'Rupture Index'])
+    # _df = pd.DataFrame(columns=['City Code', 'Site Radius', 'Rupture Index'])
     out_file = f"DATA/rupts_sol({sol[0]}).csv"
 
     writer = csv.writer(open(out_file, 'w'), quoting=csv.QUOTE_MINIMAL)
@@ -181,9 +181,9 @@ if __name__ == "__main__":
                 for radius in radii:
                     yield (sol, site_set, radius, rate_thresholds, writer)
 
-    #Parallelize it
+    # Parallelize it
     with concurrent.futures.ThreadPoolExecutor(12) as executor:
-        #executor.map(proc_radius, generate_args()
+        # executor.map(proc_radius, generate_args()
         for res in executor.map(proc_radius, generate_args()):
             pass
         # if res:
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         #     print(row)
         #     #     i+=1
 
-        #site_set dataframe
+        # site_set dataframe
         # df = pd.DataFrame(site_radius_rupts, columns=["Index", 'Solution ID', 'City Codes', 'Site Radius', 'Rupture Index'])
         # if writes == 0:
         #     df.to_csv(out_file)

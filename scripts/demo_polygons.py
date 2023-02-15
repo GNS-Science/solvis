@@ -6,6 +6,7 @@ from pathlib import PurePath
 
 from solvis import *
 
+
 def process(sol, location, radius_m, rate_threshold=None):
 
     polygon = circle_polygon(radius_m, location[1], location[2])
@@ -27,32 +28,35 @@ def process(sol, location, radius_m, rate_threshold=None):
     # export_geojson(gpd.GeoDataFrame(sp0), geofile)
 
     # #write the solution
-    base_archive = PurePath(WORK_PATH,  name)
+    base_archive = PurePath(WORK_PATH, name)
 
     for compat in [True, False]:
-        new_archive = PurePath(WORK_PATH, f"{location[0]}_ruptures_radius({radius})_rate_filter({rate_threshold})_{compat}_solution.zip")
+        new_archive = PurePath(
+            WORK_PATH, f"{location[0]}_ruptures_radius({radius})_rate_filter({rate_threshold})_{compat}_solution.zip"
+        )
         print(f"write new solution file: {new_archive}")
-        print(f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rates[ri_sol.rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}")
+        print(
+            f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rates[ri_sol.rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}"
+        )
 
         ri_sol.to_archive(str(new_archive), str(base_archive), compat)
 
 
 if __name__ == "__main__":
 
-
     locations = dict(
-        AK = ["Auckland", -36.848461, 174.763336],
+        AK=["Auckland", -36.848461, 174.763336],
         # WN = ["Wellington", -41.276825, 174.777969], #-41.288889, 174.777222], OAkley
         # GN = ["Gisborne", -38.662334, 178.017654],
-        CC = ["Christchurch", -43.525650, 172.639847],
+        CC=["Christchurch", -43.525650, 172.639847],
     )
 
     rate_filters = [1e-15, 1e-12, 1e-9, 1e-6, 0]
-    rate_filters = [0, 1e-9 ]
+    rate_filters = [0, 1e-9]
     name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTc1MlBDZllC.zip"
     name = "NZSHM22_InversionSolution-QXV0b21hdGlvblRhc2s6NTg4OG1nWFRY.zip"
     WORK_PATH = os.getenv('NZSHM22_SCRIPT_WORK_PATH', PurePath(os.getcwd(), "tmp"))
-    sol = InversionSolution().from_archive(PurePath(WORK_PATH,  name))
+    sol = InversionSolution().from_archive(PurePath(WORK_PATH, name))
 
     print(f"Build Filtered Inversion Solutions for source {name}.")
     print()
@@ -62,10 +66,9 @@ if __name__ == "__main__":
     for threshold in rate_filters:
         for key, loc in locations.items():
             print(key, loc)
-            radii = [2e4,]# 3e5, 4e5] #km
+            radii = [
+                2e4,
+            ]  # 3e5, 4e5] #km
             for radius_m in radii:
-                print ('process', sol, loc, radius_m, threshold)
+                print('process', sol, loc, radius_m, threshold)
                 process(sol, loc, radius_m, threshold)
-
-
-

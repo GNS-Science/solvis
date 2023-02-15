@@ -68,11 +68,8 @@ class TestSubductionSurface(unittest.TestCase):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         filename = pathlib.PurePath(folder, PUY_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
-
-        rupture_id = 4
-        surface = solution.rupture_surface(rupture_id)
+        surface = solution.rupture_surface(4)
         assert surface.shape == (8, 22)
-        solvis.export_geojson(surface, f"surfaces_puysegur_rupt-{rupture_id}.geojson")
 
     @pytest.mark.slow
     def test_crustal_rupture_surface(self):
@@ -81,11 +78,11 @@ class TestSubductionSurface(unittest.TestCase):
         solution = solvis.InversionSolution().from_archive(str(filename))
 
         rupture_id = 101
-        surface = solution.rupture_surface(101)
+        surface = solution.rupture_surface(rupture_id)
 
         print(surface)
         assert surface.shape == (25, 22)
-        solvis.export_geojson(surface, f"surfaces_crustal_rupt-{rupture_id}.geojson")
+        # solvis.export_geojson(surface, f"surfaces_crustal_rupt-{rupture_id}.geojson")
 
     @pytest.mark.slow
     def test_rate_caching_crustal_rupture_surface(self):
@@ -118,5 +115,5 @@ class TestSubductionSurface(unittest.TestCase):
         ri_sol = solvis.new_sol(solution, ri)
         print("rs_with_rates shape", ri_sol.rs_with_rates.shape)
         print("sections shape", ri_sol.rupture_sections.shape)
-        solvis.export_geojson(ri_sol.fault_surfaces(), f"surfaces_puysegur_above-{rate}.geojson")
+        solvis.export_geojson(ri_sol.fault_surfaces(), f"surfaces_puysegur_above-{rate}.geojson", indent=2)
         assert 0

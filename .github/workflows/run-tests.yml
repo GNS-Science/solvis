@@ -9,11 +9,14 @@ jobs:
   run_unit_tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     strategy:
       matrix:
-        python-versions: [3.9]
-        os: [ubuntu-latest]
+        python-versions: ["3.9", "3.10"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -22,12 +25,24 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Install and configure Poetry
-        uses: snok/install-poetry@v1
+      #----------------------------------------------
+      #       load cached venv if cache exists
+      #----------------------------------------------
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: |
+          poetry install --no-interaction --no-root --with dev
+          poetry add tox-gh-actions
 
       - name: Install dependencies w Poetry
         run: |
@@ -41,7 +56,9 @@ jobs:
       - name: list files
         run: ls -l .
 
-      - uses: codecov/codecov-action@v1
+      - name: Submit coverage report if Ubuntu and we're on 'main' branch
+        if: runner.os == 'Linux' && ( github.head_ref == 'main' || github.ref_name == 'main' )
+        uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: true
-          files: coverage.xml
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
