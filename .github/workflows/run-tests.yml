@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        python-versions: ["3.9", "3.10"]
+        python-versions: [3.9", "3.10"]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     defaults:
@@ -24,6 +24,13 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
+
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
 
       #----------------------------------------------
       #       load cached venv if cache exists
@@ -42,11 +49,6 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
           poetry install --no-interaction --no-root --with dev
-          poetry add tox-gh-actions
-
-      - name: Install dependencies w Poetry
-        run: |
-          poetry install --with dev
           poetry add tox-gh-actions
 
       - name: test with tox (uses tox-gh-actions to select correct environment)
