@@ -321,14 +321,6 @@ unicode = ["unicodedata2 (>=14.0.0)"]
 woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
-name = "geometry3d"
-version = "0.2.4"
-description = "A 3D Geometry Lib"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "geopandas"
 version = "0.12.2"
 description = "Geographic pandas extensions"
@@ -1193,7 +1185,7 @@ test = []
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4.0"
-content-hash = "4394acd97d5e824b0e47fccd99cf921faf72ba6ba67c6583af9eaf3ae52e0253"
+content-hash = "db13a1a7ba0b06bdefa461c61861fb727d9809fd737a5106f7b51bd4c92c74d9"
 
 [metadata.files]
 appdirs = [
@@ -1595,9 +1587,6 @@ flake8-docstrings = [
 fonttools = [
     {file = "fonttools-4.38.0-py3-none-any.whl", hash = "sha256:820466f43c8be8c3009aef8b87e785014133508f0de64ec469e4efb643ae54fb"},
     {file = "fonttools-4.38.0.zip", hash = "sha256:2bb244009f9bf3fa100fc3ead6aeb99febe5985fa20afbfbaa2f8946c2fbdaf1"},
-]
-geometry3d = [
-    {file = "Geometry3D-0.2.4.tar.gz", hash = "sha256:883234c24367289729e2bce0560797747fa0a3a40e39c8b72d49e449ca90fba8"},
 ]
 geopandas = [
     {file = "geopandas-0.12.2-py3-none-any.whl", hash = "sha256:0a470e4bf6f5367e6fd83ab6b40405e0b805c8174665bbcb7c4077ed90202912"},

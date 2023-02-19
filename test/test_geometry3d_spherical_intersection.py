@@ -3,14 +3,14 @@ import os
 import pathlib
 import unittest
 
-import Geometry3D as g3d
+# import Geometry3D as g3d
 import geopandas as gpd
 from nzshm_common.location.location import location_by_id
 from pyproj import Transformer
 
 from solvis import InversionSolution
 
-
+@unittest.skip('replace g3d')
 class TestGeometry3DDistances(unittest.TestCase):
     def test_basic_0(self):
         p0 = g3d.Point(1, 1, 0)  # 1st top-trace point
@@ -62,6 +62,9 @@ wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
 
 
 class TestSphericalIntersections(unittest.TestCase):
+
+
+    @unittest.skip('replace g3d')
     def test_build_a_sphere_with_radius(self):
 
         WLG = location_by_id('WLG')

@@ -10,80 +10,27 @@ from shapely.geometry import LineString, Point
 import solvis
 from solvis.geometry import bearing, create_surface, dip_direction, refine_dip_direction
 
-# from eq_fault_geom.geomio.cfm_faults import calculate_dip_direction
-
-# def build_new_dip_dir(idx, section):
-#     # points can be any array, depending on section complexity, but why sometimes last point is duplicated ??
-#     print('idx', idx, 'geometry', section["geometry"])
-#     # points = section["geometry"].exterior.coords[:-1]
-#     # print(len(points))
-
-#     # print(type(section.geometry.exterior.coords.xy))
-#     coords = section.geometry.exterior.coords.xy
-#     # if len(coords[0])/2 >= int(len(coords[0])/2):
-#     #     print(f'trace coords: {coords[0]}, {coords[1]}')
-#     #     print('original_solution.fault_sections', original_solution.fault_sections.geometry[idx])
-#     #     return 0
-#     #     raise ValueError()
-
-#     btm_idx = int((len(coords[0]) - 1) / 2)
-#     points = coords  # transformer.transform(coords[0], coords[1])
-
-#     print(f'trace coords: {coords[0]}, {coords[1]}')
-#     print('btm_idx ', btm_idx)
-#     print('points', points)
-
-#     # if len(coords[0]) == 5:
-#     #     points = transformer.transform(coords[0][:-1], coords[1][:-1])
-#     #     print(f'trace coords: {coords[0][:-1]}, {coords[1][:-1]}')
-#     # elif len(coords[0]) == 4:
-#     #     points = transformer.transform(coords[0], coords[1])
-#     #     print(f'trace coords: {coords[0]}, {coords[1]}')
-#     # else:
-#     #     print(f'trace coords: {coords[0]}, {coords[1]}')
-#     #     print('original_solution.fault_sections', original_solution.fault_sections.geometry[idx])
-#     #     assert 0
-
-#     # print(len(points[0]), points)
-#     # assert len(points[0]) == 4
-
-#     # bottom_idx = int(len(points)/2)
-#     # print(bottom_idx)
-#     # surface = pv.PolyData(
-#     #     [
-#     #         [points[0][0], points[0][1], int(section['UpDepth'] * 1000)],
-#     #         [points[bottom_idx-1][0], points[bottom_idx-1][1], int(section['UpDepth'] * 1000)],
-#     #         [points[bottom_idx][0], points[bottom_idx][1], int(section['LowDepth'] * 1000)],
-#     #         [points[-1][0], points[-1][1], int(section['LowDepth'] * 1000)],
-#     #     ]
-#     # )
-
-#     try:
-#         return dip_direction(Point(points[0][0], points[1][0]), Point(points[0][btm_idx - 1], points[1][btm_idx - 1]))
-#     except (ValueError) as err:
-#         print(err)
-
 
 class TestDipDirection(unittest.TestCase):
-    # @unittest.skip('wip')
+
     def test_simple_45(self):
         point_a = Point(0, 0)
         point_b = Point(1, 1)
         self.assertAlmostEqual(dip_direction(point_a, point_b), 45.0 + 90, 2)
 
-    # @unittest.skip('wip')
+
     def test_simple_90(self):
         point_a = Point(0, 0)
         point_b = Point(0, 1)
         assert dip_direction(point_a, point_b) == 90.0 + 90
 
-    # @unittest.skip('wip')
+
     def test_simple_180(self):
         point_a = Point(0, 0)
         point_b = Point(-1, 0)
         assert dip_direction(point_a, point_b) == 180.0 + 90
 
-    # @unittest.skip('wip')
+
     def test_simple_135(self):
         point_a = Point(0, 0)
         point_b = Point(-1, 1)
@@ -105,6 +52,7 @@ class TestDipDirection(unittest.TestCase):
             [168.7086, 168.7905428698305, 168.8639492164901, 168.7820496972809, 168.7086],
             [-44.0627, -44.02781681586314, -44.10142314655593, -44.13630630204676, -44.0627],
         ]
+
         btm_idx = int((len(coords[0]) - 1) / 2)
         points = coords  # transformer.transform(coords[0], coords[1])
 
@@ -127,8 +75,84 @@ class TestDipDirection(unittest.TestCase):
         # assert dd == 144.0 # desired value from section
         self.assertAlmostEqual(dd, 59.39 + 90, 2)
 
-    @unittest.skip('wip')
-    def test_fault_section_dip_direction(self):
+        # rdd = refine_dip_direction(point_a, point_b)
+        # assert rdd == dd
+
+    #@unittest.skip('wip')
+    def test_fault_section_dip_direction_crustal(self):
+
+        def build_new_dip_dir_subducion(idx, section):
+            # points can be any array, depending on section complexity, but why sometimes last point is duplicated ??
+            # print('idx', idx, 'geometry', section["geometry"])
+            # points = section["geometry"].exterior.coords[:-1]
+            # print(len(points))
+
+            # print(type(section.geometry.exterior.coords.xy))
+            coords = section.geometry.exterior.coords.xy
+
+
+            # if len(coords[0])/2 >= int(len(coords[0])/2):
+            #     print(f'trace coords: {coords[0]}, {coords[1]}')
+            #     print('original_solution.fault_sections', original_solution.fault_sections.geometry[idx])
+            #     return 0
+            #     raise ValueError()
+
+            btm_idx = int((len(coords[0]) - 1) / 2)
+            points = coords  # transformer.transform(coords[0], coords[1])
+
+            # print(f'trace coords: {coords[0]}, {coords[1]}')
+            # print('btm_idx ', btm_idx)
+            # print('points', points)
+
+            # if len(coords[0]) == 5:
+            #     points = transformer.transform(coords[0][:-1], coords[1][:-1])
+            #     print(f'trace coords: {coords[0][:-1]}, {coords[1][:-1]}')
+            # elif len(coords[0]) == 4:
+            #     points = transformer.transform(coords[0], coords[1])
+            #     print(f'trace coords: {coords[0]}, {coords[1]}')
+            # else:
+            #     print(f'trace coords: {coords[0]}, {coords[1]}')
+            #     print('original_solution.fault_sections', original_solution.fault_sections.geometry[idx])
+            #     assert 0
+
+            # print(len(points[0]), points)
+            # assert len(points[0]) == 4
+
+            # bottom_idx = int(len(points)/2)
+            # print(bottom_idx)
+            # surface = pv.PolyData(
+            #     [
+            #         [points[0][0], points[0][1], int(section['UpDepth'] * 1000)],
+            #         [points[bottom_idx-1][0], points[bottom_idx-1][1], int(section['UpDepth'] * 1000)],
+            #         [points[bottom_idx][0], points[bottom_idx][1], int(section['LowDepth'] * 1000)],
+            #         [points[-1][0], points[-1][1], int(section['LowDepth'] * 1000)],
+            #     ]
+            # )
+
+            try:
+                print(idx, section.DipDir)
+                return refine_dip_direction(
+                    Point(points[0][0], points[1][0]),
+                    Point(points[0][btm_idx - 1], points[1][btm_idx - 1]),
+                    section["DipDir"])
+            except (ValueError) as err:
+                print(err)
+                #raise
+
+
+        def build_new_dip_dir_crustal(idx, section):
+            points = section.geometry.coords.xy
+            try:
+                # print(idx, section.DipDir)
+                # print(points)
+                return refine_dip_direction(
+                    Point(points[1][0], points[0][0]),
+                    Point(points[1][-1], points[0][-1]),
+                    section["DipDir"])
+            except (ValueError) as err:
+                print(err)
+                #raise
+
 
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         original_archive = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
@@ -136,26 +160,15 @@ class TestDipDirection(unittest.TestCase):
 
         fault_sections = deepcopy(original_solution.fault_sections)
 
-        print(fault_sections[["FaultID", "DipDeg", "DipDir", "geometry"]])
+        gt_n_degrees = 0
+        for i, section in fault_sections.iterrows():
+            dip_info = (i, section["DipDir"], build_new_dip_dir_crustal(i, section), fault_sections.FaultName[i], section.geometry )
+            diff = abs(dip_info[1] - dip_info[2])
+            if  diff > 10:
+                print(f"diff: {diff}, info {dip_info}")
+                gt_n_degrees +=1
 
-        print(fault_sections.geometry[0], fault_sections.DipDir[0])
-
-        def create_section_surface(section):
-            return create_surface(
-                section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
-            )
-
-        polys = [create_section_surface(section) for i, section in fault_sections.iterrows()]
-        # print(polys[0])
-        fault_sections = fault_sections.set_geometry(polys)
-
-        # dip_dir = [build_new_dip_dir(i, section) for i, section in fault_sections.iterrows()]
-        # print(dip_dir)
-
-        # print([section.DipDir for i, section in fault_sections.iterrows()])
-
-        # assert 0
-
+        assert gt_n_degrees == 5
 
 def calc_orientation(idx, section):
     assert type(section.geometry) == LineString
