@@ -89,9 +89,11 @@ class TestPyvistaDistances(unittest.TestCase):
 
 
 class TestPyvistaDistanceIntegration(unittest.TestCase):
-    def test_calc_distance_to_a_fault_section(self):
 
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
+
+    def test_calc_distance_to_a_subduction_fault_section(self):
+
+        folder = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
         filename = pathlib.PurePath(
             folder, "fixtures/AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
         )

@@ -10,26 +10,23 @@ from shapely.geometry import LineString, Point
 import solvis
 from solvis.geometry import bearing, create_surface, dip_direction, refine_dip_direction
 
+TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
 
 class TestDipDirection(unittest.TestCase):
-
     def test_simple_45(self):
         point_a = Point(0, 0)
         point_b = Point(1, 1)
         self.assertAlmostEqual(dip_direction(point_a, point_b), 45.0 + 90, 2)
-
 
     def test_simple_90(self):
         point_a = Point(0, 0)
         point_b = Point(0, 1)
         assert dip_direction(point_a, point_b) == 90.0 + 90
 
-
     def test_simple_180(self):
         point_a = Point(0, 0)
         point_b = Point(-1, 0)
         assert dip_direction(point_a, point_b) == 180.0 + 90
-
 
     def test_simple_135(self):
         point_a = Point(0, 0)
@@ -78,9 +75,8 @@ class TestDipDirection(unittest.TestCase):
         # rdd = refine_dip_direction(point_a, point_b)
         # assert rdd == dd
 
-    #@unittest.skip('wip')
+    # @unittest.skip('wip')
     def test_fault_section_dip_direction_crustal(self):
-
         def build_new_dip_dir_subducion(idx, section):
             # points can be any array, depending on section complexity, but why sometimes last point is duplicated ??
             # print('idx', idx, 'geometry', section["geometry"])
@@ -89,7 +85,6 @@ class TestDipDirection(unittest.TestCase):
 
             # print(type(section.geometry.exterior.coords.xy))
             coords = section.geometry.exterior.coords.xy
-
 
             # if len(coords[0])/2 >= int(len(coords[0])/2):
             #     print(f'trace coords: {coords[0]}, {coords[1]}')
@@ -134,11 +129,11 @@ class TestDipDirection(unittest.TestCase):
                 return refine_dip_direction(
                     Point(points[0][0], points[1][0]),
                     Point(points[0][btm_idx - 1], points[1][btm_idx - 1]),
-                    section["DipDir"])
+                    section["DipDir"],
+                )
             except (ValueError) as err:
                 print(err)
-                #raise
-
+                # raise
 
         def build_new_dip_dir_crustal(idx, section):
             points = section.geometry.coords.xy
@@ -146,29 +141,34 @@ class TestDipDirection(unittest.TestCase):
                 # print(idx, section.DipDir)
                 # print(points)
                 return refine_dip_direction(
-                    Point(points[1][0], points[0][0]),
-                    Point(points[1][-1], points[0][-1]),
-                    section["DipDir"])
+                    Point(points[1][0], points[0][0]), Point(points[1][-1], points[0][-1]), section["DipDir"]
+                )
             except (ValueError) as err:
                 print(err)
-                #raise
+                # raise
 
 
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        original_archive = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
+        original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
         original_solution = solvis.InversionSolution().from_archive(original_archive)
 
         fault_sections = deepcopy(original_solution.fault_sections)
 
         gt_n_degrees = 0
         for i, section in fault_sections.iterrows():
-            dip_info = (i, section["DipDir"], build_new_dip_dir_crustal(i, section), fault_sections.FaultName[i], section.geometry )
+            dip_info = (
+                i,
+                section["DipDir"],
+                build_new_dip_dir_crustal(i, section),
+                fault_sections.FaultName[i],
+                section.geometry,
+            )
             diff = abs(dip_info[1] - dip_info[2])
-            if  diff > 10:
+            if diff > 10:
                 print(f"diff: {diff}, info {dip_info}")
-                gt_n_degrees +=1
+                gt_n_degrees += 1
 
         assert gt_n_degrees == 5
+
 
 def calc_orientation(idx, section):
     assert type(section.geometry) == LineString
@@ -204,8 +204,7 @@ def calc_dip_error_margin(idx, section, dip, margin):
 
 class TestDipDirectionCrustal(unittest.TestCase):
     def setUp(self):
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        original_archive = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
+        original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
         # original_archive = pathlib.PurePath(folder,
         #    "fixtures/NZSHM22_ScaledInversionSolution-QXV0b21hdGlvblRhc2s6MTEzMTQz.zip")
         original_solution = solvis.InversionSolution().from_archive(original_archive)

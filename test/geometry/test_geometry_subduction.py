@@ -19,28 +19,28 @@ HIK_ARCHIVE = "fixtures/AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6M
 PUY_ARCHIVE = "fixtures/PuysegurInversionSolution-QXV0b21hdGlvblRhc2s6MTExMDA1.zip"
 
 
+TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
+
 class TestSubductionSurface(unittest.TestCase):
     def setUp(self):
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        filename = pathlib.PurePath(folder, HIK_ARCHIVE)
+
+        filename = pathlib.PurePath(TEST_FOLDER, HIK_ARCHIVE)
         self.solution = solvis.InversionSolution().from_archive(filename)
         self.fault_sections = deepcopy(self.solution.fault_sections)
 
     @unittest.skip('use to write out some files')
     def test_write_surface_geojson(self):
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        original_archive = pathlib.PurePath(folder, CRU_ARCHIVE)  # noqa
+        original_archive = pathlib.PurePath(TEST_FOLDER, CRU_ARCHIVE)  # noqa
         # solution = solvis.InversionSolution().from_archive(original_archive)
         # solvis.export_geojson(solution.fault_surfaces(), "surfaces_original.json" )
         # solvis.export_geojson(solution.fault_surfaces(refine_dip_dir=True), "surfaces_refined.json" )
 
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        filename = pathlib.PurePath(folder, HIK_ARCHIVE)
+        filename = pathlib.PurePath(TEST_FOLDER, HIK_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
         solvis.rupt_ids_above_rate(1e-8)
         solvis.export_geojson(solution.fault_surfaces(), "surfaces_hikurangi.json")
 
-        filename = pathlib.PurePath(folder, PUY_ARCHIVE)
+        filename = pathlib.PurePath(TEST_FOLDER, PUY_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
         solvis.export_geojson(solution.fault_surfaces(), "surfaces_puysegur.json")
 
@@ -65,16 +65,14 @@ class TestSubductionSurface(unittest.TestCase):
         self.assertAlmostEqual(this_dd, 322, 0)
 
     def test_subduction_rupture_surface(self):
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        filename = pathlib.PurePath(folder, PUY_ARCHIVE)
+        filename = pathlib.PurePath(TEST_FOLDER, PUY_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
         surface = solution.rupture_surface(4)
         assert surface.shape == (8, 22)
 
     @pytest.mark.slow
     def test_crustal_rupture_surface(self):
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        filename = pathlib.PurePath(folder, CRU_ARCHIVE)
+        filename = pathlib.PurePath(TEST_FOLDER, CRU_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
 
         rupture_id = 101
@@ -86,8 +84,7 @@ class TestSubductionSurface(unittest.TestCase):
 
     @pytest.mark.slow
     def test_rate_caching_crustal_rupture_surface(self):
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        filename = pathlib.PurePath(folder, CRU_ARCHIVE)
+        filename = pathlib.PurePath(TEST_FOLDER, CRU_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
 
         rupture_id = 101
@@ -105,8 +102,7 @@ class TestSubductionSurface(unittest.TestCase):
 
     @unittest.skip('WIP filtered rutpures geojson')
     def test_write_filtered_geojson(self):
-        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        filename = pathlib.PurePath(folder, PUY_ARCHIVE)
+        filename = pathlib.PurePath(TEST_FOLDER, PUY_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
         rate = 5e-5
         ri = solvis.rupt_ids_above_rate(solution, rate)

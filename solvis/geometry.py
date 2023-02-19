@@ -1,3 +1,4 @@
+import logging
 import math
 from functools import partial
 
@@ -7,11 +8,10 @@ from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
 
-import logging
-
 EARTH_RADIUS_MEAN = 6371.0072
 
 log = logging.getLogger(__name__)
+
 
 def reverse_geom(geom: BaseGeometry):
     """
@@ -129,13 +129,13 @@ def refine_dip_direction(point_a: Point, point_b: Point, original_direction: flo
     :param point_b: the second point
     :param original_direction: the original direction in decimal degrees
     """
-    #log.info(f"original dir_dir: {original_direction}")
+    # log.info(f"original dir_dir: {original_direction}")
     dip_dir = dip_direction(point_a, point_b)
 
-    #log.info(f"calculated dip_dir: {dip_dir}")
-    if abs( original_direction - dip_dir) > 45:
+    # log.info(f"calculated dip_dir: {dip_dir}")
+    if abs(original_direction - dip_dir) > 45:
         dip_dir -= 180
-        #log.info(f"refined dip_dir is now {dip_dir}")
+        # log.info(f"refined dip_dir is now {dip_dir}")
     return dip_dir + 360 if dip_dir < 0 else dip_dir
 
 
