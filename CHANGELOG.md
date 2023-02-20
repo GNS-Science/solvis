@@ -1,15 +1,19 @@
 # Changelog
 
 
-## [0.4.0] - 2022-02-07
+## [0.4.0] - 2022-02-12
 
 ## Added
  - geometric surface projections from fault sections
- - 3D distance calculation for subduction faults
+ - 3D distance calculation for both crustal and subduction subduction faults systems
  - new_solution helper function in InversionSolution class (used by solvis.new_sol)
+ - add some performance tests using `pytest.mark.performance`
+ - helper functions for dip-direction, bearing etc in geometry package
 
 ## Changed
- - now using pytest.mark.slow for some potentially slow tests
+ - `pytest.mark.slow` for some potentially slow tests
+ - surfaces now use LineString (not Polygon) for Faults with dip-deg=90. eg Fowlers
+ - module package refactoring
 
 ## [0.3.1] - 2022-12-22
 
