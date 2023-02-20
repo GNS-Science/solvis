@@ -21,6 +21,7 @@ PUY_ARCHIVE = "fixtures/PuysegurInversionSolution-QXV0b21hdGlvblRhc2s6MTExMDA1.z
 
 TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
 
+
 class TestSubductionSurface(unittest.TestCase):
     def setUp(self):
 

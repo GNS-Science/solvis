@@ -1,7 +1,10 @@
 import logging
 import math
 from functools import partial
+from typing import Union
 
+import numpy as np
+import pyvista as pv
 from pyproj import Transformer
 from shapely import get_coordinates
 from shapely.geometry import LineString, Point, Polygon
@@ -50,7 +53,9 @@ def translate_horizontally(azimuth: float, distance: float, lon: float, lat: flo
     return math.degrees(lon2), math.degrees(lat2)
 
 
-def create_surface(trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float):
+def create_surface(
+    trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float
+) -> Union[LineString, Polygon]:
     """
     Creates a projection of the fault surface onto the geodetic sphere.
     :param trace: the fault trace
@@ -60,11 +65,15 @@ def create_surface(trace: LineString, dip_dir: float, dip_deg: float, upper_dept
     :param lower_depth: the height of the lower edge of the fault in km
     :return: a Polygon
     """
+    if dip_deg == 90:
+        return trace
+        # return LineString([x for x in trace.coords])
+
+    trace = LineString(get_coordinates(trace))
     depth = lower_depth - upper_depth
     width = depth / math.tan(math.radians(dip_deg))
     transformation = partial(translate_horizontally, dip_dir, width)
 
-    trace = LineString(get_coordinates(trace))
     bottom_edge = reverse_geom(transform(transformation, trace))
     return Polygon([x for x in trace.coords] + [x for x in bottom_edge.coords])
 
@@ -184,3 +193,37 @@ def circle_polygon(radius_m: int, lat: float, lon: float):
         points.append(Point(lon, lats[i]))
 
     return Polygon(points)
+
+
+def section_distance(transformer, surface_geometry, upper_depth, lower_depth):
+    """
+    Calculate minimum distance from the transformer datum to a surface built from the surface projection of the fault.
+
+    :param transformer:
+    :param surface_geometry: the the surface projection of the fault plane
+    :param upper_depth: the upper depth in km
+    :param upper_depth: the lower depth in km
+    :return: distance in meters
+    """
+    # print(f'trace coords: {surface_geometry.exterior.coords.xy}')
+    if isinstance(surface_geometry, Polygon):
+        trace = transformer.transform(*surface_geometry.exterior.coords.xy)
+    elif isinstance(surface_geometry, LineString):
+        trace = transformer.transform(*surface_geometry.coords.xy)
+    else:
+        raise ValueError(f'unable to handle geometry: {surface_geometry}')
+
+    # print(f'trace offsets: {trace} (in metres relative to datum)')
+    origin = pv.PolyData([0.0, 0.0, 0.0])  # , force_float=False)
+    surface = pv.PolyData(
+        [
+            [float(trace[0][0]), float(trace[1][0]), float(upper_depth * 1000)],  # OK
+            [float(trace[0][1]), float(trace[1][1]), float(upper_depth * 1000)],  # OK
+            [float(trace[0][0]), float(trace[1][0]), float(lower_depth * 1000)],  # nope, but ok for basic test
+            [float(trace[0][1]), float(trace[1][1]), float(lower_depth * 1000)],  # nope
+        ]
+    )
+
+    closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
+    d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
+    return d_exact[0] / 1000

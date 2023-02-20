@@ -1,19 +1,20 @@
 import os
 import pathlib
-import unittest
 import timeit
+import unittest
 
 import geopandas as gpd
 import numpy as np
+import pytest
 import pyvista as pv
 from nzshm_common.location.location import location_by_id
 from pyproj import Transformer
+from pytest import approx
 
-from solvis import InversionSolution
-from pytest import approx, mark
-
+from solvis import InversionSolution, geometry
 
 TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
+
 
 class TestPyvistaDistances(unittest.TestCase):
     def test_basic_0_rake_90(self):
@@ -25,7 +26,7 @@ class TestPyvistaDistances(unittest.TestCase):
         p2 = [1, 1, 10]  # 1st botton trace point
         p3 = [1, 2, 10]  # 2nd bottom trace point
 
-        mesh1 = pv.PolyData([p0, p1, p2, p3],  force_float=False)
+        mesh1 = pv.PolyData([p0, p1, p2, p3], force_float=False)
         closest_cells, closest_points = mesh1.find_closest_cell(mesh0.points, return_closest_point=True)
         d_exact = np.linalg.norm(mesh0.points - closest_points, axis=1)
 
@@ -56,7 +57,6 @@ class TestPyvistaDistances(unittest.TestCase):
 
     def test_basic_2_closer_at_depth(self):
         mesh0 = pv.PolyData([0, 0, 0], force_float=False)
-
 
         p0 = [10, 2, 0]  # 1st top-trace point
         p1 = [10, 3, 0]  # 2nd top-trace point
@@ -94,27 +94,8 @@ class TestPyvistaDistances(unittest.TestCase):
         print(d_exact)
         assert d_exact[0] == 5
 
-def section_distance(transformer, geometry, upper_depth, lower_depth):
-    # print(f'trace coords: {geometry.exterior.coords.xy}')
-    trace = transformer.transform(*geometry.exterior.coords.xy)
-    # print(f'trace offsets: {trace} (in metres relative to datum)')
-    origin = pv.PolyData([0.0, 0.0, 0.0]) #, force_float=False)
-    surface = pv.PolyData(
-        [
-            [float(trace[0][0]), float(trace[1][0]), float(upper_depth * 1000)],  # OK
-            [float(trace[0][1]), float(trace[1][1]), float(upper_depth * 1000)],  # OK
-            [float(trace[0][0]), float(trace[1][0]), float(lower_depth * 1000)],  # nope, but ok for basic test
-            [float(trace[0][1]), float(trace[1][1]), float(lower_depth * 1000)],  # nope
-        ]
-    )
 
-    closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
-    d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
-    return d_exact[0]
-
-
-class TestSurfaceDistanceCalculation(unittest.TestCase):
-
+class TestSurfaceDistanceCalculation(object):
     def test_calc_distance_to_a_subduction_fault_section(self):
 
         filename = pathlib.PurePath(
@@ -130,8 +111,11 @@ class TestSurfaceDistanceCalculation(unittest.TestCase):
         wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
-        new_series = gdf.apply(lambda section: section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth), axis=1)
-        assert new_series.min() == approx(25067.57)
+        new_series = gdf.apply(
+            lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
+            axis=1,
+        )
+        assert new_series.min() == approx(25067.57 / 1e3)
 
     def test_calc_distance_to_a_crustal_fault_section(self):
 
@@ -147,17 +131,20 @@ class TestSurfaceDistanceCalculation(unittest.TestCase):
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
-        new_series = gdf.apply(lambda section: section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth), axis=1)
+        new_series = gdf.apply(
+            lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
+            axis=1,
+        )
         # print ( new_series.loc[lambda x: x <= 100000 ])
-        assert new_series.min() == approx(38282.218)
+        assert new_series.min() == approx(38282.218 / 1e3)
 
-    @mark.slow
+    @pytest.mark.slow
     def test_calc_performance_to_a_crustal_fault_section(self):
 
         original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
         sol = InversionSolution().from_archive(original_archive)
 
-        #pick a rupture section
+        # pick a rupture section
         gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         # # set up WLG as our datum
@@ -170,12 +157,21 @@ class TestSurfaceDistanceCalculation(unittest.TestCase):
 
         # time it takes to execute the main statement a number of times, measured in seconds as a float.
         count = 10
-        elapsed = timeit.timeit(lambda: gdf.apply(lambda section: section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth), axis=1),
-            number = count
-        )/10
-        assert elapsed < 0.05 # 50msec
+        elapsed = (
+            timeit.timeit(
+                lambda: gdf.apply(
+                    lambda section: geometry.section_distance(
+                        transformer, section.geometry, section.UpDepth, section.LowDepth
+                    ),
+                    axis=1,
+                ),
+                number=count,
+            )
+            / 10
+        )
+        assert elapsed < 0.05  # 50msec
 
-    @mark.slow
+    @pytest.mark.slow
     def test_calc_peformance_to_a_subduction_fault_section(self):
 
         filename = pathlib.PurePath(
@@ -192,10 +188,88 @@ class TestSurfaceDistanceCalculation(unittest.TestCase):
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
-        new_series = gdf.apply(lambda section: section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth), axis=1)
         count = 10
-        elapsed = timeit.timeit(lambda: gdf.apply(lambda section: section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth), axis=1),
-            number = count
-        )/10
-        assert elapsed < 0.2 # 200msec
+        elapsed = (
+            timeit.timeit(
+                lambda: gdf.apply(
+                    lambda section: geometry.section_distance(
+                        transformer, section.geometry, section.UpDepth, section.LowDepth
+                    ),
+                    axis=1,
+                ),
+                number=count,
+            )
+            / 10
+        )
+        assert elapsed < 0.2  # 200msec
 
+    @pytest.mark.parametrize('dist_km', [10, 20, 30, 50, 70, 100, 150, 180])
+    def test_calc_crustal_compare_algorithms(self, dist_km):
+
+        original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
+        sol = InversionSolution().from_archive(original_archive)
+
+        # # set up WLG as our datum
+        WLG = location_by_id('WLG')
+        lon, lat = WLG['longitude'], WLG['latitude']
+
+        wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
+        local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
+        transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
+
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
+
+        polygon = geometry.circle_polygon(radius_m=dist_km * 1000, lon=WLG['longitude'], lat=WLG['latitude'])
+        polygon_intersect_df = gdf[gdf['geometry'].intersects(polygon)]  # whitemans_0)]
+        print(polygon_intersect_df.info())
+
+        gdf['distance_km'] = gdf.apply(
+            lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
+            axis=1,
+        )
+
+        print(polygon_intersect_df['FaultID'])
+
+        print(gdf[gdf['distance_km'] <= dist_km]['FaultID'])
+
+        assert list(polygon_intersect_df['FaultID']) == list(gdf[gdf['distance_km'] <= dist_km]['FaultID'])
+
+    @pytest.mark.parametrize('dist_km', [200, 300, 500, 1000])
+    def test_calc_crustal_compare_algorithms_larger_distance(self, dist_km):
+
+        original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
+        sol = InversionSolution().from_archive(original_archive)
+
+        # # set up WLG as our datum
+        WLG = location_by_id('WLG')
+        lon, lat = WLG['longitude'], WLG['latitude']
+
+        wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
+        local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
+        transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
+
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
+
+        polygon = geometry.circle_polygon(radius_m=dist_km * 1000, lon=WLG['longitude'], lat=WLG['latitude'])
+        polygon_intersect_df = gdf[gdf['geometry'].intersects(polygon)]  # whitemans_0)]
+        print(polygon_intersect_df.info())
+
+        gdf['distance_km'] = gdf.apply(
+            lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
+            axis=1,
+        )
+
+        distance_ids = set(gdf[gdf['distance_km'] <= dist_km]['FaultID'])
+        intersects_ids = set(polygon_intersect_df['FaultID'])
+
+        diffs = distance_ids.difference(intersects_ids)
+
+        assert diffs == set([])  # should be an empty set
+        print(diffs)
+        print(distance_ids)
+        print(gdf[gdf['FaultID'].isin(list(diffs))])
+
+        # with open(f'surface_within_{dist_km}_of_wellington.geojson', 'w') as fo:
+        #     fo.write(gdf[gdf['distance_km'] <= dist_km].to_json(indent=2))
+        #     fo.close()
+        # assert 0

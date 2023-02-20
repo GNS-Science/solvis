@@ -8,9 +8,10 @@ from copy import deepcopy
 from shapely.geometry import LineString, Point
 
 import solvis
-from solvis.geometry import bearing, create_surface, dip_direction, refine_dip_direction
+from solvis.geometry import bearing, dip_direction, refine_dip_direction
 
 TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
+
 
 class TestDipDirection(unittest.TestCase):
     def test_simple_45(self):
@@ -76,7 +77,6 @@ class TestDipDirection(unittest.TestCase):
         # assert rdd == dd
 
     def test_dip_direction_crustal_refined_vs_original(self):
-
         def build_new_dip_dir_crustal(idx, section):
             points = section.geometry.coords.xy
             try:
@@ -86,7 +86,6 @@ class TestDipDirection(unittest.TestCase):
             except (ValueError) as err:
                 print(err)
                 # raise
-
 
         original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
         original_solution = solvis.InversionSolution().from_archive(original_archive)
@@ -128,6 +127,7 @@ def calc_dip_dir(idx, section):
         print('southing', point_a, point_b, section.FaultName)
         pass
     return refine_dip_direction(Point(*point_a), Point(*point_b), section.DipDir)
+
 
 def calc_dip_error_margin(idx, section, dip, margin):
     diff = abs(section.DipDir - dip)
