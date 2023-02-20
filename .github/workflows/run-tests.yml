@@ -58,8 +58,8 @@ jobs:
       - name: list files
         run: ls -l .
 
-      - name: Submit coverage report if Ubuntu and we're on 'main' branch
-        if: runner.os == 'Linux' && ( github.head_ref == 'main' || github.ref_name == 'main' )
+      - name: Submit coverage report if this is Linux
+        if: runner.os == 'Linux'
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: true # optional (default = false)

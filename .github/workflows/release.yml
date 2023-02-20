@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-versions: [3.8, 3.9]
+        python-versions: ["3.9", "3.10"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -55,16 +55,16 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      # - name: build documentation
-      #   run: |
-      #     poetry install -E doc
-      #     poetry run mkdocs build
+      - name: build documentation
+        run: |
+          poetry install -E doc
+          poetry run mkdocs build
 
-      # - name: publish documentation
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     personal_token: ${{ secrets.PERSONAL_TOKEN }}
-      #     publish_dir: ./site
+      - name: publish documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          publish_dir: ./site
 
       - name: Build wheels and source tarball
         run: >-
