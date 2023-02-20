@@ -1,10 +1,20 @@
 [tool.poetry]
 name = "solvis"
-version = "0.3.1"
+version = "0.4.0"
 description = "analysis of opensha modular solution files."
 authors = ["Chris Chamberlain <chrisbc@artisan.co.nz>"]
 license = "AGPL3"
 readme = "README.md"
+classifiers=[
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10'
+]
 packages = [
 	{include = "solvis"},
     {include = "test", format = "sdist" }
@@ -18,7 +28,21 @@ click-plugins = "^1.1.1"
 geopandas = "^0.12.2"
 pytz = "2021.3"
 pyproj = "^3.3"
-shapely = "^1.8.4" # shapely 2.0 isn't working
+pyvista = "^0.37.0"
+
+[tool.poetry.group.dev.dependencies]
+black  = { version = "^22.3"}
+bump2version = "^1.0.1"
+isort  = { version = "^5.8.0"}
+flake8  = { version = "^3.9.2"}
+flake8-docstrings = { version = "^1.6.0", optional = true }
+mypy = {version = "^0.900"}
+pytest = { version = "^6.2.4"}
+pytest-cov  = { version = "^2.12.0"}
+twine = "^4.0.2"
+nzshm-common = "^0.4.0"
+matplotlib = "^3.6.3"
+tox = "^4.4.4"
 
 [tool.poetry.extras]
 test = [
@@ -36,17 +60,7 @@ scripts = [
 
 dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml", "bump2version"]
 
-[tool.poetry.group.dev.dependencies]
-black  = { version = "^22.3"}
-bump2version = "^1.0.1"
-isort  = { version = "^5.8.0"}
-flake8  = { version = "^3.9.2"}
-flake8-docstrings = { version = "^1.6.0", optional = true }
-mypy = {version = "^0.900"}
-pytest = { version = "^6.2.4"}
-pytest-cov  = { version = "^2.12.0"}
-tox = { version = "^3.20.1"}
-twine = "^4.0.2"
+
 
 [tool.black]
 line-length = 120

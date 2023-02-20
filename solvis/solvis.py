@@ -1,6 +1,6 @@
 #!python3
 
-from functools import partial
+# from functools import partial
 from pathlib import Path
 from typing import Union
 
@@ -8,9 +8,6 @@ import geopandas as gpd
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import pyproj
-from shapely.geometry import Point, Polygon
-from shapely.ops import transform
 
 from solvis.inversion_solution import InversionSolution
 
@@ -46,25 +43,15 @@ def mfd_hist(ruptures_df: pd.DataFrame):
     return mfd
 
 
-def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path]):
+def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
     print(f"Exporting to {filename}")
     f = open(filename, 'w')
-    f.write(gdf.to_json())
+    f.write(gdf.to_json(**kwargs))
     f.close()
 
 
 def new_sol(sol: InversionSolution, rupture_ids: npt.ArrayLike) -> InversionSolution:
-    rr = sol.ruptures
-    ra = sol.rates
-    ri = sol.indices
-    ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
-    rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
-    indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
-
-    # all other props are derived from these ones
-    ns = InversionSolution()
-    ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
-    return ns
+    return InversionSolution.new_solution(sol, rupture_ids)
 
 
 def rupt_ids_above_rate(sol: InversionSolution, rate: float):
@@ -72,39 +59,3 @@ def rupt_ids_above_rate(sol: InversionSolution, rate: float):
     if not rate:
         return rr["Rupture Index"].unique()
     return rr[rr['Annual Rate'] > rate]["Rupture Index"].unique()
-
-
-def circle_polygon(radius_m: int, lat: float, lon: float):
-    # based on https://gis.stackexchange.com/a/359748
-
-    center = Point(float(lon), float(lat))
-
-    local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
-
-    wgs84_to_aeqd = partial(
-        pyproj.transform,
-        pyproj.Proj("+proj=longlat +datum=WGS84 +no_defs"),
-        pyproj.Proj(local_azimuthal_projection),
-    )
-
-    aeqd_to_wgs84 = partial(
-        pyproj.transform,
-        pyproj.Proj(local_azimuthal_projection),
-        pyproj.Proj("+proj=longlat +datum=WGS84 +no_defs"),
-    )
-
-    point_transformed = transform(wgs84_to_aeqd, center)
-    buffer = point_transformed.buffer(radius_m)
-
-    # Get the polygon with lat lon coordinates
-    polygon = transform(aeqd_to_wgs84, buffer)
-
-    # Adding 360 to all negative longitudes
-    ext = np.asarray(polygon.exterior.coords)
-    points = []
-    for x, y in ext[:][:]:
-        if x < 0:
-            x += 360
-        points.append(Point(x, y))
-
-    return Polygon(points)
