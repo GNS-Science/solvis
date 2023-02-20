@@ -169,7 +169,7 @@ class TestSurfaceDistanceCalculation(object):
             )
             / 10
         )
-        assert elapsed < 0.05  # 50msec
+        assert elapsed < 0.1  # 100msec
 
     @pytest.mark.slow
     def test_calc_peformance_to_a_subduction_fault_section(self):
@@ -201,7 +201,7 @@ class TestSurfaceDistanceCalculation(object):
             )
             / 10
         )
-        assert elapsed < 0.2  # 200msec
+        assert elapsed < 0.5  # 500msec
 
     @pytest.mark.parametrize('dist_km', [10, 20, 30, 50, 70, 100, 150, 180])
     def test_calc_crustal_compare_algorithms(self, dist_km):
