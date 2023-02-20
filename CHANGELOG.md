@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [0.4.0] - 2022-02-12
+## [0.4.0] - 2022-02-21
 
 ## Added
  - geometric surface projections from fault sections
