@@ -75,71 +75,11 @@ class TestDipDirection(unittest.TestCase):
         # rdd = refine_dip_direction(point_a, point_b)
         # assert rdd == dd
 
-    # @unittest.skip('wip')
-    def test_fault_section_dip_direction_crustal(self):
-        def build_new_dip_dir_subducion(idx, section):
-            # points can be any array, depending on section complexity, but why sometimes last point is duplicated ??
-            # print('idx', idx, 'geometry', section["geometry"])
-            # points = section["geometry"].exterior.coords[:-1]
-            # print(len(points))
-
-            # print(type(section.geometry.exterior.coords.xy))
-            coords = section.geometry.exterior.coords.xy
-
-            # if len(coords[0])/2 >= int(len(coords[0])/2):
-            #     print(f'trace coords: {coords[0]}, {coords[1]}')
-            #     print('original_solution.fault_sections', original_solution.fault_sections.geometry[idx])
-            #     return 0
-            #     raise ValueError()
-
-            btm_idx = int((len(coords[0]) - 1) / 2)
-            points = coords  # transformer.transform(coords[0], coords[1])
-
-            # print(f'trace coords: {coords[0]}, {coords[1]}')
-            # print('btm_idx ', btm_idx)
-            # print('points', points)
-
-            # if len(coords[0]) == 5:
-            #     points = transformer.transform(coords[0][:-1], coords[1][:-1])
-            #     print(f'trace coords: {coords[0][:-1]}, {coords[1][:-1]}')
-            # elif len(coords[0]) == 4:
-            #     points = transformer.transform(coords[0], coords[1])
-            #     print(f'trace coords: {coords[0]}, {coords[1]}')
-            # else:
-            #     print(f'trace coords: {coords[0]}, {coords[1]}')
-            #     print('original_solution.fault_sections', original_solution.fault_sections.geometry[idx])
-            #     assert 0
-
-            # print(len(points[0]), points)
-            # assert len(points[0]) == 4
-
-            # bottom_idx = int(len(points)/2)
-            # print(bottom_idx)
-            # surface = pv.PolyData(
-            #     [
-            #         [points[0][0], points[0][1], int(section['UpDepth'] * 1000)],
-            #         [points[bottom_idx-1][0], points[bottom_idx-1][1], int(section['UpDepth'] * 1000)],
-            #         [points[bottom_idx][0], points[bottom_idx][1], int(section['LowDepth'] * 1000)],
-            #         [points[-1][0], points[-1][1], int(section['LowDepth'] * 1000)],
-            #     ]
-            # )
-
-            try:
-                print(idx, section.DipDir)
-                return refine_dip_direction(
-                    Point(points[0][0], points[1][0]),
-                    Point(points[0][btm_idx - 1], points[1][btm_idx - 1]),
-                    section["DipDir"],
-                )
-            except (ValueError) as err:
-                print(err)
-                # raise
+    def test_dip_direction_crustal_refined_vs_original(self):
 
         def build_new_dip_dir_crustal(idx, section):
             points = section.geometry.coords.xy
             try:
-                # print(idx, section.DipDir)
-                # print(points)
                 return refine_dip_direction(
                     Point(points[1][0], points[0][0]), Point(points[1][-1], points[0][-1]), section["DipDir"]
                 )
@@ -170,12 +110,12 @@ class TestDipDirection(unittest.TestCase):
         assert gt_n_degrees == 5
 
 
-def calc_orientation(idx, section):
-    assert type(section.geometry) == LineString
-    points = section.geometry.coords
-    point_a = tuple(reversed(points[0]))  # need lat/lon order
-    point_b = tuple(reversed(points[-1]))
-    return 'southing' if point_a[0] > point_b[0] else 'northing'
+# def calc_orientation(idx, section):
+#     assert type(section.geometry) == LineString
+#     points = section.geometry.coords
+#     point_a = tuple(reversed(points[0]))  # need lat/lon order
+#     point_b = tuple(reversed(points[-1]))
+#     return 'southing' if point_a[0] > point_b[0] else 'northing'
 
 
 def calc_dip_dir(idx, section):
@@ -188,7 +128,6 @@ def calc_dip_dir(idx, section):
         print('southing', point_a, point_b, section.FaultName)
         pass
     return refine_dip_direction(Point(*point_a), Point(*point_b), section.DipDir)
-
 
 def calc_dip_error_margin(idx, section, dip, margin):
     diff = abs(section.DipDir - dip)
@@ -240,15 +179,7 @@ class TestDipDirectionCrustal(unittest.TestCase):
         this_dd = refine_dip_direction(pointA, pointB, sectA.DipDir)
 
         self.assertAlmostEqual(this_dd, sectB.DipDir, -1)
-
         print(this_dd, sectB.DipDir)
-
-        # andys_dd = calculate_dip_direction(
-        #     LineString([Point(*sectA.geometry.coords[0]), Point(*sectB.geometry.coords[1])]))
-
-        # print(andys_dd, sectB.DipDir)
-        # self.assertAlmostEqual(andys_dd, this_dd, -1)
-        # assert 0
 
     def test_fault_section_dip_direction_all_fowlers_sub_30(self):
         """
@@ -277,8 +208,8 @@ class TestDipDirectionCrustal(unittest.TestCase):
         sections = list(self.fault_sections.iterrows())[47:][:14]
         test = [calc_dip_error_margin(idx, section, calc_dip_dir(idx, section), 15) for idx, section in sections]
 
-        orients = [calc_orientation(idx, section) for idx, section in sections]
-        print(orients)
+        # orients = [calc_orientation(idx, section) for idx, section in sections]
+        # print(orients)
         assert len(test) == 14
         assert max(test) < 30
         # assert 0
@@ -305,8 +236,8 @@ class TestDipDirectionCrustal(unittest.TestCase):
         sections = list(self.fault_sections.iterrows())[62:][:3]
         test = [calc_dip_error_margin(idx, section, calc_dip_dir(idx, section), 0) for idx, section in sections]
 
-        orients = [calc_orientation(idx, section) for idx, section in sections]
-        print(orients)
+        # orients = [calc_orientation(idx, section) for idx, section in sections]
+        # print(orients)
         assert len(test) == 3
         assert max(test) < 15
         # assert 0
@@ -337,8 +268,8 @@ class TestDipDirectionCrustal(unittest.TestCase):
         sections = list(self.fault_sections.iterrows())[:30]
         test = [calc_dip_error_margin(idx, section, calc_dip_dir(idx, section), 0) for idx, section in sections]
 
-        orients = [calc_orientation(idx, section) for idx, section in sections]
-        print(orients)
+        # orients = [calc_orientation(idx, section) for idx, section in sections]
+        # print(orients)
 
         assert len(test) == 30
         assert max(test) < 30
