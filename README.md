@@ -1,11 +1,21 @@
 # solvis
 
-a demo to try some techniques for analysis of opensha modular solution files.
+[![pypi](https://img.shields.io/pypi/v/solvis.svg)](https://pypi.org/project/solvis/)
+[![python](https://img.shields.io/pypi/pyversions/solvis.svg)](https://pypi.org/project/solvis/)
+[![Build Status](https://github.com/GNS-Science/solvis/actions/workflows/dev.yml/badge.svg)](https://github.com/GNS-Science/solvis/actions/workflows/dev.yml)
+[![codecov](https://codecov.io/gh/GNS-Science/solvis/branch/main/graphs/badge.svg)](https://codecov.io/github/GNS-Science/solvis)
 
+
+* Documentation: <https://GNS-Science.github.io/solvis>
+* GitHub: <https://github.com/GNS-Science/solvis>
+* PyPI: <https://pypi.org/project/solvis/>
+* Free software: GPL-3.0-only
+
+# Features / Goals
+
+ - analysis of opensha modular solution files.
  - opensha modular documentation
  - pandas, geopanda references
-
-## goals
 
 From a typical modular opensha Inversion Solution archive, we want to produce views that allow deep exploration 
 of the solution and rupture set characteristics. Features:
@@ -34,11 +44,10 @@ of the solution and rupture set characteristics. Features:
            normalised by the area of an area (region, named fault)
 
 
-## install
+## Install (Linux, OSX)
 
 ```
-git clone
-poetry install
+poetry add solvis
 ```
 
 ### Windows Installation with pipwin (CHECK)
@@ -54,7 +63,6 @@ pipwin install gdal
 pipwin install fiona
 pipwin install shapely
 pip install -r requirements.txt
->>>>>>> feature/surface_polygons
 ```
 
 ## Run
