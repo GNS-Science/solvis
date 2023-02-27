@@ -104,7 +104,7 @@ class TestSurfaceDistanceCalculation(object):
         gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         print(gdf)
-        
+
         # # set up WLG as our datum
         WLG = location_by_id('WLG')
         lon, lat = WLG['longitude'], WLG['latitude']

@@ -1,6 +1,8 @@
 import json
 import time
 import zipfile
+from pathlib import Path
+from typing import Any, List, Union
 
 import geopandas as gpd
 import numpy.typing as npt
@@ -30,7 +32,7 @@ Inversion Solution archive file:
 """
 
 
-class InversionSolution():
+class InversionSolution:
     """
     Class to handle the opensha modular archive form
     """
@@ -43,7 +45,20 @@ class InversionSolution():
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'
 
     def __init__(self) -> None:
-        self._init_props()
+        # self._init_props()
+        self._rates = None
+        self._ruptures = None
+        self._rupture_props = None
+        self._indices = None
+        self._rs_with_rates = None
+        self._fs_with_rates = None
+        self._ruptures_with_rates = None
+        self._logic_tree_branch: List[Any] = []
+        self._fault_regime: str = ''
+        self._fault_sections = None
+        self._rupture_sections = None
+        self._archive_path: Union[Path, str]
+        self._surface_builder: SolutionSurfacesBuilder
 
     @staticmethod
     def new_solution(sol: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
@@ -61,13 +76,15 @@ class InversionSolution():
         ns._surface_builder = SolutionSurfacesBuilder(ns)
         return ns
 
-    def from_archive(self, archive_path):
-        self._init_props()
+    @staticmethod
+    def from_archive(archive_path: Union[Path, str]):
+        ns = InversionSolution()
+
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
-        self._archive_path = archive_path
-        self._surface_builder = SolutionSurfacesBuilder(self)
-        # self._metadata = json.load(METADATA_PATH)
-        return self
+        ns._archive_path = Path(archive_path)
+        ns._surface_builder = SolutionSurfacesBuilder(ns)
+        # ns._metadata = json.load(METADATA_PATH)
+        return ns
 
     def to_archive(self, archive_path, base_archive_path, compat=True):
         """
@@ -149,21 +166,6 @@ class InversionSolution():
         # and the warning notice
         data_to_zip_direct(zout, WARNING, "WARNING.md")
 
-    def _init_props(self):
-        self._rates = None
-        self._ruptures = None
-        self._rupture_props = None
-        self._indices = None
-        self._rs_with_rates = None
-        self._fs_with_rates = None
-        self._ruptures_with_rates = None
-        self._logic_tree_branch = None
-        self._fault_regime = None
-        self._fault_sections = None
-        self._rupture_sections = None
-
-        self._surface_builder = None
-
     def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
             prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open()).convert_dtypes()
@@ -199,7 +201,7 @@ class InversionSolution():
         :return: "CRUSTAL" or "SUBDUCTION"
         """
 
-        def get_regime():
+        def get_regime() -> str:
             for obj in self.logic_tree_branch:  # .get('values'):
                 val = obj.get('value')
                 if val:
@@ -241,12 +243,12 @@ class InversionSolution():
         return self._surface_builder.rupture_surface(rupture_id)
 
     @property
-    def fault_sections(self):
+    def fault_sections(self) -> gpd.GeoDataFrame:
         fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
         return fault_sections
 
     def set_props(self, rates, ruptures, indices, fault_sections):
-        self._init_props()
+        # self._init_props()
         self._rates = rates
         self._ruptures = ruptures
         self._fault_sections = fault_sections
