@@ -3,14 +3,10 @@ import time
 import zipfile
 
 import geopandas as gpd
-
-# import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from shapely import get_coordinates
-from shapely.geometry import LineString, Point
 
-from solvis.geometry import create_surface, dip_direction
+from .solution_surfaces_mixin import SolutionSurfacesBuilder
 
 
 def data_to_zip_direct(z, data, name):
@@ -34,28 +30,10 @@ Inversion Solution archive file:
 """
 
 
-def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    def calc_dip_dir(section: gpd.GeoDataFrame) -> float:
-        assert type(section.geometry) == LineString
-        flat_geom = LineString(get_coordinates(section.geometry))
-
-        point_a = Point(reversed(flat_geom.coords[0]))
-        point_b = Point(reversed(flat_geom.coords[-1]))
-
-        return dip_direction(point_a, point_b)
-
-    return create_surface(
-        section["geometry"], calc_dip_dir(section), section["DipDeg"], section["UpDepth"], section["LowDepth"]
-    )
-
-
-def create_crustal_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    return create_surface(
-        section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
-    )
-
-
-class InversionSolution:
+class InversionSolution():
+    """
+    Class to handle the opensha modular archive form
+    """
 
     RATES_PATH = 'solution/rates.csv'
     RUPTS_PATH = 'ruptures/properties.csv'
@@ -64,10 +42,7 @@ class InversionSolution:
     METADATA_PATH = 'metadata.json'
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'
 
-    def __init__(self):
-        """
-        create an opensha modular archive
-        """
+    def __init__(self) -> None:
         self._init_props()
 
     @staticmethod
@@ -83,12 +58,14 @@ class InversionSolution:
         ns = InversionSolution()
         ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
         ns._archive_path = sol._archive_path
+        ns._surface_builder = SolutionSurfacesBuilder(ns.fault_regime, ns.fault_sections, ns.fault_sections_with_rates)
         return ns
 
     def from_archive(self, archive_path):
         self._init_props()
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         self._archive_path = archive_path
+        self._surface_builder = SolutionSurfacesBuilder(self.fault_regime, self.fault_sections, self.fault_sections_with_rates)
         # self._metadata = json.load(METADATA_PATH)
         return self
 
@@ -176,14 +153,16 @@ class InversionSolution:
         self._rates = None
         self._ruptures = None
         self._rupture_props = None
-        self._rupture_sections = None
         self._indices = None
-        self._fault_sections = None
         self._rs_with_rates = None
         self._fs_with_rates = None
         self._ruptures_with_rates = None
         self._logic_tree_branch = None
         self._fault_regime = None
+        self._fault_sections = None
+        self._rupture_sections = None
+
+        self._surface_builder = None
 
     def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
@@ -255,40 +234,16 @@ class InversionSolution:
         """
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
 
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        return self._surface_builder.fault_surfaces()
+
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        return self._surface_builder.rupture_surface(rupture_id)
+
     @property
     def fault_sections(self):
         fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
         return fault_sections
-
-    def fault_surfaces(self) -> gpd.GeoDataFrame:
-        """
-        Calculate the geometry of the solution fault surfaces projected onto the earth surface.
-
-        :param refine_dip_dir: option to override the dip_directon supplied, only applies to CRUSTAL
-        :return: a gpd.GeoDataFrame
-        """
-        if self.fault_regime == 'SUBDUCTION':
-            return self.fault_sections.set_geometry(
-                [create_subduction_section_surface(section) for i, section in self.fault_sections.iterrows()]
-            )
-        if self.fault_regime == 'CRUSTAL':
-            return self.fault_sections.set_geometry(
-                [create_crustal_section_surface(section) for i, section in self.fault_sections.iterrows()]
-            )
-
-    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        """
-        Calculate the geometry of the rupture fault surfaces projected onto the earth surface.
-
-        :param rupture_id: ID of the rupture
-        :return: a gpd.GeoDataFrame
-        """
-        df0 = self.fault_sections_with_rates
-        rupt = df0[df0["Rupture Index"] == rupture_id]
-        if self.fault_regime == 'SUBDUCTION':
-            return rupt.set_geometry([create_subduction_section_surface(section) for i, section in rupt.iterrows()])
-        if self.fault_regime == 'CRUSTAL':
-            return rupt.set_geometry([create_crustal_section_surface(section) for i, section in rupt.iterrows()])
 
     def set_props(self, rates, ruptures, indices, fault_sections):
         self._init_props()

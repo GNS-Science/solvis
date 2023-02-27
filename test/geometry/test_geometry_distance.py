@@ -103,6 +103,8 @@ class TestSurfaceDistanceCalculation(object):
         sol = InversionSolution().from_archive(str(filename))
         gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
+        print(gdf)
+        
         # # set up WLG as our datum
         WLG = location_by_id('WLG')
         lon, lat = WLG['longitude'], WLG['latitude']
