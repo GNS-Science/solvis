@@ -4,7 +4,17 @@ from shapely import get_coordinates
 from shapely.geometry import LineString, Point
 
 from solvis.geometry import create_surface, dip_direction
+from typing import Protocol
 
+
+class Solution(Protocol):
+    """A solution must implement these methods."""
+    def fault_regime(self) -> str:
+        ...
+    def fault_sections(self) -> gpd.GeoDataFrame:
+        ...
+    def fault_sections_with_rates(self) -> gpd.GeoDataFrame:
+        ...
 
 def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     def calc_dip_dir(section: gpd.GeoDataFrame) -> float:
@@ -29,11 +39,9 @@ def create_crustal_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 class SolutionSurfacesBuilder: 
     def __init__(
-        self, fault_regime: str, fault_sections: pd.DataFrame, fault_sections_with_rates: pd.DataFrame
+        self, solution: Solution
     ) -> None:
-        self._fault_regime = fault_regime  # TODO make this an ENUM ?
-        self._fault_sections = fault_sections
-        self._fault_sections_with_rates = fault_sections_with_rates
+        self._solution = solution
 
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         """
@@ -42,13 +50,14 @@ class SolutionSurfacesBuilder:
         :param refine_dip_dir: option to override the dip_directon supplied, only applies to CRUSTAL
         :return: a gpd.GeoDataFrame
         """
-        if self._fault_regime == 'SUBDUCTION':
-            return self._fault_sections.set_geometry(
-                [create_subduction_section_surface(section) for i, section in self._fault_sections.iterrows()]
+        new_geometry_df = self._solution.fault_sections.copy()
+        if self._solution.fault_regime == 'SUBDUCTION':
+            return new_geometry_df.set_geometry(
+                [create_subduction_section_surface(section) for i, section in new_geometry_df.iterrows()]
             )
-        if self._fault_regime == 'CRUSTAL':
-            return self._fault_sections.set_geometry(
-                [create_crustal_section_surface(section) for i, section in self._fault_sections.iterrows()]
+        if self._solution.fault_regime == 'CRUSTAL':
+            return new_geometry_df.set_geometry(
+                [create_crustal_section_surface(section) for i, section in new_geometry_df.iterrows()]
             )
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
@@ -58,9 +67,9 @@ class SolutionSurfacesBuilder:
         :param rupture_id: ID of the rupture
         :return: a gpd.GeoDataFrame
         """
-        df0 = self._fault_sections_with_rates
+        df0 = self._solution.fault_sections_with_rates.copy()
         rupt = df0[df0["Rupture Index"] == rupture_id]
-        if self._fault_regime == 'SUBDUCTION':
+        if self._solution.fault_regime == 'SUBDUCTION':
             return rupt.set_geometry([create_subduction_section_surface(section) for i, section in rupt.iterrows()])
-        if self._fault_regime == 'CRUSTAL':
+        if self._solution.fault_regime == 'CRUSTAL':
             return rupt.set_geometry([create_crustal_section_surface(section) for i, section in rupt.iterrows()])

@@ -58,14 +58,14 @@ class InversionSolution():
         ns = InversionSolution()
         ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
         ns._archive_path = sol._archive_path
-        ns._surface_builder = SolutionSurfacesBuilder(ns.fault_regime, ns.fault_sections, ns.fault_sections_with_rates)
+        ns._surface_builder = SolutionSurfacesBuilder(ns)
         return ns
 
     def from_archive(self, archive_path):
         self._init_props()
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         self._archive_path = archive_path
-        self._surface_builder = SolutionSurfacesBuilder(self.fault_regime, self.fault_sections, self.fault_sections_with_rates)
+        self._surface_builder = SolutionSurfacesBuilder(self)
         # self._metadata = json.load(METADATA_PATH)
         return self
 
