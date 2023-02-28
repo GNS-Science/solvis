@@ -8,7 +8,7 @@ import geopandas as gpd
 import numpy.typing as npt
 import pandas as pd
 
-from .solution_surfaces_mixin import SolutionSurfacesBuilder
+from .solution_surfaces_builder import SolutionSurfacesBuilder
 
 
 def data_to_zip_direct(z, data, name):
@@ -58,7 +58,7 @@ class InversionSolution:
         self._fault_sections = None
         self._rupture_sections = None
         self._archive_path: Union[Path, str]
-        self._surface_builder: SolutionSurfacesBuilder
+        # self._surface_builder: SolutionSurfacesBuilder
 
     @staticmethod
     def new_solution(sol: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
@@ -73,7 +73,7 @@ class InversionSolution:
         ns = InversionSolution()
         ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
         ns._archive_path = sol._archive_path
-        ns._surface_builder = SolutionSurfacesBuilder(ns)
+        # ns._surface_builder = SolutionSurfacesBuilder(ns)
         return ns
 
     @staticmethod
@@ -82,7 +82,7 @@ class InversionSolution:
 
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         ns._archive_path = Path(archive_path)
-        ns._surface_builder = SolutionSurfacesBuilder(ns)
+        # ns._surface_builder = SolutionSurfacesBuilder(ns)
         # ns._metadata = json.load(METADATA_PATH)
         return ns
 
@@ -98,44 +98,30 @@ class InversionSolution:
             self._to_non_compatible_archive(archive_path, base_archive_path)
 
     def _to_compatible_archive(self, archive_path, base_archive_path):
-
+        """
+        compatible because it does reindex the tables from 0 as required by opensha.
+        assume that self is some altered
+        """
         zout = zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED)
 
         # this copies in memory, skipping the datframe files we want to overwrite
         zin = zipfile.ZipFile(base_archive_path, 'r')
 
         for item in zin.infolist():
-            if item.filename in [self.RATES_PATH]:
+            if item.filename in [self.RATES_PATH, self.RUPTS_PATH, self.INDICES_PATH]:
                 continue
             buffer = zin.read(item.filename)
             zout.writestr(item, buffer)
 
-        # rebuild rates
-        base_archive = InversionSolution().from_archive(base_archive_path)
-        base_rates_df = base_archive.rates.copy()
-        # print('base before reset:', base_rates_df[base_rates_df['Annual Rate']>0])
-        # print()
-
-        # set all base rates to zero (slow)
-        for row in base_rates_df.itertuples(name=None):
-            base_rates_df.iat[row[0], 1] = 0
-
-        print('self._rates', self.rates[self.rates['Annual Rate'] > 0])
-        print()
-
-        # copy rates into new rates_df
-        for row in self.rates.itertuples(name=None):
-            # old_rate = str(base_rates_df.iat[row[0],1])
-            base_rates_df.iat[row[0], 1] = row[2]
-            # print("replacing: ", old_rate, row[2], row)
-
-        print('base_after reset:', base_rates_df[base_rates_df['Annual Rate'] > 0])
-        # print()
-        assert base_rates_df[base_rates_df['Annual Rate'] > 0].size == self.rates[self.rates['Annual Rate'] > 0].size
-        self._rates = base_rates_df
+        def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
+            new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])
+            new_df.index = new_df.index.rename('Rupture Index')
+            return new_df
 
         # write out the `self` dataframes
-        data_to_zip_direct(zout, self._rates.to_csv(index=False), self.RATES_PATH)
+        data_to_zip_direct(zout, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
+        data_to_zip_direct(zout, reindex_dataframe(self._ruptures).to_csv(), self.RUPTS_PATH)
+        data_to_zip_direct(zout, reindex_dataframe(self._indices).to_csv(), self.INDICES_PATH)
         # and the warning notice
         data_to_zip_direct(zout, WARNING, "WARNING.md")
 
@@ -189,7 +175,7 @@ class InversionSolution:
                 self._logic_tree_branch = ltb
             elif type(ltb.get('values')) == list:
                 self._logic_tree_branch = ltb.get('values')
-            else:
+            else:  # pragma: no cover
                 raise ValueError(f"unhandled logic_tree_branch: {ltb}")
         return self._logic_tree_branch
 
@@ -208,7 +194,9 @@ class InversionSolution:
                     name = val.get('name')
                     if name == 'Fault Regime':
                         return val.get('enumName')
-            raise ValueError(f"expected Fault Regime missing in solution logic tree, see {self.LOGIC_TREE_PATH}.")
+            raise ValueError(
+                f"expected Fault Regime missing in solution logic tree, see {self.LOGIC_TREE_PATH}."
+            )  # pragma: no cover
 
         if not self._fault_regime:
             self._fault_regime = get_regime()
@@ -237,10 +225,10 @@ class InversionSolution:
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
 
     def fault_surfaces(self) -> gpd.GeoDataFrame:
-        return self._surface_builder.fault_surfaces()
+        return SolutionSurfacesBuilder(self).fault_surfaces()
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        return self._surface_builder.rupture_surface(rupture_id)
+        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
 
     @property
     def fault_sections(self) -> gpd.GeoDataFrame:
@@ -258,7 +246,7 @@ class InversionSolution:
     def rupture_sections(self):
 
         if self._rupture_sections is not None:
-            return self._rupture_sections
+            return self._rupture_sections  # pragma: no cover
 
         rs = self.indices  # _dataframe_from_csv(self._rupture_sections, 'ruptures/indices.csv').copy()
 
@@ -291,7 +279,7 @@ class InversionSolution:
     @property
     def rs_with_rates(self):
         if self._rs_with_rates is not None:
-            return self._rs_with_rates
+            return self._rs_with_rates  # pragma: no cover
         # df_rupt_rate = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
         self._rs_with_rates = self.rupture_sections.join(self.ruptures_with_rates, 'rupture')
         return self._rs_with_rates
@@ -299,11 +287,11 @@ class InversionSolution:
     @property
     def ruptures_with_rates(self):
         if self._ruptures_with_rates is not None:
-            return self._ruptures_with_rates
+            return self._ruptures_with_rates  # pragma: no cover
         self._ruptures_with_rates = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
         return self._ruptures_with_rates
 
-    # return get the rupture ids for any ruptures intersecting the polygon
+    # return the rupture ids for any ruptures intersecting the polygon
     def get_ruptures_intersecting(self, polygon):
         q0 = gpd.GeoDataFrame(self.fault_sections)
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]

@@ -1,0 +1,2841 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": 0,
+      "properties": {
+        "FaultID": 0,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 0",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            168.7086,
+            -44.0627
+          ],
+          [
+            168.7905428698305,
+            -44.02781681586314
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "FaultID": 1,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 1",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            168.7905428698305,
+            -44.02781681586314
+          ],
+          [
+            168.87238926751655,
+            -43.992875138155824
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "FaultID": 2,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 2",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            168.87238926751655,
+            -43.992875138155824
+          ],
+          [
+            168.95413926313518,
+            -43.957875107017976
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "properties": {
+        "FaultID": 3,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 3",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            168.95413926313518,
+            -43.957875107017976
+          ],
+          [
+            169.03579292761856,
+            -43.92281686240613
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "properties": {
+        "FaultID": 4,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 4",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.03579292761856,
+            -43.92281686240613
+          ],
+          [
+            169.0844,
+            -43.9019
+          ],
+          [
+            169.11677325894016,
+            -43.88702742034389
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 5,
+      "properties": {
+        "FaultID": 5,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 5",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.11677325894016,
+            -43.88702742034389
+          ],
+          [
+            169.19680467369645,
+            -43.85018907668144
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 6,
+      "properties": {
+        "FaultID": 6,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 6",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.19680467369645,
+            -43.85018907668144
+          ],
+          [
+            169.27673721204607,
+            -43.81329495260825
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 7,
+      "properties": {
+        "FaultID": 7,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 7",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.27673721204607,
+            -43.81329495260825
+          ],
+          [
+            169.35657097432616,
+            -43.776345188808314
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 8,
+      "properties": {
+        "FaultID": 8,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 8",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.35657097432616,
+            -43.776345188808314
+          ],
+          [
+            169.3571,
+            -43.7761
+          ],
+          [
+            169.43705219571854,
+            -43.740191785899945
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 9,
+      "properties": {
+        "FaultID": 9,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 9",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.43705219571854,
+            -43.740191785899945
+          ],
+          [
+            169.51744118958186,
+            -43.703987664001374
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 10,
+      "properties": {
+        "FaultID": 10,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 10",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.51744118958186,
+            -43.703987664001374
+          ],
+          [
+            169.59773306920025,
+            -43.667727272848836
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 11,
+      "properties": {
+        "FaultID": 11,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 11",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.59773306920025,
+            -43.667727272848836
+          ],
+          [
+            169.6656,
+            -43.637
+          ],
+          [
+            169.67777077387692,
+            -43.631233181061354
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 12,
+      "properties": {
+        "FaultID": 12,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 12",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.67777077387692,
+            -43.631233181061354
+          ],
+          [
+            169.75684589476242,
+            -43.593706957302395
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 13,
+      "properties": {
+        "FaultID": 13,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 13",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.75684589476242,
+            -43.593706957302395
+          ],
+          [
+            169.83582238807276,
+            -43.556126300610394
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 14,
+      "properties": {
+        "FaultID": 14,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 14",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.83582238807276,
+            -43.556126300610394
+          ],
+          [
+            169.9147003637148,
+            -43.51849135024028
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 15,
+      "properties": {
+        "FaultID": 15,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 15",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.9147003637148,
+            -43.51849135024028
+          ],
+          [
+            169.99347993225317,
+            -43.48080224520698
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 16,
+      "properties": {
+        "FaultID": 16,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 16",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            169.99347993225317,
+            -43.48080224520698
+          ],
+          [
+            170.05,
+            -43.4537
+          ],
+          [
+            170.07161401389675,
+            -43.44248166898923
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 17,
+      "properties": {
+        "FaultID": 17,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 17",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.07161401389675,
+            -43.44248166898923
+          ],
+          [
+            170.14825345456043,
+            -43.40263707404192
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 18,
+      "properties": {
+        "FaultID": 18,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 18",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.14825345456043,
+            -43.40263707404192
+          ],
+          [
+            170.224792087544,
+            -43.36274136919175
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 19,
+      "properties": {
+        "FaultID": 19,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 19",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.224792087544,
+            -43.36274136919175
+          ],
+          [
+            170.3012300570633,
+            -43.32279469280927
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 20,
+      "properties": {
+        "FaultID": 20,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 20",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.3012300570633,
+            -43.32279469280927
+          ],
+          [
+            170.37756750781446,
+            -43.28279718297863
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 21,
+      "properties": {
+        "FaultID": 21,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 21",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.37756750781446,
+            -43.28279718297863
+          ],
+          [
+            170.45380458496757,
+            -43.24274897749749
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 22,
+      "properties": {
+        "FaultID": 22,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 22",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.45380458496757,
+            -43.24274897749749
+          ],
+          [
+            170.4862,
+            -43.2257
+          ],
+          [
+            170.53129459471086,
+            -43.2040789704988
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 23,
+      "properties": {
+        "FaultID": 23,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 23",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.53129459471086,
+            -43.2040789704988
+          ],
+          [
+            170.60968861449848,
+            -43.166413504316736
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 24,
+      "properties": {
+        "FaultID": 24,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 24",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.60968861449848,
+            -43.166413504316736
+          ],
+          [
+            170.68798594951872,
+            -43.12869458326834
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 25,
+      "properties": {
+        "FaultID": 25,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 25",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.68798594951872,
+            -43.12869458326834
+          ],
+          [
+            170.7561,
+            -43.0958
+          ],
+          [
+            170.76595237024364,
+            -43.090673309949686
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 26,
+      "properties": {
+        "FaultID": 26,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 26",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.76595237024364,
+            -43.090673309949686
+          ],
+          [
+            170.84223939861138,
+            -43.050919583158745
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 27,
+      "properties": {
+        "FaultID": 27,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 27",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.84223939861138,
+            -43.050919583158745
+          ],
+          [
+            170.91842753519217,
+            -43.011115252977376
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 28,
+      "properties": {
+        "FaultID": 28,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 28",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.91842753519217,
+            -43.011115252977376
+          ],
+          [
+            170.99451692033202,
+            -42.97126045533539
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 29,
+      "properties": {
+        "FaultID": 29,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 29",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            170.99451692033202,
+            -42.97126045533539
+          ],
+          [
+            171.07050769484357,
+            -42.93135532588489
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 30,
+      "properties": {
+        "FaultID": 30,
+        "FaultName": "Alpine Jacksons to Kaniere, Subsection 30",
+        "DipDeg": 50.0,
+        "Rake": 167.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 144.4,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 27.0,
+        "ParentID": 23,
+        "ParentName": "Alpine Jacksons to Kaniere",
+        "SlipRateStdDev": 5.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.07050769484357,
+            -42.93135532588489
+          ],
+          [
+            171.1464,
+            -42.8914
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 31,
+      "properties": {
+        "FaultID": 31,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 0",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.2143,
+            -42.3554
+          ],
+          [
+            172.15140378745062,
+            -42.39264773685221
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 32,
+      "properties": {
+        "FaultID": 32,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 1",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.15140378745062,
+            -42.39264773685221
+          ],
+          [
+            172.0884329115892,
+            -42.429861053737696
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 33,
+      "properties": {
+        "FaultID": 33,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 2",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.0884329115892,
+            -42.429861053737696
+          ],
+          [
+            172.02538725548905,
+            -42.467039864812186
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 34,
+      "properties": {
+        "FaultID": 34,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 3",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.02538725548905,
+            -42.467039864812186
+          ],
+          [
+            172.0134,
+            -42.4741
+          ],
+          [
+            171.95795357826051,
+            -42.499692325608684
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 35,
+      "properties": {
+        "FaultID": 35,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 4",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.95795357826051,
+            -42.499692325608684
+          ],
+          [
+            171.88943844613928,
+            -42.53125096135365
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 36,
+      "properties": {
+        "FaultID": 36,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 5",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.88943844613928,
+            -42.53125096135365
+          ],
+          [
+            171.82085408659356,
+            -42.562768742169325
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 37,
+      "properties": {
+        "FaultID": 37,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 6",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.82085408659356,
+            -42.562768742169325
+          ],
+          [
+            171.75220044308384,
+            -42.59424558159656
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 38,
+      "properties": {
+        "FaultID": 38,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 7",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.75220044308384,
+            -42.59424558159656
+          ],
+          [
+            171.68347745945238,
+            -42.62568139306446
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 39,
+      "properties": {
+        "FaultID": 39,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 8",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.68347745945238,
+            -42.62568139306446
+          ],
+          [
+            171.61468507992612,
+            -42.657076089890744
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 40,
+      "properties": {
+        "FaultID": 40,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 9",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.61468507992612,
+            -42.657076089890744
+          ],
+          [
+            171.612,
+            -42.6583
+          ],
+          [
+            171.54617048350488,
+            -42.6888382572198
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 41,
+      "properties": {
+        "FaultID": 41,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 10",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.54617048350488,
+            -42.6888382572198
+          ],
+          [
+            171.47759991226766,
+            -42.72057614932681
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 42,
+      "properties": {
+        "FaultID": 42,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 11",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.47759991226766,
+            -42.72057614932681
+          ],
+          [
+            171.4479,
+            -42.7343
+          ],
+          [
+            171.40876377754765,
+            -42.75204259889326
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 43,
+      "properties": {
+        "FaultID": 43,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 12",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.40876377754765,
+            -42.75204259889326
+          ],
+          [
+            171.3397087537198,
+            -42.78329180410587
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 44,
+      "properties": {
+        "FaultID": 44,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 13",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.3397087537198,
+            -42.78329180410587
+          ],
+          [
+            171.2779,
+            -42.8112
+          ],
+          [
+            171.27130191639142,
+            -42.81523263173789
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 45,
+      "properties": {
+        "FaultID": 45,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 14",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.27130191639142,
+            -42.81523263173789
+          ],
+          [
+            171.20888946894834,
+            -42.85333328560513
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 46,
+      "properties": {
+        "FaultID": 46,
+        "FaultName": "Alpine Kaniere to Springs Junction, Subsection 15",
+        "DipDeg": 60.0,
+        "Rake": 143.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 145.7,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 14.0,
+        "ParentID": 24,
+        "ParentName": "Alpine Kaniere to Springs Junction",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            171.20888946894834,
+            -42.85333328560513
+          ],
+          [
+            171.1464000000001,
+            -42.89139999999993
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 47,
+      "properties": {
+        "FaultID": 47,
+        "FaultName": "Fowlers, Subsection 0",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.0723,
+            -42.1869
+          ],
+          [
+            173.02536803608857,
+            -42.22337536593793
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 48,
+      "properties": {
+        "FaultID": 48,
+        "FaultName": "Fowlers, Subsection 1",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.02536803608857,
+            -42.22337536593793
+          ],
+          [
+            173.02070000000003,
+            -42.227
+          ],
+          [
+            172.96295954504524,
+            -42.24222197427979
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 49,
+      "properties": {
+        "FaultID": 49,
+        "FaultName": "Fowlers, Subsection 2",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.96295954504524,
+            -42.24222197427979
+          ],
+          [
+            172.89881355235903,
+            -42.2590900775628
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 50,
+      "properties": {
+        "FaultID": 50,
+        "FaultName": "Fowlers, Subsection 3",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.89881355235903,
+            -42.2590900775628
+          ],
+          [
+            172.8393,
+            -42.2747
+          ],
+          [
+            172.8351132201427,
+            -42.27665469058503
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 51,
+      "properties": {
+        "FaultID": 51,
+        "FaultName": "Fowlers, Subsection 4",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.8351132201427,
+            -42.27665469058503
+          ],
+          [
+            172.77749295990486,
+            -42.30352820614393
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 52,
+      "properties": {
+        "FaultID": 52,
+        "FaultName": "Fowlers, Subsection 5",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.77749295990486,
+            -42.30352820614393
+          ],
+          [
+            172.7636,
+            -42.31
+          ],
+          [
+            172.7120751371258,
+            -42.31331010801262
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 53,
+      "properties": {
+        "FaultID": 53,
+        "FaultName": "Fowlers, Subsection 6",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.7120751371258,
+            -42.31331010801262
+          ],
+          [
+            172.6605,
+            -42.31660000000001
+          ],
+          [
+            172.64462258036397,
+            -42.31956884321516
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 54,
+      "properties": {
+        "FaultID": 54,
+        "FaultName": "Fowlers, Subsection 7",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.64462258036397,
+            -42.31956884321516
+          ],
+          [
+            172.57853974761542,
+            -42.33189882657055
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 55,
+      "properties": {
+        "FaultID": 55,
+        "FaultName": "Fowlers, Subsection 8",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.57853974761542,
+            -42.33189882657055
+          ],
+          [
+            172.51243104059708,
+            -42.34419085147285
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 56,
+      "properties": {
+        "FaultID": 56,
+        "FaultName": "Fowlers, Subsection 9",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.51243104059708,
+            -42.34419085147285
+          ],
+          [
+            172.44629651791115,
+            -42.35644488671202
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 57,
+      "properties": {
+        "FaultID": 57,
+        "FaultName": "Fowlers, Subsection 10",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.44629651791115,
+            -42.35644488671202
+          ],
+          [
+            172.3801362384008,
+            -42.3686609011432
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 58,
+      "properties": {
+        "FaultID": 58,
+        "FaultName": "Fowlers, Subsection 11",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.3801362384008,
+            -42.3686609011432
+          ],
+          [
+            172.3294,
+            -42.378
+          ],
+          [
+            172.31472388779116,
+            -42.38255850105713
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 59,
+      "properties": {
+        "FaultID": 59,
+        "FaultName": "Fowlers, Subsection 12",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.31472388779116,
+            -42.38255850105713
+          ],
+          [
+            172.25181862714234,
+            -42.40206861337295
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 60,
+      "properties": {
+        "FaultID": 60,
+        "FaultName": "Fowlers, Subsection 13",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.25181862714234,
+            -42.40206861337295
+          ],
+          [
+            172.243,
+            -42.4048
+          ],
+          [
+            172.18447297848203,
+            -42.40791489244859
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 61,
+      "properties": {
+        "FaultID": 61,
+        "FaultName": "Fowlers, Subsection 14",
+        "DipDeg": 90.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 163.1,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.0,
+        "ParentID": 130,
+        "ParentName": "Fowlers",
+        "SlipRateStdDev": 0.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            172.18447297848203,
+            -42.40791489244859
+          ],
+          [
+            172.11640000000003,
+            -42.41149999999999
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 62,
+      "properties": {
+        "FaultID": 62,
+        "FaultName": "Barefell, Subsection 0",
+        "DipDeg": 60.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 293.0,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.5,
+        "ParentID": 50,
+        "ParentName": "Barefell",
+        "SlipRateStdDev": 0.4
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.1176,
+            -42.2432
+          ],
+          [
+            173.128,
+            -42.19330000000001
+          ],
+          [
+            173.1291488061902,
+            -42.1915033867789
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 63,
+      "properties": {
+        "FaultID": 63,
+        "FaultName": "Barefell, Subsection 1",
+        "DipDeg": 60.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 293.0,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.5,
+        "ParentID": 50,
+        "ParentName": "Barefell",
+        "SlipRateStdDev": 0.4
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.1291488061902,
+            -42.1915033867789
+          ],
+          [
+            173.15945078097513,
+            -42.14407321760665
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 64,
+      "properties": {
+        "FaultID": 64,
+        "FaultName": "Barefell, Subsection 2",
+        "DipDeg": 60.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 293.0,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 0.5,
+        "ParentID": 50,
+        "ParentName": "Barefell",
+        "SlipRateStdDev": 0.4
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.15945078097513,
+            -42.14407321760665
+          ],
+          [
+            173.178,
+            -42.115
+          ],
+          [
+            173.1947,
+            -42.0989
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 65,
+      "properties": {
+        "FaultID": 65,
+        "FaultName": "AwatereNortheast 1, Subsection 0",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.1947,
+            -42.0989
+          ],
+          [
+            173.2427,
+            -42.0842
+          ],
+          [
+            173.26058068847595,
+            -42.07381492894386
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 66,
+      "properties": {
+        "FaultID": 66,
+        "FaultName": "AwatereNortheast 1, Subsection 1",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.26058068847595,
+            -42.07381492894386
+          ],
+          [
+            173.31930672275044,
+            -42.03966348940607
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 67,
+      "properties": {
+        "FaultID": 67,
+        "FaultName": "AwatereNortheast 1, Subsection 2",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.31930672275044,
+            -42.03966348940607
+          ],
+          [
+            173.3438,
+            -42.0254
+          ],
+          [
+            173.37872663427714,
+            -42.00622042030203
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 68,
+      "properties": {
+        "FaultID": 68,
+        "FaultName": "AwatereNortheast 1, Subsection 3",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.37872663427714,
+            -42.00622042030203
+          ],
+          [
+            173.4386266302097,
+            -41.97327537816304
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 69,
+      "properties": {
+        "FaultID": 69,
+        "FaultName": "AwatereNortheast 1, Subsection 4",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.4386266302097,
+            -41.97327537816304
+          ],
+          [
+            173.49846466284478,
+            -41.94029923153198
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 70,
+      "properties": {
+        "FaultID": 70,
+        "FaultName": "AwatereNortheast 1, Subsection 5",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.49846466284478,
+            -41.94029923153198
+          ],
+          [
+            173.5582408096047,
+            -41.90729204853012
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 71,
+      "properties": {
+        "FaultID": 71,
+        "FaultName": "AwatereNortheast 1, Subsection 6",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.5582408096047,
+            -41.90729204853012
+          ],
+          [
+            173.61795514805965,
+            -41.87425389716072
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 72,
+      "properties": {
+        "FaultID": 72,
+        "FaultName": "AwatereNortheast 1, Subsection 7",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.61795514805965,
+            -41.87425389716072
+          ],
+          [
+            173.67760775592575,
+            -41.84118484530905
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 73,
+      "properties": {
+        "FaultID": 73,
+        "FaultName": "AwatereNortheast 1, Subsection 8",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.67760775592575,
+            -41.84118484530905
+          ],
+          [
+            173.7217,
+            -41.8167
+          ],
+          [
+            173.73674287758385,
+            -41.80764727014953
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 74,
+      "properties": {
+        "FaultID": 74,
+        "FaultName": "AwatereNortheast 1, Subsection 9",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.73674287758385,
+            -41.80764727014953
+          ],
+          [
+            173.79451952680915,
+            -41.772835512295295
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 75,
+      "properties": {
+        "FaultID": 75,
+        "FaultName": "AwatereNortheast 1, Subsection 10",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.79451952680915,
+            -41.772835512295295
+          ],
+          [
+            173.85223347084656,
+            -41.73799483971235
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 76,
+      "properties": {
+        "FaultID": 76,
+        "FaultName": "AwatereNortheast 1, Subsection 11",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.85223347084656,
+            -41.73799483971235
+          ],
+          [
+            173.90988480247705,
+            -41.70312531910768
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 77,
+      "properties": {
+        "FaultID": 77,
+        "FaultName": "AwatereNortheast 1, Subsection 12",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.90988480247705,
+            -41.70312531910768
+          ],
+          [
+            173.96747361455365,
+            -41.668227017056026
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 78,
+      "properties": {
+        "FaultID": 78,
+        "FaultName": "AwatereNortheast 1, Subsection 13",
+        "DipDeg": 75.0,
+        "Rake": 160.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 323.3,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 6.0,
+        "ParentID": 48,
+        "ParentName": "AwatereNortheast 1",
+        "SlipRateStdDev": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            173.96747361455365,
+            -41.668227017056026
+          ],
+          [
+            174.025,
+            -41.633300000000006
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 79,
+      "properties": {
+        "FaultID": 79,
+        "FaultName": "Awatere Northeast 2, Subsection 0",
+        "DipDeg": 80.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 330.9,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 1.5,
+        "ParentID": 46,
+        "ParentName": "Awatere Northeast 2",
+        "SlipRateStdDev": 1.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            174.025,
+            -41.6333
+          ],
+          [
+            174.08219030136894,
+            -41.608742435760206
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 80,
+      "properties": {
+        "FaultID": 80,
+        "FaultName": "Awatere Northeast 2, Subsection 1",
+        "DipDeg": 80.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 330.9,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 1.5,
+        "ParentID": 46,
+        "ParentName": "Awatere Northeast 2",
+        "SlipRateStdDev": 1.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            174.08219030136894,
+            -41.608742435760206
+          ],
+          [
+            174.13933705466923,
+            -41.58415655034173
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 81,
+      "properties": {
+        "FaultID": 81,
+        "FaultName": "Awatere Northeast 2, Subsection 2",
+        "DipDeg": 80.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 330.9,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 1.5,
+        "ParentID": 46,
+        "ParentName": "Awatere Northeast 2",
+        "SlipRateStdDev": 1.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            174.13933705466923,
+            -41.58415655034173
+          ],
+          [
+            174.19644028058852,
+            -41.559542389761894
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 82,
+      "properties": {
+        "FaultID": 82,
+        "FaultName": "Awatere Northeast 2, Subsection 3",
+        "DipDeg": 80.0,
+        "Rake": 180.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 330.9,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 1.5,
+        "ParentID": 46,
+        "ParentName": "Awatere Northeast 2",
+        "SlipRateStdDev": 1.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            174.19644028058852,
+            -41.559542389761894
+          ],
+          [
+            174.2535,
+            -41.5349
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 83,
+      "properties": {
+        "FaultID": 83,
+        "FaultName": "Vernon 4, Subsection 0",
+        "DipDeg": 60.0,
+        "Rake": -113.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 182.8,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 4.5,
+        "ParentID": 585,
+        "ParentName": "Vernon 4",
+        "SlipRateStdDev": 1.2
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            174.4507,
+            -41.5399
+          ],
+          [
+            174.3849632914548,
+            -41.53827076566121
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 84,
+      "properties": {
+        "FaultID": 84,
+        "FaultName": "Vernon 4, Subsection 1",
+        "DipDeg": 60.0,
+        "Rake": -113.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 182.8,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 4.5,
+        "ParentID": 585,
+        "ParentName": "Vernon 4",
+        "SlipRateStdDev": 1.2
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            174.3849632914548,
+            -41.53827076566121
+          ],
+          [
+            174.31922993288345,
+            -41.53660409762024
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 85,
+      "properties": {
+        "FaultID": 85,
+        "FaultName": "Vernon 4, Subsection 2",
+        "DipDeg": 60.0,
+        "Rake": -113.0,
+        "LowDepth": 12.0,
+        "UpDepth": 0.0,
+        "DipDir": 182.8,
+        "AseismicSlipFactor": 0.0,
+        "CouplingCoeff": 1.0,
+        "SlipRate": 4.5,
+        "ParentID": 585,
+        "ParentName": "Vernon 4",
+        "SlipRateStdDev": 1.2
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            174.31922993288345,
+            -41.53660409762024
+          ],
+          [
+            174.25350000000003,
+            -41.53490000000001
+          ]
+        ]
+      }
+    }
+  ]
+}

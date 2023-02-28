@@ -12,15 +12,15 @@ class Solution(Protocol):
 
     @property
     def fault_regime(self) -> str:
-        ...
+        """solution requires a fault regime"""
 
     @property
     def fault_sections(self) -> gpd.GeoDataFrame:
-        ...
+        """solution requires fault sections"""
 
     @property
     def fault_sections_with_rates(self) -> gpd.GeoDataFrame:
-        ...
+        """solution requires fault sections with rates"""
 
 
 def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:

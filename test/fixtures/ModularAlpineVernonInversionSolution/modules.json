@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Rupture Set",
+    "className": "org.opensha.sha.earthquake.faultSysSolution.FaultSystemRupSet",
+    "path": "ruptures/",
+    "assets": [
+      "fault_sections.geojson",
+      "indices.csv",
+      "modules.json",
+      "properties.csv"
+    ]
+  },
+  {
+    "name": "Solution",
+    "className": "org.opensha.sha.earthquake.faultSysSolution.FaultSystemSolution",
+    "path": "solution/",
+    "assets": [
+      "modules.json",
+      "rates.csv"
+    ]
+  }
+]

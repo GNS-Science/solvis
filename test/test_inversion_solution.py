@@ -53,3 +53,16 @@ class TestInversionSolution(unittest.TestCase):
         assert isinstance(new_sol, InversionSolution)
         assert sol.fault_regime == 'SUBDUCTION'
         assert new_sol.fault_regime == 'SUBDUCTION'
+
+    def test_get_ruptures_for_parent_fault(self):
+        folder = pathlib.PurePath(os.path.realpath(__file__)).parent
+        filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
+        sol = InversionSolution().from_archive(str(filename))
+
+        df0 = set(sol.get_ruptures_for_parent_fault("Alpine Kaniere to Springs Junction"))
+        df1 = set(sol.get_ruptures_for_parent_fault("Alpine Jacksons to Kaniere"))
+        print(list(df0))
+
+        assert df0 is not df1
+        assert len(df0) is not len(df1)
+        assert len(df0.intersection(df1)) > 0

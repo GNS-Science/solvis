@@ -104,20 +104,17 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
 
         folder = str(TestNewInversionSolutionCrustal.temp_dir.name)
         new_path = pathlib.Path(folder, 'test_non_compatible_archive.zip')
-        # new_path = pathlib.Path('./', 'test_non_compatible_archive.zip')
 
         new_sol.to_archive(str(new_path), TestNewInversionSolutionCrustal.original_archive, compat=False)
-        read_sol = solvis.InversionSolution().from_archive(new_path)
+        read_sol = solvis.InversionSolution.from_archive(new_path)
 
         self.assertEqual(read_sol.indices.shape[0], len(ruptures))
         self.assertEqual(read_sol.rates.shape[0], len(ruptures))
         self.assertEqual(read_sol.ruptures.shape[0], len(ruptures))
 
-    @unittest.skip("feature incomplete")
     def test_filter_writes_attribs_compatible_mode(self):
         """
-        With compatible mode all the data should be reindexed from 0, aand are smaller than the original
-
+        With compatible mode all the dataframes should be reindexed from 0
         """
 
         sol = TestNewInversionSolutionCrustal.original_solution
@@ -127,9 +124,9 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
 
         folder = str(TestNewInversionSolutionCrustal.temp_dir.name)
         new_path = pathlib.Path(folder, 'test_compatible_archive.zip')
-        # new_path = pathlib.Path('./', 'test_compatible_archive.zip')
 
         new_sol.to_archive(str(new_path), TestNewInversionSolutionCrustal.original_archive, compat=True)
+
         read_sol = solvis.InversionSolution().from_archive(new_path)
 
         self.assertEqual(read_sol.indices.shape[0], len(ruptures))
