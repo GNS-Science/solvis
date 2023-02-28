@@ -17,7 +17,6 @@ class SolutionLike:
 
 
 class TestSolutionSurfacesBuilder(unittest.TestCase):
- 
     def test_build_crustal_from_archive(self):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
