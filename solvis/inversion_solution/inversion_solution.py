@@ -3,6 +3,7 @@ import time
 import zipfile
 from pathlib import Path
 from typing import Any, List, Union
+from typing import Protocol
 
 import geopandas as gpd
 import numpy.typing as npt
@@ -32,9 +33,41 @@ Inversion Solution archive file:
 """
 
 
-class InversionSolution:
+class InversionSolutionProtocol(Protocol):
+    @property
+    def fault_regime(self) -> str:
+        """solution requires a fault regime"""
+
+    @property
+    def fault_sections(self) -> gpd.GeoDataFrame:
+        """solution requires fault sections"""
+
+    @property
+    def fault_sections_with_rates(self) -> gpd.GeoDataFrame:
+        """solution requires fault sections with rates"""
+
+    @property
+    def rates(self) -> gpd.GeoDataFrame:
+        """the event rate for each rupture."""
+
+    @property
+    def ruptures(self) -> gpd.GeoDataFrame:
+        """the properties of each rupture."""
+
+    @property
+    def indices(self) -> gpd.GeoDataFrame:
+        """the fault sections involved in each rupture."""
+
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        """builder method returning the fault surfaces."""
+
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        """builder method returning the rupture surface of a given rupture id."""
+
+
+class InversionSolutionFile:
     """
-    Class to handle the opensha modular archive form
+    Class to handle the opensha modular archive file form
     """
 
     RATES_PATH = 'solution/rates.csv'
@@ -61,23 +94,7 @@ class InversionSolution:
         # self._surface_builder: SolutionSurfacesBuilder
 
     @staticmethod
-    def new_solution(sol: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
-        rr = sol.ruptures
-        ra = sol.rates
-        ri = sol.indices
-        ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
-        rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
-        indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
-
-        # all other props are derived from these ones
-        ns = InversionSolution()
-        ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
-        ns._archive_path = sol._archive_path
-        # ns._surface_builder = SolutionSurfacesBuilder(ns)
-        return ns
-
-    @staticmethod
-    def from_archive(archive_path: Union[Path, str]):
+    def from_archive(archive_path: Union[Path, str]) -> InversionSolutionProtocol:
         ns = InversionSolution()
 
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
@@ -157,16 +174,10 @@ class InversionSolution:
             prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open()).convert_dtypes()
         return prop
 
-    def _geodataframe_from_geojson(self, prop, path):
-        if not isinstance(prop, pd.DataFrame):
-            prop = gpd.read_file(zipfile.Path(self._archive_path, at=path).open())
-        return prop
-
     @property
     def logic_tree_branch(self) -> list:
         """
         get values from the opensha logic_tree_branch data file.
-
         :return: list of value objects
         """
         if not self._logic_tree_branch:
@@ -203,37 +214,16 @@ class InversionSolution:
         return self._fault_regime
 
     @property
-    def rates(self):
+    def rates(self) -> gpd.GeoDataFrame:
         return self._dataframe_from_csv(self._rates, self.RATES_PATH)
 
     @property
-    def ruptures(self):
+    def ruptures(self) -> gpd.GeoDataFrame:
         return self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH)
 
     @property
-    def indices(self):
-        """
-        Rupture Index,Num Sections,# 1,# 2,# 3,# 4,# 5,# 6,# 7,# 8,# 9,# 10,# 11,# 12,# 13,# 14,# 15,# 16,# 17,# 18,# 19,# 20,# 21,# 22,# 23,# 24,# 25,# 26,# 27,# 28,# 29,# 30,# 31,# 32,# 33,# 34,# 35,# 36,# 37,# 38,# 39,# 40,# 41,# 42,# 43,# 44,# 45,# 46,# 47,# 48,# 49,# 50,# 51,# 52,# 53,# 54,# 55,# 56,# 57,# 58,# 59,# 60,# 61,# 62,# 63,# 64,# 65,# 66,# 67,# 68,# 69,# 70,# 71,# 72,# 73,# 74,# 75,# 76,# 77,# 78,# 79,# 80,# 81,# 82,# 83,# 84,# 85,# 86,# 87,# 88,# 89,# 90,# 91,# 92,# 93,# 94,# 95,# 96,# 97,# 98,# 99,# 100,# 101,# 102,# 103,# 104,# 105,# 106,# 107,# 108,# 109  # noqa
-        0,2,0,1
-        1,4,0,1,1081,1080
-        2,5,0,1,1081,1080,1079
-        3,7,0,1,1081,1080,1079,1078,1077
-        4,8,0,1,1081,1080,1079,1078,1077,1076
-        5,9,0,1,1081,1080,1079,1078,1077,1076,1075
-        etc
-        """
+    def indices(self) -> gpd.GeoDataFrame:
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
-
-    def fault_surfaces(self) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).fault_surfaces()
-
-    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
-
-    @property
-    def fault_sections(self) -> gpd.GeoDataFrame:
-        fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
-        return fault_sections
 
     def set_props(self, rates, ruptures, indices, fault_sections):
         # self._init_props()
@@ -242,8 +232,33 @@ class InversionSolution:
         self._fault_sections = fault_sections
         self._indices = indices
 
+
+class InversionSolutionOperations:
+    _fs_with_rates = None
+    _rupture_sections = None
+    _fs_with_rates = None
+    _rs_with_rates = None
+    _fault_sections = None
+    _ruptures_with_rates: pd.DataFrame = None
+
+    indices: gpd.GeoDataFrame = None
+    ruptures: gpd.GeoDataFrame = None
+    rates: gpd.GeoDataFrame = None
+
+    FAULTS_PATH = InversionSolutionFile.FAULTS_PATH
+
+    def _geodataframe_from_geojson(self, prop, path):
+        if not isinstance(prop, pd.DataFrame):
+            prop = gpd.read_file(zipfile.Path(self._archive_path, at=path).open())
+        return prop
+
     @property
-    def rupture_sections(self):
+    def fault_sections(self) -> gpd.GeoDataFrame:
+        fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        return fault_sections
+
+    @property
+    def rupture_sections(self) -> gpd.GeoDataFrame:
 
         if self._rupture_sections is not None:
             return self._rupture_sections  # pragma: no cover
@@ -277,7 +292,7 @@ class InversionSolution:
         return self._fs_with_rates
 
     @property
-    def rs_with_rates(self):
+    def rs_with_rates(self) -> gpd.GeoDataFrame:
         if self._rs_with_rates is not None:
             return self._rs_with_rates  # pragma: no cover
         # df_rupt_rate = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
@@ -285,23 +300,50 @@ class InversionSolution:
         return self._rs_with_rates
 
     @property
-    def ruptures_with_rates(self):
+    def ruptures_with_rates(self) -> pd.DataFrame:
         if self._ruptures_with_rates is not None:
             return self._ruptures_with_rates  # pragma: no cover
         self._ruptures_with_rates = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
         return self._ruptures_with_rates
 
     # return the rupture ids for any ruptures intersecting the polygon
-    def get_ruptures_intersecting(self, polygon):
+    def get_ruptures_intersecting(self, polygon) -> pd.Series:
         q0 = gpd.GeoDataFrame(self.fault_sections)
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
         sr = self.rs_with_rates
         qdf = sr.join(q1, 'section', how='inner')
         return qdf.rupture.unique()
 
-    def get_ruptures_for_parent_fault(self, parent_fault_name: str):
+    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
         # sr = sol.rs_with_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
         qdf = self.rupture_sections.join(sects, 'section', how='inner')
         return qdf.rupture.unique()
+
+
+class InversionSolution(InversionSolutionFile, InversionSolutionOperations, InversionSolutionProtocol):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).fault_surfaces()
+
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
+
+    @staticmethod
+    def new_solution(sol: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
+        rr = sol.ruptures
+        ra = sol.rates
+        ri = sol.indices
+        ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
+        rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
+        indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
+
+        # all other props are derived from these ones
+        ns = InversionSolution()
+        ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
+        ns._archive_path = sol._archive_path
+        # ns._surface_builder = SolutionSurfacesBuilder(ns)
+        return ns
