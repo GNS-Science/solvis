@@ -1,26 +1,10 @@
-from typing import Protocol
-
 import geopandas as gpd
 from shapely import get_coordinates
 from shapely.geometry import LineString, Point
 
 from solvis.geometry import create_surface, dip_direction
 
-
-class Solution(Protocol):
-    """A solution must implement these methods."""
-
-    @property
-    def fault_regime(self) -> str:
-        """solution requires a fault regime"""
-
-    @property
-    def fault_sections(self) -> gpd.GeoDataFrame:
-        """solution requires fault sections"""
-
-    @property
-    def fault_sections_with_rates(self) -> gpd.GeoDataFrame:
-        """solution requires fault sections with rates"""
+from .typing import InversionSolutionProtocol
 
 
 def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -45,7 +29,7 @@ def create_crustal_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 class SolutionSurfacesBuilder:
-    def __init__(self, solution: Solution) -> None:
+    def __init__(self, solution: InversionSolutionProtocol) -> None:
         self._solution = solution
 
     def fault_surfaces(self) -> gpd.GeoDataFrame:
