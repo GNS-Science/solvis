@@ -1,2 +1,0 @@
-Iteration,Time (ms),# Perturbations,# Non-Zero,Total Energy,Equality Energy,Entropy Energy,Inequality Energy,Slip Rate with weighting adjusted for uncertainty,Rupture Rate Minimization,Normalized MFD Equality,Normalized MFD Inequality
-29730883,10030,14136,1006,195539.9,195512.02,0.0,27.884706,5478.92,0.0,190033.1,27.884706
