@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
-          poetry install --no-interaction --no-root --with dev
+          poetry install --no-interaction --no-root --with dev --all-extras
           poetry add tox-gh-actions
 
       - name: test with tox (uses tox-gh-actions to select correct environment)
