@@ -51,7 +51,9 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations, Inve
         all_rates_df = pd.DataFrame(columns=['Rupture Index', 'Magnitude'])
         for sb in solutions:
             # print(sb, sb.branch.inversion_solution_id)
-            more_df = sb.rates[sb.rates['Annual Rate'] > 0]
+            # print('source info', sb.rates.info())
+            more_df = sb.rates[sb.rates['Annual Rate'] > 1e-20]
+            # print('more_df info', more_df.info())
             more_df.insert(0, 'solution_id', sb.branch.inversion_solution_id)
             # if not isinstance(all_rates_df, pd.DataFrame):
             #     all_rates_df = pd.concat([more_df], ignore_index=True)
