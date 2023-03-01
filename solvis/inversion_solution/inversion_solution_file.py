@@ -79,6 +79,7 @@ class InversionSolutionFile:
             self._to_compatible_archive(archive_path, base_archive_path)
         else:
             self._to_non_compatible_archive(archive_path, base_archive_path)
+        self._archive_path = archive_path
 
     def _to_compatible_archive(self, archive_path, base_archive_path):
         """
@@ -97,8 +98,9 @@ class InversionSolutionFile:
             zout.writestr(item, buffer)
 
         def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
-            new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])
+            new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
             new_df.index = new_df.index.rename('Rupture Index')
+            print("NEW DF", new_df)
             return new_df
 
         # write out the `self` dataframes
@@ -137,7 +139,10 @@ class InversionSolutionFile:
 
     def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
-            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open()).convert_dtypes()
+            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open())
+            # print('prop')
+            # print(prop)
+            prop = prop.convert_dtypes()
         return prop
 
     @property

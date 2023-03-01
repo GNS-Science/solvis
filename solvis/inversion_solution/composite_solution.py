@@ -1,7 +1,10 @@
-from typing import Iterable
+import zipfile
+from pathlib import Path
+from typing import Iterable, Union
 
 import geopandas as gpd
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 from .inversion_solution_file import InversionSolutionFile
@@ -11,6 +14,8 @@ from .typing import BranchSolutionProtocol, InversionSolutionProtocol
 
 
 class CompositeSolution(InversionSolutionFile, InversionSolutionOperations, InversionSolutionProtocol):
+    # _archive_path: Union[Path, str]
+
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         return SolutionSurfacesBuilder(self).fault_surfaces()
 
@@ -26,12 +31,48 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations, Inve
         self._fault_regime = fault_regime
 
     @staticmethod
+    def from_archive(archive_path: Union[Path, str]) -> 'CompositeSolution':
+        new_solution = CompositeSolution()
+        assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
+        new_solution._archive_path = Path(archive_path)
+        return new_solution
+
+    @staticmethod
+    def filter_solution(sol: 'CompositeSolution', rupture_ids: npt.ArrayLike) -> 'CompositeSolution':
+        rr = sol.ruptures
+        ra = sol.rates
+        ri = sol.indices
+        ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
+        rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
+        indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
+
+        ns = CompositeSolution()
+        ns.set_props(
+            rates,
+            ruptures,
+            indices,
+            sol.fault_sections.copy(),
+            sol.fault_regime,
+        )
+
+        # ns._archive_path = sol._archive_path
+        # ns._surface_builder = SolutionSurfacesBuilder(ns)
+        return ns
+
+    @staticmethod
     def new_solution(solution: BranchSolutionProtocol, composite_rates: pd.DataFrame) -> 'CompositeSolution':
         # build a new composite solution, taking solution template properties, and composite_rates
         ns = CompositeSolution()
 
         aggregate_rates_df = composite_rates.pivot_table(
-            values='Annual Rate', index=['Rupture Index'], aggfunc={"Annual Rate": [np.min, np.mean, np.max, 'count']}
+            values='Annual Rate',
+            index=['Rupture Index'],
+            # columns='Rupture Index',
+            aggfunc={"Annual Rate": [np.min, np.mean, np.max, 'count']},
+        )
+
+        aggregate_rates_df = aggregate_rates_df.reset_index().rename(
+            columns={"amax": "rate_max", "amin": "rate_min", "count": "rate_count", "mean": "rate_mean"}
         )
 
         ns.set_props(
@@ -47,17 +88,15 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations, Inve
     @staticmethod
     def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'CompositeSolution':
 
-        # combine the rupture rates from all solutinos
+        # combine the rupture rates from all solutions
         all_rates_df = pd.DataFrame(columns=['Rupture Index', 'Magnitude'])
         for sb in solutions:
             # print(sb, sb.branch.inversion_solution_id)
             # print('source info', sb.rates.info())
-            more_df = sb.rates[sb.rates['Annual Rate'] > 1e-20]
+            more_df = sb.rates.copy()  # [sb.rates['Annual Rate'] > 1e-20]
             # print('more_df info', more_df.info())
             more_df.insert(0, 'solution_id', sb.branch.inversion_solution_id)
-            # if not isinstance(all_rates_df, pd.DataFrame):
-            #     all_rates_df = pd.concat([more_df], ignore_index=True)
-            # else:
+
             all_rates_df = pd.concat([all_rates_df, more_df], ignore_index=True)
         all_rates_df.solution_id = all_rates_df.solution_id.astype('category')
 
