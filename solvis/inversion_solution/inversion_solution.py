@@ -8,13 +8,10 @@ import numpy.typing as npt
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import InversionSolutionProtocol
+from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
 
 
 class InversionSolution(InversionSolutionFile, InversionSolutionOperations, InversionSolutionProtocol):
-    def __init__(self) -> None:
-        super().__init__()
-
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         return SolutionSurfacesBuilder(self).fault_surfaces()
 
@@ -22,7 +19,7 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations, Inve
         return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
 
     @staticmethod
-    def from_archive(archive_path: Union[Path, str]) -> InversionSolutionProtocol:
+    def from_archive(archive_path: Union[Path, str]) -> 'InversionSolution':
         new_solution = InversionSolution()
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         new_solution._archive_path = Path(archive_path)
@@ -43,3 +40,24 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations, Inve
         ns._archive_path = sol._archive_path
         # ns._surface_builder = SolutionSurfacesBuilder(ns)
         return ns
+
+
+class BranchInversionSolution(InversionSolution):
+    """Just an ordinary InversionSolution with branch attribute added"""
+
+    branch: ModelLogicTreeBranch
+
+    @staticmethod
+    def new_branch_solution(
+        solution: InversionSolutionProtocol, branch: ModelLogicTreeBranch
+    ) -> 'BranchInversionSolution':
+        ruptures = solution.ruptures.copy()
+        rates = solution.rates.copy()
+        indices = solution.indices.copy()
+
+        # all other props are derived from these ones
+        bis = BranchInversionSolution()
+        bis.branch = branch
+        bis.set_props(rates, ruptures, indices, solution.fault_sections.copy())
+        bis._archive_path = solution._archive_path
+        return bis

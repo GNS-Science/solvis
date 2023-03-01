@@ -1,1 +1,2 @@
+from .composite_solution import CompositeSolution
 from .inversion_solution import InversionSolution
