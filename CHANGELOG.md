@@ -1,8 +1,13 @@
 # Changelog
 
+## [0.5.0] - 2022-03
+## Added
+ - CompositeSolution with aggregate rates;
+ - to_archive() with compatible mode 
+## Changed
+ - InversionSolution is now composed from three modules.
 
 ## [0.4.0] - 2022-02-21
-
 ## Added
  - geometric surface projections from fault sections
  - 3D distance calculation for both crustal and subduction subduction faults systems

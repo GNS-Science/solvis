@@ -15,6 +15,7 @@ CRU_ARCHIVE = "ModularAlpineVernonInversionSolution.zip"
 HIK_ARCHIVE = "AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
 PUY_ARCHIVE = "PuysegurInversionSolution-QXV0b21hdGlvblRhc2s6MTExMDA1.zip"
 
+
 def get_solution(id: str) -> InversionSolution:
 
     files = dict(
