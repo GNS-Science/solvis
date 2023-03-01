@@ -29,6 +29,8 @@ geopandas = "^0.12.2"
 pytz = "2021.3"
 pyproj = "^3.3"
 pyvista = "^0.37.0"
+nzshm-model = {version = "^0.1.1", optional = true}
+nshm-toshi-client = {version = "^1.0.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
@@ -55,7 +57,9 @@ test = [
     "pytest-cov"
     ]
 scripts = [
-    "click"
+    "click",
+    "nzshm-model",
+    "nshm-toshi-client"
 ]
 
 dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml", "bump2version"]
