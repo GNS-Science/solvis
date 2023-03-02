@@ -2,26 +2,16 @@ import zipfile
 from pathlib import Path
 from typing import Iterable, Union
 
-import geopandas as gpd
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
-from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import BranchSolutionProtocol, InversionSolutionProtocol
+from .typing import BranchSolutionProtocol
 
 
-class CompositeSolution(InversionSolutionFile, InversionSolutionOperations, InversionSolutionProtocol):
-    # _archive_path: Union[Path, str]
-
-    def fault_surfaces(self) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).fault_surfaces()
-
-    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
-
+class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
     def set_props(self, rates, ruptures, indices, fault_sections, fault_regime):
         # self._init_props()
         self._rates = rates
@@ -54,9 +44,6 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations, Inve
             sol.fault_sections.copy(),
             sol.fault_regime,
         )
-
-        # ns._archive_path = sol._archive_path
-        # ns._surface_builder = SolutionSurfacesBuilder(ns)
         return ns
 
     @staticmethod

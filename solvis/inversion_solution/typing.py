@@ -2,11 +2,19 @@ from pathlib import Path
 from typing import Any, List, Protocol, Union
 
 import geopandas as gpd
+import pandas as pd
 
 
 class InversionSolutionProtocol(Protocol):
 
-    _archive_path: Union[Path, str]
+    _rupture_sections: pd.DataFrame = ...
+    _fs_with_rates: pd.DataFrame = ...
+    _rs_with_rates: pd.DataFrame = ...
+    _fault_sections: pd.DataFrame = ...
+    _ruptures_with_rates: pd.DataFrame = ...
+    _archive_path: Union[Path, str] = ''
+
+    FAULTS_PATH: Union[Path, str] = ''
 
     @property
     def fault_regime(self) -> str:

@@ -2,22 +2,14 @@ import zipfile
 from pathlib import Path
 from typing import Union
 
-import geopandas as gpd
 import numpy.typing as npt
 
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
-from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
 
 
-class InversionSolution(InversionSolutionFile, InversionSolutionOperations, InversionSolutionProtocol):
-    def fault_surfaces(self) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).fault_surfaces()
-
-    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
-
+class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
     @staticmethod
     def from_archive(archive_path: Union[Path, str]) -> 'InversionSolution':
         new_solution = InversionSolution()
@@ -26,7 +18,7 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations, Inve
         return new_solution
 
     @staticmethod
-    def new_solution(sol: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
+    def filter_solution(sol: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
         rr = sol.ruptures
         ra = sol.rates
         ri = sol.indices

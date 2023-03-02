@@ -56,7 +56,7 @@ class TestInversionSolution(object):
 
     def test_new_puysegur_subduction_solution(self, puysegur_fixture):
         sol = puysegur_fixture
-        new_sol = InversionSolution.new_solution(sol, sol.ruptures)
+        new_sol = InversionSolution.filter_solution(sol, sol.ruptures)
 
         assert isinstance(new_sol, InversionSolution)
         assert sol.fault_regime == 'SUBDUCTION'

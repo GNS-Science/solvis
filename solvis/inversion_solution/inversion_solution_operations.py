@@ -1,23 +1,18 @@
 import zipfile
-from typing import Union
 
 import geopandas as gpd
 import pandas as pd
 
+from .solution_surfaces_builder import SolutionSurfacesBuilder
+from .typing import InversionSolutionProtocol
 
-class InversionSolutionOperations:
-    _fs_with_rates = None
-    _rupture_sections = None
-    _fs_with_rates = None
-    _rs_with_rates = None
-    _fault_sections = None
-    _ruptures_with_rates: pd.DataFrame = None
 
-    indices: gpd.GeoDataFrame = None
-    ruptures: gpd.GeoDataFrame = None
-    rates: gpd.GeoDataFrame = None
+class InversionSolutionOperations(InversionSolutionProtocol):
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).fault_surfaces()
 
-    FAULTS_PATH: Union[str, None] = None
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
 
     def _geodataframe_from_geojson(self, prop, path):
         if not isinstance(prop, pd.DataFrame):

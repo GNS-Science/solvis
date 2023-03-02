@@ -51,7 +51,7 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
 
 
 def new_sol(sol: InversionSolution, rupture_ids: npt.ArrayLike) -> InversionSolution:
-    return InversionSolution.new_solution(sol, rupture_ids)
+    return InversionSolution.filter_solution(sol, rupture_ids)
 
 
 def rupt_ids_above_rate(sol: InversionSolution, rate: float):

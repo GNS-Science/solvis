@@ -7,7 +7,7 @@ from typing import Any, List, Union
 import geopandas as gpd
 import pandas as pd
 
-# from .typing import InversionSolutionProtocol
+from .typing import InversionSolutionProtocol
 
 
 def data_to_zip_direct(z, data, name):
@@ -31,7 +31,7 @@ Inversion Solution archive file:
 """
 
 
-class InversionSolutionFile:
+class InversionSolutionFile(InversionSolutionProtocol):
     """
     Class to handle the opensha modular archive file form
     """
@@ -39,7 +39,7 @@ class InversionSolutionFile:
     RATES_PATH = 'solution/rates.csv'
     RUPTS_PATH = 'ruptures/properties.csv'
     INDICES_PATH = 'ruptures/indices.csv'
-    FAULTS_PATH: Union[str, None] = 'ruptures/fault_sections.geojson'
+    FAULTS_PATH = 'ruptures/fault_sections.geojson'
     METADATA_PATH = 'metadata.json'
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'
 
@@ -58,16 +58,6 @@ class InversionSolutionFile:
         self._rupture_sections = None
         self._archive_path: Union[Path, str]
         # self._surface_builder: SolutionSurfacesBuilder
-
-    # @staticmethod
-    # def from_archive(archive_path: Union[Path, str]) -> InversionSolutionProtocol:
-    #     ns = InversionSolutionFile()
-
-    #     assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
-    #     ns._archive_path = Path(archive_path)
-    #     # ns._surface_builder = SolutionSurfacesBuilder(ns)
-    #     # ns._metadata = json.load(METADATA_PATH)
-    #     return ns
 
     def to_archive(self, archive_path, base_archive_path, compat=True):
         """
