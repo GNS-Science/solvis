@@ -45,13 +45,21 @@ class TestNewInversionSolutionSubduction(unittest.TestCase):
         self.assertLess(len(ruptures_med), len(ruptures_small))
         self.assertLess(len(ruptures_big), len(ruptures_med))
 
-    @unittest.skip('WIP')
+    # @unittest.skip('WIP')
     def test_new_sol_filtered_ruptures(self):
 
         sol = TestNewInversionSolutionSubduction.original_solution
         ruptures_big = solvis.rupt_ids_above_rate(sol, 1e-6)
 
         new_sol = solvis.new_sol(sol, ruptures_big)
+        self.assertEqual(ruptures_big.shape[0], new_sol.ruptures.shape[0])
+
+    def test_filter_solution_ruptures(self):
+
+        sol = TestNewInversionSolutionSubduction.original_solution
+        ruptures_big = solvis.rupt_ids_above_rate(sol, 1e-6)
+
+        new_sol = solvis.filter_solution(sol, ruptures_big)
         self.assertEqual(ruptures_big.shape[0], new_sol.ruptures.shape[0])
 
 

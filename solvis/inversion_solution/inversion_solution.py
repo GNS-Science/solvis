@@ -18,18 +18,18 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         return new_solution
 
     @staticmethod
-    def filter_solution(sol: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
-        rr = sol.ruptures
-        ra = sol.rates
-        ri = sol.indices
+    def filter_solution(solution: InversionSolutionProtocol, rupture_ids: npt.ArrayLike) -> 'InversionSolution':
+        rr = solution.ruptures
+        ra = solution.rates
+        ri = solution.indices
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
         indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
 
         # all other props are derived from these ones
         ns = InversionSolution()
-        ns.set_props(rates, ruptures, indices, sol.fault_sections.copy())
-        ns._archive_path = sol._archive_path
+        ns.set_props(rates, ruptures, indices, solution.fault_sections.copy())
+        ns._archive_path = solution._archive_path
         # ns._surface_builder = SolutionSurfacesBuilder(ns)
         return ns
 

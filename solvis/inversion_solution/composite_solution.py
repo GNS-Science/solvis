@@ -8,7 +8,7 @@ import pandas as pd
 
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
-from .typing import BranchSolutionProtocol
+from .typing import BranchSolutionProtocol, InversionSolutionProtocol
 
 
 class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
@@ -28,10 +28,10 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
         return new_solution
 
     @staticmethod
-    def filter_solution(sol: 'CompositeSolution', rupture_ids: npt.ArrayLike) -> 'CompositeSolution':
-        rr = sol.ruptures
-        ra = sol.rates
-        ri = sol.indices
+    def filter_solution(solution: InversionSolutionProtocol, rupture_ids: npt.ArrayLike) -> 'CompositeSolution':
+        rr = solution.ruptures
+        ra = solution.rates
+        ri = solution.indices
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
         indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
@@ -41,8 +41,8 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
             rates,
             ruptures,
             indices,
-            sol.fault_sections.copy(),
-            sol.fault_regime,
+            solution.fault_sections.copy(),
+            solution.fault_regime,
         )
         return ns
 

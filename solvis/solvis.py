@@ -9,7 +9,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from solvis.inversion_solution import InversionSolution
+from solvis.inversion_solution import InversionSolution, CompositeSolution
+from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 # def sections_rates_for_ruptures(ruptures: pd.Series):
 #     #https://stackoverflow.com/questions/50655370/filtering-the-dataframe-based-on-the-column-value-of-another-dataframe
@@ -18,7 +19,7 @@ from solvis.inversion_solution import InversionSolution
 
 
 # filtered_rupture_sections (with gemoetry)
-def section_participation(sol: InversionSolution, df_ruptures: pd.DataFrame = None):
+def section_participation(sol: InversionSolutionProtocol, df_ruptures: pd.DataFrame = None):
     sr = sol.rs_with_rates
     if df_ruptures is not None:
         filtered_sections_with_rates_df = sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate'] > 0)]
@@ -50,11 +51,14 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
     f.close()
 
 
-def new_sol(sol: InversionSolution, rupture_ids: npt.ArrayLike) -> InversionSolution:
-    return InversionSolution.filter_solution(sol, rupture_ids)
+def filter_solution(
+    sol: InversionSolutionProtocol, rupture_ids: npt.ArrayLike
+) -> Union[InversionSolution, CompositeSolution]:
+    klass = type(sol)
+    return klass.filter_solution(sol, rupture_ids)
 
 
-def rupt_ids_above_rate(sol: InversionSolution, rate: float):
+def rupt_ids_above_rate(sol: InversionSolutionProtocol, rate: float):
     rr = sol.rates
     if not rate:
         return rr["Rupture Index"].unique()
