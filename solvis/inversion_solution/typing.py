@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Any, List, Protocol, Union
-import numpy.typing as npt
+
 import geopandas as gpd
+import numpy.typing as npt
 import pandas as pd
 
 

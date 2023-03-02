@@ -55,11 +55,17 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
             values='Annual Rate',
             index=['Rupture Index'],
             # columns='Rupture Index',
-            aggfunc={"Annual Rate": [np.min, np.mean, np.max, 'count']},
+            aggfunc={"Annual Rate": [np.min, np.mean, np.max, np.median, 'count']},
         )
 
         aggregate_rates_df = aggregate_rates_df.reset_index().rename(
-            columns={"amax": "rate_max", "amin": "rate_min", "count": "rate_count", "mean": "rate_mean"}
+            columns={
+                "amax": "rate_max",
+                "amin": "rate_min",
+                "count": "rate_count",
+                "mean": "rate_mean",
+                "median": "rate_median",
+            }
         )
 
         ns.set_props(

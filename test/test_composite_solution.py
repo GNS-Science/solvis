@@ -57,26 +57,26 @@ def test_from_puy_branch_solutions():
     print(fslt.branches)
     composite = CompositeSolution.from_branch_solutions(branch_solutions(fslt, archive=PUY_ARCHIVE))
     print(composite.fault_sections_with_rates)
-    assert composite.fault_sections_with_rates.shape == (1369370, 25)
+    assert composite.fault_sections_with_rates.shape == (1369370, 26)
 
 
 class TestCrustal(object):
     def test_rates_shape(self, crustal_fixture):
         rates = crustal_fixture.rates
-        assert rates.shape == (3101, 5)
+        assert rates.shape == (3101, 6)
 
 
 class TestPuysegur(object):
     def test_rates_shape(self, puysegur_fixture):
         rates = puysegur_fixture.rates
-        assert rates.shape == (15800, 5)
+        assert rates.shape == (15800, 6)
 
     def test_rupture_surface(self, puysegur_fixture):
         surface = puysegur_fixture.rupture_surface(42)
-        assert surface.shape == (76, 25)
+        assert surface.shape == (76, 26)
 
     def test_fault_sections_with_rates_shape(self, puysegur_fixture):
-        assert puysegur_fixture.fault_sections_with_rates.shape == (1369370, 25)
+        assert puysegur_fixture.fault_sections_with_rates.shape == (1369370, 26)
 
     def test_fault_surfaces(self, puysegur_fixture):
         surfaces = puysegur_fixture.fault_surfaces()
@@ -90,7 +90,7 @@ class TestPuysegur(object):
 
 class TestHikurangi(object):
     def test_fault_sections_with_rates_shape(self, hikurangi_fixture):
-        assert hikurangi_fixture.fault_sections_with_rates.shape == (2398024, 24)
+        assert hikurangi_fixture.fault_sections_with_rates.shape == (2398024, 25)
 
     def test_fault_surfaces(self, hikurangi_fixture):
         surfaces = hikurangi_fixture.fault_surfaces()
@@ -103,11 +103,11 @@ class TestHikurangi(object):
 
     def test_rupture_surface(self, hikurangi_fixture):
         surface = hikurangi_fixture.rupture_surface(44)
-        assert surface.shape == (94, 24)
+        assert surface.shape == (94, 25)
 
     def test_rates_shape(self, hikurangi_fixture):
         rates = hikurangi_fixture.rates
-        assert rates.shape == (23675, 5)
+        assert rates.shape == (23675, 6)
 
 
 class TestSerialisation(object):
