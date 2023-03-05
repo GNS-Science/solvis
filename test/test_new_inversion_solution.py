@@ -101,7 +101,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
 
     def test_filter_writes_attribs_non_compatible_mode(self):
         """
-        With non-compatible mode redundnat rows can be removed but the rupture indices are as original.
+        With non-compatible mode redundant rows can be removed but the rupture indices are as original.
         This is not compatible with opensha which expects sequential 0-based indexing.
         """
 
@@ -135,7 +135,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
 
         new_sol.to_archive(str(new_path), TestNewInversionSolutionCrustal.original_archive, compat=True)
 
-        read_sol = solvis.InversionSolution().from_archive(new_path)
+        read_sol = solvis.InversionSolution.from_archive(new_path)
 
         self.assertEqual(read_sol.indices.shape[0], len(ruptures))
         self.assertEqual(read_sol.rates.shape[0], len(ruptures))

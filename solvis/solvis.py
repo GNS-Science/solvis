@@ -18,7 +18,7 @@ from solvis.inversion_solution.typing import InversionSolutionProtocol
 #     return sr[sr.rupture.isin(list(ruptures))]
 
 
-# filtered_rupture_sections (with gemoetry)
+# filtered_rupture_sections (with geometry)
 def section_participation(sol: InversionSolutionProtocol, df_ruptures: pd.DataFrame = None):
     sr = sol.rs_with_rates
     if df_ruptures is not None:
