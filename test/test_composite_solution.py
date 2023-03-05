@@ -239,11 +239,14 @@ if __name__ == "__main__":
     # print(composite.ruptures_with_rates.info())
     # print(composite.ruptures_with_rates.head())
 
-    rupt_surface_df = composite.rupture_surface(3)
-    print(rupt_surface_df)
+    # rupt_surface_df = composite.rupture_surface(3)
+    # print(rupt_surface_df)
+    # # solvis.export_geojson(composite.fault_surfaces(), "_composite_surfaces.geojson", indent=2)
 
-    solvis.export_geojson(composite.fault_surfaces(), "puysegur_composite_surfaces.geojson", indent=2)
-
-    print()
-    print(rupt_surface_df.to_json())
-    # solvis.export_geojson(composite.rupture_surface(3), f"puysegur_composite_rupture3.geojson", indent=2)
+    # print(rupt_surface_df)
+    # print(rupt_surface_df.to_json())
+    rr = composite.rates
+    ruptures = rr[rr['rate_mean'] > 1e-6]["Rupture Index"].unique()
+    print(ruptures)
+    # print("Fowlers", composite.get_ruptures_for_parent_fault("Fowlers"))
+    solvis.export_geojson(composite.rupture_surface(2450), f"_composite_rupture_2450.geojson", indent=2)

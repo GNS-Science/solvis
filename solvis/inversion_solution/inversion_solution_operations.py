@@ -76,7 +76,7 @@ class InversionSolutionOperations:
         if self._ruptures_with_rates is not None:
             return self._ruptures_with_rates  # pragma: no cover
 
-        print(self.rates.drop(self.rates.iloc[:, :1], axis=1))
+        # print(self.rates.drop(self.rates.iloc[:, :1], axis=1))
         self._ruptures_with_rates = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
         return self._ruptures_with_rates
 
