@@ -26,11 +26,10 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
         indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
 
-        # all other props are derived from these ones
+        # all other solution properties are derived from those above
         ns = InversionSolution()
         ns.set_props(rates, ruptures, indices, solution.fault_sections.copy())
         ns._archive_path = solution._archive_path
-        # ns._surface_builder = SolutionSurfacesBuilder(ns)
         return ns
 
 
@@ -47,7 +46,6 @@ class BranchInversionSolution(InversionSolution):
         rates = solution.rates.copy()
         indices = solution.indices.copy()
 
-        # all other props are derived from these ones
         bis = BranchInversionSolution()
         bis.branch = branch
         bis.set_props(rates, ruptures, indices, solution.fault_sections.copy())

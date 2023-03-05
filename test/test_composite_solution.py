@@ -217,36 +217,3 @@ class TestSerialisation(object):
         assert read_sol.indices.shape[0] == len(ruptures)
         assert read_sol.rates.shape[0] == len(ruptures)
         assert read_sol.ruptures.shape[0] == len(ruptures)
-
-
-if __name__ == "__main__":
-    fslt = slt.fault_system_branches[0]  # PUY
-    print(fslt.branches)
-
-    # df0 = build_rates(branch_solutions(fslt))
-    # print(df0.info())
-    # print()
-    # print(df0)
-
-    composite = CompositeSolution.from_branch_solutions(branch_solutions(fslt))
-
-    # print("")
-    # print('rates')
-    # print(composite.rates.info())
-    # print(composite.rates.head())
-    # print("")
-    # print('ruptures_with_rates')
-    # print(composite.ruptures_with_rates.info())
-    # print(composite.ruptures_with_rates.head())
-
-    # rupt_surface_df = composite.rupture_surface(3)
-    # print(rupt_surface_df)
-    # # solvis.export_geojson(composite.fault_surfaces(), "_composite_surfaces.geojson", indent=2)
-
-    # print(rupt_surface_df)
-    # print(rupt_surface_df.to_json())
-    rr = composite.rates
-    ruptures = rr[rr['rate_mean'] > 1e-6]["Rupture Index"].unique()
-    print(ruptures)
-    # print("Fowlers", composite.get_ruptures_for_parent_fault("Fowlers"))
-    solvis.export_geojson(composite.rupture_surface(2450), f"_composite_rupture_2450.geojson", indent=2)

@@ -51,6 +51,7 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
         # build a new composite solution, taking solution template properties, and composite_rates
         ns = CompositeSolution()
 
+        # TODO CBC/CDC -use the weight column on composite_rates to do weighted mean etc
         aggregate_rates_df = composite_rates.pivot_table(
             values='Annual Rate',
             index=['Rupture Index'],
@@ -84,13 +85,10 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
         # combine the rupture rates from all solutions
         all_rates_df = pd.DataFrame(columns=['Rupture Index', 'Magnitude'])
         for sb in solutions:
-            # print(sb, sb.branch.inversion_solution_id)
-            # print('source info', sb.rates.info())
-            more_df = sb.rates.copy()  # [sb.rates['Annual Rate'] > 1e-20]
-            # print('more_df info', more_df.info())
-            more_df.insert(0, 'solution_id', sb.branch.inversion_solution_id)
-
-            all_rates_df = pd.concat([all_rates_df, more_df], ignore_index=True)
+            solution_df = sb.rates.copy()
+            solution_df.insert(0, 'weight', sb.branch.weight)
+            solution_df.insert(0, 'solution_id', sb.branch.inversion_solution_id)
+            all_rates_df = pd.concat([all_rates_df, solution_df], ignore_index=True)
         all_rates_df.solution_id = all_rates_df.solution_id.astype('category')
 
         return CompositeSolution.new_solution(solution=sb, composite_rates=all_rates_df)
