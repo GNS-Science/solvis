@@ -4,8 +4,10 @@
 ## Added
  - CompositeSolution with aggregate rates;
  - to_archive() with compatible mode 
+ - solution.filter_solution is preferred; .new_sol is deprecated;
 ## Changed
  - InversionSolution is now composed from three modules.
+ - typing improvements
 
 ## [0.4.0] - 2022-02-21
 ## Added
