@@ -13,7 +13,7 @@ from solvis.get_secret import get_secret
 from solvis import circle_polygon
 
 from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
-from solvis.inversion_solution.composite_solution import CompositeSolution
+from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 from nzshm_common.location.location import location_by_id
 
 # Get API key from AWS secrets manager
@@ -132,13 +132,13 @@ def build_composite(work_folder, fault_system):
     #build time ....
     click.echo(f"build composite solution...")
     tic = time.perf_counter()
-    composite = CompositeSolution.from_branch_solutions(solutions)
+    composite = FaultSystemSolution.from_branch_solutions(solutions)
     toc = time.perf_counter()
     click.echo(f'time to build composite solution {toc-tic} seconds')
     # print( composite.rates)
 
     # save the archive
-    fname = pathlib.Path(work_folder, f"{fault_system}_composite_solution.zip")
+    fname = pathlib.Path(work_folder, f"{fault_system}_fault_system_solution.zip")
     composite.to_archive(str(fname), filemap[file_ids[0]]['filepath'], compat=True)
 
 
@@ -170,13 +170,13 @@ def build_composite(work_folder, fault_system):
 #     #build time ....
 #     click.echo(f"build composite solution...")
 #     tic = time.perf_counter()
-#     composite = CompositeSolution.from_branch_solutions(solutions)
+#     composite = FaultSystemSolution.from_branch_solutions(solutions)
 #     toc = time.perf_counter()
 #     click.echo(f'time to build composite solution {toc-tic} seconds')
 #     # print( composite.rates)
 
 #     # save the archive
-#     fname = pathlib.Path(work_folder, f"{nzshm_model.CURRENT_VERSION}_composite_solution.zip")
+#     fname = pathlib.Path(work_folder, f"{nzshm_model.CURRENT_VERSION}_fault_system_solution.zip")
 #     composite.to_archive(str(fname), filemap[file_ids[0]], compat=True)
 
 
@@ -191,8 +191,8 @@ def build_composite(work_folder, fault_system):
 @click.option('--work_folder', '-w', default=lambda: os.getcwd())
 @click.pass_context
 def cli(ctx, work_folder, fault_system):
-    """CompositeSolution tasks - build, analyse."""
-    click.echo("CompositeSolution tasks - build, analyse.")
+    """FaultSystemSolution tasks - build, analyse."""
+    click.echo("FaultSystemSolution tasks - build, analyse.")
     click.echo(f"work folder: {work_folder}")
     click.echo(f"fault system: {fault_system}")
 
@@ -216,8 +216,8 @@ def query(ctx):
 
     work_folder, fault_system = ctx.obj['work_folder'], ctx.obj['fault_system']
 
-    fname = pathlib.Path(work_folder, f"{fault_system}_composite_solution.zip")
-    sol = CompositeSolution.from_archive(fname)
+    fname = pathlib.Path(work_folder, f"{fault_system}_fault_system_solution.zip")
+    sol = FaultSystemSolution.from_archive(fname)
 
     print(sol)
     print(sol.rates)

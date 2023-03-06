@@ -9,7 +9,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from solvis.inversion_solution import CompositeSolution, InversionSolution
+from solvis.inversion_solution import FaultSystemSolution, InversionSolution
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 # def sections_rates_for_ruptures(ruptures: pd.Series):
@@ -53,7 +53,7 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
 
 def filter_solution(
     sol: InversionSolutionProtocol, rupture_ids: npt.ArrayLike
-) -> Union[InversionSolution, CompositeSolution]:
+) -> Union[InversionSolution, FaultSystemSolution]:
     klass = type(sol)
     return klass.filter_solution(sol, rupture_ids)
 

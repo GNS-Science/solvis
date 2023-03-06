@@ -8,7 +8,7 @@ import nzshm_model as nm
 import pytest
 
 import solvis
-from solvis.inversion_solution.composite_solution import CompositeSolution
+from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
@@ -48,24 +48,24 @@ def branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID'):
 @pytest.fixture(scope='class')
 def hikurangi_fixture(request):
     print("setup hikurangi")
-    yield CompositeSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['HIK']))
+    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['HIK']))
 
 
 @pytest.fixture(scope='class')
 def puysegur_fixture(request):
     print("setup puysegur")
-    yield CompositeSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['PUY']))
+    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['PUY']))
 
 
 @pytest.fixture(scope='class')
 def crustal_fixture(request):
     print("setup crustal")
-    yield CompositeSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['CRU']))
+    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['CRU']))
 
 
 def test_from_puy_branch_solutions():
     print(fslt.branches)
-    composite = CompositeSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['PUY']))
+    composite = FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['PUY']))
     print(composite.fault_sections_with_rates)
     assert composite.fault_sections_with_rates.shape == (1369370, FSR_COLUMNS_A)
 
@@ -96,7 +96,7 @@ class TestThreeFaultSystems(object):
         # print(solutions)
         # print()
 
-        composite = CompositeSolution.from_branch_solutions(solutions)
+        composite = FaultSystemSolution.from_branch_solutions(solutions)
 
         assert composite.rates.shape == (3101 + 15800 + 23675, RATE_COLUMNS_A)
         assert composite.composite_rates.shape == (127728, 6)
@@ -179,7 +179,7 @@ class TestSerialisation(object):
         ref_solution = pathlib.PurePath(fixture_folder, ARCHIVES['CRU'])
 
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
-        read_sol = solvis.CompositeSolution.from_archive(new_path)
+        read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
         print(read_sol.rates)
         print(crustal_fixture.rates)
@@ -197,7 +197,7 @@ class TestSerialisation(object):
         ref_solution = pathlib.PurePath(fixture_folder, ARCHIVES['CRU'])
 
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
-        read_sol = solvis.CompositeSolution.from_archive(new_path)
+        read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
         print(read_sol.composite_rates.info())
         print(read_sol.composite_rates.columns)
@@ -216,7 +216,7 @@ class TestSerialisation(object):
         ref_solution = pathlib.PurePath(fixture_folder, ARCHIVES['CRU'])
 
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=False)
-        read_sol = solvis.CompositeSolution.from_archive(new_path)
+        read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
         print(read_sol.rates)
         print(crustal_fixture.rates)
@@ -236,10 +236,10 @@ class TestSerialisation(object):
     #     rr = crustal_fixture.rates
     #     ruptures = rr[rr['rate_mean'] > 1e-6]["Rupture Index"].unique()
     #     print(ruptures)
-    #     new_sol = solvis.CompositeSolution.filter_solution(crustal_fixture, ruptures)
+    #     new_sol = solvis.FaultSystemSolution.filter_solution(crustal_fixture, ruptures)
 
     #     new_sol.to_archive(str(new_path), ref_solution, compat=False)
-    #     read_sol = solvis.CompositeSolution.from_archive(new_path)
+    #     read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
     #     print(read_sol.rates)
     #     print(crustal_fixture.rates)
@@ -264,10 +264,10 @@ class TestSerialisation(object):
     #     rr = crustal_fixture.rates
     #     ruptures = rr[rr['rate_mean'] > 1e-6]["Rupture Index"].unique()
     #     print(ruptures)
-    #     new_sol = solvis.CompositeSolution.filter_solution(crustal_fixture, ruptures)
+    #     new_sol = solvis.FaultSystemSolution.filter_solution(crustal_fixture, ruptures)
 
     #     new_sol.to_archive(str(new_path), ref_solution, compat=True)
-    #     read_sol = solvis.CompositeSolution.from_archive(new_path)
+    #     read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
     #     print(read_sol.rates)
     #     print(crustal_fixture.rates)

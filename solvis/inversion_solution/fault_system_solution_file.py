@@ -20,7 +20,7 @@ Inversion Solution archive file:
 """
 
 
-class CompositeSolutionFile(InversionSolutionFile):
+class FaultSystemSolutionFile(InversionSolutionFile):
     """
     Class to handle the NZHSM Compositie solution modular archive file form
     """

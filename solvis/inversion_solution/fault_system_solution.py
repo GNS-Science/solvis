@@ -5,12 +5,12 @@ from typing import Iterable, Union
 import numpy as np
 import pandas as pd
 
-from .composite_solution_file import CompositeSolutionFile
+from .fault_system_solution_file import FaultSystemSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .typing import BranchSolutionProtocol
 
 
-class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
+class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
 
     _composite_rates: pd.DataFrame = ...
 
@@ -24,37 +24,16 @@ class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
         self._fault_regime = fault_regime
 
     @staticmethod
-    def from_archive(archive_path: Union[Path, str]) -> 'CompositeSolution':
-        new_solution = CompositeSolution()
+    def from_archive(archive_path: Union[Path, str]) -> 'FaultSystemSolution':
+        new_solution = FaultSystemSolution()
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         new_solution._archive_path = Path(archive_path)
         return new_solution
 
-    # @staticmethod
-    # def filter_solution(solution: InversionSolutionProtocol, rupture_ids: npt.ArrayLike) -> 'CompositeSolution':
-    #     rr = solution.ruptures
-    #     ra = solution.rates
-    #     cr = solutoin.composite_rates
-    #     ri = solution.indices
-    #     ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
-    #     composite_rates =
-    #     rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
-    #     indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
-
-    #     ns = CompositeSolution()
-    #     ns.set_props(
-    #         rates,
-    #         ruptures,
-    #         indices,
-    #         solution.fault_sections.copy(),
-    #         solution.fault_regime,
-    #     )
-    #     return ns
-
     @staticmethod
-    def new_solution(solution: BranchSolutionProtocol, composite_rates: pd.DataFrame) -> 'CompositeSolution':
+    def new_solution(solution: BranchSolutionProtocol, composite_rates: pd.DataFrame) -> 'FaultSystemSolution':
         # build a new composite solution, taking solution template properties, and composite_rates
-        ns = CompositeSolution()
+        ns = FaultSystemSolution()
 
         # TODO CBC/CDC -use the weight column on composite_rates to do weighted mean etc
         aggregate_rates_df = composite_rates.pivot_table(
@@ -88,7 +67,7 @@ class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
         return ns
 
     @staticmethod
-    def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'CompositeSolution':
+    def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'FaultSystemSolution':
 
         # combine the rupture rates from all solutions
         all_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
@@ -104,4 +83,4 @@ class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
 
         all_rates_df.solution_id = all_rates_df.solution_id.astype('category')
 
-        return CompositeSolution.new_solution(solution=sb, composite_rates=all_rates_df)
+        return FaultSystemSolution.new_solution(solution=sb, composite_rates=all_rates_df)
