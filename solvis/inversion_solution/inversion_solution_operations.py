@@ -72,7 +72,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             return self._ruptures_with_rates  # pragma: no cover
 
         # print(self.rates.drop(self.rates.iloc[:, :1], axis=1))
-        self._ruptures_with_rates = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
+        self._ruptures_with_rates = self.ruptures.join(self.rates.drop(columns=["Rupture Index"]))
         return self._ruptures_with_rates
 
     # return the rupture ids for any ruptures intersecting the polygon

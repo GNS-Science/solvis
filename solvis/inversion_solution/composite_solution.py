@@ -3,13 +3,11 @@ from pathlib import Path
 from typing import Iterable, Union
 
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
-import geopandas as gpd
 
 from .composite_solution_file import CompositeSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
-from .typing import BranchSolutionProtocol, InversionSolutionProtocol
+from .typing import BranchSolutionProtocol
 
 
 class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
@@ -61,7 +59,10 @@ class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
         # TODO CBC/CDC -use the weight column on composite_rates to do weighted mean etc
         aggregate_rates_df = composite_rates.pivot_table(
             values='Annual Rate',
-            index=['Rupture Index'],
+            index=[
+                'fault_system',
+                'Rupture Index',
+            ],
             aggfunc={"Annual Rate": [np.min, np.mean, np.max, np.median, 'count']},
         )
 
@@ -90,7 +91,7 @@ class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
     def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'CompositeSolution':
 
         # combine the rupture rates from all solutions
-        all_rates_df = pd.DataFrame(columns=['Rupture Index']) #, 'Magnitude'])
+        all_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
         for sb in solutions:
             solution_df = sb.rates.copy()
             solution_df.insert(0, 'solution_id', sb.branch.inversion_solution_id)
@@ -98,6 +99,8 @@ class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
             solution_df.insert(0, 'weight', sb.branch.weight)
             solution_df.insert(0, 'fault_system', sb.fault_system)
             all_rates_df = pd.concat([all_rates_df, solution_df], ignore_index=True)
+
+            print('dims', all_rates_df.shape, solution_df.shape)
 
         all_rates_df.solution_id = all_rates_df.solution_id.astype('category')
 

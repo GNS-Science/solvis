@@ -30,11 +30,13 @@ Inversion Solution archive file:
 
 """
 
+
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
     new_df.index = new_df.index.rename('Rupture Index')
     # print("NEW DF", new_df)
     return new_df
+
 
 class InversionSolutionFile(InversionSolutionProtocol):
     """
@@ -66,8 +68,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._archive_path: Union[Path, str]
         # self._surface_builder: SolutionSurfacesBuilder
 
-
-    def _write_dataframes(self, zip_archive:zipfile.ZipFile, reindex:bool =False):
+    def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
         # write out the `self` dataframes
         if reindex:
             data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
@@ -102,7 +103,6 @@ class InversionSolutionFile(InversionSolutionProtocol):
             self._write_dataframes(zout, reindex=False)
         self._archive_path = archive_path
         data_to_zip_direct(zout, WARNING, "WARNING.md")
-
 
     def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
@@ -163,7 +163,9 @@ class InversionSolutionFile(InversionSolutionProtocol):
     def indices(self) -> gpd.GeoDataFrame:
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
 
-    def set_props(self, rates: pd.DataFrame, ruptures: pd.DataFrame, indices: pd.DataFrame, fault_sections: pd.DataFrame):
+    def set_props(
+        self, rates: pd.DataFrame, ruptures: pd.DataFrame, indices: pd.DataFrame, fault_sections: pd.DataFrame
+    ):
         # self._init_props()
         self._rates = rates
         self._ruptures = ruptures
