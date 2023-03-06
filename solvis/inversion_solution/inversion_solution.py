@@ -37,10 +37,13 @@ class BranchInversionSolution(InversionSolution):
     """Just an ordinary InversionSolution with branch attribute added"""
 
     branch: ModelLogicTreeBranch
+    fault_system: Union[str, None] = ""
+    rupture_set_id: Union[str, None] = ""
 
     @staticmethod
     def new_branch_solution(
-        solution: InversionSolutionProtocol, branch: ModelLogicTreeBranch
+        solution: InversionSolutionProtocol, branch: ModelLogicTreeBranch,
+        fault_system: str, rupture_set_id: str
     ) -> 'BranchInversionSolution':
         ruptures = solution.ruptures.copy()
         rates = solution.rates.copy()
@@ -48,6 +51,8 @@ class BranchInversionSolution(InversionSolution):
 
         bis = BranchInversionSolution()
         bis.branch = branch
+        bis.fault_system = fault_system
+        bis.rupture_set_id = rupture_set_id
         bis.set_props(rates, ruptures, indices, solution.fault_sections.copy())
         bis._archive_path = solution._archive_path
         return bis

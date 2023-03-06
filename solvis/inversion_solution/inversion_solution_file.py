@@ -30,6 +30,11 @@ Inversion Solution archive file:
 
 """
 
+def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
+    new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
+    new_df.index = new_df.index.rename('Rupture Index')
+    # print("NEW DF", new_df)
+    return new_df
 
 class InversionSolutionFile(InversionSolutionProtocol):
     """
@@ -42,6 +47,8 @@ class InversionSolutionFile(InversionSolutionProtocol):
     FAULTS_PATH = 'ruptures/fault_sections.geojson'
     METADATA_PATH = 'metadata.json'
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'
+
+    DATAFRAMES = [RATES_PATH, RUPTS_PATH, INDICES_PATH]
 
     def __init__(self) -> None:
         # self._init_props()
@@ -59,73 +66,43 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._archive_path: Union[Path, str]
         # self._surface_builder: SolutionSurfacesBuilder
 
+
+    def _write_dataframes(self, zip_archive:zipfile.ZipFile, reindex:bool =False):
+        # write out the `self` dataframes
+        if reindex:
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(), self.RUPTS_PATH)
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(), self.INDICES_PATH)
+        else:
+            data_to_zip_direct(zip_archive, self._rates.to_csv(index=False), self.RATES_PATH)
+            data_to_zip_direct(zip_archive, self._ruptures.to_csv(), self.RUPTS_PATH)
+            data_to_zip_direct(zip_archive, self._indices.to_csv(), self.INDICES_PATH)
+
     def to_archive(self, archive_path, base_archive_path, compat=True):
         """
-        Writes the current solution to a new zip archive, optionally cloning data from a base archive
-        Note this is not well tested, use with caution!
+        Writes the current solution to a new zip archive, cloning data from a base archive
+        """
+        zout = zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED)
 
+        # this copies in memory, skipping the datframe files we'll want to overwrite
+        zin = zipfile.ZipFile(base_archive_path, 'r')
+        for item in zin.infolist():
+            if item.filename in self.DATAFRAMES:
+                continue
+            buffer = zin.read(item.filename)
+            zout.writestr(item, buffer)
+
+        """
+        Non-compatible mode does not reindex the tables from 0 as required by opensha. So it cannot be
+        used to produce opensha reports etc.
         """
         if compat:
-            self._to_compatible_archive(archive_path, base_archive_path)
+            self._write_dataframes(zout, reindex=True)
         else:
-            self._to_non_compatible_archive(archive_path, base_archive_path)
+            self._write_dataframes(zout, reindex=False)
         self._archive_path = archive_path
-
-    def _to_compatible_archive(self, archive_path, base_archive_path):
-        """
-        compatible because it does reindex the tables from 0 as required by opensha.
-        assume that self is some altered
-        """
-        zout = zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED)
-
-        # this copies in memory, skipping the datframe files we want to overwrite
-        zin = zipfile.ZipFile(base_archive_path, 'r')
-
-        for item in zin.infolist():
-            if item.filename in [self.RATES_PATH, self.RUPTS_PATH, self.INDICES_PATH]:
-                continue
-            buffer = zin.read(item.filename)
-            zout.writestr(item, buffer)
-
-        def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
-            new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
-            new_df.index = new_df.index.rename('Rupture Index')
-            # print("NEW DF", new_df)
-            return new_df
-
-        # write out the `self` dataframes
-        data_to_zip_direct(zout, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
-        data_to_zip_direct(zout, reindex_dataframe(self._ruptures).to_csv(), self.RUPTS_PATH)
-        data_to_zip_direct(zout, reindex_dataframe(self._indices).to_csv(), self.INDICES_PATH)
-        # and the warning notice
         data_to_zip_direct(zout, WARNING, "WARNING.md")
 
-    def _to_non_compatible_archive(self, archive_path, base_archive_path):
-        """
-        It' non-compatible because it does not reindex the tables from 0 as required by opensha. So it cannot be
-        used to produce opensha reports etc.
-
-        Writes the current solution to a new zip archive, optionally cloning data from a base archive
-        Note this is not well tested, use with caution!
-
-        """
-        zout = zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED)
-
-        # this copies in memory, skipping the datframe files we want to overwrite
-        zin = zipfile.ZipFile(base_archive_path, 'r')
-        for item in zin.infolist():
-            if item.filename in [self.RATES_PATH, self.RUPTS_PATH, self.INDICES_PATH]:
-                continue
-            buffer = zin.read(item.filename)
-            zout.writestr(item, buffer)
-
-        # write out the `self` dataframes
-        data_to_zip_direct(zout, self._rates.to_csv(index=False), self.RATES_PATH)
-        data_to_zip_direct(zout, self._ruptures.to_csv(), self.RUPTS_PATH)
-        data_to_zip_direct(zout, self._indices.to_csv(), self.INDICES_PATH)
-
-        # and the warning notice
-        data_to_zip_direct(zout, WARNING, "WARNING.md")
 
     def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
@@ -186,7 +163,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
     def indices(self) -> gpd.GeoDataFrame:
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
 
-    def set_props(self, rates, ruptures, indices, fault_sections):
+    def set_props(self, rates: pd.DataFrame, ruptures: pd.DataFrame, indices: pd.DataFrame, fault_sections: pd.DataFrame):
         # self._init_props()
         self._rates = rates
         self._ruptures = ruptures

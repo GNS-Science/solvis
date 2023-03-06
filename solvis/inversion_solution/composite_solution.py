@@ -5,15 +5,20 @@ from typing import Iterable, Union
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import geopandas as gpd
 
-from .inversion_solution_file import InversionSolutionFile
+from .composite_solution_file import CompositeSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .typing import BranchSolutionProtocol, InversionSolutionProtocol
 
 
-class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
-    def set_props(self, rates, ruptures, indices, fault_sections, fault_regime):
+class CompositeSolution(CompositeSolutionFile, InversionSolutionOperations):
+
+    _composite_rates: pd.DataFrame = ...
+
+    def set_props(self, composite_rates, rates, ruptures, indices, fault_sections, fault_regime):
         # self._init_props()
+        self._composite_rates = composite_rates
         self._rates = rates
         self._ruptures = ruptures
         self._fault_sections = fault_sections
@@ -27,24 +32,26 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
         new_solution._archive_path = Path(archive_path)
         return new_solution
 
-    @staticmethod
-    def filter_solution(solution: InversionSolutionProtocol, rupture_ids: npt.ArrayLike) -> 'CompositeSolution':
-        rr = solution.ruptures
-        ra = solution.rates
-        ri = solution.indices
-        ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
-        rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
-        indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
+    # @staticmethod
+    # def filter_solution(solution: InversionSolutionProtocol, rupture_ids: npt.ArrayLike) -> 'CompositeSolution':
+    #     rr = solution.ruptures
+    #     ra = solution.rates
+    #     cr = solutoin.composite_rates
+    #     ri = solution.indices
+    #     ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
+    #     composite_rates =
+    #     rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
+    #     indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
 
-        ns = CompositeSolution()
-        ns.set_props(
-            rates,
-            ruptures,
-            indices,
-            solution.fault_sections.copy(),
-            solution.fault_regime,
-        )
-        return ns
+    #     ns = CompositeSolution()
+    #     ns.set_props(
+    #         rates,
+    #         ruptures,
+    #         indices,
+    #         solution.fault_sections.copy(),
+    #         solution.fault_regime,
+    #     )
+    #     return ns
 
     @staticmethod
     def new_solution(solution: BranchSolutionProtocol, composite_rates: pd.DataFrame) -> 'CompositeSolution':
@@ -55,7 +62,6 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
         aggregate_rates_df = composite_rates.pivot_table(
             values='Annual Rate',
             index=['Rupture Index'],
-            # columns='Rupture Index',
             aggfunc={"Annual Rate": [np.min, np.mean, np.max, np.median, 'count']},
         )
 
@@ -70,6 +76,7 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
         )
 
         ns.set_props(
+            composite_rates,
             aggregate_rates_df,
             solution.ruptures.copy(),
             solution.indices.copy(),
@@ -83,12 +90,15 @@ class CompositeSolution(InversionSolutionFile, InversionSolutionOperations):
     def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'CompositeSolution':
 
         # combine the rupture rates from all solutions
-        all_rates_df = pd.DataFrame(columns=['Rupture Index', 'Magnitude'])
+        all_rates_df = pd.DataFrame(columns=['Rupture Index']) #, 'Magnitude'])
         for sb in solutions:
             solution_df = sb.rates.copy()
-            solution_df.insert(0, 'weight', sb.branch.weight)
             solution_df.insert(0, 'solution_id', sb.branch.inversion_solution_id)
+            solution_df.insert(0, 'rupture_set_id', sb.rupture_set_id)
+            solution_df.insert(0, 'weight', sb.branch.weight)
+            solution_df.insert(0, 'fault_system', sb.fault_system)
             all_rates_df = pd.concat([all_rates_df, solution_df], ignore_index=True)
+
         all_rates_df.solution_id = all_rates_df.solution_id.astype('category')
 
         return CompositeSolution.new_solution(solution=sb, composite_rates=all_rates_df)
