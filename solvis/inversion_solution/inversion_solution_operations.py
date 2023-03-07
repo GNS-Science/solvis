@@ -4,7 +4,7 @@ import geopandas as gpd
 import pandas as pd
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import InversionSolutionProtocol
+from .typing import CompositeSolutionProtocol, InversionSolutionProtocol
 
 
 class InversionSolutionOperations(InversionSolutionProtocol):
@@ -89,3 +89,17 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
         qdf = self.rupture_sections.join(sects, 'section', how='inner')
         return qdf.rupture.unique()
+
+
+class CompositeSolutionOperations(CompositeSolutionProtocol):
+    def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
+        return self._solutions[fault_system].rupture_surface(rupture_id)
+
+    def fault_surfaces(self):
+        surfaces = []
+        for fault_system, sol in self._solutions.items():
+            solution_df = sol.fault_surfaces().to_crs("EPSG:4326")
+            solution_df.insert(0, 'fault_system', fault_system)
+            surfaces.append(solution_df)
+        all_surfaces_df = pd.concat(surfaces, ignore_index=True)
+        return gpd.GeoDataFrame(all_surfaces_df)

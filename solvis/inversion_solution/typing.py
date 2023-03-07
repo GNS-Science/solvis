@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, List, Protocol, Union
+from typing import Any, List, Mapping, Protocol, Union
 
 import geopandas as gpd
 import numpy.typing as npt
@@ -57,6 +57,15 @@ class InversionSolutionProtocol(Protocol):
     @property
     def rs_with_rates(self) -> gpd.GeoDataFrame:
         """the event rate for each rupture section."""
+
+
+class CompositeSolutionProtocol(Protocol):
+
+    _solutions: Mapping[str, InversionSolutionProtocol] = {}
+    # _solutions: Dict[str, FaultSystemSolution] = {}
+
+    def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
+        """builder method returning the rupture surface of a given rupture id."""
 
 
 class ModelLogicTreeBranch(Protocol):
