@@ -143,7 +143,7 @@ def build_composite(work_folder, fault_system):
     composite.to_archive(str(fname), filemap[file_ids[0]]['filepath'], compat=True)
 
 
-def build_composite_all(work_folder):
+def build_composite_all(work_folder, archive_name):
     current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
     slt = current_model.source_logic_tree()
 
@@ -156,8 +156,35 @@ def build_composite_all(work_folder):
                 rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id']
             )
 
-    composite = CompositeSolution()  # create the new composite solutoin
+    composite = CompositeSolution(slt)  # create the new composite solutoin
     tic = time.perf_counter()
+
+    """
+    for fault_system_lt in slt.fault_system_branches:
+        if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
+            solutions = list(
+                branch_solutions(
+                    fault_system_lt,
+                    archive=ARCHIVES[fault_system_lt.short_name],
+                    rupt_set_id=f'rupset_{fault_system_lt.short_name}',
+                )
+            )
+
+            fss = FaultSystemSolution.from_branch_solutions(solutions)
+            composite.add_fault_system_solution(fault_system_lt.short_name, fss)
+
+            # write the fss-archive file
+
+            ref_solution = solutions[0].archive_path  # the file path to the reference solution
+            new_path = pathlib.Path(folder.name, f'test_fault_system_{fault_system_lt.short_name}_archive.zip')
+            fss.to_archive(str(new_path), ref_solution, compat=True)
+            assert new_path.exists()
+            assert str(fss.archive_path) == str(new_path)
+
+    new_path = pathlib.Path(folder.name, 'test_composite_archive.zip')
+    composite.to_archive(new_path)
+    """
+
     for fault_system_lt in slt.fault_system_branches:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
             file_ids = [b.inversion_solution_id for b in fault_system_lt.branches]
@@ -165,18 +192,25 @@ def build_composite_all(work_folder):
 
             # prepare BranchSolutions
             click.echo(f"load branch solutions... {fault_system_lt.short_name}")
-            composite.add_fault_system_solution(
-                fault_system_lt.short_name,
-                FaultSystemSolution.from_branch_solutions(
+            fss = FaultSystemSolution.from_branch_solutions(
                     branch_solutions(fault_system_lt, filemap)
-                ),
-            )
+                )
 
+            # write the fss-archive file
+            ref_solution = filemap[file_ids[0]]['filepath'] # the file path to the reference solution
+            new_path = pathlib.Path(work_folder, f'{fault_system_lt.short_name}_fault_system_archive.zip')
+            fss.to_archive(str(new_path), ref_solution, compat=True)
+            assert new_path.exists()
+
+            composite.add_fault_system_solution(fault_system_lt.short_name, fss)
+
+    new_path = pathlib.Path(work_folder, archive_name)
+    composite.to_archive(new_path)
     toc = time.perf_counter()
-    click.echo(f'time to build composite solution {toc-tic} seconds')
-    print( composite.rates )
-    print()
-    print(composite.rupture_surface("HIK", 1))
+    click.echo(f'created composite solution file {new_path.name} in {toc-tic} seconds')
+    # print( composite.rates )
+    # print()
+    # print(composite.rupture_surface("HIK", 1))
 
 #  _ __ ___   __ _(_)_ __
 # | '_ ` _ \ / _` | | '_ \
@@ -200,10 +234,11 @@ def cli(ctx, work_folder, fault_system):
 
 
 @cli.command()
+@click.option('--archive_name', '-a', default="CompositeSolution.zip")
 @click.pass_context
-def build(ctx):
+def build(ctx, archive_name):
     if ctx.obj['fault_system'] == 'ALL':
-        solution = build_composite_all(ctx.obj['work_folder'])
+        solution = build_composite_all(ctx.obj['work_folder'], archive_name)
     else:
         solution = build_composite(ctx.obj['work_folder'] , ctx.obj['fault_system'] )
 
