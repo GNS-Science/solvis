@@ -2,7 +2,7 @@ import json
 import time
 import zipfile
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any, List
 
 import geopandas as gpd
 import pandas as pd
@@ -65,7 +65,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._fault_regime: str = ''
         self._fault_sections = None
         self._rupture_sections = None
-        self._archive_path: Union[Path, str]
+        self._archive_path: Path
         # self._surface_builder: SolutionSurfacesBuilder
 
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
@@ -103,6 +103,10 @@ class InversionSolutionFile(InversionSolutionProtocol):
             self._write_dataframes(zout, reindex=False)
         self._archive_path = archive_path
         data_to_zip_direct(zout, WARNING, "WARNING.md")
+
+    @property
+    def archive_path(self) -> Path:
+        return self._archive_path
 
     def _dataframe_from_csv(self, prop, path):
         if not isinstance(prop, pd.DataFrame):

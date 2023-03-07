@@ -1,7 +1,6 @@
 import os
 import pathlib
-
-# import tempfile
+import tempfile
 from copy import deepcopy
 
 import geopandas as gpd
@@ -58,7 +57,7 @@ def composite_fixture():
     for idx in [1, 2]:
         slt.fault_system_branches[idx].branches = deepcopy(slt.fault_system_branches[0].branches)
 
-    composite = CompositeSolution()  # create the new composite solutoin
+    composite = CompositeSolution(slt)  # create the new composite solutoin
     for fault_system_lt in slt.fault_system_branches:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
             composite.add_fault_system_solution(
@@ -97,3 +96,47 @@ class TestThreeFaultSystems(object):
 
         assert isinstance(surfaces, gpd.GeoDataFrame)
         assert surfaces.shape == (809, 15)
+
+
+def test_composite_serialisation():
+    folder = tempfile.TemporaryDirectory()
+    # folder = pathlib.PurePath(os.path.realpath(__file__)).parent
+
+    v1_0_0 = nm.get_model_version('NSHM_1.0.0')
+    slt = v1_0_0.source_logic_tree()
+    print(slt.fault_system_branches[0])
+
+    # fudge the model branches because we have too few fixtures
+    for idx in [1, 2]:
+        slt.fault_system_branches[idx].branches = deepcopy(slt.fault_system_branches[0].branches)
+
+    composite = CompositeSolution(slt)  # create the new composite solutoin
+    for fault_system_lt in slt.fault_system_branches:
+        if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
+            solutions = list(
+                branch_solutions(
+                    fault_system_lt,
+                    archive=ARCHIVES[fault_system_lt.short_name],
+                    rupt_set_id=f'rupset_{fault_system_lt.short_name}',
+                )
+            )
+
+            fss = FaultSystemSolution.from_branch_solutions(solutions)
+            composite.add_fault_system_solution(fault_system_lt.short_name, fss)
+
+            # write the fss-archive file
+            ref_solution = solutions[0].archive_path  # the file path to the reference solution
+            new_path = pathlib.Path(folder.name, f'test_fault_system_{fault_system_lt.short_name}_archive.zip')
+            fss.to_archive(str(new_path), ref_solution, compat=True)
+            assert new_path.exists()
+            assert str(fss.archive_path) == str(new_path)
+
+    new_path = pathlib.Path(folder.name, 'test_composite_archive.zip')
+    composite.to_archive(new_path)
+    assert new_path.exists()
+    assert str(composite.archive_path) == str(new_path)
+
+    new_composite = CompositeSolution.from_archive(new_path, slt)
+    assert new_composite.rates.columns.all() == composite.rates.columns.all()
+    assert new_composite.rates.shape == composite.rates.shape
+    assert new_composite.rates['Rupture Index'].all() == composite.rates['Rupture Index'].all()

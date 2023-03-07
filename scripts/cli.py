@@ -13,7 +13,8 @@ from solvis.get_secret import get_secret
 from solvis import circle_polygon
 
 from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
-from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
+from solvis import FaultSystemSolution, CompositeSolution
+
 from nzshm_common.location.location import location_by_id
 
 # Get API key from AWS secrets manager
@@ -142,43 +143,40 @@ def build_composite(work_folder, fault_system):
     composite.to_archive(str(fname), filemap[file_ids[0]]['filepath'], compat=True)
 
 
-# def build_composite_all(work_folder):
-#     current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
-#     slt = current_model.source_logic_tree()
-#     branch = None
-#     solutions = []
+def build_composite_all(work_folder):
+    current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
+    slt = current_model.source_logic_tree()
 
-#     for fslt in slt.fault_system_branches:
-#         if fslt.short_name in ['CRU', 'PUY', 'HIK']:
-#             branch = fslt
-#         else:
-#             continue
-#         click.echo(f"branch {branch.short_name} {branch.long_name}")
-#         file_ids = [b.inversion_solution_id for b in branch.branches]
-#         filemap = fetch_toshi_files(work_folder, file_ids)
+    def branch_solutions(fslt, filemap):
+        for fslt_branch in fslt.branches:
+            yield BranchInversionSolution.new_branch_solution(
+                InversionSolution.from_archive(filemap[fslt_branch.inversion_solution_id]['filepath']),
+                branch = fslt_branch,
+                fault_system = fslt.short_name,
+                rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id']
+            )
 
-#         click.echo(f"load branch solutions...")
-#         for fslt_branch in branch.branches:
-#             solutions.append(
-#                 BranchInversionSolution.new_branch_solution(
-#                     InversionSolution.from_archive(filemap[fslt_branch.inversion_solution_id]['filepath']),
-#                     branch = fslt_branch,
-#                     fault_system = branch.short_name,
-#                     rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id'])
-#                 )
+    composite = CompositeSolution()  # create the new composite solutoin
+    tic = time.perf_counter()
+    for fault_system_lt in slt.fault_system_branches:
+        if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
+            file_ids = [b.inversion_solution_id for b in fault_system_lt.branches]
+            filemap = fetch_toshi_files(work_folder, file_ids)
 
-#     #build time ....
-#     click.echo(f"build composite solution...")
-#     tic = time.perf_counter()
-#     composite = FaultSystemSolution.from_branch_solutions(solutions)
-#     toc = time.perf_counter()
-#     click.echo(f'time to build composite solution {toc-tic} seconds')
-#     # print( composite.rates)
+            # prepare BranchSolutions
+            click.echo(f"load branch solutions... {fault_system_lt.short_name}")
+            composite.add_fault_system_solution(
+                fault_system_lt.short_name,
+                FaultSystemSolution.from_branch_solutions(
+                    branch_solutions(fault_system_lt, filemap)
+                ),
+            )
 
-#     # save the archive
-#     fname = pathlib.Path(work_folder, f"{nzshm_model.CURRENT_VERSION}_fault_system_solution.zip")
-#     composite.to_archive(str(fname), filemap[file_ids[0]], compat=True)
-
+    toc = time.perf_counter()
+    click.echo(f'time to build composite solution {toc-tic} seconds')
+    print( composite.rates )
+    print()
+    print(composite.rupture_surface("HIK", 1))
 
 #  _ __ ___   __ _(_)_ __
 # | '_ ` _ \ / _` | | '_ \
@@ -205,7 +203,7 @@ def cli(ctx, work_folder, fault_system):
 @click.pass_context
 def build(ctx):
     if ctx.obj['fault_system'] == 'ALL':
-        solution = build_composite_all(ctx.obj['work_folder'] , ctx.obj['fault_system'] )
+        solution = build_composite_all(ctx.obj['work_folder'])
     else:
         solution = build_composite(ctx.obj['work_folder'] , ctx.obj['fault_system'] )
 

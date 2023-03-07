@@ -1,6 +1,6 @@
-# import zipfile
-# from pathlib import Path
-from typing import Dict
+import zipfile
+from pathlib import Path
+from typing import Any, Dict, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -14,13 +14,27 @@ from .inversion_solution_operations import CompositeSolutionOperations
 class CompositeSolution(CompositeSolutionOperations):
 
     _solutions: Dict[str, FaultSystemSolution] = {}
+    _source_logic_tree: Any
 
-    # def __init__(self):
+    def __init__(self, source_logic_tree):
+        self._source_logic_tree = source_logic_tree
+        self._solutions = {}
+        # print('__init__', self._solutions)
 
     def add_fault_system_solution(self, fault_system: str, fault_system_solution: FaultSystemSolution):
-        assert fault_system not in self._solutions.keys()
+        print(">>> add_fault_system_solution", self, fault_system)
+        if fault_system in self._solutions.keys():
+            raise ValueError(f"fault system with key: {fault_system} exists already. {self._solutions.keys()}")
         self._solutions[fault_system] = fault_system_solution
         return self
+
+    @property
+    def archive_path(self):
+        return self._archive_path
+
+    @property
+    def source_logic_tree(self):
+        return self._source_logic_tree
 
     @property
     def rates(self) -> pd.DataFrame:
@@ -55,3 +69,29 @@ class CompositeSolution(CompositeSolutionOperations):
         all = [gpd.GeoDataFrame(sol.fault_sections_with_rates).to_crs("EPSG:4326") for sol in self._solutions.values()]
         all_df = pd.concat(all, ignore_index=True)
         return all_df
+
+    def to_archive(self, archive_path: Union[Path, str]):
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zout:
+            for key, fss in self._solutions.items():
+                zout.write(fss.archive_path, arcname=f"{key}_fault_system_solution.zip")
+        self._archive_path = archive_path
+
+    @staticmethod
+    def from_archive(archive_path: Path, source_logic_tree: Any) -> 'CompositeSolution':
+        new_solution = CompositeSolution(source_logic_tree)
+
+        # print("NEW_SOL", new_solution, new_solution._solutions, new_solution.archive_path)
+
+        zout = zipfile.ZipFile(archive_path)
+        zout.extractall(archive_path.parent)
+
+        for fault_system_lt in source_logic_tree.fault_system_branches:
+            if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
+                # print(f"fault_system_lt.short_name: {fault_system_lt.short_name }")
+                fss = FaultSystemSolution.from_archive(
+                    Path(archive_path.parent, f"{fault_system_lt.short_name}_fault_system_solution.zip")
+                )
+                new_solution.add_fault_system_solution(fault_system_lt.short_name, fss)
+
+        new_solution._archive_path = archive_path
+        return new_solution

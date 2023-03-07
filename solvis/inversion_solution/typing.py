@@ -16,7 +16,7 @@ class InversionSolutionProtocol(Protocol):
     _rs_with_rates: pd.DataFrame = ...
     _fault_sections: pd.DataFrame = ...
     _ruptures_with_rates: pd.DataFrame = ...
-    _archive_path: Union[Path, str] = ''
+    _archive_path: Path
 
     FAULTS_PATH: Union[Path, str] = ''
 
@@ -58,14 +58,22 @@ class InversionSolutionProtocol(Protocol):
     def rs_with_rates(self) -> gpd.GeoDataFrame:
         """the event rate for each rupture section."""
 
+    @property
+    def archive_path(self) -> Path:
+        """the path to the archive file"""
+
 
 class CompositeSolutionProtocol(Protocol):
 
     _solutions: Mapping[str, InversionSolutionProtocol] = {}
-    # _solutions: Dict[str, FaultSystemSolution] = {}
+    _archive_path: Union[Path, str] = ''
 
     def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
         """builder method returning the rupture surface of a given rupture id."""
+
+    @property
+    def archive_path(self):
+        """the path to the archive file"""
 
 
 class ModelLogicTreeBranch(Protocol):
