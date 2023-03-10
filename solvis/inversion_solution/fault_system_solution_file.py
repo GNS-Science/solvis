@@ -1,6 +1,8 @@
 import zipfile
+from collections import defaultdict
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 
 from .inversion_solution_file import InversionSolutionFile, data_to_zip_direct, reindex_dataframe
@@ -26,13 +28,17 @@ class FaultSystemSolutionFile(InversionSolutionFile):
     """
 
     _composite_rates: pd.DataFrame = ...
+    _aggregate_rates: pd.DataFrame = ...
 
     COMPOSITE_RATES_PATH = 'composite_rates.csv'
+    AGGREGATE_RATES_PATH = 'aggregate_rates.csv'
+
     DATAFRAMES = [
-        InversionSolutionFile.RATES_PATH,
+        # InversionSolutionFile.RATES_PATH,
         InversionSolutionFile.RUPTS_PATH,
         InversionSolutionFile.INDICES_PATH,
         COMPOSITE_RATES_PATH,
+        AGGREGATE_RATES_PATH,
     ]
 
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
@@ -40,15 +46,30 @@ class FaultSystemSolutionFile(InversionSolutionFile):
             data_to_zip_direct(
                 zip_archive, reindex_dataframe(self._composite_rates).to_csv(), self.COMPOSITE_RATES_PATH
             )
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
+            data_to_zip_direct(
+                zip_archive, reindex_dataframe(self._aggregate_rates).to_csv(), self.AGGREGATE_RATES_PATH
+            )
+            # data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
             data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(), self.RUPTS_PATH)
             data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(), self.INDICES_PATH)
         else:
             data_to_zip_direct(zip_archive, self._composite_rates.to_csv(), self.COMPOSITE_RATES_PATH)
-            data_to_zip_direct(zip_archive, self._rates.to_csv(index=False), self.RATES_PATH)
+            # data_to_zip_direct(zip_archive, self._rates.to_csv(index=False), self.RATES_PATH)
+            data_to_zip_direct(zip_archive, self._aggregate_rates.to_csv(index=False), self.AGGREGATE_RATES_PATH)
             data_to_zip_direct(zip_archive, self._ruptures.to_csv(), self.RUPTS_PATH)
             data_to_zip_direct(zip_archive, self._indices.to_csv(), self.INDICES_PATH)
 
     @property
     def composite_rates(self) -> gpd.GeoDataFrame:
         return self._dataframe_from_csv(self._composite_rates, self.COMPOSITE_RATES_PATH)
+
+    @property
+    def rates(self) -> gpd.GeoDataFrame:
+        dtypes: defaultdict = defaultdict(np.float32)
+        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        dtypes["fault_system"] = pd.CategoricalDtype()
+        return self._dataframe_from_csv(self._aggregate_rates, self.AGGREGATE_RATES_PATH, dtypes)
+
+    # @property
+    # def rates(self):
+    #     raise NotImplementedError("Use aggregate_rates instead")

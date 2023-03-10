@@ -1,10 +1,14 @@
 import json
 import time
 import zipfile
+from collections import defaultdict
 from pathlib import Path
+from functools import cached_property
+
 from typing import Any, List
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 
 from .typing import InversionSolutionProtocol
@@ -79,7 +83,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
             data_to_zip_direct(zip_archive, self._ruptures.to_csv(), self.RUPTS_PATH)
             data_to_zip_direct(zip_archive, self._indices.to_csv(), self.INDICES_PATH)
 
-    def to_archive(self, archive_path, base_archive_path, compat=True):
+    def to_archive(self, archive_path, base_archive_path, compat=False):
         """
         Writes the current solution to a new zip archive, cloning data from a base archive
         """
@@ -108,12 +112,16 @@ class InversionSolutionFile(InversionSolutionProtocol):
     def archive_path(self) -> Path:
         return self._archive_path
 
-    def _dataframe_from_csv(self, prop, path):
+    def _dataframe_from_csv(self, prop, path, dtype={}):
         if not isinstance(prop, pd.DataFrame):
-            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open())
+            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open(), dtype=dtype) # , index_col=0)
             # print('prop')
-            # print(prop)
-            prop = prop.convert_dtypes()
+            # print( "DTYPES:",  prop.dtypes)
+            # # print(prop)
+            # prop = prop.convert_dtypes()
+            # # print('prop')
+            # print( prop )
+            # print( "DTYPES:",  prop.dtypes)
         return prop
 
     @property
@@ -155,17 +163,27 @@ class InversionSolutionFile(InversionSolutionProtocol):
             self._fault_regime = get_regime()
         return self._fault_regime
 
-    @property
+    @cached_property
     def rates(self) -> gpd.GeoDataFrame:
-        return self._dataframe_from_csv(self._rates, self.RATES_PATH)
+        dtypes: defaultdict = defaultdict(np.float32)
+        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        dtypes["fault_system"] = pd.CategoricalDtype()
+
+        return pd.read_csv(zipfile.Path(self._archive_path, at=self.RATES_PATH).open(), dtype=dtypes)
+        # return self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
 
     @property
     def ruptures(self) -> gpd.GeoDataFrame:
-        return self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH)
+        dtypes: defaultdict = defaultdict(np.float32)
+        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        return self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH, dtypes)
 
     @property
     def indices(self) -> gpd.GeoDataFrame:
-        return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
+        dtypes: defaultdict = defaultdict(pd.UInt16Dtype)
+        dtypes["Rupture Index"] = 'uint32'  # pd.UInt32Dtype()
+        dtypes["Num Sections"] = 'uint16'  # pd.UInt16Dtype()
+        return self._dataframe_from_csv(self._indices, self.INDICES_PATH, dtypes)
 
     def set_props(
         self, rates: pd.DataFrame, ruptures: pd.DataFrame, indices: pd.DataFrame, fault_sections: pd.DataFrame

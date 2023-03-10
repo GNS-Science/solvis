@@ -5,7 +5,9 @@ from copy import deepcopy
 
 import geopandas as gpd
 import nzshm_model as nm
+import pandas as pd
 import pytest
+from pandas.api.types import infer_dtype
 
 import solvis
 from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
@@ -21,10 +23,11 @@ ARCHIVES = dict(
     PUY="PuysegurInversionSolution-QXV0b21hdGlvblRhc2s6MTExMDA1.zip",
 )
 
-FSR_COLUMNS_A = 27
-FSR_COLUMNS_B = 26  # HIK
+FSR_COLUMNS_A = 26
+FSR_COLUMNS_B = 25  # HIK
 
-RATE_COLUMNS_A = 7
+RATE_COLUMNS_A = 6
+COMPOSITE_RATE_COLUMNS = 6
 
 
 def get_solution(id: str, archive: str) -> InversionSolution:
@@ -71,6 +74,8 @@ def test_from_puy_branch_solutions():
 
 
 class TestThreeFaultSystems(object):
+
+    # @pytest.mark.skip('REVIEW')
     def test_composite_rates_shape(self):
         solutions = []
 
@@ -97,21 +102,44 @@ class TestThreeFaultSystems(object):
         # print()
 
         composite = FaultSystemSolution.from_branch_solutions(solutions)
+        # print( composite.aggregate_rates.info() )
+        # print( composite.aggregate_rates.head() )
+        # print( composite.aggregate_rates.tail() )
 
-        assert composite.rates.shape == (3101 + 15800 + 23675, RATE_COLUMNS_A)
-        assert composite.composite_rates.shape == (127728, 6)
+        # assert composite.rates.shape == (3101 + 15800 + 23675, RATE_COLUMNS_A)
+        assert composite.rates.shape == (4211, RATE_COLUMNS_A)
+        assert composite.composite_rates.shape == (3 * 4211, COMPOSITE_RATE_COLUMNS)
+        # assert composite.composite_rates.shape == (127728, COMPOSITE_RATE_COLUMNS)
 
 
 class TestCrustal(object):
     def test_rates_shape(self, crustal_fixture):
         rates = crustal_fixture.rates
-        assert rates.shape == (3101, RATE_COLUMNS_A)
+        assert rates.shape == (1006, RATE_COLUMNS_A)  # no 0 rates
+
+    def test_check_types(self, crustal_fixture):
+        sol = crustal_fixture
+        assert isinstance(sol, FaultSystemSolution)
+        assert sol.fault_regime == 'CRUSTAL'
+        # assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
+
+        print(sol.composite_rates.dtypes)
+        print(sol.rates.dtypes)
+        print(sol.indices.dtypes)
+        print(sol.ruptures.dtypes)
+
+        assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert infer_dtype(sol.rates["fault_system"]) == "string"
+        assert sol.rates["rate_weighted_mean"].dtype == 'float32'
+        assert sol.indices["Num Sections"].dtype == "uint16"  # pd.UInt16Dtype()
+        assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
+        # assert 0
 
 
 class TestPuysegur(object):
     def test_rates_shape(self, puysegur_fixture):
         rates = puysegur_fixture.rates
-        assert rates.shape == (15800, RATE_COLUMNS_A)
+        assert rates.shape == (2033, RATE_COLUMNS_A)  # no 0 rates
 
     def test_rupture_surface(self, puysegur_fixture):
         surface = puysegur_fixture.rupture_surface(42)
@@ -149,7 +177,7 @@ class TestHikurangi(object):
 
     def test_rates_shape(self, hikurangi_fixture):
         rates = hikurangi_fixture.rates
-        assert rates.shape == (23675, RATE_COLUMNS_A)
+        assert rates.shape == (1172, RATE_COLUMNS_A)  # no 0 rates
 
 
 class TestSerialisation(object):
@@ -169,6 +197,7 @@ class TestSerialisation(object):
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
         assert new_path.exists()
 
+    # @pytest.mark.skip('REVIEW read-write to compatible is not legit to compare rupture indices')
     def test_write_read_archive_compatible(self, crustal_fixture):
 
         folder = tempfile.TemporaryDirectory()
@@ -185,8 +214,9 @@ class TestSerialisation(object):
         print(crustal_fixture.rates)
         assert read_sol.rates.columns.all() == crustal_fixture.rates.columns.all()
         assert read_sol.rates.shape == crustal_fixture.rates.shape
-        assert read_sol.rates['Rupture Index'].all() == crustal_fixture.rates['Rupture Index'].all()
+        # assert read_sol.rates['Rupture Index'].all() == crustal_fixture.rates['Rupture Index'].all()
 
+    # @pytest.mark.skip('REVIEW read-write to compatible is not legit to compare rupture indices')
     def test_write_read_archive_compatible_composite_rates(self, crustal_fixture):
 
         folder = tempfile.TemporaryDirectory()
@@ -204,7 +234,7 @@ class TestSerialisation(object):
         print(read_sol.composite_rates)
         assert read_sol.composite_rates.columns.all() == crustal_fixture.composite_rates.columns.all()
         assert read_sol.composite_rates.shape == crustal_fixture.composite_rates.shape
-        assert read_sol.composite_rates['Rupture Index'].all() == crustal_fixture.composite_rates['Rupture Index'].all()
+        # assert read_sol.composite_rates['Rupture Index'].all() == crustal_fixture.composite_rates['Rupture Index'].all()
 
     def test_write_read_archive_incompatible(self, crustal_fixture):
 
@@ -221,7 +251,8 @@ class TestSerialisation(object):
         print(read_sol.rates)
         print(crustal_fixture.rates)
         assert read_sol.rates.columns.all() == crustal_fixture.rates.columns.all()
-        assert read_sol.rates.shape == crustal_fixture.rates.shape
+        # NO the composite solutions have diffent rate structure
+        # assert read_sol.rates.shape == crustal_fixture.rates.shape
         assert read_sol.rates['Rupture Index'].all() == crustal_fixture.rates['Rupture Index'].all()
 
     # def test_write_read_archive_filtered_incompatible(self, crustal_fixture):

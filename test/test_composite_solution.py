@@ -21,9 +21,9 @@ ARCHIVES = dict(
     PUY="PuysegurInversionSolution-QXV0b21hdGlvblRhc2s6MTExMDA1.zip",
 )
 
-FSR_COLUMNS_A = 27
-FSR_COLUMNS_B = 26  # HIK
-RATE_COLUMNS_A = 7
+FSR_COLUMNS_A = 26
+FSR_COLUMNS_B = 25  # HIK
+RATE_COLUMNS_A = 6
 
 
 def get_solution(id: str, archive: str) -> InversionSolution:
@@ -74,9 +74,14 @@ def composite_fixture():
 
 
 class TestThreeFaultSystems(object):
+
+    # @pytest.mark.skip('TODO_check_values')
     def test_composite_rates_shape(self, composite_fixture):
-        assert composite_fixture.rates.shape == (3101 + 15800 + 23675, RATE_COLUMNS_A)
-        assert composite_fixture.composite_rates.shape == (127728, 6)
+        assert composite_fixture.rates.shape == (
+            4211,
+            RATE_COLUMNS_A,
+        )  # 3101 + 15800 + 23675 was before removing 0 rated
+        assert composite_fixture.composite_rates.shape == (3 * 4211, RATE_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
     def test_rupture_surface(self, composite_fixture):
@@ -127,7 +132,7 @@ def test_composite_serialisation():
             # write the fss-archive file
             ref_solution = solutions[0].archive_path  # the file path to the reference solution
             new_path = pathlib.Path(folder.name, f'test_fault_system_{fault_system_lt.short_name}_archive.zip')
-            fss.to_archive(str(new_path), ref_solution, compat=True)
+            fss.to_archive(str(new_path), ref_solution, compat=False)
             assert new_path.exists()
             assert str(fss.archive_path) == str(new_path)
 

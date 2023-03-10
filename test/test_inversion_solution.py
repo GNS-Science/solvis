@@ -3,6 +3,8 @@
 import os
 import pathlib
 
+import numpy as np
+import pandas as pd
 import pytest
 from nzshm_common.location.location import location_by_id
 
@@ -30,6 +32,29 @@ def crustal_fixture(request):
 
 
 class TestInversionSolution(object):
+    def test_check_types(self, crustal_fixture):
+        sol = crustal_fixture
+        assert isinstance(sol, InversionSolution)
+        assert sol.fault_regime == 'CRUSTAL'
+        assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
+
+        # print(sol.rates.dtypes)
+        # print(sol.indices.dtypes)
+        # print(sol.ruptures.dtypes)
+        # print( sol.rates )
+        assert sol.rates.index == sol.rates["Rupture Index"]
+        assert sol.ruptures.index == sol.ruptures["Rupture Index"]
+        # print('IDX', sol.rates.index.name)
+        # assert sol.indices.index == sol.indices["Rupture Index"]
+
+        assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
+
+        # assert sol.rates["fault_system"].dtype == pd.CategoricalDtype()
+        assert sol.rates["Annual Rate"].dtype == np.float32
+        assert sol.indices["Num Sections"].dtype == "uint16"  # pd.UInt16Dtype()
+        assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
+        # assert 0
+
     def test_load_crustal_from_archive(self, crustal_fixture):
         sol = crustal_fixture
         assert isinstance(sol, InversionSolution)

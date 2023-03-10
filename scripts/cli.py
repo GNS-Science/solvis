@@ -140,7 +140,7 @@ def build_composite(work_folder, fault_system):
 
     # save the archive
     fname = pathlib.Path(work_folder, f"{fault_system}_fault_system_solution.zip")
-    composite.to_archive(str(fname), filemap[file_ids[0]]['filepath'], compat=True)
+    composite.to_archive(str(fname), filemap[file_ids[0]]['filepath']) #, compat=False)
 
 
 def build_composite_all(work_folder, archive_name):
@@ -199,7 +199,7 @@ def build_composite_all(work_folder, archive_name):
             # write the fss-archive file
             ref_solution = filemap[file_ids[0]]['filepath'] # the file path to the reference solution
             new_path = pathlib.Path(work_folder, f'{fault_system_lt.short_name}_fault_system_archive.zip')
-            fss.to_archive(str(new_path), ref_solution, compat=True)
+            fss.to_archive(str(new_path), ref_solution) #, compat=True)
             assert new_path.exists()
 
             composite.add_fault_system_solution(fault_system_lt.short_name, fss)
