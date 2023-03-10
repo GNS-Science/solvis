@@ -163,14 +163,13 @@ class InversionSolutionFile(InversionSolutionProtocol):
             self._fault_regime = get_regime()
         return self._fault_regime
 
-    @cached_property
+    @property
     def rates(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(np.float32)
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
-
-        return pd.read_csv(zipfile.Path(self._archive_path, at=self.RATES_PATH).open(), dtype=dtypes)
-        # return self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
+        # return pd.read_csv(zipfile.Path(self._archive_path, at=self.RATES_PATH).open(), dtype=dtypes)
+        return self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
 
     @property
     def ruptures(self) -> gpd.GeoDataFrame:
@@ -181,8 +180,8 @@ class InversionSolutionFile(InversionSolutionProtocol):
     @property
     def indices(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(pd.UInt16Dtype)
-        dtypes["Rupture Index"] = 'uint32'  # pd.UInt32Dtype()
-        dtypes["Num Sections"] = 'uint16'  # pd.UInt16Dtype()
+        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        dtypes["Num Sections"] = pd.UInt16Dtype()
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH, dtypes)
 
     def set_props(
