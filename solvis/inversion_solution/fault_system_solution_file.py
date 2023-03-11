@@ -61,14 +61,21 @@ class FaultSystemSolutionFile(InversionSolutionFile):
 
     @property
     def composite_rates(self) -> gpd.GeoDataFrame:
-        return self._dataframe_from_csv(self._composite_rates, self.COMPOSITE_RATES_PATH)
+        # dtypes: defaultdict = defaultdict(np.float32)
+        dtypes = {}
+
+        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        dtypes["fault_system"] = pd.CategoricalDtype()
+        df = self._dataframe_from_csv(self._composite_rates, self.COMPOSITE_RATES_PATH, dtypes)
+        return df.set_index(["solution_id", "Rupture Index"], drop=False)
 
     @property
     def rates(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(np.float32)
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
-        return self._dataframe_from_csv(self._aggregate_rates, self.AGGREGATE_RATES_PATH, dtypes)
+        df = self._dataframe_from_csv(self._aggregate_rates, self.AGGREGATE_RATES_PATH, dtypes)
+        return df.set_index(["fault_system", "Rupture Index"], drop=False)
 
     # @property
     # def rates(self):

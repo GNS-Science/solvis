@@ -13,6 +13,7 @@ from solvis import InversionSolution, circle_polygon
 CRU_ARCHIVE = "ModularAlpineVernonInversionSolution.zip"
 HIK_ARCHIVE = "AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
 PUY_ARCHIVE = "PuysegurInversionSolution-QXV0b21hdGlvblRhc2s6MTExMDA1.zip"
+# PUY_MINI_ARCHIVE = "PuysegurInversionSolutionMini.zip"
 
 folder = pathlib.PurePath(os.path.realpath(__file__)).parent
 
@@ -24,6 +25,12 @@ def puysegur_fixture(request):
     yield InversionSolution().from_archive(str(filename))
 
 
+# @pytest.fixture(scope='class')
+# def puysegur_mini_fixture(request):
+#     filename = pathlib.PurePath(folder, f"fixtures/{PUY_MINI_ARCHIVE}")
+#     yield InversionSolution().from_archive(str(filename))
+
+
 @pytest.fixture(scope='class')
 def crustal_fixture(request):
     print("setup crustal")
@@ -32,15 +39,14 @@ def crustal_fixture(request):
 
 
 class TestInversionSolution(object):
-
-
     def test_check_indexes(self, crustal_fixture):
         sol = crustal_fixture
         assert sol.rates.index == sol.rates["Rupture Index"]
         assert sol.ruptures.index == sol.ruptures["Rupture Index"]
         assert sol.indices.index == sol.indices["Rupture Index"]
-
         assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
 
     def test_check_types(self, crustal_fixture):
         sol = crustal_fixture
@@ -49,7 +55,7 @@ class TestInversionSolution(object):
         assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
 
         assert sol.rates["Annual Rate"].dtype == np.float32
-        assert sol.indices["Num Sections"].dtype == "uint16"  # pd.UInt16Dtype()
+        assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
         assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
         # assert 0
 

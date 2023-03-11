@@ -3,8 +3,6 @@ import time
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from functools import cached_property
-
 from typing import Any, List
 
 import geopandas as gpd
@@ -12,6 +10,8 @@ import numpy as np
 import pandas as pd
 
 from .typing import InversionSolutionProtocol
+
+# from functools import cached_property
 
 
 def data_to_zip_direct(z, data, name):
@@ -114,7 +114,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     def _dataframe_from_csv(self, prop, path, dtype={}):
         if not isinstance(prop, pd.DataFrame):
-            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open(), dtype=dtype) # , index_col=0)
+            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open(), dtype=dtype)  # , index_col=0)
             # print('prop')
             # print( "DTYPES:",  prop.dtypes)
             # # print(prop)

@@ -13,6 +13,7 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
     @staticmethod
     def from_archive(archive_path: Union[Path, str]) -> 'InversionSolution':
         new_solution = InversionSolution()
+        assert Path(archive_path).exists()
         assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
         new_solution._archive_path = Path(archive_path)
         return new_solution

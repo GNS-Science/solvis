@@ -56,6 +56,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         if self._fs_with_rates is not None:
             return self._fs_with_rates
         self._fs_with_rates = self.rs_with_rates.join(self.fault_sections, 'section', how='inner')
+        # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rates,
+        #     on=self.fault_sections["Rupture Index"] )
         return self._fs_with_rates
 
     @property
@@ -63,7 +65,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         if self._rs_with_rates is not None:
             return self._rs_with_rates  # pragma: no cover
         # df_rupt_rate = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
-        self._rs_with_rates = self.rupture_sections.join(self.ruptures_with_rates, 'rupture')
+        self._rs_with_rates = self.ruptures_with_rates.join(
+            self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rates["Rupture Index"]
+        )
         return self._rs_with_rates
 
     @property
@@ -72,7 +76,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             return self._ruptures_with_rates  # pragma: no cover
 
         # print(self.rates.drop(self.rates.iloc[:, :1], axis=1))
-        self._ruptures_with_rates = self.ruptures.join(self.rates.drop(columns=["Rupture Index"]))
+        self._ruptures_with_rates = self.rates.join(
+            self.ruptures.drop(columns="Rupture Index"), on=self.rates["Rupture Index"]
+        )
         return self._ruptures_with_rates
 
     # return the rupture ids for any ruptures intersecting the polygon
@@ -81,7 +87,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
         sr = self.rs_with_rates
         qdf = sr.join(q1, 'section', how='inner')
-        return qdf.rupture.unique()
+        return qdf["Rupture Index"].unique()
 
     def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
         # sr = sol.rs_with_rates
