@@ -46,6 +46,7 @@ twine = "^4.0.2"
 nzshm-common = "^0.4.0"
 matplotlib = "^3.6.3"
 tox = "^4.4.4"
+ipython = "^8.11.0"
 
 [tool.poetry.extras]
 test = [

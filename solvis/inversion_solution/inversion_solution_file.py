@@ -75,13 +75,13 @@ class InversionSolutionFile(InversionSolutionProtocol):
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
         # write out the `self` dataframes
         if reindex:
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(), self.RUPTS_PATH)
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(), self.INDICES_PATH)
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(index=False), self.RATES_PATH)
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(index=False), self.RUPTS_PATH)
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(index=False), self.INDICES_PATH)
         else:
             data_to_zip_direct(zip_archive, self._rates.to_csv(index=False), self.RATES_PATH)
-            data_to_zip_direct(zip_archive, self._ruptures.to_csv(), self.RUPTS_PATH)
-            data_to_zip_direct(zip_archive, self._indices.to_csv(), self.INDICES_PATH)
+            data_to_zip_direct(zip_archive, self._ruptures.to_csv(index=False), self.RUPTS_PATH)
+            data_to_zip_direct(zip_archive, self._indices.to_csv(index=False), self.INDICES_PATH)
 
     def to_archive(self, archive_path, base_archive_path, compat=False):
         """

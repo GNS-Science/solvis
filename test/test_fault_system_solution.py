@@ -242,7 +242,6 @@ class TestSerialisation(object):
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
         assert new_path.exists()
 
-    # @pytest.mark.skip('REVIEW read-write to compatible is not legit to compare rupture indices')
     def test_write_read_archive_compatible(self, crustal_fixture):
 
         folder = tempfile.TemporaryDirectory()
@@ -259,9 +258,7 @@ class TestSerialisation(object):
         print(crustal_fixture.rates)
         assert read_sol.rates.columns.all() == crustal_fixture.rates.columns.all()
         assert read_sol.rates.shape == crustal_fixture.rates.shape
-        # assert read_sol.rates['Rupture Index'].all() == crustal_fixture.rates['Rupture Index'].all()
 
-    # @pytest.mark.skip('REVIEW read-write to compatible is not legit to compare rupture indices')
     def test_write_read_archive_compatible_composite_rates(self, crustal_fixture):
 
         folder = tempfile.TemporaryDirectory()
@@ -295,7 +292,7 @@ class TestSerialisation(object):
         print(read_sol.rates)
         print(crustal_fixture.rates)
         assert read_sol.rates.columns.all() == crustal_fixture.rates.columns.all()
-        # NO the composite solutions have diffent rate structure
+        # NO the composite solutions have different rate structure
         # assert read_sol.rates.shape == crustal_fixture.rates.shape
         assert read_sol.rates['Rupture Index'].all() == crustal_fixture.rates['Rupture Index'].all()
 

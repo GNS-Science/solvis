@@ -44,20 +44,20 @@ class FaultSystemSolutionFile(InversionSolutionFile):
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
         if reindex:
             data_to_zip_direct(
-                zip_archive, reindex_dataframe(self._composite_rates).to_csv(), self.COMPOSITE_RATES_PATH
+                zip_archive, reindex_dataframe(self._composite_rates).to_csv(index=True), self.COMPOSITE_RATES_PATH
             )
             data_to_zip_direct(
-                zip_archive, reindex_dataframe(self._aggregate_rates).to_csv(), self.AGGREGATE_RATES_PATH
+                zip_archive, reindex_dataframe(self._aggregate_rates).to_csv(index=True), self.AGGREGATE_RATES_PATH
             )
             # data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(), self.RATES_PATH)
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(), self.RUPTS_PATH)
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(), self.INDICES_PATH)
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(index=False), self.RUPTS_PATH)
+            data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(index=False), self.INDICES_PATH)
         else:
-            data_to_zip_direct(zip_archive, self._composite_rates.to_csv(), self.COMPOSITE_RATES_PATH)
+            data_to_zip_direct(zip_archive, self._composite_rates.to_csv(index=False), self.COMPOSITE_RATES_PATH)
             # data_to_zip_direct(zip_archive, self._rates.to_csv(index=False), self.RATES_PATH)
             data_to_zip_direct(zip_archive, self._aggregate_rates.to_csv(index=False), self.AGGREGATE_RATES_PATH)
-            data_to_zip_direct(zip_archive, self._ruptures.to_csv(), self.RUPTS_PATH)
-            data_to_zip_direct(zip_archive, self._indices.to_csv(), self.INDICES_PATH)
+            data_to_zip_direct(zip_archive, self._ruptures.to_csv(index=False), self.RUPTS_PATH)
+            data_to_zip_direct(zip_archive, self._indices.to_csv(index=False), self.INDICES_PATH)
 
     @property
     def composite_rates(self) -> gpd.GeoDataFrame:
