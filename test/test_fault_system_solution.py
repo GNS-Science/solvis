@@ -17,13 +17,6 @@ current_model = nm.get_model_version(nm.CURRENT_VERSION)
 slt = current_model.source_logic_tree()
 fslt = slt.fault_system_branches[0]  # PUY is used always , just for the 3 solution_ids
 
-ARCHIVES = dict(
-    CRU="ModularAlpineVernonInversionSolution.zip",
-    HIK="AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip",
-    PUY="PuysegurInversionSolution-QXV0b21hdGlvblRhc2s6MTExMDA1.zip",
-    # PUY="PuysegurInversionSolutionMini.zip",
-)
-
 FSR_COLUMNS_A = 26
 FSR_COLUMNS_B = 25  # HIK
 
@@ -31,87 +24,11 @@ RATE_COLUMNS_A = 6
 COMPOSITE_RATE_COLUMNS = 6
 
 
-def get_solution(id: str, archive: str) -> InversionSolution:
-    files = dict(
-        U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTE4NTQ2=archive,
-        U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTE4NTQz=archive,
-        U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTE4NTQ1=archive,
-    )
-    folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-    filename = pathlib.PurePath(folder, f"fixtures/{files[id]}")
-    return InversionSolution().from_archive(str(filename))
-
-
-def branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID'):
-    for branch in fslt.branches:
-        yield BranchInversionSolution.new_branch_solution(
-            get_solution(branch.inversion_solution_id, archive), branch, fslt.short_name, rupt_set_id
-        )
-
-
-@pytest.fixture(scope='class')
-def hikurangi_fixture(request):
-    print("setup hikurangi")
-    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['HIK']))
-
-
-@pytest.fixture(scope='class')
-def puysegur_fixture(request):
-    print("setup puysegur")
-    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['PUY']))
-
-
-@pytest.fixture(scope='class')
-def crustal_fixture(request):
-    print("setup crustal")
-    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['CRU']))
-
-
-def test_from_puy_branch_solutions():
+def test_from_puy_branch_solutions(puy_branch_solutions):
     print(fslt.branches)
-    composite = FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['PUY']))
+    composite = FaultSystemSolution.from_branch_solutions(puy_branch_solutions)
     print(composite.fault_sections_with_rates)
     assert composite.fault_sections_with_rates.shape == (148394, FSR_COLUMNS_A)
-
-
-class TestThreeFaultSystems(object):
-
-    # @pytest.mark.skip('REVIEW')
-    def test_composite_rates_shape(self):
-        solutions = []
-
-        v1_0_0 = nm.get_model_version('NSHM_1.0.0')
-        slt = v1_0_0.source_logic_tree()
-        print(slt.fault_system_branches[0])
-
-        for idx in [1, 2]:
-            slt.fault_system_branches[idx].branches = deepcopy(slt.fault_system_branches[0].branches)
-
-        for fault_system_lt in slt.fault_system_branches:
-            if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
-                print('extending', fault_system_lt.short_name)
-                solutions.extend(
-                    branch_solutions(
-                        fault_system_lt,
-                        archive=ARCHIVES[fault_system_lt.short_name],
-                        rupt_set_id=f'rupset_{fault_system_lt.short_name}',
-                    )
-                )
-
-        # print('solutions', len(solutions))
-        # print(solutions)
-        # print()
-
-        composite = FaultSystemSolution.from_branch_solutions(solutions)
-        # print( composite.aggregate_rates.info() )
-        # print( composite.aggregate_rates.head() )
-        # print( composite.aggregate_rates.tail() )
-
-        # assert composite.rates.shape == (3101 + 15800 + 23675, RATE_COLUMNS_A)
-        assert composite.rates.shape == (4211, RATE_COLUMNS_A)
-        assert composite.composite_rates.shape == (3 * 4211, COMPOSITE_RATE_COLUMNS)
-        # assert composite.composite_rates.shape == (127728, COMPOSITE_RATE_COLUMNS)
-
 
 class TestCrustal(object):
     def test_rates_shape(self, crustal_fixture):
@@ -224,77 +141,6 @@ class TestHikurangi(object):
         rates = hikurangi_fixture.rates
         assert rates.shape == (1172, RATE_COLUMNS_A)  # no 0 rates
 
-
-class TestSerialisation(object):
-    def test_write_to_archive_compatible(self, crustal_fixture):
-
-        folder = tempfile.TemporaryDirectory()
-        # folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        new_path = pathlib.Path(folder.name, 'test_compatible_archive.zip')
-
-        # ref_solution = next(branch_solutions(fslt, archive=ARCHIVES['CRU']))
-
-        fixture_folder = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures"
-        ref_solution = pathlib.PurePath(fixture_folder, ARCHIVES['CRU'])
-
-        # assert not new_path.exists()
-        # write the file
-        crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
-        assert new_path.exists()
-
-    def test_write_read_archive_compatible(self, crustal_fixture):
-
-        folder = tempfile.TemporaryDirectory()
-        # folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        new_path = pathlib.Path(folder.name, 'test_compatible_archive.zip')
-
-        fixture_folder = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures"
-        ref_solution = pathlib.PurePath(fixture_folder, ARCHIVES['CRU'])
-
-        crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
-        read_sol = solvis.FaultSystemSolution.from_archive(new_path)
-
-        print(read_sol.rates)
-        print(crustal_fixture.rates)
-        assert read_sol.rates.columns.all() == crustal_fixture.rates.columns.all()
-        assert read_sol.rates.shape == crustal_fixture.rates.shape
-
-    def test_write_read_archive_compatible_composite_rates(self, crustal_fixture):
-
-        folder = tempfile.TemporaryDirectory()
-        # folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        new_path = pathlib.Path(folder.name, 'test_compatible_archive.zip')
-
-        fixture_folder = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures"
-        ref_solution = pathlib.PurePath(fixture_folder, ARCHIVES['CRU'])
-
-        crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
-        read_sol = solvis.FaultSystemSolution.from_archive(new_path)
-
-        print(read_sol.composite_rates.info())
-        print(read_sol.composite_rates.columns)
-        print(read_sol.composite_rates)
-        assert read_sol.composite_rates.columns.all() == crustal_fixture.composite_rates.columns.all()
-        assert read_sol.composite_rates.shape == crustal_fixture.composite_rates.shape
-
-    def test_write_read_archive_incompatible(self, crustal_fixture):
-
-        folder = tempfile.TemporaryDirectory()
-        # folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-        new_path = pathlib.Path(folder.name, 'test_incompatible_archive.zip')
-
-        fixture_folder = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures"
-        ref_solution = pathlib.PurePath(fixture_folder, ARCHIVES['CRU'])
-
-        crustal_fixture.to_archive(str(new_path), ref_solution, compat=False)
-        read_sol = solvis.FaultSystemSolution.from_archive(new_path)
-
-        print(read_sol.rates)
-        print(crustal_fixture.rates)
-        assert read_sol.rates.columns.all() == crustal_fixture.rates.columns.all()
-        # NO the composite solutions have different rate structure
-        # assert read_sol.rates.shape == crustal_fixture.rates.shape
-        assert read_sol.rates['Rupture Index'].all() == crustal_fixture.rates['Rupture Index'].all()
 
     # def test_write_read_archive_filtered_incompatible(self, crustal_fixture):
 
