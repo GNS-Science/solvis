@@ -2,16 +2,16 @@
 
 import os
 import pathlib
+import tempfile
 import unittest
 import zipfile
-import tempfile
-import solvis
-import pytest
 
 import pandas as pd
 
-class TestRates(unittest.TestCase):
+import solvis
 
+
+class TestRates(unittest.TestCase):
     def test_read_rates_csv(self):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
@@ -36,6 +36,7 @@ class TestRates(unittest.TestCase):
         rr = rates_df2
         out1 = rr[rr['Annual Rate'] > rate].index
         assert out0.all() == out1.all()
+
 
 class TestSerialisation(object):
     def test_write_to_archive_compatible(self, crustal_fixture, archives):

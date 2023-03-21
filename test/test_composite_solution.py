@@ -1,7 +1,7 @@
-import os
 import pathlib
 import tempfile
 from copy import deepcopy
+from test.conftest import branch_solutions
 
 import geopandas as gpd
 import nzshm_model as nm
@@ -9,9 +9,7 @@ import pytest
 
 # import solvis
 from solvis import CompositeSolution, FaultSystemSolution
-from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
 
-from test.conftest import branch_solutions
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
 slt = current_model.source_logic_tree()
 fslt = slt.fault_system_branches[0]  # PUY is used always , just for the 3 solution_ids
@@ -21,6 +19,8 @@ FSR_COLUMNS_A = 26
 FSR_COLUMNS_B = 25  # HIK
 RATE_COLUMNS_A = 6
 
+
+@pytest.mark.slow
 class TestThreeFaultSystems(object):
 
     # @pytest.mark.skip('TODO_check_values')
@@ -52,7 +52,38 @@ class TestThreeFaultSystems(object):
         assert surfaces.shape == (809, 15)
 
 
-def test_composite_serialisation(archives):
+class TestThreeSmallFaultSystems(object):
+
+    # @pytest.mark.skip('TODO_check_values')
+    def test_composite_rates_shape(self, small_composite_fixture):
+        assert small_composite_fixture.rates.shape == (
+            7 + 3 + 5,  # PUY, HIK, CRU
+            RATE_COLUMNS_A,
+        )  # 3101 + 15800 + 23675 was before removing 0 rated
+        assert small_composite_fixture.composite_rates.shape == (3 * (7 + 3 + 5), RATE_COLUMNS_A)
+
+    @pytest.mark.TODO_check_values
+    def test_rupture_surface(self, small_composite_fixture):
+        surface = small_composite_fixture.rupture_surface('PUY', 3)
+        print(surface)
+        assert surface.shape == (5, FSR_COLUMNS_A)
+
+    @pytest.mark.TODO_check_values
+    def test_fault_sections_with_rates_shape(self, small_composite_fixture):
+        assert small_composite_fixture.fault_sections_with_rates.shape == (148, FSR_COLUMNS_A)
+
+    @pytest.mark.TODO_check_values
+    def test_fault_surfaces(self, small_composite_fixture):
+        surfaces = small_composite_fixture.fault_surfaces()
+        print(surfaces.info())
+        print()
+        print(surfaces.tail())
+
+        assert isinstance(surfaces, gpd.GeoDataFrame)
+        assert surfaces.shape == (809, 15)
+
+
+def test_composite_serialisation(small_archives):
     folder = tempfile.TemporaryDirectory()
     # folder = pathlib.PurePath(os.path.realpath(__file__)).parent
 
@@ -70,7 +101,7 @@ def test_composite_serialisation(archives):
             solutions = list(
                 branch_solutions(
                     fault_system_lt,
-                    archive=archives[fault_system_lt.short_name],
+                    archive=small_archives[fault_system_lt.short_name],
                     rupt_set_id=f'rupset_{fault_system_lt.short_name}',
                 )
             )
@@ -135,4 +166,3 @@ def test_composite_serialisation(archives):
 #         assert composite.rates.shape == (4211, RATE_COLUMNS_A)
 #         assert composite.composite_rates.shape == (3 * 4211, COMPOSITE_RATE_COLUMNS)
 #         # assert composite.composite_rates.shape == (127728, COMPOSITE_RATE_COLUMNS)
-
