@@ -1,3 +1,4 @@
+import io
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, Union
@@ -73,7 +74,10 @@ class CompositeSolution(CompositeSolutionOperations):
     def to_archive(self, archive_path: Union[Path, str]):
         with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zout:
             for key, fss in self._solutions.items():
-                zout.write(fss.archive_path, arcname=f"{key}_fault_system_solution.zip")
+                if fss.archive_path is None:
+                    raise RuntimeError("archive_path is not defined")
+                else:
+                    zout.write(fss.archive_path, arcname=f"{key}_fault_system_solution.zip")
         self._archive_path = archive_path
 
     @staticmethod
@@ -81,15 +85,24 @@ class CompositeSolution(CompositeSolutionOperations):
         new_solution = CompositeSolution(source_logic_tree)
 
         # print("NEW_SOL", new_solution, new_solution._solutions, new_solution.archive_path)
+        # zout = zipfile.ZipFile(archive_path)
+        # zout.extractall(archive_path.parent)
 
-        zout = zipfile.ZipFile(archive_path)
-        zout.extractall(archive_path.parent)
-
-        for fault_system_lt in source_logic_tree.fault_system_branches:
+        for fault_system_lt in source_logic_tree.fault_system_lts:
             if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
+
+                assert zipfile.Path(archive_path, at=f'{fault_system_lt.short_name}_fault_system_solution.zip').exists()
+
                 # print(f"fault_system_lt.short_name: {fault_system_lt.short_name }")
                 fss = FaultSystemSolution.from_archive(
-                    Path(archive_path.parent, f"{fault_system_lt.short_name}_fault_system_solution.zip")
+                    zipfile.ZipFile(
+                        io.BytesIO(
+                            zipfile.Path(
+                                archive_path, at=f'{fault_system_lt.short_name}_fault_system_solution.zip'
+                            ).read_bytes()
+                        )
+                    )
+                    # Path(archive_path.parent, f"{fault_system_lt.short_name}_fault_system_solution.zip")
                 )
                 new_solution.add_fault_system_solution(fault_system_lt.short_name, fss)
 

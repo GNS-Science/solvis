@@ -11,11 +11,16 @@ from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
 
 class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
     @staticmethod
-    def from_archive(archive_path: Union[Path, str]) -> 'InversionSolution':
+    def from_archive(instance_or_path: Union[Path, str, zipfile.ZipFile]) -> 'InversionSolution':
         new_solution = InversionSolution()
-        assert Path(archive_path).exists()
-        assert zipfile.Path(archive_path, at='ruptures/indices.csv').exists()
-        new_solution._archive_path = Path(archive_path)
+
+        if isinstance(instance_or_path, zipfile.ZipFile):
+            assert 'ruptures/indices.csv' in instance_or_path.namelist()
+            new_solution._archive = instance_or_path
+        else:
+            assert Path(instance_or_path).exists()
+            assert zipfile.Path(instance_or_path, at='ruptures/indices.csv').exists()
+            new_solution._archive_path = Path(instance_or_path)
         return new_solution
 
     @staticmethod

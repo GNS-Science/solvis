@@ -47,7 +47,7 @@ slt.source_logic_tree()
 slt.source_logic_tree
 slt
 slt
-for b in slt.fault_system_branches:
+for b in slt.fault_system_lts:
     if b.short_name=="HIK":
         print(b)
 from solvis import InversionSolution

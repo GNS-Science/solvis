@@ -3,7 +3,7 @@ import time
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -69,7 +69,8 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._fault_regime: str = ''
         self._fault_sections = None
         self._rupture_sections = None
-        self._archive_path: Path
+        self._archive_path: Optional[Path] = None
+        self._archive: Optional[zipfile.ZipFile] = None
         # self._surface_builder: SolutionSurfacesBuilder
 
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
@@ -109,19 +110,22 @@ class InversionSolutionFile(InversionSolutionProtocol):
         data_to_zip_direct(zout, WARNING, "WARNING.md")
 
     @property
-    def archive_path(self) -> Path:
+    def archive_path(self) -> Optional[Path]:
         return self._archive_path
+
+    @property
+    def archive(self) -> zipfile.ZipFile:
+        if self._archive is None:
+            if self._archive_path is None:
+                raise RuntimeError("archive_path ARGG")
+            else:
+                self._archive = zipfile.ZipFile(self._archive_path)
+
+        return self._archive
 
     def _dataframe_from_csv(self, prop, path, dtype={}):
         if not isinstance(prop, pd.DataFrame):
-            prop = pd.read_csv(zipfile.Path(self._archive_path, at=path).open(), dtype=dtype)  # , index_col=0)
-            # print('prop')
-            # print( "DTYPES:",  prop.dtypes)
-            # # print(prop)
-            # prop = prop.convert_dtypes()
-            # # print('prop')
-            # print( prop )
-            # print( "DTYPES:",  prop.dtypes)
+            prop = pd.read_csv(self.archive.open(path), dtype=dtype)
         return prop
 
     @property
@@ -131,7 +135,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         :return: list of value objects
         """
         if not self._logic_tree_branch:
-            ltb = json.load(zipfile.Path(self._archive_path, at=self.LOGIC_TREE_PATH).open())
+            ltb = json.load(self.archive.open(self.LOGIC_TREE_PATH))
             if type(ltb) == list:
                 self._logic_tree_branch = ltb
             elif type(ltb.get('values')) == list:

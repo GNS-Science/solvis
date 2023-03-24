@@ -107,7 +107,7 @@ def build_composite(work_folder, fault_system):
     current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
     slt = current_model.source_logic_tree()
     branch = None
-    for fslt in slt.fault_system_branches:
+    for fslt in slt.fault_system_lts:
         if fslt.short_name == fault_system:
             branch = fslt
             break
@@ -143,8 +143,8 @@ def build_composite(work_folder, fault_system):
     composite.to_archive(str(fname), filemap[file_ids[0]]['filepath']) #, compat=False)
 
 
-def build_composite_all(work_folder, archive_name):
-    current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
+def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CURRENT_VERSION):
+    current_model = nzshm_model.get_model_version(model_version)
     slt = current_model.source_logic_tree()
 
     def branch_solutions(fslt, filemap):
@@ -160,7 +160,7 @@ def build_composite_all(work_folder, archive_name):
     tic = time.perf_counter()
 
     """
-    for fault_system_lt in slt.fault_system_branches:
+    for fault_system_lt in slt.fault_system_lts:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
             solutions = list(
                 branch_solutions(
@@ -185,9 +185,9 @@ def build_composite_all(work_folder, archive_name):
     composite.to_archive(new_path)
     """
 
-    for fault_system_lt in slt.fault_system_branches:
+    for fault_system_lt in slt.fault_system_lts:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
-            file_ids = [b.inversion_solution_id for b in fault_system_lt.branches]
+            file_ids = [b.  for b in fault_system_lt.branches]
             filemap = fetch_toshi_files(work_folder, file_ids)
 
             # prepare BranchSolutions
@@ -221,6 +221,7 @@ def build_composite_all(work_folder, archive_name):
 @click.group()
 @click.option('--fault_system', '-fs', default='PUY', type=click.Choice(['PUY', 'HIK', 'CRU', 'ALL']))
 @click.option('--work_folder', '-w', default=lambda: os.getcwd())
+
 @click.pass_context
 def cli(ctx, work_folder, fault_system):
     """FaultSystemSolution tasks - build, analyse."""
@@ -235,12 +236,13 @@ def cli(ctx, work_folder, fault_system):
 
 @cli.command()
 @click.option('--archive_name', '-a', default="CompositeSolution.zip")
+@click.option('--model_id', '-m', default="NSHM_1.0.4")
 @click.pass_context
-def build(ctx, archive_name):
+def build(ctx, archive_name, model_id):
     if ctx.obj['fault_system'] == 'ALL':
-        solution = build_composite_all(ctx.obj['work_folder'], archive_name)
+        solution = build_composite_all(ctx.obj['work_folder'], archive_name, model_id )
     else:
-        solution = build_composite(ctx.obj['work_folder'] , ctx.obj['fault_system'] )
+        solution = build_composite(ctx.obj['work_folder'] , ctx.obj['fault_system'])
 
 @cli.command()
 @click.pass_context

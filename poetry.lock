@@ -328,7 +328,7 @@ name = "dacite"
 version = "1.8.0"
 description = "Simple creation of data classes from dictionaries."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.extras]
@@ -518,7 +518,7 @@ name = "imageio"
 version = "2.26.0"
 description = "Library for reading and writing a wide range of image, video, scientific, and volumetric data formats."
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7"
 
 [package.dependencies]
@@ -873,15 +873,24 @@ name = "nzshm-model"
 version = "0.1.1"
 description = "The logic tree definitions, final configurations, and versioning of the New Zealand | Aotearoa National Seismic Hazard Model"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.8,<4.0"
+develop = false
 
 [package.dependencies]
-dacite = ">=1.6.0,<2.0.0"
+dacite = "^1.6.0"
 
 [package.extras]
+dev = []
 scripts = ["click[scripts] (>=8.1.3,<9.0.0)"]
+test = []
 toshi = ["boto3[toshi] (>=1.26.28,<2.0.0)", "nshm-toshi-client[toshi] (>=1.0.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/GNS-Science/nzshm-model"
+reference = "HEAD"
+resolved_reference = "bae4b9629a8be21f55df4524f1cb460dbf934a3e"
 
 [[package]]
 name = "packaging"
@@ -1002,7 +1011,7 @@ name = "pooch"
 version = "1.7.0"
 description = "\"Pooch manages your Python library's sample data files: it automatically downloads and stores them in a local directory, with support for versioning and corruption checks.\""
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7"
 
 [package.dependencies]
@@ -1201,7 +1210,7 @@ name = "pyvista"
 version = "0.37.0"
 description = "Easier Pythonic interface to VTK"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7.*"
 
 [package.dependencies]
@@ -1317,7 +1326,7 @@ name = "scooby"
 version = "0.7.1"
 description = "A Great Dane turned Python environment detective"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.7.*"
 
 [package.extras]
@@ -1527,7 +1536,7 @@ name = "vtk"
 version = "9.2.6"
 description = "VTK is an open-source toolkit for 3D computer graphics, image processing, and visualization"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 
 [package.dependencies]
@@ -1579,13 +1588,13 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 
 [extras]
 dev = []
-scripts = ["click", "nzshm-model", "nshm-toshi-client", "boto3"]
+scripts = ["click", "nshm-toshi-client", "boto3"]
 test = []
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4.0"
-content-hash = "795ae96ea335350a156f2c5fc616094509c5e7d941c89b5245174b33e4797f2b"
+content-hash = "48e3159948e729c02bbcb84b0eb4de3df8524d02c18a1f651eb8a8df39499366"
 
 [metadata.files]
 aiohttp = [
@@ -2532,10 +2541,7 @@ nzshm-common = [
     {file = "nzshm-common-0.4.0.tar.gz", hash = "sha256:f0f7d303548c70be0f12c7894b75fcf59a7019f068e9ab71f9c950b9ec63740b"},
     {file = "nzshm_common-0.4.0-py3-none-any.whl", hash = "sha256:78572dde972362ee3b0c3b5e2633950cf9befcc7ada03a382ad5084e5c148ef1"},
 ]
-nzshm-model = [
-    {file = "nzshm_model-0.1.1-py3-none-any.whl", hash = "sha256:66b93af81f32c4cc7fc0e448a719c449a03993ef1f03d3c8c98b41f45719aa1b"},
-    {file = "nzshm_model-0.1.1.tar.gz", hash = "sha256:7ef436b9cc7f20430bbb85f41c84697f237af23f195dc50329b72200375e7c82"},
-]
+nzshm-model = []
 packaging = [
     {file = "packaging-23.0-py3-none-any.whl", hash = "sha256:714ac14496c3e68c99c29b00845f7a2b85f3bb6f1078fd9f72fd20f0570002b2"},
     {file = "packaging-23.0.tar.gz", hash = "sha256:b6ad297f8907de0fa2fe1ccbd26fdaf387f5f47c7275fedf8cce89f99446cf97"},

@@ -1,5 +1,6 @@
+import zipfile
 from pathlib import Path
-from typing import Any, List, Mapping, Protocol, Union
+from typing import Any, List, Mapping, Optional, Protocol, Union
 
 import geopandas as gpd
 import numpy.typing as npt
@@ -16,7 +17,8 @@ class InversionSolutionProtocol(Protocol):
     _rs_with_rates: pd.DataFrame = ...
     _fault_sections: pd.DataFrame = ...
     _ruptures_with_rates: pd.DataFrame = ...
-    _archive_path: Path
+    _archive_path: Optional[Path]
+    _archive: Optional[zipfile.ZipFile]
 
     FAULTS_PATH: Union[Path, str] = ''
 
@@ -59,8 +61,12 @@ class InversionSolutionProtocol(Protocol):
         """the event rate for each rupture section."""
 
     @property
-    def archive_path(self) -> Path:
+    def archive_path(self) -> Optional[Path]:
         """the path to the archive file"""
+
+    @property
+    def archive(self) -> Optional[zipfile.ZipFile]:
+        """the archive instance"""
 
 
 class CompositeSolutionProtocol(Protocol):

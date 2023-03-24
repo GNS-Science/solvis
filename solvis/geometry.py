@@ -4,7 +4,6 @@ from functools import partial
 from typing import Union
 
 import numpy as np
-
 from pyproj import Transformer
 from shapely import get_coordinates
 from shapely.geometry import LineString, Point, Polygon
