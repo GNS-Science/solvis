@@ -16,7 +16,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     def _geodataframe_from_geojson(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
-            prop = gpd.read_file(zipfile.Path(self._archive_path, at=path).open())
+            prop = gpd.read_file(self.archive.open(path))
         return prop
 
     @property
