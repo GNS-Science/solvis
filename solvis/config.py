@@ -2,12 +2,9 @@
 """
 configuration for the system
 """
-
 import enum
 import os
 from pathlib import PurePath
-
-# from runzi.util.aws import get_secret
 
 
 class EnvMode(enum.IntEnum):

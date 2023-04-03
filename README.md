@@ -28,15 +28,15 @@ of the solution and rupture set characteristics. Features:
  - [x] user can create new region polygons
  - [ ] user can compare selections (e.g. Wellington East vs Wellington CBD vs Hutt Valley) 
  - for a given query result show me dimensions...
-    - mag, length, area, rate, section count, parent fault count, jump-length, jump angles, slip (various), partication, nucleation 
+    - mag, length, area, rate, section count, parent fault count, ~jump-length, jump angles~, slip (various), partication, nucleation 
     - filter, group on any of the dimensions
 
 
 ## From here the user can answer questions like ....
 
  - create a MFD histogram in 0.01 bins from 7.0 to 7.30 (3O bins) for the WHV fault system
- - list all ruptures between 7.75 and 8.25, involving the TVZ, ordered by rupture-length
- - given a user-defined-function udfRuptureComplexity(rupture) rank ruptures in Region X by complexity, then by magnitude
+ - list all ruptures between 7.75 and 8.25, ordered by rupture-length
+ - given a user-defined-function udf RuptureComplexity(rupture) rank ruptures in Region X by complexity, then by magnitude
 
   - regional MFD
       - [x] participation (sum of rate) for every rupture though a point

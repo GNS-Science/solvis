@@ -4,12 +4,17 @@ from functools import partial
 from typing import Union
 
 import numpy as np
-import pyvista as pv
 from pyproj import Transformer
 from shapely import get_coordinates
 from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
+
+try:
+    import pyvista as pv
+except ImportError:
+    print("WARNING: geometry.section_distance() uses the optional dependency pyvista.")
+
 
 EARTH_RADIUS_MEAN = 6371.0072
 
@@ -211,7 +216,7 @@ def section_distance(transformer, surface_geometry, upper_depth, lower_depth):
     elif isinstance(surface_geometry, LineString):
         trace = transformer.transform(*surface_geometry.coords.xy)
     else:
-        raise ValueError(f'unable to handle geometry: {surface_geometry}')
+        raise ValueError(f'unable to handle geometry: {surface_geometry}')  # pragma: no cover
 
     # print(f'trace offsets: {trace} (in metres relative to datum)')
     origin = pv.PolyData([0.0, 0.0, 0.0])  # , force_float=False)
