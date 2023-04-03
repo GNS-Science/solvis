@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.0] - 2022-04
+## Added
+ - FaultSystemSolution.filter_solution method
+## Changed
+ - removed solvis helps new_sol and filter_solution, these must be used as the respective class methods
+
 ## [0.5.0] - 2022-03
 ## Added
  - CompositeSolution with aggregate rates;
