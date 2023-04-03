@@ -68,9 +68,10 @@ scripts = [
     "nshm-toshi-client",
     "boto3"
 ]
-
+vtk = [
+    "pyvista"
+]
 dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml", "bump2version"]
-
 
 
 [tool.black]
