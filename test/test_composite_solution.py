@@ -86,7 +86,7 @@ class TestThreeSmallFaultSystems(object):
 
 def test_composite_serialisation(small_archives):
     folder = tempfile.TemporaryDirectory()
-    folder = pathlib.Path(pathlib.PurePath(os.path.realpath(__file__)).parent.parent, "SCRATCH")
+    # folder = pathlib.Path(pathlib.PurePath(os.path.realpath(__file__)).parent.parent, "SCRATCH")
 
     v1_0_0 = nm.get_model_version('NSHM_1.0.0')
     slt = v1_0_0.source_logic_tree()
