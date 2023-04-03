@@ -889,8 +889,8 @@ toshi = ["boto3[toshi] (>=1.26.28,<2.0.0)", "nshm-toshi-client[toshi] (>=1.0.0)"
 [package.source]
 type = "git"
 url = "https://github.com/GNS-Science/nzshm-model"
-reference = "HEAD"
-resolved_reference = "bae4b9629a8be21f55df4524f1cb460dbf934a3e"
+reference = "03f7f5f2f7bdca559515e3a28fd843de9b47120d"
+resolved_reference = "03f7f5f2f7bdca559515e3a28fd843de9b47120d"
 
 [[package]]
 name = "packaging"
@@ -1588,13 +1588,13 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 
 [extras]
 dev = []
-scripts = ["click", "nshm-toshi-client", "boto3"]
+scripts = ["click", "nzshm-model", "nshm-toshi-client", "boto3"]
 test = []
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4.0"
-content-hash = "48e3159948e729c02bbcb84b0eb4de3df8524d02c18a1f651eb8a8df39499366"
+content-hash = "0c3f591f6afcd36f1effee487bd3a164f954f38711d4721c77f07b1f5ed59c3d"
 
 [metadata.files]
 aiohttp = [

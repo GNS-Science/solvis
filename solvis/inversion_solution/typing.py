@@ -53,8 +53,9 @@ class InversionSolutionProtocol(Protocol):
         """builder method returning the rupture surface of a given rupture id."""
 
     @staticmethod
-    def filter_solution(solution: 'InversionSolutionProtocol', rupture_ids: npt.ArrayLike) -> Any:
+    def filter_solution(solution: Any, rupture_ids: npt.ArrayLike) -> Any:
         """return a new solution containing just the ruptures specified"""
+        raise NotImplementedError()
 
     @property
     def rs_with_rates(self) -> gpd.GeoDataFrame:

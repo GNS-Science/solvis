@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Iterable, Union
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 from .fault_system_solution_file import FaultSystemSolutionFile
@@ -39,6 +40,25 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             assert zipfile.Path(instance_or_path, at='ruptures/indices.csv').exists()
             new_solution._archive_path = Path(instance_or_path)
         return new_solution
+
+    @staticmethod
+    def filter_solution(solution: 'FaultSystemSolution', rupture_ids: npt.ArrayLike) -> 'FaultSystemSolution':
+        rr = solution.ruptures
+        cr = solution.composite_rates
+        ar = solution.aggregate_rates
+        ri = solution.indices
+        ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
+        composite_rates = cr[cr["Rupture Index"].isin(rupture_ids)].copy()
+        aggregate_rates = ar[ar["Rupture Index"].isin(rupture_ids)].copy()
+        indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
+
+        # all other solution properties are derived from those above
+        ns = FaultSystemSolution()
+        ns.set_props(
+            composite_rates, aggregate_rates, ruptures, indices, solution.fault_sections.copy(), solution.fault_regime
+        )
+        ns._archive_path = solution._archive_path
+        return ns
 
     @staticmethod
     def new_solution(solution: BranchSolutionProtocol, composite_rates_df: pd.DataFrame) -> 'FaultSystemSolution':
@@ -93,10 +113,10 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             }
         )
 
-        print()
-        print('AGG 1', aggregate_rates_df.shape)
-        print(aggregate_rates_df)
-        print(aggregate_rates_df.info())
+        # print()
+        # print('AGG 1', aggregate_rates_df.shape)
+        # print(aggregate_rates_df)
+        # print(aggregate_rates_df.info())
 
         composite_rates_df = composite_rates_df.drop(columns="weighted_rate")
         # # debugggg
@@ -133,7 +153,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             )  # , pd.Series(branch_solution.fault_system, dtype='category'))
             composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
 
-            print('dims', composite_rates_df.shape, solution_df.shape)
+            # print('dims', composite_rates_df.shape, solution_df.shape)
 
         # composite_rates_df.solution_id = composite_rates_df.solution_id.astype('category')
         # composite_rates_df.fault_system = composite_rates_df.fault_system.astype('category')

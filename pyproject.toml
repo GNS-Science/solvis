@@ -19,6 +19,10 @@ packages = [
 	{include = "solvis"},
     {include = "test", format = "sdist" }
 ]
+
+[tool.poetry.scripts]
+cli = 'scripts.cli:cli'
+
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
 pandas = "^1.3.4"
@@ -31,7 +35,7 @@ pyproj = "^3.3"
 pyvista = {version = "^0.37.0", optional = true}
 nshm-toshi-client = {version = "^1.0.0", optional = true}
 boto3 = {version = "^1.26.82", optional = true}
-nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model"}
+nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model", rev="03f7f5f2f7bdca559515e3a28fd843de9b47120d"}
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}

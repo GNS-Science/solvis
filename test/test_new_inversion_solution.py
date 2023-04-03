@@ -45,21 +45,11 @@ class TestNewInversionSolutionSubduction(unittest.TestCase):
         self.assertLess(len(ruptures_med), len(ruptures_small))
         self.assertLess(len(ruptures_big), len(ruptures_med))
 
-    # @unittest.skip('WIP')
-    def test_new_sol_filtered_ruptures(self):
-
-        sol = TestNewInversionSolutionSubduction.original_solution
-        ruptures_big = solvis.rupt_ids_above_rate(sol, 1e-6)
-
-        new_sol = solvis.new_sol(sol, ruptures_big)
-        self.assertEqual(ruptures_big.shape[0], new_sol.ruptures.shape[0])
-
     def test_filter_solution_ruptures(self):
-
         sol = TestNewInversionSolutionSubduction.original_solution
         ruptures_big = solvis.rupt_ids_above_rate(sol, 1e-6)
 
-        new_sol = solvis.filter_solution(sol, ruptures_big)
+        new_sol = solvis.InversionSolution.filter_solution(sol, ruptures_big)
         self.assertEqual(ruptures_big.shape[0], new_sol.ruptures.shape[0])
 
 
@@ -71,7 +61,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
 
         global temp_dir
         cls.temp_dir = temp_dir
-        cls.original_solution = solvis.InversionSolution().from_archive(str(cls.original_archive))
+        cls.original_solution = solvis.InversionSolution.from_archive(str(cls.original_archive))
 
     def test_rupt_ids_above_rate(self):
 
@@ -91,7 +81,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         sol = TestNewInversionSolutionCrustal.original_solution
 
         ruptures = solvis.rupt_ids_above_rate(sol, 1e-5)
-        new_sol = solvis.new_sol(sol, ruptures)
+        new_sol = solvis.InversionSolution.filter_solution(sol, ruptures)
 
         self.assertEqual(new_sol.ruptures.shape[0], len(ruptures))
         self.assertEqual(new_sol.ruptures['Rupture Index'].to_list(), ruptures)
@@ -108,7 +98,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         sol = TestNewInversionSolutionCrustal.original_solution
 
         ruptures = solvis.rupt_ids_above_rate(sol, 1e-6)
-        new_sol = solvis.new_sol(sol, ruptures)
+        new_sol = solvis.InversionSolution.filter_solution(sol, ruptures)
 
         folder = str(TestNewInversionSolutionCrustal.temp_dir.name)
         new_path = pathlib.Path(folder, 'test_non_compatible_archive.zip')
@@ -128,7 +118,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         sol = TestNewInversionSolutionCrustal.original_solution
 
         ruptures = solvis.rupt_ids_above_rate(sol, 1e-6)
-        new_sol = solvis.new_sol(sol, ruptures)
+        new_sol = solvis.InversionSolution.filter_solution(sol, ruptures)
 
         folder = str(TestNewInversionSolutionCrustal.temp_dir.name)
         new_path = pathlib.Path(folder, 'test_compatible_archive.zip')

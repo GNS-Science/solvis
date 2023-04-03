@@ -23,7 +23,7 @@ class CompositeSolution(CompositeSolutionOperations):
         # print('__init__', self._solutions)
 
     def add_fault_system_solution(self, fault_system: str, fault_system_solution: FaultSystemSolution):
-        print(">>> add_fault_system_solution", self, fault_system)
+        # print(">>> add_fault_system_solution", self, fault_system)
         if fault_system in self._solutions.keys():
             raise ValueError(f"fault system with key: {fault_system} exists already. {self._solutions.keys()}")
         self._solutions[fault_system] = fault_system_solution

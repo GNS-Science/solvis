@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from pandas.api.types import infer_dtype
 
+import solvis
 from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
@@ -24,43 +25,6 @@ def test_from_puy_branch_solutions(puy_branch_solutions):
     assert composite.fault_sections_with_rates.shape == (148394, FSR_COLUMNS_A)
 
 
-# @pytest.mark.slow
-# class TestCrustal(object):
-#     def test_rates_shape(self, crustal_fixture):
-#         rates = crustal_fixture.rates
-#         assert rates.shape == (1006, RATE_COLUMNS_A)  # no 0 rates
-
-#     def test_check_indexes(self, crustal_fixture):
-#         sol = crustal_fixture
-#         assert sol.ruptures.index == sol.ruptures["Rupture Index"]
-#         assert sol.indices.index == sol.indices["Rupture Index"]
-
-#         # here we want a multi index
-#         # print( sol.rates.index.names )
-#         # assert sol.rates.index.names == ['fault_system', 'Rupture Index']
-
-#         print(sol.composite_rates.index.names)
-#         assert sol.composite_rates.index.names == ['solution_id', 'Rupture Index']
-
-#         assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
-#         assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
-#         assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
-
-#     def test_check_types(self, crustal_fixture):
-#         sol = crustal_fixture
-#         assert isinstance(sol, FaultSystemSolution)
-#         assert sol.fault_regime == 'CRUSTAL'
-#         # assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
-
-#         assert infer_dtype(sol.rates["fault_system"]) == "string"
-#         assert sol.rates["rate_weighted_mean"].dtype == 'float32'
-#         assert infer_dtype(sol.indices["Num Sections"]) == "integer"
-#         assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
-#         assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
-#         # assert 0
-
-
-@pytest.mark.slow
 class TestSmallCrustal(object):
     def test_rates_shape(self, crustal_small_fss_fixture):
         rates = crustal_small_fss_fixture.rates
@@ -88,6 +52,12 @@ class TestSmallCrustal(object):
         assert infer_dtype(sol.indices["Num Sections"]) == "integer"
         assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
         assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
+
+    def test_filter_solution_ruptures(self, crustal_small_fss_fixture):
+        sol = crustal_small_fss_fixture
+        ruptures = solvis.rupt_ids_above_rate(sol, 1e-7, rate_column="rate_weighted_mean")
+        new_sol = solvis.FaultSystemSolution.filter_solution(sol, ruptures)
+        assert ruptures.shape[0] == new_sol.ruptures.shape[0]
 
 
 # @pytest.mark.slow

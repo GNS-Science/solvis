@@ -187,7 +187,7 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
 
     for fault_system_lt in slt.fault_system_lts:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
-            file_ids = [b.  for b in fault_system_lt.branches]
+            file_ids = [b.inversion_solution_id for b in fault_system_lt.branches]
             filemap = fetch_toshi_files(work_folder, file_ids)
 
             # prepare BranchSolutions

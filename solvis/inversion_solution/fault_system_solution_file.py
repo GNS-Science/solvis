@@ -71,6 +71,10 @@ class FaultSystemSolutionFile(InversionSolutionFile):
 
     @property
     def rates(self) -> gpd.GeoDataFrame:
+        return self.aggregate_rates
+
+    @property
+    def aggregate_rates(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(np.float32)
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
