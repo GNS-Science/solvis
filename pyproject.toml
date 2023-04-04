@@ -35,7 +35,7 @@ pyproj = "^3.3"
 pyvista = {version = "^0.37.0", optional = true, extras = ["vtk"]}
 nshm-toshi-client = {version = "^1.0.0", optional = true}
 boto3 = {version = "^1.26.82", optional = true}
-nzshm-model = {git = "https://github.com/GNS-Science/nzshm-model", rev="03f7f5f2f7bdca559515e3a28fd843de9b47120d"}
+nzshm-model = {version = "^0.2.0"}
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
