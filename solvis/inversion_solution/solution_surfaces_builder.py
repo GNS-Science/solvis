@@ -1,3 +1,6 @@
+import logging
+import time
+
 import geopandas as gpd
 from shapely import get_coordinates
 from shapely.geometry import LineString, Point
@@ -5,6 +8,8 @@ from shapely.geometry import LineString, Point
 from solvis.geometry import create_surface, dip_direction
 
 from .typing import InversionSolutionProtocol
+
+log = logging.getLogger(__name__)
 
 
 def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -39,7 +44,11 @@ class SolutionSurfacesBuilder:
         :param refine_dip_dir: option to override the dip_directon supplied, only applies to CRUSTAL
         :return: a gpd.GeoDataFrame
         """
+        tic = time.perf_counter()
         new_geometry_df = self._solution.fault_sections.copy()
+        toc = time.perf_counter()
+        log.debug('time to load fault_sections: %2.3f seconds' % (toc - tic))
+
         if self._solution.fault_regime == 'SUBDUCTION':
             return new_geometry_df.set_geometry(
                 [create_subduction_section_surface(section) for i, section in new_geometry_df.iterrows()]
@@ -56,7 +65,10 @@ class SolutionSurfacesBuilder:
         :param rupture_id: ID of the rupture
         :return: a gpd.GeoDataFrame
         """
+        tic = time.perf_counter()
         df0 = self._solution.fault_sections_with_rates.copy()
+        toc = time.perf_counter()
+        log.debug('time to load fault_sections_with_rates: %2.3f seconds' % (toc - tic))
         rupt = df0[df0["Rupture Index"] == rupture_id]
         if self._solution.fault_regime == 'SUBDUCTION':
             return rupt.set_geometry([create_subduction_section_surface(section) for i, section in rupt.iterrows()])

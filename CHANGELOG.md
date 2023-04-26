@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0] - 2022-04-26
+## Changed
+ - fault_system_solution now uses fast_indices.csv instead of indices.csv
+ - remove dtype arg to from_csv to improve load performance
+
+## Changed
+ - updated nzshm_model
+ - added perf test to CLI
+
 ## [0.6.0] - 2022-04
 ## Added
  - FaultSystemSolution.filter_solution method
