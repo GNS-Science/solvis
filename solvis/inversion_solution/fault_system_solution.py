@@ -1,7 +1,9 @@
+import logging
 import zipfile
 from pathlib import Path
 from typing import Iterable, Union
 
+import geopandas as gpd
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -9,6 +11,8 @@ import pandas as pd
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .typing import BranchSolutionProtocol
+
+log = logging.getLogger(__name__)
 
 
 class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
@@ -32,13 +36,18 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
     def from_archive(instance_or_path: Union[Path, str, zipfile.ZipFile]) -> 'FaultSystemSolution':
         new_solution = FaultSystemSolution()
 
+        # TODO: sort out this weirdness
         if isinstance(instance_or_path, zipfile.ZipFile):
-            assert 'ruptures/indices.csv' in instance_or_path.namelist()
+            assert 'ruptures/fast_indices.csv' in instance_or_path.namelist()
+            assert 'composite_rates.csv' in instance_or_path.namelist()
+            assert 'aggregate_rates.csv' in instance_or_path.namelist()
             new_solution._archive = instance_or_path
         else:
-            assert Path(instance_or_path).exists()
-            assert zipfile.Path(instance_or_path, at='ruptures/indices.csv').exists()
+            assert zipfile.Path(instance_or_path, at='ruptures/fast_indices.csv').exists()
+            assert zipfile.Path(instance_or_path, at='composite_rates.csv').exists()
+            assert zipfile.Path(instance_or_path, at='aggregate_rates.csv').exists()
             new_solution._archive_path = Path(instance_or_path)
+            log.debug("from_archive %s " % instance_or_path)
         return new_solution
 
     @staticmethod
@@ -158,3 +167,25 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         # composite_rates_df.solution_id = composite_rates_df.solution_id.astype('category')
         # composite_rates_df.fault_system = composite_rates_df.fault_system.astype('category')
         return FaultSystemSolution.new_solution(solution=branch_solution, composite_rates_df=composite_rates_df)
+
+    @property
+    def rupture_sections(self) -> gpd.GeoDataFrame:
+        """FSS overrides InversionSolutionOperations so we can use fast_indices"""
+
+        if self._fast_indices is None:
+            try:
+                self._fast_indices = self.fast_indices
+                log.debug("loaded fast indices")
+            except Exception:
+                log.info("rupture_sections() building fast indices")
+                self._fast_indices = self.build_rupture_sections()
+
+        if self._rupture_sections is None:
+            self._rupture_sections = self._fast_indices
+
+        return self._rupture_sections
+
+    def enable_fast_indices(self) -> bool:
+        """make sure that the fast_indices dataframe is available at serialisation time"""
+        rs = self.rupture_sections  # noqa
+        return self._fast_indices is not None

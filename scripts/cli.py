@@ -39,19 +39,23 @@ REGION = os.getenv('REGION', 'ap-southeast-2')  # SYDNEY
 # from toshi_hazard_post.hazard_aggregation.aws_aggregation import distribute_aggregation, push_test_message
 
 log = logging.getLogger()
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('nshm_toshi_client.toshi_client_base').setLevel(logging.INFO)
 logging.getLogger('urllib3').setLevel(logging.INFO)
 logging.getLogger('botocore').setLevel(logging.INFO)
 #logging.getLogger('pynamodb').setLevel(logging.DEBUG)
 logging.getLogger('fiona').setLevel(logging.INFO)
-# logging.getLogger('toshi_hazard_store').setLevel(logging.DEBUG)
 logging.getLogger('gql.transport.requests').setLevel(logging.WARN)
+logging.getLogger('solvis').setLevel(logging.DEBUG)
 
 formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 screen_handler = logging.StreamHandler(stream=sys.stdout)
 screen_handler.setFormatter(formatter)
 log.addHandler(screen_handler)
+
+log.debug('DEBUG message')
+log.info('INFO message')
+
 
 class SourceSolution(ToshiFile):
 
@@ -103,7 +107,7 @@ def fetch_toshi_files(work_folder, file_ids ):
         api.download_file(fid, work_folder)
     return file_map
 
-def build_composite(work_folder, fault_system):
+def build_fault_system_solution(work_folder, fault_system):
     current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
     slt = current_model.source_logic_tree()
     branch = None
@@ -131,16 +135,18 @@ def build_composite(work_folder, fault_system):
             )
 
     #build time ....
-    click.echo(f"build composite solution...")
+    click.echo(f"build fault_system_solution ...")
     tic = time.perf_counter()
-    composite = FaultSystemSolution.from_branch_solutions(solutions)
+    fault_system_solution = FaultSystemSolution.from_branch_solutions(solutions)
     toc = time.perf_counter()
-    click.echo(f'time to build composite solution {toc-tic} seconds')
-    # print( composite.rates)
+    click.echo(f'time to build fault_system_solution: {toc-tic} seconds')
+
+    # ensure fast indices
+    fault_system_solution.enable_fast_indices()
 
     # save the archive
     fname = pathlib.Path(work_folder, f"{fault_system}_fault_system_solution.zip")
-    composite.to_archive(str(fname), filemap[file_ids[0]]['filepath']) #, compat=False)
+    fault_system_solution.to_archive(str(fname), filemap[file_ids[0]]['filepath']) #, compat=False)
 
 
 def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CURRENT_VERSION):
@@ -159,32 +165,6 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
     composite = CompositeSolution(slt)  # create the new composite solutoin
     tic = time.perf_counter()
 
-    """
-    for fault_system_lt in slt.fault_system_lts:
-        if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
-            solutions = list(
-                branch_solutions(
-                    fault_system_lt,
-                    archive=ARCHIVES[fault_system_lt.short_name],
-                    rupt_set_id=f'rupset_{fault_system_lt.short_name}',
-                )
-            )
-
-            fss = FaultSystemSolution.from_branch_solutions(solutions)
-            composite.add_fault_system_solution(fault_system_lt.short_name, fss)
-
-            # write the fss-archive file
-
-            ref_solution = solutions[0].archive_path  # the file path to the reference solution
-            new_path = pathlib.Path(folder.name, f'test_fault_system_{fault_system_lt.short_name}_archive.zip')
-            fss.to_archive(str(new_path), ref_solution, compat=True)
-            assert new_path.exists()
-            assert str(fss.archive_path) == str(new_path)
-
-    new_path = pathlib.Path(folder.name, 'test_composite_archive.zip')
-    composite.to_archive(new_path)
-    """
-
     for fault_system_lt in slt.fault_system_lts:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
             file_ids = [b.inversion_solution_id for b in fault_system_lt.branches]
@@ -195,6 +175,9 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
             fss = FaultSystemSolution.from_branch_solutions(
                     branch_solutions(fault_system_lt, filemap)
                 )
+
+            # ensure fast indices
+            fss.enable_fast_indices()
 
             # write the fss-archive file
             ref_solution = filemap[file_ids[0]]['filepath'] # the file path to the reference solution
@@ -236,15 +219,44 @@ def cli(ctx, work_folder, fault_system):
 
 @cli.command()
 @click.option('--archive_name', '-a', default="CompositeSolution.zip")
-@click.option('--model_id', '-m', default="NSHM_1.0.4")
+@click.option('--model_id', '-m', default="NSHM_v1.0.4")
 @click.pass_context
 def build(ctx, archive_name, model_id):
     if ctx.obj['fault_system'] == 'ALL':
         solution = build_composite_all(ctx.obj['work_folder'], archive_name, model_id )
     else:
-        solution = build_composite(ctx.obj['work_folder'] , ctx.obj['fault_system'])
+        solution = build_fault_system_solution(ctx.obj['work_folder'] , ctx.obj['fault_system'])
 
 @cli.command()
+@click.option('--archive_name', '-a', default="NSHM_v1.0.4_CompositeSolution.zip")
+@click.option('--model_id', '-m', default="NSHM_v1.0.4")
+@click.pass_context
+def perf(ctx, archive_name, model_id):
+    # click.echo(ctx.obj['work_folder'] , ctx.obj['fault_system'] )
+
+    tic = time.perf_counter()
+    # Load archive with SLT
+    work_folder, fault_system = ctx.obj['work_folder'], ctx.obj['fault_system']
+    current_model = nzshm_model.get_model_version(model_id)
+    slt = current_model.source_logic_tree()
+
+    comp = CompositeSolution.from_archive(pathlib.Path(work_folder, archive_name), slt)
+    toc = time.perf_counter()
+    click.echo(f'time to load archive: {toc-tic:2.3f} seconds')
+    print (comp)
+
+    tic = toc
+    # LOC = location_by_id('WLG')
+    rupture_surface_gdf = comp._solutions[ctx.obj['fault_system']].rupture_surface(2)
+    toc = time.perf_counter()
+    click.echo(f'time to load 1st rupture_surface_gdf: {toc-tic:2.3f} seconds')
+    tic = toc
+
+    rupture_surface_gdf = comp._solutions[ctx.obj['fault_system']].rupture_surface(4)
+    toc = time.perf_counter()
+    click.echo(f'time to load 2nd rupture_surface_gdf: {toc-tic:2.3f} seconds')
+    tic = toc
+
 @click.pass_context
 def query(ctx):
     # click.echo(ctx.obj['work_folder'] , ctx.obj['fault_system'] )

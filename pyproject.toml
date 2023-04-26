@@ -33,9 +33,9 @@ geopandas = "^0.12.2"
 pytz = "2021.3"
 pyproj = "^3.3"
 pyvista = {version = "^0.37.0", optional = true, extras = ["vtk"]}
-nshm-toshi-client = {version = "^1.0.0", optional = true}
-boto3 = {version = "^1.26.82", optional = true}
-nzshm-model = {version = "^0.2.0"}
+nshm-toshi-client = {version = "^1.0.0", optional = true, extras = ["scripts"]}
+boto3 = {version = "^1.26.82", optional = true, extras = ["scripts"]}
+nzshm-model = {version = "^0.3.0", optional = true, extras = ["scripts"]}
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
@@ -63,7 +63,6 @@ test = [
     "pytest-cov"
     ]
 scripts = [
-    "click",
     "nzshm-model",
     "nshm-toshi-client",
     "boto3"
