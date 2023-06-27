@@ -28,7 +28,6 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
         toc = time.perf_counter()
         log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
-
         return fault_sections
 
     @property

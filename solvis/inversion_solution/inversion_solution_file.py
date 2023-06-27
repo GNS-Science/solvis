@@ -160,7 +160,8 @@ class InversionSolutionFile(InversionSolutionProtocol):
                 log.debug('archive time to open zipfile %s %2.3f seconds' % (self._archive_path, toc - tic))
         return self._archive
 
-    def _dataframe_from_csv(self, prop, path, dtype={}):
+    def _dataframe_from_csv(self, prop, path, dtype=None):
+        log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))
         if not isinstance(prop, pd.DataFrame):
             tic = time.perf_counter()
             data = self.archive.open(path)

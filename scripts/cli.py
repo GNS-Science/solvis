@@ -29,7 +29,7 @@ try:
 except AttributeError as err:
     print(f"unable to get secret from secretmanager: {err}")
     API_KEY = os.getenv('NZSHM22_TOSHI_API_KEY', "")
-S3_URL=None
+S3_URL = None
 DEPLOYMENT_STAGE = os.getenv('DEPLOYMENT_STAGE', 'LOCAL').upper()
 REGION = os.getenv('REGION', 'ap-southeast-2')  # SYDNEY
 
@@ -39,11 +39,11 @@ REGION = os.getenv('REGION', 'ap-southeast-2')  # SYDNEY
 # from toshi_hazard_post.hazard_aggregation.aws_aggregation import distribute_aggregation, push_test_message
 
 log = logging.getLogger()
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('nshm_toshi_client.toshi_client_base').setLevel(logging.INFO)
 logging.getLogger('urllib3').setLevel(logging.INFO)
 logging.getLogger('botocore').setLevel(logging.INFO)
-#logging.getLogger('pynamodb').setLevel(logging.DEBUG)
+# logging.getLogger('pynamodb').setLevel(logging.DEBUG)
 logging.getLogger('fiona').setLevel(logging.INFO)
 logging.getLogger('gql.transport.requests').setLevel(logging.WARN)
 logging.getLogger('solvis').setLevel(logging.DEBUG)
@@ -58,7 +58,6 @@ log.info('INFO message')
 
 
 class SourceSolution(ToshiFile):
-
     def get_source(self, fid):
 
         qry = '''
@@ -84,16 +83,17 @@ class SourceSolution(ToshiFile):
         executed = self.run_query(qry, input_variables)
         return executed['node']
 
+
 def rupt_set_from_meta(meta):
     for itm in meta:
         if itm['k'] == "rupture_set_file_id":
             return itm['v']
 
 
-def fetch_toshi_files(work_folder, file_ids ):
+def fetch_toshi_files(work_folder, file_ids):
     headers = {"x-api-key": API_KEY}
     api = SourceSolution(API_URL, S3_URL, None, with_schema_validation=False, headers=headers)
-    file_map={}
+    file_map = {}
     for fid in file_ids:
         click.echo(f'fetching {fid}')
         file_detail = api.get_source(fid)
@@ -106,6 +106,7 @@ def fetch_toshi_files(work_folder, file_ids ):
             continue
         api.download_file(fid, work_folder)
     return file_map
+
 
 def build_fault_system_solution(work_folder, fault_system):
     current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
@@ -129,12 +130,13 @@ def build_fault_system_solution(work_folder, fault_system):
         solutions.append(
             BranchInversionSolution.new_branch_solution(
                 InversionSolution.from_archive(filemap[fslt_branch.inversion_solution_id]['filepath']),
-                branch = fslt_branch,
-                fault_system = branch.short_name,
-                rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id'])
+                branch=fslt_branch,
+                fault_system=branch.short_name,
+                rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id'],
             )
+        )
 
-    #build time ....
+    # build time ....
     click.echo(f"build fault_system_solution ...")
     tic = time.perf_counter()
     fault_system_solution = FaultSystemSolution.from_branch_solutions(solutions)
@@ -146,7 +148,7 @@ def build_fault_system_solution(work_folder, fault_system):
 
     # save the archive
     fname = pathlib.Path(work_folder, f"{fault_system}_fault_system_solution.zip")
-    fault_system_solution.to_archive(str(fname), filemap[file_ids[0]]['filepath']) #, compat=False)
+    fault_system_solution.to_archive(str(fname), filemap[file_ids[0]]['filepath'])  # , compat=False)
 
 
 def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CURRENT_VERSION):
@@ -157,9 +159,9 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
         for fslt_branch in fslt.branches:
             yield BranchInversionSolution.new_branch_solution(
                 InversionSolution.from_archive(filemap[fslt_branch.inversion_solution_id]['filepath']),
-                branch = fslt_branch,
-                fault_system = fslt.short_name,
-                rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id']
+                branch=fslt_branch,
+                fault_system=fslt.short_name,
+                rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id'],
             )
 
     composite = CompositeSolution(slt)  # create the new composite solutoin
@@ -172,17 +174,15 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
 
             # prepare BranchSolutions
             click.echo(f"load branch solutions... {fault_system_lt.short_name}")
-            fss = FaultSystemSolution.from_branch_solutions(
-                    branch_solutions(fault_system_lt, filemap)
-                )
+            fss = FaultSystemSolution.from_branch_solutions(branch_solutions(fault_system_lt, filemap))
 
             # ensure fast indices
             fss.enable_fast_indices()
 
             # write the fss-archive file
-            ref_solution = filemap[file_ids[0]]['filepath'] # the file path to the reference solution
+            ref_solution = filemap[file_ids[0]]['filepath']  # the file path to the reference solution
             new_path = pathlib.Path(work_folder, f'{fault_system_lt.short_name}_fault_system_archive.zip')
-            fss.to_archive(str(new_path), ref_solution) #, compat=True)
+            fss.to_archive(str(new_path), ref_solution)  # , compat=True)
             assert new_path.exists()
 
             composite.add_fault_system_solution(fault_system_lt.short_name, fss)
@@ -195,6 +195,7 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
     # print()
     # print(composite.rupture_surface("HIK", 1))
 
+
 #  _ __ ___   __ _(_)_ __
 # | '_ ` _ \ / _` | | '_ \
 # | | | | | | (_| | | | | |
@@ -204,7 +205,6 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
 @click.group()
 @click.option('--fault_system', '-fs', default='PUY', type=click.Choice(['PUY', 'HIK', 'CRU', 'ALL']))
 @click.option('--work_folder', '-w', default=lambda: os.getcwd())
-
 @click.pass_context
 def cli(ctx, work_folder, fault_system):
     """FaultSystemSolution tasks - build, analyse."""
@@ -223,11 +223,12 @@ def cli(ctx, work_folder, fault_system):
 @click.pass_context
 def build(ctx, archive_name, model_id):
     if ctx.obj['fault_system'] == 'ALL':
-        solution = build_composite_all(ctx.obj['work_folder'], archive_name, model_id )
+        solution = build_composite_all(ctx.obj['work_folder'], archive_name, model_id)
     else:
-        solution = build_fault_system_solution(ctx.obj['work_folder'] , ctx.obj['fault_system'])
+        solution = build_fault_system_solution(ctx.obj['work_folder'], ctx.obj['fault_system'])
 
-@cli.command()
+
+@cli.command('ls')
 @click.option('--archive_name', '-a', default="NSHM_v1.0.4_CompositeSolution.zip")
 @click.option('--model_id', '-m', default="NSHM_v1.0.4")
 @click.pass_context
@@ -243,7 +244,7 @@ def perf(ctx, archive_name, model_id):
     comp = CompositeSolution.from_archive(pathlib.Path(work_folder, archive_name), slt)
     toc = time.perf_counter()
     click.echo(f'time to load archive: {toc-tic:2.3f} seconds')
-    print (comp)
+    print(comp)
 
     tic = toc
     # LOC = location_by_id('WLG')
@@ -256,6 +257,7 @@ def perf(ctx, archive_name, model_id):
     toc = time.perf_counter()
     click.echo(f'time to load 2nd rupture_surface_gdf: {toc-tic:2.3f} seconds')
     tic = toc
+
 
 @click.pass_context
 def query(ctx):
@@ -279,7 +281,7 @@ def query(ctx):
     rate = 1e-5
     rate_filtered = rr[rr['rate_max'] > rate]["Rupture Index"].unique()
 
-    combo = list(set( rate_filtered).intersection(set(loc_filtered)))
+    combo = list(set(rate_filtered).intersection(set(loc_filtered)))
     print(combo)
     print(len(combo))
 
@@ -288,6 +290,7 @@ def query(ctx):
 
     toc = time.perf_counter()
     click.echo(f'time to get ruptures: {toc-tic} seconds')
+
 
 if __name__ == "__main__":
     cli()  # pragma: no cover
