@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.1] - 2023-07-18
+## Changed
+ - patch version bump for GHA changes
+
 ## [0.8.0] - 2023-06-28
 ## Added
  - new solivs method parent_fault_names
@@ -43,7 +47,6 @@
  - module package refactoring
 
 ## [0.3.1] - 2022-12-22
-
 ## Changed
  - refactored project structure for packaging
  - changelog format for bump2version

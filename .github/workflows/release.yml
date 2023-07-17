@@ -37,7 +37,7 @@ jobs:
 
       - name: Get Changelog Entry
         id: changelog_reader
-        uses: GNS-Science/changelog-reader-action@main
+        uses: GNS-Science/changelog-reader-action
         with:
           validation_depth: 10
           version: ${{ steps.tag_name.outputs.current_version }}
@@ -76,7 +76,7 @@ jobs:
 
       - name: create github release
         id: create_release
-        uses: GNS-Science/action-gh-release@main
+        uses: GNS-Science/action-gh-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
