@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ matrix.python-versions }}
 
       - name: Install and configure Poetry
-        uses: snok/install-poetry@v1
+        uses: GNS-Science/install-poetry@main
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
-          poetry install --no-interaction --no-root --with dev --with vtk --all-extras
+          poetry install --no-interaction --no-root --with dev --all-extras
           poetry add tox-gh-actions
 
       - name: test with tox (uses tox-gh-actions to select correct environment)

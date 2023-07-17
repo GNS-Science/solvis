@@ -1,4 +1,3 @@
-
 # from nzshm_common.location.location import location_by_id
 from solvis import geometry, CompositeSolution, FaultSystemSolution, export_geojson
 from pathlib import Path
@@ -15,7 +14,6 @@ mag_775 = hik.ruptures[hik.ruptures['Magnitude'] < 7.75]['Rupture Index'].unique
 poly15 = geometry.circle_polygon(radius_m=15_000, lon=POR['lon'], lat=POR['lat'])
 por15 = hik.get_ruptures_intersecting(poly15)
 combo = list(set(por15).intersection(set(mag_775)))
-
 
 
 """

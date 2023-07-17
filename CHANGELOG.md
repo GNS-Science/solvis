@@ -1,6 +1,11 @@
 # Changelog
 
-## [0.7.0] - 2022-04-26
+## [0.8.0] - 2023-06-28
+## Added
+ - new solivs method parent_fault_names
+ - utility script for MFD calculaton checks
+
+## [0.7.0] - 2023-04-26
 ## Changed
  - fault_system_solution now uses fast_indices.csv instead of indices.csv
  - remove dtype arg to from_csv to improve load performance
@@ -9,13 +14,13 @@
  - updated nzshm_model
  - added perf test to CLI
 
-## [0.6.0] - 2022-04
+## [0.6.0] - 2023-04
 ## Added
  - FaultSystemSolution.filter_solution method
 ## Changed
  - removed solvis helps new_sol and filter_solution, these must be used as the respective class methods
 
-## [0.5.0] - 2022-03
+## [0.5.0] - 2023-03
 ## Added
  - CompositeSolution with aggregate rates;
  - to_archive() with compatible mode 
@@ -24,7 +29,7 @@
  - InversionSolution is now composed from three modules.
  - typing improvements
 
-## [0.4.0] - 2022-02-21
+## [0.4.0] - 2023-02-21
 ## Added
  - geometric surface projections from fault sections
  - 3D distance calculation for both crustal and subduction subduction faults systems

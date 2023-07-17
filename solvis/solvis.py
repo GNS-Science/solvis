@@ -2,7 +2,7 @@
 
 # from functools import partial
 from pathlib import Path
-from typing import Union
+from typing import Callable, Iterable, List, Union
 
 import geopandas as gpd
 import numpy as np
@@ -11,11 +11,19 @@ import pandas as pd
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 
+def parent_fault_names(
+    sol: InversionSolutionProtocol, sort: Union[None, Callable[[Iterable], List]] = sorted
+) -> List[str]:
+    if sort:
+        return sort(sol.fault_sections.ParentName.unique())
+    return list(sol.fault_sections.ParentName.unique())
+
+
 # filtered_rupture_sections (with geometry)
 def section_participation(sol: InversionSolutionProtocol, df_ruptures: pd.DataFrame = None):
     sr = sol.rs_with_rates
     if df_ruptures is not None:
-        filtered_sections_with_rates_df = sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate'] > 0)]
+        filtered_sections_with_rates_df = sr[(sr["Rupture Index"].isin(list(df_ruptures))) & (sr['Annual Rate'] > 0)]
     else:
         filtered_sections_with_rates_df = sr
 
