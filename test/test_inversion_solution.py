@@ -2,6 +2,7 @@
 
 import os
 import pathlib
+from pytest import approx
 
 import numpy as np
 import pandas as pd
@@ -71,6 +72,13 @@ class TestInversionSolution(object):
         assert df0 is not df1
         assert len(df0) is not len(df1)
         assert len(df0.intersection(df1)) > 0
+
+    def test_slip_rate_soln(self, crustal_solution_fixture):
+        sol = crustal_solution_fixture
+
+        assert (sol.average_slips.index == sol.average_slips["Rupture Index"]).all()
+        assert len(sol.fault_sections_with_solution_rates) == len(sol.fault_sections)
+        assert sol.fault_sections_with_solution_rates.loc[0,"Solution Slip Rate"] == approx(0.02632348565225584, abs=1e-10, rel=1e-6)
 
 
 class TestSmallPuyInversionSolution(object):

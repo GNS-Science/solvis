@@ -76,6 +76,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
     RATES_PATH = 'solution/rates.csv'
     RUPTS_PATH = 'ruptures/properties.csv'
     INDICES_PATH = 'ruptures/indices.csv'
+    AVG_SLIPS_PATH  = 'ruptures/average_slips.csv'
     FAULTS_PATH = 'ruptures/fault_sections.geojson'
     METADATA_PATH = 'metadata.json'
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'
@@ -92,7 +93,9 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._fast_indices = None
         self._rs_with_rates = None
         self._fs_with_rates = None
+        self._fs_with_soln_rates = None
         self._ruptures_with_rates = None
+        self._average_slips = None
         self._logic_tree_branch: List[Any] = []
         self._fault_regime: str = ''
         self._fault_sections = None
@@ -232,6 +235,12 @@ class InversionSolutionFile(InversionSolutionProtocol):
         # dtypes["Rupture Index"] = pd.UInt32Dtype()
         # dtypes["Num Sections"] = pd.UInt16Dtype()
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)  # no dtype is faster!!
+
+    @property
+    def average_slips(self) -> gpd.GeoDataFrame:
+        dtypes: defaultdict = defaultdict(np.float32)
+        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        return self._dataframe_from_csv(self._average_slips, self.AVG_SLIPS_PATH, dtypes)
 
     def set_props(
         self, rates: pd.DataFrame, ruptures: pd.DataFrame, indices: pd.DataFrame, fault_sections: pd.DataFrame
