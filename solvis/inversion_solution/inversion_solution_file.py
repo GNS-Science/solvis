@@ -76,7 +76,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
     RATES_PATH = 'solution/rates.csv'
     RUPTS_PATH = 'ruptures/properties.csv'
     INDICES_PATH = 'ruptures/indices.csv'
-    AVG_SLIPS_PATH  = 'ruptures/average_slips.csv'
+    AVG_SLIPS_PATH = 'ruptures/average_slips.csv'
     FAULTS_PATH = 'ruptures/fault_sections.geojson'
     METADATA_PATH = 'metadata.json'
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'

@@ -1,6 +1,5 @@
 import logging
 import time
-
 from typing import List
 
 import geopandas as gpd
@@ -93,7 +92,6 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         fault_names.sort()
         return fault_names
 
-
     @property
     def fault_sections_with_solution_rates(self) -> gpd.GeoDataFrame:
         """
@@ -107,10 +105,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         tic = time.perf_counter()
         self._fs_with_soln_rates = self._get_soln_rates()
         toc = time.perf_counter()
-        log.debug(
-            'fault_sections_with_soilution_rates: time to calculate solution rates: %2.3f seconds'
-            % (toc - tic)
-        )
+        log.debug('fault_sections_with_soilution_rates: time to calculate solution rates: %2.3f seconds' % (toc - tic))
         return self._fs_with_soln_rates
 
     def _get_soln_rates(self):
@@ -121,8 +116,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         for ind, fault_section in self.fault_sections.iterrows():
             fault_id = fault_section['FaultID']
             fswr_gt0 = self.fault_sections_with_rates[
-                (self.fault_sections_with_rates['FaultID'] == fault_id) & 
-                (self.fault_sections_with_rates['Annual Rate'] > 0.0)
+                (self.fault_sections_with_rates['FaultID'] == fault_id)
+                & (self.fault_sections_with_rates['Annual Rate'] > 0.0)
             ]
             fault_sections_wr.loc[ind, 'Solution Slip Rate'] = sum(
                 fswr_gt0['Annual Rate'] * average_slips.loc[fswr_gt0['Rupture Index']]['Average Slip (m)']

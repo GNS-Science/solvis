@@ -2,11 +2,11 @@
 
 import os
 import pathlib
-from pytest import approx
 
 import numpy as np
 import pandas as pd
 from nzshm_common.location.location import location_by_id
+from pytest import approx
 
 from solvis import InversionSolution, circle_polygon
 
@@ -78,7 +78,9 @@ class TestInversionSolution(object):
 
         assert (sol.average_slips.index == sol.average_slips["Rupture Index"]).all()
         assert len(sol.fault_sections_with_solution_rates) == len(sol.fault_sections)
-        assert sol.fault_sections_with_solution_rates.loc[0,"Solution Slip Rate"] == approx(0.02632348565225584, abs=1e-10, rel=1e-6)
+        assert sol.fault_sections_with_solution_rates.loc[0, "Solution Slip Rate"] == approx(
+            0.02632348565225584, abs=1e-10, rel=1e-6
+        )
 
 
 class TestSmallPuyInversionSolution(object):
