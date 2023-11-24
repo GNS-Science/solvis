@@ -279,7 +279,7 @@ def query(ctx):
 
     rr = sol.rate
     rate = 1e-5
-    rate_filtered = rr[rr['rate_max'] > rate]["Rupture Index"].unique()
+    rate_filtered = rr[rr['rate_max'] > rate]["RuptureIndex"].unique()
 
     combo = list(set(rate_filtered).intersection(set(loc_filtered)))
     print(combo)

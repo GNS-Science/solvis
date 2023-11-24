@@ -20,12 +20,12 @@ RATE_COLUMNS_A = 6
 class TestInversionSolution(object):
     def test_check_indexes(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
-        assert sol.rates.index == sol.rates["Rupture Index"]
-        assert sol.ruptures.index == sol.ruptures["Rupture Index"]
-        assert sol.indices.index.all() == sol.indices["Rupture Index"].all()
-        assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
-        assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
-        # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.rates.index == sol.rates["RuptureIndex"]
+        assert sol.ruptures.index == sol.ruptures["RuptureIndex"]
+        assert sol.indices.index.all() == sol.indices["RuptureIndex"].all()
+        assert sol.rates["RuptureIndex"].dtype == pd.UInt32Dtype()
+        assert sol.ruptures["RuptureIndex"].dtype == pd.UInt32Dtype()
+        # assert sol.indices["RuptureIndex"].dtype == pd.UInt32Dtype()
 
     def test_check_types(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
@@ -33,7 +33,7 @@ class TestInversionSolution(object):
         assert sol.fault_regime == 'CRUSTAL'
         assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
 
-        assert sol.rates["Annual Rate"].dtype == np.float32
+        assert sol.rates["AnnualRate"].dtype == np.float32
         # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
         # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
         # assert 0
@@ -76,7 +76,7 @@ class TestInversionSolution(object):
     def test_slip_rate_soln(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
 
-        assert (sol.average_slips.index == sol.average_slips["Rupture Index"]).all()
+        assert (sol.average_slips.index == sol.average_slips["RuptureIndex"]).all()
         assert len(sol.fault_sections_with_solution_slip_rates) == len(sol.fault_sections)
         assert sol.fault_sections_with_solution_slip_rates.loc[0, "Solution Slip Rate"] == approx(
             0.02632348565225584, abs=1e-10, rel=1e-6
@@ -86,7 +86,7 @@ class TestInversionSolution(object):
 class TestSmallPuyInversionSolution(object):
     def test_new_puysegur_filter_solution(self, puysegur_small_fixture):
         sol = puysegur_small_fixture
-        new_sol = InversionSolution.filter_solution(sol, sol.ruptures.head()["Rupture Index"])
+        new_sol = InversionSolution.filter_solution(sol, sol.ruptures.head()["RuptureIndex"])
         assert isinstance(new_sol, InversionSolution)
         print(new_sol.rates)
         print(sol.rates)
@@ -96,12 +96,12 @@ class TestSmallPuyInversionSolution(object):
 
     def test_check_indexes(self, puysegur_small_fixture):
         sol = puysegur_small_fixture
-        assert sol.rates.index == sol.rates["Rupture Index"]
-        assert sol.ruptures.index == sol.ruptures["Rupture Index"]
-        assert sol.indices.index.all() == sol.indices["Rupture Index"].all()
-        # assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
-        # assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
-        # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.rates.index == sol.rates["RuptureIndex"]
+        assert sol.ruptures.index == sol.ruptures["RuptureIndex"]
+        assert sol.indices.index.all() == sol.indices["RuptureIndex"].all()
+        # assert sol.rates["RuptureIndex"].dtype == pd.UInt32Dtype()
+        # assert sol.ruptures["RuptureIndex"].dtype == pd.UInt32Dtype()
+        # assert sol.indices["RuptureIndex"].dtype == pd.UInt32Dtype()
 
     def test_shapes(self, puysegur_small_fixture):
         sol = puysegur_small_fixture

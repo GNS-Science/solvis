@@ -45,7 +45,7 @@ def all_mfds_mode_A(comp, slt, fs: str = 'CRU'):
 
         fss = comp._solutions[fs]
         # cr = comp.composite_rates # the rates dataframe with original source solution rates
-        crr = comp.composite_rates.join(fss.ruptures.drop(columns="Rupture Index"), on="Rupture Index")
+        crr = comp.composite_rates.join(fss.ruptures.drop(columns="RuptureIndex"), on="RuptureIndex")
 
         for fslt in slt.fault_system_lts:
             if not fslt.short_name == fs:

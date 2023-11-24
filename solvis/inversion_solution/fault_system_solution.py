@@ -56,10 +56,10 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         cr = solution.composite_rates
         ar = solution.aggregate_rates
         ri = solution.indices
-        ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
-        composite_rates = cr[cr["Rupture Index"].isin(rupture_ids)].copy()
-        aggregate_rates = ar[ar["Rupture Index"].isin(rupture_ids)].copy()
-        indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
+        ruptures = rr[rr["RuptureIndex"].isin(rupture_ids)].copy()
+        composite_rates = cr[cr["RuptureIndex"].isin(rupture_ids)].copy()
+        aggregate_rates = ar[ar["RuptureIndex"].isin(rupture_ids)].copy()
+        indices = ri[ri["RuptureIndex"].isin(rupture_ids)].copy()
 
         # all other solution properties are derived from those above
         ns = FaultSystemSolution()
@@ -80,10 +80,10 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         # print(composite_rates_df.info())
         # composite_rates_df.to_json('diag_composite_rates_df_0.json')
 
-        composite_rates_df = composite_rates_df[composite_rates_df["Annual Rate"] > 0]
+        composite_rates_df = composite_rates_df[composite_rates_df["AnnualRate"] > 0]
 
         # TODO CBC/CDC -use the weight column on composite_rates_df to do weighted mean etc
-        weighted_rate = pd.Series(composite_rates_df['Annual Rate'] * composite_rates_df['weight'], dtype="float32")
+        weighted_rate = pd.Series(composite_rates_df['AnnualRate'] * composite_rates_df['weight'], dtype="float32")
         composite_rates_df.insert(0, 'weighted_rate', weighted_rate)
 
         # print('COMP 1', composite_rates_df.shape)
@@ -95,9 +95,9 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             # values=['weighted_rate', "Annual Rate"],
             index=[
                 'fault_system',
-                'Rupture Index',
+                'RuptureIndex',
             ],
-            aggfunc={"Annual Rate": [np.min, np.max, 'count'], "weighted_rate": np.sum},
+            aggfunc={"AnnualRate": [np.min, np.max, 'count'], "weighted_rate": np.sum},
         )
 
         # #aggregate_rates_df.to_json('diag_aggregate_rates.json')
@@ -147,7 +147,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
     def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'FaultSystemSolution':
 
         # combine the rupture rates from all solutions
-        composite_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
+        composite_rates_df = pd.DataFrame(columns=['RuptureIndex'])  # , 'Magnitude'])
         for branch_solution in solutions:
             solution_df = branch_solution.rates.copy()
             solution_df.insert(

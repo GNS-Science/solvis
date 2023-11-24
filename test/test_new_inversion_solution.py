@@ -84,7 +84,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         new_sol = solvis.InversionSolution.filter_solution(sol, ruptures)
 
         self.assertEqual(new_sol.ruptures.shape[0], len(ruptures))
-        self.assertEqual(new_sol.ruptures['Rupture Index'].to_list(), ruptures)
+        self.assertEqual(new_sol.ruptures['RuptureIndex'].to_list(), ruptures)
 
         self.assertNotEqual(sol.ruptures.shape, new_sol.ruptures.shape)
         self.assertNotEqual(sol.rates.shape, new_sol.rates.shape)

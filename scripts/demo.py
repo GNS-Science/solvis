@@ -74,20 +74,20 @@ sol = InversionSolution().from_archive(PurePath(WORK_PATH, name))
 def demo_polygon_to_mfd():
     riw = sol.get_ruptures_intersecting(wlg_hex_polygon)
     rr = sol.ruptures_with_rates
-    return mfd_hist(rr[rr["Rupture Index"].isin(list(riw))])
+    return mfd_hist(rr[rr["RuptureIndex"].isin(list(riw))])
 
 
 def demo_parent_fault_mfd():
     rr = sol.ruptures_with_rates  # for all the solution
     kr = sol.get_ruptures_for_parent_fault("Kongahau")
-    return mfd_hist(rr[rr["Rupture Index"].isin(list(kr))])
+    return mfd_hist(rr[rr["RuptureIndex"].isin(list(kr))])
 
 
 def demo_polygon_to_geojson(polygon=None, rate_threshold=1e-8):
     riw = sol.get_ruptures_intersecting(polygon)
     # rs = sol.rs_with_rates
     wsp0 = section_participation(sol, riw)
-    # wmfd0 = mfd_hist(rs[rs["Rupture Index"].isin(list(riw))])
+    # wmfd0 = mfd_hist(rs[rs["RuptureIndex"].isin(list(riw))])
     wsp1 = wsp0[wsp0['Annual Rate'] > rate_threshold]
 
     export_geojson(gpd.GeoDataFrame(wsp0), "wlg_hex_polygon_60m.geojson")

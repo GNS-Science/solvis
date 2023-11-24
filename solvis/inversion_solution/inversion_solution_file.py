@@ -62,8 +62,8 @@ Inversion Solution archive file:
 
 
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
-    new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
-    new_df.index = new_df.index.rename('Rupture Index')
+    new_df = dataframe.copy().reset_index(drop=True).drop(columns=['RuptureIndex'])  # , errors='ignore')
+    new_df.index = new_df.index.rename('RuptureIndex')
     # print("NEW DF", new_df)
     return new_df
 
@@ -174,6 +174,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
             log.debug('dataframe_from_csv() time to open datafile %s %2.3f seconds' % (path, toc - tic))
             tic = time.perf_counter()
             prop = pd.read_csv(data, dtype=dtype)
+            prop.columns = prop.columns.str.replace(' ','')
             toc = time.perf_counter()
             log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
         return prop
@@ -234,7 +235,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
     @property
     def indices(self) -> gpd.GeoDataFrame:
         # dtypes: defaultdict = defaultdict(pd.UInt16Dtype)
-        # dtypes["Rupture Index"] = pd.UInt32Dtype()
+        # dtypes["RuptureIndex"] = pd.UInt32Dtype()
         # dtypes["Num Sections"] = pd.UInt16Dtype()
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH)  # no dtype is faster!!
 

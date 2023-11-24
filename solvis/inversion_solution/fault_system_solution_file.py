@@ -93,7 +93,7 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
         df = self._dataframe_from_csv(self._composite_rates, self.COMPOSITE_RATES_PATH, dtypes)
-        return df.set_index(["solution_id", "Rupture Index"], drop=False)
+        return df.set_index(["solution_id", "RuptureIndex"], drop=False)
 
     @property
     def rates(self) -> gpd.GeoDataFrame:
@@ -105,7 +105,7 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
         df = self._dataframe_from_csv(self._aggregate_rates, self.AGGREGATE_RATES_PATH, dtypes)
-        return df.set_index(["fault_system", "Rupture Index"], drop=False)
+        return df.set_index(["fault_system", "RuptureIndex"], drop=False)
 
     # @property
     # def rates(self):
