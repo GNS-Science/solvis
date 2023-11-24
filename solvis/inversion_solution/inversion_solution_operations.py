@@ -25,11 +25,20 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     @property
     def fault_sections(self) -> gpd.GeoDataFrame:
+        """
+        Get the fault sections and replace slip rates from rupture set with target rates from inverison.
+        Cache result.
+        """
+        if self._fault_sections is not None:
+            return self._fault_sections
+
         tic = time.perf_counter()
-        fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev"], inplace=True)
+        self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
         toc = time.perf_counter()
         log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
-        return fault_sections
+        return self._fault_sections
 
     @property
     def rupture_sections(self) -> gpd.GeoDataFrame:
