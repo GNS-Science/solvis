@@ -175,8 +175,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
 
-        return self.fault_sections_with_solution_rates[
-            self.fault_sections_with_solution_rates['ParentName'] == parent_fault_name
+        return self.fault_sections_with_solution_slip_rates[
+            self.fault_sections_with_solution_slip_rates['ParentName'] == parent_fault_name
         ]
 
 
