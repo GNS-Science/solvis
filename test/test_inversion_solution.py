@@ -77,8 +77,8 @@ class TestInversionSolution(object):
         sol = crustal_solution_fixture
 
         assert (sol.average_slips.index == sol.average_slips["Rupture Index"]).all()
-        assert len(sol.fault_sections_with_solution_rates) == len(sol.fault_sections)
-        assert sol.fault_sections_with_solution_rates.loc[0, "Solution Slip Rate"] == approx(
+        assert len(sol.fault_sections_with_solution_slip_rates) == len(sol.fault_sections)
+        assert sol.fault_sections_with_solution_slip_rates.loc[0, "Solution Slip Rate"] == approx(
             0.02632348565225584, abs=1e-10, rel=1e-6
         )
 
