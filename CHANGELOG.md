@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.9.1] - 2023-11-24
+## Added
+- solution slip rate property and method (fault_sections_with_solution_slip_rates, get_solution_slip_rates_for_parent_fault)
+
 ## [0.8.1] - 2023-07-18
 ## Changed
  - patch version bump for GHA changes

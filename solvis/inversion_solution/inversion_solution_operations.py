@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import List
 
 import geopandas as gpd
 import pandas as pd
@@ -86,6 +87,46 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return self._fs_with_rates
 
     @property
+    def parent_fault_names(self) -> List[str]:
+        fault_names = list(set(list(self.fault_sections['ParentName'])))
+        fault_names.sort()
+        return fault_names
+
+    @property
+    def fault_sections_with_solution_slip_rates(self) -> gpd.GeoDataFrame:
+        """
+        Calculate and cache fault sections and their solution slip rates.
+        Solution slip rate combines input (avg slips) and solution (rupture rates).
+
+        :return: a gpd.GeoDataFrame
+        """
+        if self._fs_with_soln_rates is not None:
+            return self._fs_with_soln_rates
+
+        tic = time.perf_counter()
+        self._fs_with_soln_rates = self._get_soln_rates()
+        toc = time.perf_counter()
+        log.debug('fault_sections_with_soilution_rates: time to calculate solution rates: %2.3f seconds' % (toc - tic))
+        return self._fs_with_soln_rates
+
+    def _get_soln_rates(self):
+
+        average_slips = self.average_slips
+        # for every subsection, find the ruptures on it
+        fault_sections_wr = self.fault_sections.copy()
+        for ind, fault_section in self.fault_sections.iterrows():
+            fault_id = fault_section['FaultID']
+            fswr_gt0 = self.fault_sections_with_rates[
+                (self.fault_sections_with_rates['FaultID'] == fault_id)
+                & (self.fault_sections_with_rates['Annual Rate'] > 0.0)
+            ]
+            fault_sections_wr.loc[ind, 'Solution Slip Rate'] = sum(
+                fswr_gt0['Annual Rate'] * average_slips.loc[fswr_gt0['Rupture Index']]['Average Slip (m)']
+            )
+
+        return fault_sections_wr
+
+    @property
     def rs_with_rates(self) -> gpd.GeoDataFrame:
         if self._rs_with_rates is not None:
             return self._rs_with_rates  # pragma: no cover
@@ -131,6 +172,12 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
         qdf = self.rupture_sections.join(sects, 'section', how='inner')
         return qdf.rupture.unique()
+
+    def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
+
+        return self.fault_sections_with_solution_rates[
+            self.fault_sections_with_solution_rates['ParentName'] == parent_fault_name
+        ]
 
 
 class CompositeSolutionOperations(CompositeSolutionProtocol):
