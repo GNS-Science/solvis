@@ -78,7 +78,7 @@ class TestInversionSolution(object):
 
         assert (sol.average_slips.index == sol.average_slips["RuptureIndex"]).all()
         assert len(sol.fault_sections_with_solution_slip_rates) == len(sol.fault_sections)
-        assert sol.fault_sections_with_solution_slip_rates.loc[0, "Solution Slip Rate"] == approx(
+        assert sol.fault_sections_with_solution_slip_rates.loc[0, "SolutionSlipRate"] == approx(
             0.02632348565225584, abs=1e-10, rel=1e-6
         )
 

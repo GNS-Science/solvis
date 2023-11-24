@@ -40,10 +40,10 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         assert (self._fault_sections["FaultID"] == self._fault_sections["SectionIndex"]).all()
         self._fault_sections.drop(columns=["SectionIndex"], inplace=True)
         mapper = {
-            "Slip Rate (m/yr)":"TargetSlipRate",
-            "Slip Rate Standard Deviation (m/yr)":"TargetSlipRateStdDev",
+            "SlipRate(m/yr)":"TargetSlipRate",
+            "SlipRateStandardDeviation(m/yr)":"TargetSlipRateStdDev",
         }
-        self._fault_sections.rename(columns=mapper)
+        self._fault_sections.rename(columns=mapper, inplace=True)
         toc = time.perf_counter()
         log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
         return self._fault_sections
@@ -137,7 +137,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
                 (self.fault_sections_with_rates['FaultID'] == fault_id)
                 & (self.fault_sections_with_rates['AnnualRate'] > 0.0)
             ]
-            fault_sections_wr.loc[ind, 'Solution Slip Rate'] = sum(
+            fault_sections_wr.loc[ind, 'SolutionSlipRate'] = sum(
                 fswr_gt0['AnnualRate'] * average_slips.loc[fswr_gt0['RuptureIndex']]['AverageSlip(m)']
             )
 
