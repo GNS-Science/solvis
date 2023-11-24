@@ -93,9 +93,10 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return fault_names
 
     @property
-    def fault_sections_with_solution_rates(self) -> gpd.GeoDataFrame:
+    def fault_sections_with_solution_slip_rates(self) -> gpd.GeoDataFrame:
         """
         Calculate and cache fault sections and their solution slip rates.
+        Solution slip rate combines input (avg slips) and solution (rupture rates).
 
         :return: a gpd.GeoDataFrame
         """
@@ -172,7 +173,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         qdf = self.rupture_sections.join(sects, 'section', how='inner')
         return qdf.rupture.unique()
 
-    def get_solution_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
+    def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
 
         return self.fault_sections_with_solution_rates[
             self.fault_sections_with_solution_rates['ParentName'] == parent_fault_name
