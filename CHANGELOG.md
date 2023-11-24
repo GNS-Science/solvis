@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.9.1] - 2023-11-24
+## [0.9.0] - 2023-11-24
 ## Added
 - solution slip rate property and method (fault_sections_with_solution_slip_rates, get_solution_slip_rates_for_parent_fault)
 
