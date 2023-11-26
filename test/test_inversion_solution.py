@@ -87,8 +87,8 @@ class TestInversionSolution(object):
 
         sol.section_target_slip_rates
         sol.fault_sections
-        assert "Slip Rate (m/yr)" in sol.fault_sections.columns
-        assert "Slip Rate Standard Deviation (m/yr)" in sol.fault_sections.columns
+        assert "Target Slip Rate" in sol.fault_sections.columns
+        assert "Target Slip Rate StdDev" in sol.fault_sections.columns
         assert "SlipRate" not in sol.fault_sections.columns
         assert "SlipRateStdDev" not in sol.fault_sections.columns
         assert "Section Index" not in sol.fault_sections.columns
