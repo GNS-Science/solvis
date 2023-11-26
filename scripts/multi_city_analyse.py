@@ -27,7 +27,7 @@ df = pd.read_json('multi_city_ruptures_60hr.json')
 #     where_n_cities_are_within_d_km(df, 3, 30) &\
 #     (df['Annual Rate'] >=1e-6)])
 
-idxs = list(df[where_city_within_d_km(df, 'WLG', 20) & (df['Annual Rate'] >= 1e-6)]['RuptureIndex'])
+idxs = list(df[where_city_within_d_km(df, 'WLG', 20) & (df['Annual Rate'] >= 1e-6)]['Rupture Index'])
 # where_n_cities_are_within_d_km(df, 3, 50) &\
 
 print(len(idxs))

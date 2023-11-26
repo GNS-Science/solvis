@@ -28,9 +28,9 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         rr = solution.ruptures
         ra = solution.rates
         ri = solution.indices
-        ruptures = rr[rr["RuptureIndex"].isin(rupture_ids)].copy()
-        rates = ra[ra["RuptureIndex"].isin(rupture_ids)].copy()
-        indices = ri[ri["RuptureIndex"].isin(rupture_ids)].copy()
+        ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
+        rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
+        indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
 
         # all other solution properties are derived from those above
         ns = InversionSolution()

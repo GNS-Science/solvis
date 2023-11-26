@@ -135,7 +135,7 @@ def test_composite_serialisation(small_archives):
     new_composite = CompositeSolution.from_archive(new_path, slt)
     assert new_composite.rates.columns.all() == composite.rates.columns.all()
     assert new_composite.rates.shape == composite.rates.shape
-    assert new_composite.rates['RuptureIndex'].all() == composite.rates['RuptureIndex'].all()
+    assert new_composite.rates['Rupture Index'].all() == composite.rates['Rupture Index'].all()
 
 
 # class TestThreeFaultSystems(object):

@@ -107,4 +107,4 @@ class TestSerialisation(object):
         assert read_sol.rates.columns.all() == crustal_fixture.rates.columns.all()
         # NO the composite solutions have different rate structure
         # assert read_sol.rates.shape == crustal_fixture.rates.shape
-        assert read_sol.rates['RuptureIndex'].all() == crustal_fixture.rates['RuptureIndex'].all()
+        assert read_sol.rates['Rupture Index'].all() == crustal_fixture.rates['Rupture Index'].all()

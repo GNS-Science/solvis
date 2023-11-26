@@ -57,7 +57,7 @@ def city_combinations(cities, pop_impacted=1e6, combo_max=5):
 
 
 def process(sol, cities, site_keys, radius):
-    rupts_in_all_locs = set(sol.ruptures['RuptureIndex'])
+    rupts_in_all_locs = set(sol.ruptures['Rupture Index'])
 
     # global polygon_query_cache
     locations = {}
@@ -113,7 +113,7 @@ def proc_radius(args):
         rated_events = rates[rates['Annual Rate'] > threshold]
         if rated_events.shape[0] > 0:
             print(f"{rated_events.shape[0]} events with rate > {threshold} for {site_set} ")
-            idxs = list(rated_events["RuptureIndex"])
+            idxs = list(rated_events["Rupture Index"])
             for idx in idxs:
                 if not idx in unique_events:
                     # for site in site_set:
@@ -166,11 +166,11 @@ if __name__ == "__main__":
         count += 1
     print(f"{count} permutations")
 
-    # _df = pd.DataFrame(columns=['City Code', 'Site Radius', 'RuptureIndex'])
+    # _df = pd.DataFrame(columns=['City Code', 'Site Radius', 'Rupture Index'])
     out_file = f"DATA/rupts_sol({sol[0]}).csv"
 
     writer = csv.writer(open(out_file, 'w'), quoting=csv.QUOTE_MINIMAL)
-    writer.writerow(['Solution ID', 'City Codes', 'Site Radius', 'Threshold', 'RuptureIndex'])
+    writer.writerow(['Solution ID', 'City Codes', 'Site Radius', 'Threshold', 'Rupture Index'])
 
     # site_rupts = []
     # i, writes = 0, 0
@@ -193,7 +193,7 @@ if __name__ == "__main__":
         #     #     i+=1
 
         # site_set dataframe
-        # df = pd.DataFrame(site_radius_rupts, columns=["Index", 'Solution ID', 'City Codes', 'Site Radius', 'RuptureIndex'])
+        # df = pd.DataFrame(site_radius_rupts, columns=["Index", 'Solution ID', 'City Codes', 'Site Radius', 'Rupture Index'])
         # if writes == 0:
         #     df.to_csv(out_file)
         # else:

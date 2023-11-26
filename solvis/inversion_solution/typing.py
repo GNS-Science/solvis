@@ -48,10 +48,6 @@ class InversionSolutionProtocol(Protocol):
     @property
     def average_slips(self) -> gpd.GeoDataFrame:
         """the average slips for each rupture."""
-    
-    @property
-    def section_target_slip_rates(self) -> gpd.GeoDataFrame:
-        """the inversion target slip rates for each rupture."""
 
     @property
     def indices(self) -> gpd.GeoDataFrame:

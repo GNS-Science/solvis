@@ -35,7 +35,7 @@ def city_combinations(cities, pop_impacted=1e6, combo_max=5):
 
 
 def pre_process(sol, cities, site_keys, radii):
-    rupts_in_all_locs = set(sol.ruptures['RuptureIndex'])
+    rupts_in_all_locs = set(sol.ruptures['Rupture Index'])
 
     locations = {}
     for sk in site_keys:
@@ -54,7 +54,7 @@ def pre_process(sol, cities, site_keys, radii):
 
 def process(args):
     sol, city_radius_ruptures, rupture_radius_site_sets, site_set, radius = args[:]
-    events = set(sol.ruptures['RuptureIndex'])
+    events = set(sol.ruptures['Rupture Index'])
     if len(events) == 0:
         return
 
