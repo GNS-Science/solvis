@@ -34,8 +34,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         tic = time.perf_counter()
         self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
-        self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev"], inplace=True)
         self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
+        self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
         toc = time.perf_counter()
         log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
         return self._fault_sections
