@@ -159,7 +159,7 @@ if __name__ == "__main__":
     df = df.rename(columns=dict(zip(radii, [f'r{int(r/1000)}km' for r in radii])))
 
     print(df)
-    ruptures = df.join(sol.ruptures_with_rates)
+    ruptures = df.join(sol.ruptures_with_rupture_rates)
 
     print(ruptures)
     fname = 'multi_city_ruptures_60hr'

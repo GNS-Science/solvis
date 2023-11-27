@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     print(f"Build Filtered Inversion Solutions for source {name}.")
     print()
-    print(f"with {sol.ruptures_with_rates[sol.ruptures_with_rates['Annual Rate']>0].size} ruptures with rate>0.")
+    print(f"with {sol.ruptures_with_rupture_rates[sol.ruptures_with_rupture_rates['Annual Rate']>0].size} ruptures with rate>0.")
     print()
 
     for threshold in rate_filters:

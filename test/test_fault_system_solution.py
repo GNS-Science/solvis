@@ -70,17 +70,17 @@ class TestSmallCrustal(object):
 #         sol = puysegur_fixture
 #         print(sol.rupture_rates.info())
 #         assert sol.rupture_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
-#         print(sol.ruptures_with_rates.info())
-#         assert sol.ruptures_with_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
-#         assert sol.ruptures_with_rates["rate_weighted_mean"].shape[0] == sol.rupture_rates.shape[0]
+#         print(sol.ruptures_with_rupture_rates.info())
+#         assert sol.ruptures_with_rupture_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
+#         assert sol.ruptures_with_rupture_rates["rate_weighted_mean"].shape[0] == sol.rupture_rates.shape[0]
 #         # assert 0
 
-#     def test_ruptures_with_rates(self, puysegur_fixture):
+#     def test_ruptures_with_rupture_rates(self, puysegur_fixture):
 #         sol = puysegur_fixture
-#         print(sol.ruptures_with_rates.info())
+#         print(sol.ruptures_with_rupture_rates.info())
 #         print()
-#         print(sol.ruptures_with_rates)
-#         assert sol.ruptures_with_rates.shape[0] == sol.rupture_rates.shape[0]
+#         print(sol.ruptures_with_rupture_rates)
+#         assert sol.ruptures_with_rupture_rates.shape[0] == sol.rupture_rates.shape[0]
 
 #     def test_rs_with_rupture_rates(self, puysegur_fixture):
 #         sol = puysegur_fixture
@@ -106,16 +106,16 @@ class TestSmallDataFrames(object):
         sol = puysegur_small_fss_fixture
         print(sol.rupture_rates.info())
         assert sol.rupture_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
-        print(sol.ruptures_with_rates.info())
-        assert sol.ruptures_with_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
-        assert sol.ruptures_with_rates["rate_weighted_mean"].shape[0] == sol.rupture_rates.shape[0]
+        print(sol.ruptures_with_rupture_rates.info())
+        assert sol.ruptures_with_rupture_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
+        assert sol.ruptures_with_rupture_rates["rate_weighted_mean"].shape[0] == sol.rupture_rates.shape[0]
 
-    def test_ruptures_with_rates(self, puysegur_small_fss_fixture):
+    def test_ruptures_with_rupture_rates(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
-        print(sol.ruptures_with_rates.info())
+        print(sol.ruptures_with_rupture_rates.info())
         print()
-        print(sol.ruptures_with_rates)
-        assert sol.ruptures_with_rates.shape[0] == sol.rupture_rates.shape[0]
+        print(sol.ruptures_with_rupture_rates)
+        assert sol.ruptures_with_rupture_rates.shape[0] == sol.rupture_rates.shape[0]
 
     def test_rs_with_rupture_rates(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture

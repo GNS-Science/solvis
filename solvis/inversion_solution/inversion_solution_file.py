@@ -96,7 +96,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._rs_with_rupture_rates = None
         self._fs_with_rates = None
         self._fs_with_soln_rates = None
-        self._ruptures_with_rates = None
+        self._ruptures_with_rupture_rates = None
         self._average_slips = None
         self._logic_tree_branch: List[Any] = []
         self._fault_regime: str = ''

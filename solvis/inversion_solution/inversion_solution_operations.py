@@ -96,7 +96,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             % (toc - tic)
         )
 
-        # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rates,
+        # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rupture_rates,
         #     on=self.fault_sections["Rupture Index"] )
         return self._fs_with_rates
 
@@ -147,30 +147,30 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         tic = time.perf_counter()
         # df_rupt_rate = self.ruptures.join(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
-        self._rs_with_rupture_rates = self.ruptures_with_rates.join(
-            self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rates["Rupture Index"]
+        self._rs_with_rupture_rates = self.ruptures_with_rupture_rates.join(
+            self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rupture_rates["Rupture Index"]
         )
 
         toc = time.perf_counter()
         log.debug(
-            'rs_with_rupture_rates: time to load ruptures_with_rates and join with rupture_sections: %2.3f seconds'
+            'rs_with_rupture_rates: time to load ruptures_with_rupture_rates and join with rupture_sections: %2.3f seconds'
             % (toc - tic)
         )
         return self._rs_with_rupture_rates
 
     @property
-    def ruptures_with_rates(self) -> pd.DataFrame:
-        if self._ruptures_with_rates is not None:
-            return self._ruptures_with_rates  # pragma: no cover
+    def ruptures_with_rupture_rates(self) -> pd.DataFrame:
+        if self._ruptures_with_rupture_rates is not None:
+            return self._ruptures_with_rupture_rates  # pragma: no cover
 
         tic = time.perf_counter()
         # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
-        self._ruptures_with_rates = self.rupture_rates.join(
+        self._ruptures_with_rupture_rates = self.rupture_rates.join(
             self.ruptures.drop(columns="Rupture Index"), on=self.rupture_rates["Rupture Index"]
         )
         toc = time.perf_counter()
-        log.debug('ruptures_with_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic))
-        return self._ruptures_with_rates
+        log.debug('ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic))
+        return self._ruptures_with_rupture_rates
 
     # return the rupture ids for any ruptures intersecting the polygon
     def get_ruptures_intersecting(self, polygon) -> pd.Series:

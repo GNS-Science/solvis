@@ -17,7 +17,7 @@ combo = list(set(por15).intersection(set(mag_775)))
 
 
 """
->>>hik.ruptures_with_rates[hik.ruptures_with_rates['Rupture Index'].isin(combo)]
+>>>hik.ruptures_with_rupture_rates[hik.ruptures_with_rupture_rates['Rupture Index'].isin(combo)]
 
 
 >>> hik.ruptures[hik.ruptures['Rupture Index'].isin(combo)]

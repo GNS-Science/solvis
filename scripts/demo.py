@@ -73,12 +73,12 @@ sol = InversionSolution().from_archive(PurePath(WORK_PATH, name))
 
 def demo_polygon_to_mfd():
     riw = sol.get_ruptures_intersecting(wlg_hex_polygon)
-    rr = sol.ruptures_with_rates
+    rr = sol.ruptures_with_rupture_rates
     return mfd_hist(rr[rr["Rupture Index"].isin(list(riw))])
 
 
 def demo_parent_fault_mfd():
-    rr = sol.ruptures_with_rates  # for all the solution
+    rr = sol.ruptures_with_rupture_rates  # for all the solution
     kr = sol.get_ruptures_for_parent_fault("Kongahau")
     return mfd_hist(rr[rr["Rupture Index"].isin(list(kr))])
 
@@ -99,7 +99,7 @@ def demo_mfd_comparison(rate_threshold=1e-8):
     print(f"compare raw, with rate_above_{rate_threshold}")
     print("========================================")
 
-    rr = sol.ruptures_with_rates
+    rr = sol.ruptures_with_rupture_rates
     mfd0 = mfd_hist(rr)
     mfd1 = mfd_hist(rr[rr['Annual Rate'] > rate_threshold])
     print(mfd0.compare(mfd1))
