@@ -37,8 +37,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
         self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
         mapper = {
-            "Slip Rate (m/yr)":"Target Slip Rate",
-            "Slip Rate Standard Deviation (m/yr)":"Target Slip Rate StdDev",
+            "Slip Rate (m/yr)": "Target Slip Rate",
+            "Slip Rate Standard Deviation (m/yr)": "Target Slip Rate StdDev",
         }
         self._fault_sections.rename(columns=mapper, inplace=True)
         toc = time.perf_counter()

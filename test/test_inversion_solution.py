@@ -81,7 +81,7 @@ class TestInversionSolution(object):
         assert sol.fault_sections_with_solution_slip_rates.loc[0, "Solution Slip Rate"] == approx(
             0.02632348565225584, abs=1e-10, rel=1e-6
         )
-    
+
     def test_target_slip_rates(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
 
