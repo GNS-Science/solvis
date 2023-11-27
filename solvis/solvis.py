@@ -53,7 +53,7 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
 
 
 def rupt_ids_above_rate(sol: InversionSolutionProtocol, rate: float, rate_column: str = "Annual Rate"):
-    rr = sol.rates
+    rr = sol.rupture_rates
     if not rate:
         return rr["Rupture Index"].unique()
     return rr[rr[rate_column] > rate]["Rupture Index"].unique()

@@ -38,7 +38,7 @@ class CompositeSolution(CompositeSolutionOperations):
         return self._source_logic_tree
 
     @property
-    def rates(self) -> pd.DataFrame:
+    def rupture_rates(self) -> pd.DataFrame:
         """
         Calculate (and cache) the rates.
 
@@ -47,7 +47,7 @@ class CompositeSolution(CompositeSolutionOperations):
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.rates for sol in self._solutions.values()]
+        all_rates = [sol.rupture_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 

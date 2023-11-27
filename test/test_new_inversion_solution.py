@@ -87,7 +87,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         self.assertEqual(new_sol.ruptures['Rupture Index'].to_list(), ruptures)
 
         self.assertNotEqual(sol.ruptures.shape, new_sol.ruptures.shape)
-        self.assertNotEqual(sol.rates.shape, new_sol.rates.shape)
+        self.assertNotEqual(sol.rupture_rates.shape, new_sol.rupture_rates.shape)
 
     def test_filter_writes_attribs_non_compatible_mode(self):
         """
@@ -107,7 +107,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         read_sol = solvis.InversionSolution.from_archive(new_path)
 
         self.assertEqual(read_sol.indices.shape[0], len(ruptures))
-        self.assertEqual(read_sol.rates.shape[0], len(ruptures))
+        self.assertEqual(read_sol.rupture_rates.shape[0], len(ruptures))
         self.assertEqual(read_sol.ruptures.shape[0], len(ruptures))
 
     def test_filter_writes_attribs_compatible_mode(self):
@@ -128,5 +128,5 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         read_sol = solvis.InversionSolution.from_archive(new_path)
 
         self.assertEqual(read_sol.indices.shape[0], len(ruptures))
-        self.assertEqual(read_sol.rates.shape[0], len(ruptures))
+        self.assertEqual(read_sol.rupture_rates.shape[0], len(ruptures))
         self.assertEqual(read_sol.ruptures.shape[0], len(ruptures))

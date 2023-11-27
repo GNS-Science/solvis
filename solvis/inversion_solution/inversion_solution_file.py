@@ -218,7 +218,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         return self._fault_regime
 
     @property
-    def rates(self) -> gpd.GeoDataFrame:
+    def rupture_rates(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(np.float32)
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()

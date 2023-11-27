@@ -35,8 +35,8 @@ import nzshm_model as nm
 
 slt = nm.get_model_version(nm.CURRENT_VERSION).source_logic_tree()
 hik = FaultSystemSolution.from_archive(Path("WORK/HIK_fault_system_solution.zip"))
-hik.rates
-hkr = hik.rates
+hik.rupture_rates
+hkr = hik.rupture_rates
 hkr[hkr["Rupture Index"] == 4912]
 hcr = hik.composite_rates
 hcr[hcr["Rupture Index"] == 4912]
@@ -54,7 +54,7 @@ hiksol = InversionSolution.from_archive(Path("WORK/NZSHM22_ScaledInversionSoluti
 sol4912 = hiksol.filter_solution([4912])
 import solvis
 sol4912 = solvis.filter_solution(hiksol, [4912])
-sol4912.rates
+sol4912.rupture_rates
 sol4912.ruptures
 sol4912.indices
 help(sol4912.to_archive)

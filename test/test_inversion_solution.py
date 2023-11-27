@@ -20,10 +20,10 @@ RATE_COLUMNS_A = 6
 class TestInversionSolution(object):
     def test_check_indexes(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
-        assert sol.rates.index == sol.rates["Rupture Index"]
+        assert sol.rupture_rates.index == sol.rupture_rates["Rupture Index"]
         assert sol.ruptures.index == sol.ruptures["Rupture Index"]
         assert sol.indices.index.all() == sol.indices["Rupture Index"].all()
-        assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
         assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
         # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
 
@@ -33,7 +33,7 @@ class TestInversionSolution(object):
         assert sol.fault_regime == 'CRUSTAL'
         assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
 
-        assert sol.rates["Annual Rate"].dtype == np.float32
+        assert sol.rupture_rates["Annual Rate"].dtype == np.float32
         # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
         # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
         # assert 0
@@ -99,25 +99,25 @@ class TestSmallPuyInversionSolution(object):
         sol = puysegur_small_fixture
         new_sol = InversionSolution.filter_solution(sol, sol.ruptures.head()["Rupture Index"])
         assert isinstance(new_sol, InversionSolution)
-        print(new_sol.rates)
-        print(sol.rates)
+        print(new_sol.rupture_rates)
+        print(sol.rupture_rates)
 
         # What is this test doing??
-        assert sol.rates.head().all().all() == new_sol.rates.all().all()
+        assert sol.rupture_rates.head().all().all() == new_sol.rupture_rates.all().all()
 
     def test_check_indexes(self, puysegur_small_fixture):
         sol = puysegur_small_fixture
-        assert sol.rates.index == sol.rates["Rupture Index"]
+        assert sol.rupture_rates.index == sol.rupture_rates["Rupture Index"]
         assert sol.ruptures.index == sol.ruptures["Rupture Index"]
         assert sol.indices.index.all() == sol.indices["Rupture Index"].all()
-        # assert sol.rates["Rupture Index"].dtype == pd.UInt32Dtype()
+        # assert sol.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
         # assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
         # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
 
     def test_shapes(self, puysegur_small_fixture):
         sol = puysegur_small_fixture
-        print(sol.rates)
-        assert sol.rates.shape == (10, 2)
+        print(sol.rupture_rates)
+        assert sol.rupture_rates.shape == (10, 2)
         print(sol.indices)
         assert sol.indices.shape == (10, 273)
         print(sol.ruptures)

@@ -146,7 +146,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             return self._rs_with_rates  # pragma: no cover
 
         tic = time.perf_counter()
-        # df_rupt_rate = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
+        # df_rupt_rate = self.ruptures.join(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
         self._rs_with_rates = self.ruptures_with_rates.join(
             self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rates["Rupture Index"]
         )
@@ -164,9 +164,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             return self._ruptures_with_rates  # pragma: no cover
 
         tic = time.perf_counter()
-        # print(self.rates.drop(self.rates.iloc[:, :1], axis=1))
-        self._ruptures_with_rates = self.rates.join(
-            self.ruptures.drop(columns="Rupture Index"), on=self.rates["Rupture Index"]
+        # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
+        self._ruptures_with_rates = self.rupture_rates.join(
+            self.ruptures.drop(columns="Rupture Index"), on=self.rupture_rates["Rupture Index"]
         )
         toc = time.perf_counter()
         log.debug('ruptures_with_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic))

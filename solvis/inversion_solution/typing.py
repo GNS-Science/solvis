@@ -38,7 +38,7 @@ class InversionSolutionProtocol(Protocol):
         """solution requires fault sections with rates"""
 
     @property
-    def rates(self) -> gpd.GeoDataFrame:
+    def rupture_rates(self) -> gpd.GeoDataFrame:
         """the event rate for each rupture."""
 
     @property

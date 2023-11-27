@@ -96,7 +96,7 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         return df.set_index(["solution_id", "Rupture Index"], drop=False)
 
     @property
-    def rates(self) -> gpd.GeoDataFrame:
+    def rupture_rates(self) -> gpd.GeoDataFrame:
         return self.aggregate_rates
 
     @property
@@ -108,7 +108,7 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         return df.set_index(["fault_system", "Rupture Index"], drop=False)
 
     # @property
-    # def rates(self):
+    # def rupture_rates(self):
     #     raise NotImplementedError("Use aggregate_rates instead")
 
     @property

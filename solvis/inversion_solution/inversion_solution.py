@@ -26,7 +26,7 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
     @staticmethod
     def filter_solution(solution: InversionSolutionProtocol, rupture_ids: npt.ArrayLike) -> 'InversionSolution':
         rr = solution.ruptures
-        ra = solution.rates
+        ra = solution.rupture_rates
         ri = solution.indices
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
@@ -51,7 +51,7 @@ class BranchInversionSolution(InversionSolution):
         solution: InversionSolutionProtocol, branch: ModelLogicTreeBranch, fault_system: str, rupture_set_id: str
     ) -> 'BranchInversionSolution':
         ruptures = solution.ruptures.copy()
-        rates = solution.rates.copy()
+        rates = solution.rupture_rates.copy()
         indices = solution.indices.copy()
 
         bis = BranchInversionSolution()
