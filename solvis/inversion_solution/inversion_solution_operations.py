@@ -92,7 +92,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         self._fs_with_rates = self.rs_with_rupture_rates.join(self.fault_sections, 'section', how='inner')
         toc = time.perf_counter()
         log.debug(
-            'fault_sections_with_rupture_rates: time to load rs_with_rupture_rates and join with fault_sections: %2.3f seconds'
+            ('fault_sections_with_rupture_rates: time to load rs_with_rupture_rates '
+             'and join with fault_sections: %2.3f seconds')
             % (toc - tic)
         )
 
@@ -153,7 +154,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         toc = time.perf_counter()
         log.debug(
-            'rs_with_rupture_rates: time to load ruptures_with_rupture_rates and join with rupture_sections: %2.3f seconds'
+            ('rs_with_rupture_rates: time to load ruptures_with_rupture_rates '
+             'and join with rupture_sections: %2.3f seconds')
             % (toc - tic)
         )
         return self._rs_with_rupture_rates
@@ -169,7 +171,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             self.ruptures.drop(columns="Rupture Index"), on=self.rupture_rates["Rupture Index"]
         )
         toc = time.perf_counter()
-        log.debug('ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic))
+        log.debug(
+            'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
+        )
         return self._ruptures_with_rupture_rates
 
     # return the rupture ids for any ruptures intersecting the polygon

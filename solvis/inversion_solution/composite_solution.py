@@ -67,7 +67,10 @@ class CompositeSolution(CompositeSolutionOperations):
 
     @property
     def fault_sections_with_rupture_rates(self) -> pd.DataFrame:
-        all = [gpd.GeoDataFrame(sol.fault_sections_with_rupture_rates).to_crs("EPSG:4326") for sol in self._solutions.values()]
+        all = [
+            gpd.GeoDataFrame(sol.fault_sections_with_rupture_rates).to_crs("EPSG:4326")
+            for sol in self._solutions.values()
+        ]
         all_df = pd.concat(all, ignore_index=True)
         return all_df
 
