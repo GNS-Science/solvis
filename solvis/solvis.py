@@ -21,7 +21,7 @@ def parent_fault_names(
 
 # filtered_rupture_sections (with geometry)
 def section_participation(sol: InversionSolutionProtocol, df_ruptures: pd.DataFrame = None):
-    sr = sol.rs_with_rates
+    sr = sol.rs_with_rupture_rates
     if df_ruptures is not None:
         filtered_sections_with_rates_df = sr[(sr["Rupture Index"].isin(list(df_ruptures))) & (sr['Annual Rate'] > 0)]
     else:

@@ -82,12 +82,12 @@ class TestSmallCrustal(object):
 #         print(sol.ruptures_with_rates)
 #         assert sol.ruptures_with_rates.shape[0] == sol.rupture_rates.shape[0]
 
-#     def test_rs_with_rates(self, puysegur_fixture):
+#     def test_rs_with_rupture_rates(self, puysegur_fixture):
 #         sol = puysegur_fixture
-#         print(sol.rs_with_rates.info())
+#         print(sol.rs_with_rupture_rates.info())
 #         print()
-#         print(sol.rs_with_rates)
-#         assert len(sol.rs_with_rates["Rupture Index"].unique()) == sol.rupture_rates.shape[0]
+#         print(sol.rs_with_rupture_rates)
+#         assert len(sol.rs_with_rupture_rates["Rupture Index"].unique()) == sol.rupture_rates.shape[0]
 
 #     def test_fault_sections_with_rupture_rates_shape(self, puysegur_fixture):
 #         sol = puysegur_fixture
@@ -117,12 +117,12 @@ class TestSmallDataFrames(object):
         print(sol.ruptures_with_rates)
         assert sol.ruptures_with_rates.shape[0] == sol.rupture_rates.shape[0]
 
-    def test_rs_with_rates(self, puysegur_small_fss_fixture):
+    def test_rs_with_rupture_rates(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
-        print(sol.rs_with_rates.info())
+        print(sol.rs_with_rupture_rates.info())
         print()
-        print(sol.rs_with_rates)
-        assert len(sol.rs_with_rates["Rupture Index"].unique()) == sol.rupture_rates.shape[0]
+        print(sol.rs_with_rupture_rates)
+        assert len(sol.rs_with_rupture_rates["Rupture Index"].unique()) == sol.rupture_rates.shape[0]
 
     def test_fault_sections_with_rupture_rates_shape(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture

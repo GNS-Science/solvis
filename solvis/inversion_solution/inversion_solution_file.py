@@ -93,7 +93,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._section_target_slip_rates = None
         self._fast_indices = None
         self._fast_indices = None
-        self._rs_with_rates = None
+        self._rs_with_rupture_rates = None
         self._fs_with_rates = None
         self._fs_with_soln_rates = None
         self._ruptures_with_rates = None

@@ -89,10 +89,10 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             return self._fs_with_rates
 
         tic = time.perf_counter()
-        self._fs_with_rates = self.rs_with_rates.join(self.fault_sections, 'section', how='inner')
+        self._fs_with_rates = self.rs_with_rupture_rates.join(self.fault_sections, 'section', how='inner')
         toc = time.perf_counter()
         log.debug(
-            'fault_sections_with_rupture_rates: time to load rs_with_rates and join with fault_sections: %2.3f seconds'
+            'fault_sections_with_rupture_rates: time to load rs_with_rupture_rates and join with fault_sections: %2.3f seconds'
             % (toc - tic)
         )
 
@@ -141,22 +141,22 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return fault_sections_wr
 
     @property
-    def rs_with_rates(self) -> gpd.GeoDataFrame:
-        if self._rs_with_rates is not None:
-            return self._rs_with_rates  # pragma: no cover
+    def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        if self._rs_with_rupture_rates is not None:
+            return self._rs_with_rupture_rates  # pragma: no cover
 
         tic = time.perf_counter()
         # df_rupt_rate = self.ruptures.join(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
-        self._rs_with_rates = self.ruptures_with_rates.join(
+        self._rs_with_rupture_rates = self.ruptures_with_rates.join(
             self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rates["Rupture Index"]
         )
 
         toc = time.perf_counter()
         log.debug(
-            'rs_with_rates: time to load ruptures_with_rates and join with rupture_sections: %2.3f seconds'
+            'rs_with_rupture_rates: time to load ruptures_with_rates and join with rupture_sections: %2.3f seconds'
             % (toc - tic)
         )
-        return self._rs_with_rates
+        return self._rs_with_rupture_rates
 
     @property
     def ruptures_with_rates(self) -> pd.DataFrame:
@@ -176,12 +176,12 @@ class InversionSolutionOperations(InversionSolutionProtocol):
     def get_ruptures_intersecting(self, polygon) -> pd.Series:
         q0 = gpd.GeoDataFrame(self.fault_sections)
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
-        sr = self.rs_with_rates
+        sr = self.rs_with_rupture_rates
         qdf = sr.join(q1, 'section', how='inner')
         return qdf["Rupture Index"].unique()
 
     def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
-        # sr = sol.rs_with_rates
+        # sr = sol.rs_with_rupture_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
         qdf = self.rupture_sections.join(sects, 'section', how='inner')
