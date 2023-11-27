@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.0] - 2023-11-28
+## Changed
+- change class property names to clarify if rates are rupture rates or slip rates
+- remove units from DataFrame column names
+
 ## [0.9.0] - 2023-11-24
 ## Added
 - solution slip rate property and method (fault_sections_with_solution_slip_rates, get_solution_slip_rates_for_parent_fault)

@@ -73,7 +73,7 @@ def all_mfds_mode_A(comp, slt, fs: str = 'CRU'):
 def all_mfds_mode_B(comp, fs: str = 'CRU'):
     """use the previously calculated aggregate rates"""
     fss = comp._solutions[fs]
-    df0 = fss.ruptures_with_rates
+    df0 = fss.ruptures_with_rupture_rates
     return build_mfd(df0, "rate_weighted_mean", "Magnitude")
 
 

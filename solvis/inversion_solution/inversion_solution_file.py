@@ -80,6 +80,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
     FAULTS_PATH = 'ruptures/fault_sections.geojson'
     METADATA_PATH = 'metadata.json'
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'
+    SECT_SLIP_RATES_PATH = 'ruptures/sect_slip_rates.csv'
 
     DATAFRAMES = [RATES_PATH, RUPTS_PATH, INDICES_PATH]
 
@@ -89,12 +90,13 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._ruptures = None
         self._rupture_props = None
         self._indices = None
+        self._section_target_slip_rates = None
         self._fast_indices = None
         self._fast_indices = None
-        self._rs_with_rates = None
+        self._rs_with_rupture_rates = None
         self._fs_with_rates = None
         self._fs_with_soln_rates = None
-        self._ruptures_with_rates = None
+        self._ruptures_with_rupture_rates = None
         self._average_slips = None
         self._logic_tree_branch: List[Any] = []
         self._fault_regime: str = ''
@@ -216,7 +218,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         return self._fault_regime
 
     @property
-    def rates(self) -> gpd.GeoDataFrame:
+    def rupture_rates(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(np.float32)
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
@@ -241,6 +243,12 @@ class InversionSolutionFile(InversionSolutionProtocol):
         dtypes: defaultdict = defaultdict(np.float32)
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         return self._dataframe_from_csv(self._average_slips, self.AVG_SLIPS_PATH, dtypes)
+
+    @property
+    def section_target_slip_rates(self) -> gpd.GeoDataFrame:
+        dtypes: defaultdict = defaultdict(np.float32)
+        dtypes["Section Index"] = pd.UInt32Dtype()
+        return self._dataframe_from_csv(self._section_target_slip_rates, self.SECT_SLIP_RATES_PATH)
 
     def set_props(
         self, rates: pd.DataFrame, ruptures: pd.DataFrame, indices: pd.DataFrame, fault_sections: pd.DataFrame

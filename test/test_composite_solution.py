@@ -26,7 +26,7 @@ class TestThreeFaultSystems(object):
 
     # @pytest.mark.skip('TODO_check_values')
     def test_composite_rates_shape(self, composite_fixture):
-        assert composite_fixture.rates.shape == (
+        assert composite_fixture.rupture_rates.shape == (
             4211,
             RATE_COLUMNS_A,
         )  # 3101 + 15800 + 23675 was before removing 0 rated
@@ -39,8 +39,8 @@ class TestThreeFaultSystems(object):
         assert surface.shape == (5, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
-    def test_fault_sections_with_rates_shape(self, composite_fixture):
-        assert composite_fixture.fault_sections_with_rates.shape == (229102, FSR_COLUMNS_A)
+    def test_fault_sections_with_rupture_rates_shape(self, composite_fixture):
+        assert composite_fixture.fault_sections_with_rupture_rates.shape == (229102, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
     def test_fault_surfaces(self, composite_fixture):
@@ -57,7 +57,7 @@ class TestThreeSmallFaultSystems(object):
 
     # @pytest.mark.skip('TODO_check_values')
     def test_composite_rates_shape(self, small_composite_fixture):
-        assert small_composite_fixture.rates.shape == (
+        assert small_composite_fixture.rupture_rates.shape == (
             7 + 3 + 5,  # PUY, HIK, CRU
             RATE_COLUMNS_A,
         )  # 3101 + 15800 + 23675 was before removing 0 rated
@@ -70,8 +70,8 @@ class TestThreeSmallFaultSystems(object):
         assert surface.shape == (5, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
-    def test_fault_sections_with_rates_shape(self, small_composite_fixture):
-        assert small_composite_fixture.fault_sections_with_rates.shape == (148, FSR_COLUMNS_A)
+    def test_fault_sections_with_rupture_rates_shape(self, small_composite_fixture):
+        assert small_composite_fixture.fault_sections_with_rupture_rates.shape == (148, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
     def test_fault_surfaces(self, small_composite_fixture):
@@ -133,9 +133,9 @@ def test_composite_serialisation(small_archives):
 
     # rehydrate the composite
     new_composite = CompositeSolution.from_archive(new_path, slt)
-    assert new_composite.rates.columns.all() == composite.rates.columns.all()
-    assert new_composite.rates.shape == composite.rates.shape
-    assert new_composite.rates['Rupture Index'].all() == composite.rates['Rupture Index'].all()
+    assert new_composite.rupture_rates.columns.all() == composite.rupture_rates.columns.all()
+    assert new_composite.rupture_rates.shape == composite.rupture_rates.shape
+    assert new_composite.rupture_rates['Rupture Index'].all() == composite.rupture_rates['Rupture Index'].all()
 
 
 # class TestThreeFaultSystems(object):
@@ -173,7 +173,7 @@ def test_composite_serialisation(small_archives):
 #         # print( composite.aggregate_rates.head() )
 #         # print( composite.aggregate_rates.tail() )
 
-#         # assert composite.rates.shape == (3101 + 15800 + 23675, RATE_COLUMNS_A)
-#         assert composite.rates.shape == (4211, RATE_COLUMNS_A)
+#         # assert composite.rupture_rates.shape == (3101 + 15800 + 23675, RATE_COLUMNS_A)
+#         assert composite.rupture_rates.shape == (4211, RATE_COLUMNS_A)
 #         assert composite.composite_rates.shape == (3 * 4211, COMPOSITE_RATE_COLUMNS)
 #         # assert composite.composite_rates.shape == (127728, COMPOSITE_RATE_COLUMNS)

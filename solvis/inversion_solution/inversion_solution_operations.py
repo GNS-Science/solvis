@@ -25,11 +25,25 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     @property
     def fault_sections(self) -> gpd.GeoDataFrame:
+        """
+        Get the fault sections and replace slip rates from rupture set with target rates from inverison.
+        Cache result.
+        """
+        if self._fault_sections is not None:
+            return self._fault_sections
+
         tic = time.perf_counter()
-        fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
+        self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
+        mapper = {
+            "Slip Rate (m/yr)": "Target Slip Rate",
+            "Slip Rate Standard Deviation (m/yr)": "Target Slip Rate StdDev",
+        }
+        self._fault_sections.rename(columns=mapper, inplace=True)
         toc = time.perf_counter()
         log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
-        return fault_sections
+        return self._fault_sections
 
     @property
     def rupture_sections(self) -> gpd.GeoDataFrame:
@@ -65,7 +79,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return df2
 
     @property
-    def fault_sections_with_rates(self) -> gpd.GeoDataFrame:
+    def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
         """
         Calculate and cache the fault sections and their rupture rates.
 
@@ -75,14 +89,15 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             return self._fs_with_rates
 
         tic = time.perf_counter()
-        self._fs_with_rates = self.rs_with_rates.join(self.fault_sections, 'section', how='inner')
+        self._fs_with_rates = self.rs_with_rupture_rates.join(self.fault_sections, 'section', how='inner')
         toc = time.perf_counter()
         log.debug(
-            'fault_sections_with_rates: time to load rs_with_rates and join with fault_sections: %2.3f seconds'
+            ('fault_sections_with_rupture_rates: time to load rs_with_rupture_rates '
+             'and join with fault_sections: %2.3f seconds')
             % (toc - tic)
         )
 
-        # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rates,
+        # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rupture_rates,
         #     on=self.fault_sections["Rupture Index"] )
         return self._fs_with_rates
 
@@ -116,9 +131,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         fault_sections_wr = self.fault_sections.copy()
         for ind, fault_section in self.fault_sections.iterrows():
             fault_id = fault_section['FaultID']
-            fswr_gt0 = self.fault_sections_with_rates[
-                (self.fault_sections_with_rates['FaultID'] == fault_id)
-                & (self.fault_sections_with_rates['Annual Rate'] > 0.0)
+            fswr_gt0 = self.fault_sections_with_rupture_rates[
+                (self.fault_sections_with_rupture_rates['FaultID'] == fault_id)
+                & (self.fault_sections_with_rupture_rates['Annual Rate'] > 0.0)
             ]
             fault_sections_wr.loc[ind, 'Solution Slip Rate'] = sum(
                 fswr_gt0['Annual Rate'] * average_slips.loc[fswr_gt0['Rupture Index']]['Average Slip (m)']
@@ -127,47 +142,50 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return fault_sections_wr
 
     @property
-    def rs_with_rates(self) -> gpd.GeoDataFrame:
-        if self._rs_with_rates is not None:
-            return self._rs_with_rates  # pragma: no cover
+    def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        if self._rs_with_rupture_rates is not None:
+            return self._rs_with_rupture_rates  # pragma: no cover
 
         tic = time.perf_counter()
-        # df_rupt_rate = self.ruptures.join(self.rates.drop(self.rates.iloc[:, :1], axis=1))
-        self._rs_with_rates = self.ruptures_with_rates.join(
-            self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rates["Rupture Index"]
+        # df_rupt_rate = self.ruptures.join(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
+        self._rs_with_rupture_rates = self.ruptures_with_rupture_rates.join(
+            self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rupture_rates["Rupture Index"]
         )
 
         toc = time.perf_counter()
         log.debug(
-            'rs_with_rates: time to load ruptures_with_rates and join with rupture_sections: %2.3f seconds'
+            ('rs_with_rupture_rates: time to load ruptures_with_rupture_rates '
+             'and join with rupture_sections: %2.3f seconds')
             % (toc - tic)
         )
-        return self._rs_with_rates
+        return self._rs_with_rupture_rates
 
     @property
-    def ruptures_with_rates(self) -> pd.DataFrame:
-        if self._ruptures_with_rates is not None:
-            return self._ruptures_with_rates  # pragma: no cover
+    def ruptures_with_rupture_rates(self) -> pd.DataFrame:
+        if self._ruptures_with_rupture_rates is not None:
+            return self._ruptures_with_rupture_rates  # pragma: no cover
 
         tic = time.perf_counter()
-        # print(self.rates.drop(self.rates.iloc[:, :1], axis=1))
-        self._ruptures_with_rates = self.rates.join(
-            self.ruptures.drop(columns="Rupture Index"), on=self.rates["Rupture Index"]
+        # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
+        self._ruptures_with_rupture_rates = self.rupture_rates.join(
+            self.ruptures.drop(columns="Rupture Index"), on=self.rupture_rates["Rupture Index"]
         )
         toc = time.perf_counter()
-        log.debug('ruptures_with_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic))
-        return self._ruptures_with_rates
+        log.debug(
+            'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
+        )
+        return self._ruptures_with_rupture_rates
 
     # return the rupture ids for any ruptures intersecting the polygon
     def get_ruptures_intersecting(self, polygon) -> pd.Series:
         q0 = gpd.GeoDataFrame(self.fault_sections)
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
-        sr = self.rs_with_rates
+        sr = self.rs_with_rupture_rates
         qdf = sr.join(q1, 'section', how='inner')
         return qdf["Rupture Index"].unique()
 
     def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
-        # sr = sol.rs_with_rates
+        # sr = sol.rs_with_rupture_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
         qdf = self.rupture_sections.join(sects, 'section', how='inner')

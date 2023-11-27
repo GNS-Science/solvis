@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solvis"
-version = "0.9.0"
+version = "0.10.0"
 description = "analysis of opensha modular solution files."
 authors = ["Chris Chamberlain <chrisbc@artisan.co.nz>"]
 license = "AGPL3"
@@ -54,6 +54,7 @@ matplotlib = "^3.6.3"
 tox = "^4.4.4"
 ipython = "^8.11.0"
 mypy = "^1.7.1"
+pytest-xdist = "^3.5.0"
 
 [tool.poetry.extras]
 test = [

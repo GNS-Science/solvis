@@ -38,7 +38,7 @@ class CompositeSolution(CompositeSolutionOperations):
         return self._source_logic_tree
 
     @property
-    def rates(self) -> pd.DataFrame:
+    def rupture_rates(self) -> pd.DataFrame:
         """
         Calculate (and cache) the rates.
 
@@ -47,7 +47,7 @@ class CompositeSolution(CompositeSolutionOperations):
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.rates for sol in self._solutions.values()]
+        all_rates = [sol.rupture_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 
@@ -66,8 +66,11 @@ class CompositeSolution(CompositeSolutionOperations):
         return all_rates_df
 
     @property
-    def fault_sections_with_rates(self) -> pd.DataFrame:
-        all = [gpd.GeoDataFrame(sol.fault_sections_with_rates).to_crs("EPSG:4326") for sol in self._solutions.values()]
+    def fault_sections_with_rupture_rates(self) -> pd.DataFrame:
+        all = [
+            gpd.GeoDataFrame(sol.fault_sections_with_rupture_rates).to_crs("EPSG:4326")
+            for sol in self._solutions.values()
+        ]
         all_df = pd.concat(all, ignore_index=True)
         return all_df
 

@@ -110,7 +110,7 @@ class TestSubductionSurface(unittest.TestCase):
         print(f'rate: {rate} count: {len(ri)}')
 
         ri_sol = solvis.new_sol(solution, ri)
-        print("rs_with_rates shape", ri_sol.rs_with_rates.shape)
+        print("rs_with_rupture_rates shape", ri_sol.rs_with_rupture_rates.shape)
         print("sections shape", ri_sol.rupture_sections.shape)
         solvis.export_geojson(ri_sol.fault_surfaces(), f"surfaces_puysegur_above-{rate}.geojson", indent=2)
         assert 0

@@ -34,7 +34,7 @@ def export(sol):
     base_archive = PurePath(WORK_PATH,  name)
     new_archive = PurePath(WORK_PATH, f"{location[0]}_ruptures_radius({radius})_rate_filter({rate_threshold})_solution.zip")
     # print(f"write new solution file: {new_archive}")
-    #  print(f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rates[ri_sol.rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}")
+    #  print(f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rupture_rates[ri_sol.rupture_rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}")
 
     ri_sol.to_archive(str(new_archive), str(base_archive))
 """
@@ -100,7 +100,7 @@ def proc_radius(args):
         return
     else:
         subset = process(sol[1], cities, site_set, radius)
-        rates = subset.rates
+        rates = subset.rupture_rates
         with combo_lock:
             combo_cache[f'{key}:{radius}'] = rates.shape[0]
 

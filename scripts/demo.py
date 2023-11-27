@@ -7,7 +7,7 @@ from solvis import *
 
 
 def demo1():
-    sr = sol.rs_with_rates
+    sr = sol.rs_with_rupture_rates
     print("Query: Query: sections with rate (sr) where sr['rupture']==5]")
     print(sr[sr['rupture'] == 5])
     print()
@@ -22,7 +22,7 @@ def demo1():
 
 
 def demo2(parent_fault_name: str = 'Whitemans Valley'):
-    sr = sol.rs_with_rates
+    sr = sol.rs_with_rupture_rates
     print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
     acton_sects = sol.fault_sections[sol.fault_sections['ParentName'] == parent_fault_name]
     return gpd.GeoDataFrame(sr.join(acton_sects, 'section', how='inner'))
@@ -30,7 +30,7 @@ def demo2(parent_fault_name: str = 'Whitemans Valley'):
 
 # rupture_sections_in_area
 def geom_demo1(polygon):
-    sr = sol.rs_with_rates
+    sr = sol.rs_with_rupture_rates
     q0 = gpd.GeoDataFrame(sol.fault_sections)
     q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0_polygon)]
     qdf = gpd.GeoDataFrame(sr.join(q1, 'section', how='inner'))
@@ -73,19 +73,19 @@ sol = InversionSolution().from_archive(PurePath(WORK_PATH, name))
 
 def demo_polygon_to_mfd():
     riw = sol.get_ruptures_intersecting(wlg_hex_polygon)
-    rr = sol.ruptures_with_rates
+    rr = sol.ruptures_with_rupture_rates
     return mfd_hist(rr[rr["Rupture Index"].isin(list(riw))])
 
 
 def demo_parent_fault_mfd():
-    rr = sol.ruptures_with_rates  # for all the solution
+    rr = sol.ruptures_with_rupture_rates  # for all the solution
     kr = sol.get_ruptures_for_parent_fault("Kongahau")
     return mfd_hist(rr[rr["Rupture Index"].isin(list(kr))])
 
 
 def demo_polygon_to_geojson(polygon=None, rate_threshold=1e-8):
     riw = sol.get_ruptures_intersecting(polygon)
-    # rs = sol.rs_with_rates
+    # rs = sol.rs_with_rupture_rates
     wsp0 = section_participation(sol, riw)
     # wmfd0 = mfd_hist(rs[rs["Rupture Index"].isin(list(riw))])
     wsp1 = wsp0[wsp0['Annual Rate'] > rate_threshold]
@@ -99,7 +99,7 @@ def demo_mfd_comparison(rate_threshold=1e-8):
     print(f"compare raw, with rate_above_{rate_threshold}")
     print("========================================")
 
-    rr = sol.ruptures_with_rates
+    rr = sol.ruptures_with_rupture_rates
     mfd0 = mfd_hist(rr)
     mfd1 = mfd_hist(rr[rr['Annual Rate'] > rate_threshold])
     print(mfd0.compare(mfd1))
@@ -107,7 +107,7 @@ def demo_mfd_comparison(rate_threshold=1e-8):
 
 def demo_all_nz_to_geojson(rate_threshold=1e-8):
     ##BROKEN (BRAin fade)
-    sr = sol.rs_with_rates
+    sr = sol.rs_with_rupture_rates
     # sr[(sr.rupture.isin(list(df_ruptures))) & (sr['Annual Rate']>0)]
     sp0 = sr.join(sol.fault_sections, 'section', how='inner')
 

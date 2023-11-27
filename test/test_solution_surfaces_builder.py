@@ -10,10 +10,10 @@ from solvis import InversionSolution
 
 
 class SolutionLike:
-    def __init__(self, fault_regime, fault_sections, fault_sections_with_rates):
+    def __init__(self, fault_regime, fault_sections, fault_sections_with_rupture_rates):
         self.fault_regime = fault_regime
         self.fault_sections = fault_sections
-        self.fault_sections_with_rates = fault_sections_with_rates
+        self.fault_sections_with_rupture_rates = fault_sections_with_rupture_rates
 
 
 class TestSolutionSurfacesBuilder(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestSolutionSurfacesBuilder(unittest.TestCase):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
         sol = InversionSolution.from_archive(str(filename))
-        likeness = SolutionLike(sol.fault_regime, sol.fault_sections, sol.fault_sections_with_rates)
+        likeness = SolutionLike(sol.fault_regime, sol.fault_sections, sol.fault_sections_with_rupture_rates)
 
         # assert isinstance(likeness, InversionSolution)
         assert likeness.fault_regime == 'CRUSTAL'

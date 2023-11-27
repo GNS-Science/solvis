@@ -12,12 +12,14 @@ class InversionSolutionProtocol(Protocol):
     _rates: pd.DataFrame = ...
     _ruptures: pd.DataFrame = ...
     _indices: pd.DataFrame = ...
+    _average_slips: pd.DataFrame = ...
+    _sect_slip_rates: pd.DataFrame = ...
     _rupture_sections: pd.DataFrame = ...
     _fs_with_rates: pd.DataFrame = ...
     _fs_with_soln_rates: pd.DataFrame = ...
-    _rs_with_rates: pd.DataFrame = ...
+    _rs_with_rupture_rates: pd.DataFrame = ...
     _fault_sections: pd.DataFrame = ...
-    _ruptures_with_rates: pd.DataFrame = ...
+    _ruptures_with_rupture_rates: pd.DataFrame = ...
     _archive_path: Optional[Path]
     _archive: Optional[zipfile.ZipFile]
 
@@ -32,16 +34,24 @@ class InversionSolutionProtocol(Protocol):
         """solution requires fault sections"""
 
     @property
-    def fault_sections_with_rates(self) -> gpd.GeoDataFrame:
+    def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
         """solution requires fault sections with rates"""
 
     @property
-    def rates(self) -> gpd.GeoDataFrame:
+    def rupture_rates(self) -> gpd.GeoDataFrame:
         """the event rate for each rupture."""
 
     @property
     def ruptures(self) -> gpd.GeoDataFrame:
         """the properties of each rupture."""
+
+    @property
+    def average_slips(self) -> gpd.GeoDataFrame:
+        """the average slips for each rupture."""
+
+    @property
+    def section_target_slip_rates(self) -> gpd.GeoDataFrame:
+        """the inversion target slip rates for each rupture."""
 
     @property
     def indices(self) -> gpd.GeoDataFrame:
@@ -59,7 +69,7 @@ class InversionSolutionProtocol(Protocol):
         raise NotImplementedError()
 
     @property
-    def rs_with_rates(self) -> gpd.GeoDataFrame:
+    def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
         """the event rate for each rupture section."""
 
     @property

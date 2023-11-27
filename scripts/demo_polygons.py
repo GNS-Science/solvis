@@ -36,7 +36,7 @@ def process(sol, location, radius_m, rate_threshold=None):
         )
         print(f"write new solution file: {new_archive}")
         print(
-            f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rates[ri_sol.rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}"
+            f"Filtered InversionSolution {loc[0]} within {radius} has {ri_sol.rupture_rates[ri_sol.rupture_rates['Annual Rate']>rate_threshold].size} ruptures where rate > {rate_threshold}"
         )
 
         ri_sol.to_archive(str(new_archive), str(base_archive), compat)
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     print(f"Build Filtered Inversion Solutions for source {name}.")
     print()
-    print(f"with {sol.ruptures_with_rates[sol.ruptures_with_rates['Annual Rate']>0].size} ruptures with rate>0.")
+    print(f"with {sol.ruptures_with_rupture_rates[sol.ruptures_with_rupture_rates['Annual Rate']>0].size} ruptures with rate>0.")
     print()
 
     for threshold in rate_filters:

@@ -21,7 +21,7 @@ def parent_fault_names(
 
 # filtered_rupture_sections (with geometry)
 def section_participation(sol: InversionSolutionProtocol, df_ruptures: pd.DataFrame = None):
-    sr = sol.rs_with_rates
+    sr = sol.rs_with_rupture_rates
     if df_ruptures is not None:
         filtered_sections_with_rates_df = sr[(sr["Rupture Index"].isin(list(df_ruptures))) & (sr['Annual Rate'] > 0)]
     else:
@@ -53,7 +53,7 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
 
 
 def rupt_ids_above_rate(sol: InversionSolutionProtocol, rate: float, rate_column: str = "Annual Rate"):
-    rr = sol.rates
+    rr = sol.rupture_rates
     if not rate:
         return rr["Rupture Index"].unique()
     return rr[rr[rate_column] > rate]["Rupture Index"].unique()

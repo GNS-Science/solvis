@@ -191,7 +191,7 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
     composite.to_archive(new_path)
     toc = time.perf_counter()
     click.echo(f'created composite solution file {new_path.name} in {toc-tic} seconds')
-    # print( composite.rates )
+    # print( composite.rupture_rates )
     # print()
     # print(composite.rupture_surface("HIK", 1))
 
@@ -269,7 +269,7 @@ def query(ctx):
     sol = FaultSystemSolution.from_archive(fname)
 
     print(sol)
-    print(sol.rates)
+    print(sol.rupture_rates)
     tic = time.perf_counter()
 
     LOC = location_by_id('KBZ')

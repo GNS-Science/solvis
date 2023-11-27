@@ -149,7 +149,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         # combine the rupture rates from all solutions
         composite_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
         for branch_solution in solutions:
-            solution_df = branch_solution.rates.copy()
+            solution_df = branch_solution.rupture_rates.copy()
             solution_df.insert(
                 0, 'solution_id', branch_solution.branch.inversion_solution_id
             )  # CategoricalDtype(categories=['PUY'], ordered=False)
