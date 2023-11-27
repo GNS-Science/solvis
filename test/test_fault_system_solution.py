@@ -21,8 +21,8 @@ COMPOSITE_RATE_COLUMNS = 6
 def test_from_puy_branch_solutions(puy_branch_solutions):
     print(fslt.branches)
     composite = FaultSystemSolution.from_branch_solutions(puy_branch_solutions)
-    print(composite.fault_sections_with_rates)
-    assert composite.fault_sections_with_rates.shape == (148394, FSR_COLUMNS_A)
+    print(composite.fault_sections_with_rupture_rates)
+    assert composite.fault_sections_with_rupture_rates.shape == (148394, FSR_COLUMNS_A)
 
 
 class TestSmallCrustal(object):
@@ -89,12 +89,12 @@ class TestSmallCrustal(object):
 #         print(sol.rs_with_rates)
 #         assert len(sol.rs_with_rates["Rupture Index"].unique()) == sol.rupture_rates.shape[0]
 
-#     def test_fault_sections_with_rates_shape(self, puysegur_fixture):
+#     def test_fault_sections_with_rupture_rates_shape(self, puysegur_fixture):
 #         sol = puysegur_fixture
-#         print(sol.fault_sections_with_rates.info())
+#         print(sol.fault_sections_with_rupture_rates.info())
 #         print()
-#         print(sol.fault_sections_with_rates)
-#         assert puysegur_fixture.fault_sections_with_rates.shape == (148394, FSR_COLUMNS_A)
+#         print(sol.fault_sections_with_rupture_rates)
+#         assert puysegur_fixture.fault_sections_with_rupture_rates.shape == (148394, FSR_COLUMNS_A)
 
 
 class TestSmallDataFrames(object):
@@ -124,12 +124,12 @@ class TestSmallDataFrames(object):
         print(sol.rs_with_rates)
         assert len(sol.rs_with_rates["Rupture Index"].unique()) == sol.rupture_rates.shape[0]
 
-    def test_fault_sections_with_rates_shape(self, puysegur_small_fss_fixture):
+    def test_fault_sections_with_rupture_rates_shape(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
-        print(sol.fault_sections_with_rates.info())
+        print(sol.fault_sections_with_rupture_rates.info())
         print()
-        print(sol.fault_sections_with_rates)
-        assert puysegur_small_fss_fixture.fault_sections_with_rates.shape == (83, FSR_COLUMNS_A)
+        print(sol.fault_sections_with_rupture_rates)
+        assert puysegur_small_fss_fixture.fault_sections_with_rupture_rates.shape == (83, FSR_COLUMNS_A)
 
 
 class TestPuysegurSmallSurfaces(object):
@@ -152,8 +152,8 @@ class TestPuysegurSmallSurfaces(object):
 
 @pytest.mark.slow
 class TestHikurangi(object):
-    def test_fault_sections_with_rates_shape(self, hikurangi_fixture):
-        assert hikurangi_fixture.fault_sections_with_rates.shape == (42403, FSR_COLUMNS_B)
+    def test_fault_sections_with_rupture_rates_shape(self, hikurangi_fixture):
+        assert hikurangi_fixture.fault_sections_with_rupture_rates.shape == (42403, FSR_COLUMNS_B)
 
     def test_fault_surfaces(self, hikurangi_fixture):
         surfaces = hikurangi_fixture.fault_surfaces()
@@ -176,9 +176,9 @@ class TestHikurangi(object):
 @pytest.mark.slow
 class TestSmallHikurangi(object):
     @pytest.mark.TODO_check_values
-    def test_fault_sections_with_rates_shape(self, hikurangi_small_fss_fixture):
-        print(hikurangi_small_fss_fixture.fault_sections_with_rates)
-        assert hikurangi_small_fss_fixture.fault_sections_with_rates.shape == (20, FSR_COLUMNS_B)
+    def test_fault_sections_with_rupture_rates_shape(self, hikurangi_small_fss_fixture):
+        print(hikurangi_small_fss_fixture.fault_sections_with_rupture_rates)
+        assert hikurangi_small_fss_fixture.fault_sections_with_rupture_rates.shape == (20, FSR_COLUMNS_B)
 
     @pytest.mark.TODO_check_values
     def test_fault_surfaces(self, hikurangi_small_fss_fixture):

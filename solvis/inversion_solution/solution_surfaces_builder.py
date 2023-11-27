@@ -66,9 +66,9 @@ class SolutionSurfacesBuilder:
         :return: a gpd.GeoDataFrame
         """
         tic = time.perf_counter()
-        df0 = self._solution.fault_sections_with_rates.copy()
+        df0 = self._solution.fault_sections_with_rupture_rates.copy()
         toc = time.perf_counter()
-        log.debug('time to load fault_sections_with_rates: %2.3f seconds' % (toc - tic))
+        log.debug('time to load fault_sections_with_rupture_rates: %2.3f seconds' % (toc - tic))
         rupt = df0[df0["Rupture Index"] == rupture_id]
         if self._solution.fault_regime == 'SUBDUCTION':
             return rupt.set_geometry([create_subduction_section_surface(section) for i, section in rupt.iterrows()])

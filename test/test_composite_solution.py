@@ -39,8 +39,8 @@ class TestThreeFaultSystems(object):
         assert surface.shape == (5, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
-    def test_fault_sections_with_rates_shape(self, composite_fixture):
-        assert composite_fixture.fault_sections_with_rates.shape == (229102, FSR_COLUMNS_A)
+    def test_fault_sections_with_rupture_rates_shape(self, composite_fixture):
+        assert composite_fixture.fault_sections_with_rupture_rates.shape == (229102, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
     def test_fault_surfaces(self, composite_fixture):
@@ -70,8 +70,8 @@ class TestThreeSmallFaultSystems(object):
         assert surface.shape == (5, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
-    def test_fault_sections_with_rates_shape(self, small_composite_fixture):
-        assert small_composite_fixture.fault_sections_with_rates.shape == (148, FSR_COLUMNS_A)
+    def test_fault_sections_with_rupture_rates_shape(self, small_composite_fixture):
+        assert small_composite_fixture.fault_sections_with_rupture_rates.shape == (148, FSR_COLUMNS_A)
 
     @pytest.mark.TODO_check_values
     def test_fault_surfaces(self, small_composite_fixture):

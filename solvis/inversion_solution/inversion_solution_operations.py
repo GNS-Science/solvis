@@ -79,7 +79,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return df2
 
     @property
-    def fault_sections_with_rates(self) -> gpd.GeoDataFrame:
+    def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
         """
         Calculate and cache the fault sections and their rupture rates.
 
@@ -92,7 +92,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         self._fs_with_rates = self.rs_with_rates.join(self.fault_sections, 'section', how='inner')
         toc = time.perf_counter()
         log.debug(
-            'fault_sections_with_rates: time to load rs_with_rates and join with fault_sections: %2.3f seconds'
+            'fault_sections_with_rupture_rates: time to load rs_with_rates and join with fault_sections: %2.3f seconds'
             % (toc - tic)
         )
 
@@ -130,9 +130,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         fault_sections_wr = self.fault_sections.copy()
         for ind, fault_section in self.fault_sections.iterrows():
             fault_id = fault_section['FaultID']
-            fswr_gt0 = self.fault_sections_with_rates[
-                (self.fault_sections_with_rates['FaultID'] == fault_id)
-                & (self.fault_sections_with_rates['Annual Rate'] > 0.0)
+            fswr_gt0 = self.fault_sections_with_rupture_rates[
+                (self.fault_sections_with_rupture_rates['FaultID'] == fault_id)
+                & (self.fault_sections_with_rupture_rates['Annual Rate'] > 0.0)
             ]
             fault_sections_wr.loc[ind, 'Solution Slip Rate'] = sum(
                 fswr_gt0['Annual Rate'] * average_slips.loc[fswr_gt0['Rupture Index']]['Average Slip (m)']
