@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0] - 2023-12-08
+## Changed
+ - fix missing indices error
+ - *.to_archive() base_archive_path can None if we already have a valid self._archive
+## Added
+ - FaultSystemSolution.to_archive() adds a solution/rates.csv file, with Annual rates from rate_weighted_mean aggregate.
+
 ## [0.10.0] - 2023-11-28
 ## Changed
 - change class property names to clarify if rates are rupture rates or slip rates

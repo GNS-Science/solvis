@@ -108,17 +108,12 @@ class InversionSolutionFile(InversionSolutionProtocol):
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
         # write out the `self` dataframes
         log.info("%s write_dataframes with fast_indices: %s" % (type(self), self._fast_indices is not None))
+        data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(index=reindex), self.RATES_PATH)
+        data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(index=reindex), self.RUPTS_PATH)
+        data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(index=reindex), self.INDICES_PATH)
 
-        if reindex:  # for compatible
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(index=True), self.RATES_PATH)
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(index=True), self.RUPTS_PATH)
-            data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(index=True), self.INDICES_PATH)
-        else:
-            data_to_zip_direct(zip_archive, self._rates.to_csv(index=False), self.RATES_PATH)
-            data_to_zip_direct(zip_archive, self._ruptures.to_csv(index=False), self.RUPTS_PATH)
-            data_to_zip_direct(zip_archive, self._indices.to_csv(index=False), self.INDICES_PATH)
 
-    def to_archive(self, archive_path, base_archive_path, compat=False):
+    def to_archive(self, archive_path, base_archive_path=None, compat=False):
         """
         Writes the current solution to a new zip archive, cloning data from a base archive
         """
