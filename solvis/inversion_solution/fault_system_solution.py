@@ -1,3 +1,4 @@
+import io
 import logging
 import zipfile
 from pathlib import Path
@@ -56,6 +57,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         cr = solution.composite_rates
         ar = solution.aggregate_rates
         ri = solution.indices
+
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         composite_rates = cr[cr["Rupture Index"].isin(rupture_ids)].copy()
         aggregate_rates = ar[ar["Rupture Index"].isin(rupture_ids)].copy()
@@ -67,6 +69,15 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             composite_rates, aggregate_rates, ruptures, indices, solution.fault_sections.copy(), solution.fault_regime
         )
         ns._archive_path = solution._archive_path
+
+        # copy the original archive, if it exists
+        # TODO: does the archive needs filtering applied?? see to_archive()
+        if solution._archive:
+            new_archive = io.BytesIO()
+            with zipfile.ZipFile(new_archive, 'w') as new_zip:
+                for item in solution._archive.filelist:
+                    new_zip.writestr(item, solution._archive.read(item.filename))
+            ns._archive = zipfile.ZipFile(new_archive, 'r')
         return ns
 
     @staticmethod

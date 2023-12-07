@@ -92,8 +92,10 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         self._fs_with_rates = self.rs_with_rupture_rates.join(self.fault_sections, 'section', how='inner')
         toc = time.perf_counter()
         log.debug(
-            ('fault_sections_with_rupture_rates: time to load rs_with_rupture_rates '
-             'and join with fault_sections: %2.3f seconds')
+            (
+                'fault_sections_with_rupture_rates: time to load rs_with_rupture_rates '
+                'and join with fault_sections: %2.3f seconds'
+            )
             % (toc - tic)
         )
 
@@ -154,8 +156,10 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         toc = time.perf_counter()
         log.debug(
-            ('rs_with_rupture_rates: time to load ruptures_with_rupture_rates '
-             'and join with rupture_sections: %2.3f seconds')
+            (
+                'rs_with_rupture_rates: time to load ruptures_with_rupture_rates '
+                'and join with rupture_sections: %2.3f seconds'
+            )
             % (toc - tic)
         )
         return self._rs_with_rupture_rates

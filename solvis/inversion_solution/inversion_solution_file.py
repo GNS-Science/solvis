@@ -92,7 +92,6 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._indices = None
         self._section_target_slip_rates = None
         self._fast_indices = None
-        self._fast_indices = None
         self._rs_with_rupture_rates = None
         self._fs_with_rates = None
         self._fs_with_soln_rates = None
@@ -123,13 +122,19 @@ class InversionSolutionFile(InversionSolutionProtocol):
         """
         Writes the current solution to a new zip archive, cloning data from a base archive
         """
+
+        if base_archive_path is None:
+            # try to use this archive, rather than a base archive
+            zin = self._archive
+        else:
+            zin = zipfile.ZipFile(base_archive_path, 'r')
+
         log.debug('create zipfile %s with method %s' % (archive_path, ZIP_METHOD))
         zout = zipfile.ZipFile(archive_path, 'w', ZIP_METHOD)
 
-        # this copies in memory, skipping the dataframe files we'll want to overwrite
-        zin = zipfile.ZipFile(base_archive_path, 'r')
-
         log.debug('to_archive: skipping files: %s' % self.DATAFRAMES)
+        # this copies in memory, skipping the dataframe files we'll want to overwrite
+
         for item in zin.infolist():
             if item.filename in self.DATAFRAMES:
                 continue
@@ -233,10 +238,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def indices(self) -> gpd.GeoDataFrame:
-        # dtypes: defaultdict = defaultdict(pd.UInt16Dtype)
-        # dtypes["Rupture Index"] = pd.UInt32Dtype()
-        # dtypes["Num Sections"] = pd.UInt16Dtype()
-        return self._dataframe_from_csv(self._indices, self.INDICES_PATH)  # no dtype is faster!!
+        return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
 
     @property
     def average_slips(self) -> gpd.GeoDataFrame:
