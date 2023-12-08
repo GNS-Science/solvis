@@ -1,7 +1,8 @@
 # Changelog
 
-## [0.11.0] - 2023-12-08
+## [0.11.0] - 2023-12-09
 ## Changed
+ - remove unnecessary poetry groups from pyproject.toml
  - fix missing indices error
  - *.to_archive() base_archive_path can None if we already have a valid self._archive
 ## Added
