@@ -112,7 +112,6 @@ class InversionSolutionFile(InversionSolutionProtocol):
         data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(index=reindex), self.RUPTS_PATH)
         data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(index=reindex), self.INDICES_PATH)
 
-
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
         """
         Writes the current solution to a new zip archive, cloning data from a base archive
