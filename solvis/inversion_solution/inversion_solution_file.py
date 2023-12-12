@@ -1,3 +1,4 @@
+import io
 import json
 import logging
 import time
@@ -57,6 +58,7 @@ Inversion Solution archive file:
  - 'solution/rates.csv'
  - 'ruptures/properties.csv'
  - 'ruptures/indices.csv'
+ - 'ruptures/average_slips.csv'
 
 """
 
@@ -82,7 +84,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
     LOGIC_TREE_PATH = 'ruptures/logic_tree_branch.json'
     SECT_SLIP_RATES_PATH = 'ruptures/sect_slip_rates.csv'
 
-    DATAFRAMES = [RATES_PATH, RUPTS_PATH, INDICES_PATH]
+    DATAFRAMES = [RATES_PATH, RUPTS_PATH, INDICES_PATH, AVG_SLIPS_PATH]
 
     def __init__(self) -> None:
         # self._init_props()
@@ -102,7 +104,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._fault_sections = None
         self._rupture_sections = None
         self._archive_path: Optional[Path] = None
-        self._archive: Optional[zipfile.ZipFile] = None
+        self._archive: Optional[io.BytesIO] = None
         # self._surface_builder: SolutionSurfacesBuilder
 
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
@@ -111,12 +113,14 @@ class InversionSolutionFile(InversionSolutionProtocol):
         data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(index=reindex), self.RATES_PATH)
         data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(index=reindex), self.RUPTS_PATH)
         data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(index=reindex), self.INDICES_PATH)
+        data_to_zip_direct(
+            zip_archive, reindex_dataframe(self._average_slips).to_csv(index=reindex), self.AVG_SLIPS_PATH
+        )
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
         """
         Writes the current solution to a new zip archive, cloning data from a base archive
         """
-
         if base_archive_path is None:
             # try to use this archive, rather than a base archive
             zin = self._archive
@@ -154,15 +158,19 @@ class InversionSolutionFile(InversionSolutionProtocol):
     @property
     def archive(self) -> zipfile.ZipFile:
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
+        archive = None
         if self._archive is None:
             if self._archive_path is None:
                 raise RuntimeError("archive_path ARGG")
             else:
                 tic = time.perf_counter()
-                self._archive = zipfile.ZipFile(self._archive_path)
+                data = io.BytesIO(open(self._archive_path, 'rb').read())
+                archive = zipfile.ZipFile(data)
                 toc = time.perf_counter()
                 log.debug('archive time to open zipfile %s %2.3f seconds' % (self._archive_path, toc - tic))
-        return self._archive
+        else:
+            archive = zipfile.ZipFile(self._archive)
+        return archive
 
     def _dataframe_from_csv(self, prop, path, dtype=None):
         log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))
@@ -247,10 +255,16 @@ class InversionSolutionFile(InversionSolutionProtocol):
         return self._dataframe_from_csv(self._section_target_slip_rates, self.SECT_SLIP_RATES_PATH)
 
     def set_props(
-        self, rates: pd.DataFrame, ruptures: pd.DataFrame, indices: pd.DataFrame, fault_sections: pd.DataFrame
+        self,
+        rates: pd.DataFrame,
+        ruptures: pd.DataFrame,
+        indices: pd.DataFrame,
+        fault_sections: pd.DataFrame,
+        average_slips: pd.DataFrame,
     ):
         # self._init_props()
         self._rates = rates
         self._ruptures = ruptures
         self._fault_sections = fault_sections
         self._indices = indices
+        self._average_slips = average_slips

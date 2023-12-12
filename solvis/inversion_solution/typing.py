@@ -1,3 +1,4 @@
+import io
 import zipfile
 from pathlib import Path
 from typing import Any, List, Mapping, Optional, Protocol, Union
@@ -21,7 +22,7 @@ class InversionSolutionProtocol(Protocol):
     _fault_sections: pd.DataFrame = ...
     _ruptures_with_rupture_rates: pd.DataFrame = ...
     _archive_path: Optional[Path]
-    _archive: Optional[zipfile.ZipFile]
+    _archive: Optional[io.BytesIO]
 
     FAULTS_PATH: Union[Path, str] = ''
 

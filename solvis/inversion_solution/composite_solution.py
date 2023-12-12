@@ -7,6 +7,7 @@ import geopandas as gpd
 import pandas as pd
 
 from .fault_system_solution import FaultSystemSolution
+from .inversion_solution_file import data_to_zip_direct
 
 # from .typing import CompositeSolutionProtocol
 from .inversion_solution_operations import CompositeSolutionOperations
@@ -77,10 +78,16 @@ class CompositeSolution(CompositeSolutionOperations):
     def to_archive(self, archive_path: Union[Path, str]):
         with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zout:
             for key, fss in self._solutions.items():
-                if fss.archive_path is None:
+                fss_name = f"{key}_fault_system_solution.zip"
+                if fss._archive:
+                    # we can serialise the 'in-memory' archive now
+                    # fss._archive
+                    # print(fss._archive))
+                    data_to_zip_direct(zout, fss._archive.read(), fss_name)
+                elif fss.archive_path is None:
                     raise RuntimeError("archive_path is not defined")
                 else:
-                    zout.write(fss.archive_path, arcname=f"{key}_fault_system_solution.zip")
+                    zout.write(fss.archive_path, arcname=fss_name)
         self._archive_path = archive_path
 
     @staticmethod
@@ -98,15 +105,15 @@ class CompositeSolution(CompositeSolutionOperations):
 
                 # print(f"fault_system_lt.short_name: {fault_system_lt.short_name }")
                 fss = FaultSystemSolution.from_archive(
-                    zipfile.ZipFile(
-                        io.BytesIO(
-                            zipfile.Path(
-                                archive_path, at=f'{fault_system_lt.short_name}_fault_system_solution.zip'
-                            ).read_bytes()
-                        )
+                    # zipfile.ZipFile(
+                    io.BytesIO(
+                        zipfile.Path(
+                            archive_path, at=f'{fault_system_lt.short_name}_fault_system_solution.zip'
+                        ).read_bytes()
                     )
-                    # Path(archive_path.parent, f"{fault_system_lt.short_name}_fault_system_solution.zip")
                 )
+                # Path(archive_path.parent, f"{fault_system_lt.short_name}_fault_system_solution.zip")
+                # )
                 new_solution.add_fault_system_solution(fault_system_lt.short_name, fss)
 
         new_solution._archive_path = archive_path

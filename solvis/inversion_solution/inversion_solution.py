@@ -1,3 +1,4 @@
+import io
 import zipfile
 from pathlib import Path
 from typing import Union
@@ -11,11 +12,11 @@ from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
 
 class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
     @staticmethod
-    def from_archive(instance_or_path: Union[Path, str, zipfile.ZipFile]) -> 'InversionSolution':
+    def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':
         new_solution = InversionSolution()
 
-        if isinstance(instance_or_path, zipfile.ZipFile):
-            assert 'ruptures/indices.csv' in instance_or_path.namelist()
+        if isinstance(instance_or_path, io.BytesIO):
+            # assert 'ruptures/indices.csv' in instance_or_path.namelist()
             new_solution._archive = instance_or_path
         else:
             assert Path(instance_or_path).exists()
@@ -28,13 +29,15 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         rr = solution.ruptures
         ra = solution.rupture_rates
         ri = solution.indices
+        avs = solution.average_slips
+
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
         indices = ri[ri["Rupture Index"].isin(rupture_ids)].copy()
+        average_slips = avs[avs["Rupture Index"].isin(rupture_ids)].copy()
 
-        # all other solution properties are derived from those above
         ns = InversionSolution()
-        ns.set_props(rates, ruptures, indices, solution.fault_sections.copy())
+        ns.set_props(rates, ruptures, indices, solution.fault_sections.copy(), average_slips)
         ns._archive_path = solution._archive_path
         return ns
 
@@ -58,7 +61,7 @@ class BranchInversionSolution(InversionSolution):
         bis.branch = branch
         bis.fault_system = fault_system
         bis.rupture_set_id = rupture_set_id
-        bis.set_props(rates, ruptures, indices, solution.fault_sections.copy())
+        bis.set_props(rates, ruptures, indices, solution.fault_sections.copy(), solution.average_slips.copy())
         bis._archive_path = solution._archive_path
         return bis
 

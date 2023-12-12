@@ -38,10 +38,13 @@ class FaultSystemSolutionFile(InversionSolutionFile):
 
     FAST_INDICES_PATH = 'ruptures/fast_indices.csv'  # store indices in standard table format for much faster I/O
 
-    DATAFRAMES = [
-        InversionSolutionFile.RATES_PATH,
-        InversionSolutionFile.RUPTS_PATH,
-        InversionSolutionFile.INDICES_PATH,
+    # OPENSHA_ONLY
+    OPENSHA_LTB_PATH = 'ruptures/logic_tree_branch.json'
+    OPENSHA_SECT_POLYS_PATH = 'ruptures/sect_polygons.geojson'
+    OPENSHA_GRID_REGION_PATH = 'ruptures/grid_region.geojson'
+    OPENSHA_ONLY = [OPENSHA_LTB_PATH, OPENSHA_SECT_POLYS_PATH, OPENSHA_GRID_REGION_PATH]
+
+    DATAFRAMES = InversionSolutionFile.DATAFRAMES + [
         COMPOSITE_RATES_PATH,
         AGGREGATE_RATES_PATH,
         FAST_INDICES_PATH,
@@ -60,13 +63,6 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         Writes the current solution to a new zip archive, cloning data from a base archive
         """
         log.debug("%s to_archive %s" % (type(self), archive_path))
-
-        # Now we need a rates table, structurecd correctly, with weights from the aggregate_rates
-        rates = self.aggregate_rates.drop(columns=['rate_max', 'rate_min', 'rate_count', 'fault_system']).rename(
-            columns={"rate_weighted_mean": "Annual Rate"}
-        )
-        self._rates = rates
-
         self.enable_fast_indices()
         super().to_archive(archive_path, base_archive_path, compat=False)
 
