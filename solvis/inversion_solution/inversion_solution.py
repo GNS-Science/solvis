@@ -16,7 +16,8 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         new_solution = InversionSolution()
 
         if isinstance(instance_or_path, io.BytesIO):
-            # assert 'ruptures/indices.csv' in instance_or_path.namelist()
+            with zipfile.ZipFile(instance_or_path, 'r') as zf:
+                assert 'ruptures/indices.csv' in zf.namelist()
             new_solution._archive = instance_or_path
         else:
             assert Path(instance_or_path).exists()

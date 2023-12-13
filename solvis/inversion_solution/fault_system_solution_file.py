@@ -88,10 +88,6 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         df = self._dataframe_from_csv(self._aggregate_rates, self.AGGREGATE_RATES_PATH, dtypes)
         return df.set_index(["fault_system", "Rupture Index"], drop=False)
 
-    # @property
-    # def rupture_rates(self):
-    #     raise NotImplementedError("Use aggregate_rates instead")
-
     @property
     def fast_indices(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(pd.UInt32Dtype)

@@ -13,7 +13,7 @@ import solvis
 def composite_fixture(request):
     slt = nm.get_model_version("NSHM_v1.0.4").source_logic_tree()
     # archive = pathlib.PurePath(os.path.realpath(__file__)).parent / f"fixtures/NSHM_v1.0.4_CompositeSolution.zip"
-    archive = pathlib.PurePath(os.path.realpath(__file__)).parent.parent / 'WORK/NSHM_v1.0.4_CompositeSolution.zip'
+    archive = pathlib.PurePath(os.path.realpath(__file__)).parent.parent / 'WORK/NSHM_v1.0.4_CompositeSolution-M1.zip'
     yield solvis.CompositeSolution.from_archive(archive, slt)
 
 

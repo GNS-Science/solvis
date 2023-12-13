@@ -20,10 +20,6 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
 
     _composite_rates: pd.DataFrame = ...
 
-    # def __init__(self, source_logic_tree):
-    #     self._source_logic_tree = source_logic_tree
-    #     self._solutions = {}
-
     def set_props(
         self, composite_rates, aggregate_rates, ruptures, indices, fault_sections, fault_regime, average_slips
     ):
@@ -102,7 +98,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
                             continue
                         new_zip.writestr(item, zf.read(item.filename))
                 # write the modifies tables
-                ns._write_dataframes(new_zip, reindex=False)  # retain original rupture ids
+                ns._write_dataframes(new_zip, reindex=False)  # retain original rupture ids and structure
             ns._archive = new_archive
             ns._archive.seek(0)
         return ns
@@ -167,9 +163,6 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
 
             # print('dims', composite_rates_df.shape, solution_df.shape)
-
-        # composite_rates_df.solution_id = composite_rates_df.solution_id.astype('category')
-        # composite_rates_df.fault_system = composite_rates_df.fault_system.astype('category')
         return FaultSystemSolution.new_solution(solution=branch_solution, composite_rates_df=composite_rates_df)
 
     @property

@@ -81,8 +81,6 @@ class CompositeSolution(CompositeSolutionOperations):
                 fss_name = f"{key}_fault_system_solution.zip"
                 if fss._archive:
                     # we can serialise the 'in-memory' archive now
-                    # fss._archive
-                    # print(fss._archive))
                     data_to_zip_direct(zout, fss._archive.read(), fss_name)
                 elif fss.archive_path is None:
                     raise RuntimeError("archive_path is not defined")
@@ -94,26 +92,16 @@ class CompositeSolution(CompositeSolutionOperations):
     def from_archive(archive_path: Path, source_logic_tree: Any) -> 'CompositeSolution':
         new_solution = CompositeSolution(source_logic_tree)
 
-        # print("NEW_SOL", new_solution, new_solution._solutions, new_solution.archive_path)
-        # zout = zipfile.ZipFile(archive_path)
-        # zout.extractall(archive_path.parent)
-
         for fault_system_lt in source_logic_tree.fault_system_lts:
             if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
-
                 assert zipfile.Path(archive_path, at=f'{fault_system_lt.short_name}_fault_system_solution.zip').exists()
-
-                # print(f"fault_system_lt.short_name: {fault_system_lt.short_name }")
                 fss = FaultSystemSolution.from_archive(
-                    # zipfile.ZipFile(
                     io.BytesIO(
                         zipfile.Path(
                             archive_path, at=f'{fault_system_lt.short_name}_fault_system_solution.zip'
                         ).read_bytes()
                     )
                 )
-                # Path(archive_path.parent, f"{fault_system_lt.short_name}_fault_system_solution.zip")
-                # )
                 new_solution.add_fault_system_solution(fault_system_lt.short_name, fss)
 
         new_solution._archive_path = archive_path

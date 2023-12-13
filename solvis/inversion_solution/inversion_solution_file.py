@@ -110,12 +110,15 @@ class InversionSolutionFile(InversionSolutionProtocol):
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
         # write out the `self` dataframes
         log.info("%s write_dataframes with fast_indices: %s" % (type(self), self._fast_indices is not None))
-        data_to_zip_direct(zip_archive, reindex_dataframe(self._rates).to_csv(index=reindex), self.RATES_PATH)
-        data_to_zip_direct(zip_archive, reindex_dataframe(self._ruptures).to_csv(index=reindex), self.RUPTS_PATH)
-        data_to_zip_direct(zip_archive, reindex_dataframe(self._indices).to_csv(index=reindex), self.INDICES_PATH)
-        data_to_zip_direct(
-            zip_archive, reindex_dataframe(self._average_slips).to_csv(index=reindex), self.AVG_SLIPS_PATH
-        )
+        rates = reindex_dataframe(self._rates) if reindex else self._rates
+        rupts = reindex_dataframe(self._ruptures) if reindex else self._ruptures
+        indices = reindex_dataframe(self._indices) if reindex else self._indices
+        slips = reindex_dataframe(self._average_slips) if reindex else self._average_slips
+
+        data_to_zip_direct(zip_archive, rates.to_csv(index=reindex), self.RATES_PATH)
+        data_to_zip_direct(zip_archive, rupts.to_csv(index=reindex), self.RUPTS_PATH)
+        data_to_zip_direct(zip_archive, indices.to_csv(index=reindex), self.INDICES_PATH)
+        data_to_zip_direct(zip_archive, slips.to_csv(index=reindex), self.AVG_SLIPS_PATH)
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
         """
@@ -244,7 +247,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def average_slips(self) -> gpd.GeoDataFrame:
-        dtypes: defaultdict = defaultdict(np.float32)
+        dtypes: defaultdict = defaultdict(np.float64)
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         return self._dataframe_from_csv(self._average_slips, self.AVG_SLIPS_PATH, dtypes)
 

@@ -2,16 +2,14 @@ import os
 import pathlib
 
 import nzshm_model as nm
-import pytest
 
 import solvis
 
-# import tempfile
+import pytest
 
+# import tempfile
 # from copy import deepcopy
 # from test.conftest import branch_solutions
-
-
 # from solvis import CompositeSolution, FaultSystemSolution
 
 tests_folder = pathlib.PurePath(os.path.realpath(__file__)).parent
@@ -25,7 +23,7 @@ work_folder = tests_folder / ".." / "WORK"
 @pytest.mark.skip("WIP still need to properly serialise FSS with filtered tables and indexing")
 def test_composite_filtering():
     slt = nm.get_model_version('NSHM_v1.0.4').source_logic_tree()
-    composite_v1_0_4 = solvis.CompositeSolution.from_archive(work_folder / "NSHM_v1.0.4_CompositeSolution.zip", slt)
+    composite_v1_0_4 = solvis.CompositeSolution.from_archive(work_folder / "NSHM_v1.0.4_CompositeSolution-M1.zip", slt)
 
     # folder = tempfile.TemporaryDirectory()
     print(composite_v1_0_4._solutions)
