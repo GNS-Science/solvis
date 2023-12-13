@@ -39,10 +39,10 @@ class FaultSystemSolutionFile(InversionSolutionFile):
     FAST_INDICES_PATH = 'ruptures/fast_indices.csv'  # store indices in standard table format for much faster I/O
 
     # OPENSHA_ONLY
-    OPENSHA_LTB_PATH = 'ruptures/logic_tree_branch.json'
+    # OPENSHA_LTB_PATH = 'ruptures/logic_tree_branch.json'
     OPENSHA_SECT_POLYS_PATH = 'ruptures/sect_polygons.geojson'
     OPENSHA_GRID_REGION_PATH = 'ruptures/grid_region.geojson'
-    OPENSHA_ONLY = [OPENSHA_LTB_PATH, OPENSHA_SECT_POLYS_PATH, OPENSHA_GRID_REGION_PATH]
+    OPENSHA_ONLY = [OPENSHA_SECT_POLYS_PATH, OPENSHA_GRID_REGION_PATH]
 
     DATAFRAMES = InversionSolutionFile.DATAFRAMES + [
         COMPOSITE_RATES_PATH,

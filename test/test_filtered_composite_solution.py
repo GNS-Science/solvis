@@ -2,10 +2,9 @@ import os
 import pathlib
 
 import nzshm_model as nm
+import pytest
 
 import solvis
-
-import pytest
 
 # import tempfile
 # from copy import deepcopy

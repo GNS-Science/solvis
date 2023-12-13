@@ -83,7 +83,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             average_slips,
         )
         # ns._archive_path = None
-
+        ns.enable_fast_indices()
         # copy the original archive, if it exists
         # TODO: does the archive needs filtering applied?? see to_archive()
         if solution._archive:

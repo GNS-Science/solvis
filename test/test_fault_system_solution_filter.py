@@ -12,8 +12,7 @@ import solvis
 @pytest.fixture(scope='module')
 def composite_fixture(request):
     slt = nm.get_model_version("NSHM_v1.0.4").source_logic_tree()
-    # archive = pathlib.PurePath(os.path.realpath(__file__)).parent / f"fixtures/NSHM_v1.0.4_CompositeSolution.zip"
-    archive = pathlib.PurePath(os.path.realpath(__file__)).parent.parent / 'WORK/NSHM_v1.0.4_CompositeSolution-M1.zip'
+    archive = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures/TinyCompositeSolution.zip"
     yield solvis.CompositeSolution.from_archive(archive, slt)
 
 
@@ -29,4 +28,3 @@ def test_filter_from_complete_composite(composite_fixture):
     new_sol = solvis.FaultSystemSolution.filter_solution(sol, ruptures)
 
     assert ruptures.shape[0] == new_sol.ruptures.shape[0]
-    # assert 0
