@@ -55,6 +55,7 @@ tox = "^4.4.4"
 ipython = "^8.11.0"
 mypy = "^1.7.1"
 pytest-xdist = "^3.5.0"
+pyqt5 = "5.15.2"
 
 [tool.poetry.extras]
 scripts = [
