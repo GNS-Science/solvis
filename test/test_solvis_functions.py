@@ -1,6 +1,8 @@
-import solvis.solvis
 import pandas as pd
 import pytest
+
+import solvis.solvis
+
 
 def test_mfd_hist(crustal_small_fss_fixture, crustal_solution_fixture):
 

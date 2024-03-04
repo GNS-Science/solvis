@@ -24,13 +24,7 @@ REQUIRES_PYTHON = '>=3.8.0'
 VERSION = '0.0.3'
 
 # What packages are required for this module to be executed?
-REQUIRED = [
- 'numpy',
- 'pandas',
- 'geopandas',
- 'pyproj',
- 'Shapely'
-]
+REQUIRED = ['numpy', 'pandas', 'geopandas', 'pyproj', 'Shapely']
 
 # What packages are optional?
 EXTRAS = {
@@ -110,10 +104,11 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=["lib", "bin", "tests", "*.tests", "*.tests.*", "tests.*", "samples", "scripts", "doc"]),
+    packages=find_packages(
+        exclude=["lib", "bin", "tests", "*.tests", "*.tests.*", "tests.*", "samples", "scripts", "doc"]
+    ),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
-
     # entry_points={
     #     'console_scripts': ['mycli=mymodule:cli'],
     # },
@@ -129,7 +124,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy'
+        'Programming Language :: Python :: Implementation :: PyPy',
     ],
     # $ setup.py publish support.
     cmdclass={
