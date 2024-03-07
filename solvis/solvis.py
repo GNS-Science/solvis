@@ -41,7 +41,7 @@ def section_participation(sol: InversionSolutionProtocol, df_ruptures: pd.DataFr
 def mfd_hist(ruptures_df: pd.DataFrame, rate_column: str = "Annual Rate"):
     # https://stackoverflow.com/questions/45273731/binning-a-column-with-python-pandas
     bins = [round(x / 100, 2) for x in range(500, 1000, 10)]
-    mfd = ruptures_df.groupby(pd.cut(ruptures_df.Magnitude, bins=bins)).sum()[rate_column]
+    mfd = ruptures_df.groupby(pd.cut(ruptures_df.Magnitude, bins=bins))[rate_column].sum()
     return mfd
 
 

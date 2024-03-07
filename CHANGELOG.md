@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.11.1] - 2024-03-04
+## Fixed
+ - mfd_hist function updated for pandas v2 compatibility 
+
 ## [0.11.0] - 2023-12-13
 ## Changed
  - remove unnecessary poetry groups from pyproject.toml
