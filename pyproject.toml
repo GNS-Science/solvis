@@ -13,7 +13,8 @@ classifiers=[
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
-    'Programming Language :: Python :: 3.10'
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11'
 ]
 packages = [
 	{include = "solvis"},
@@ -35,10 +36,18 @@ pytz = "2021.3"
 pyvista = {version = "^0.37.0", optional = true, extras = ["vtk"]}
 
 # see https://github.com/orgs/python-poetry/discussions/7937
-urllib3 = "<2" 
+urllib3 = "<2"
 geopandas = "^0.13.2"
 numpy = "<1.25"
 nzshm-model = {version = "^0.4.0"}
+mkdocs = "^1.6.0"
+mkdocs-include-markdown-plugin = "^6.0.6"
+mkdocs-material = "^9.5.21"
+mkdocs-material-extensions = "^1.3.1"
+mkdocstrings = "^0.25.1"
+mkdocstrings-python = "^1.10.0"
+mkdocs-pymdownx-material-extras = "^2.5.6"
+mkdocs-with-pdf = "^0.9.3"
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
@@ -70,7 +79,7 @@ vtk = [
 [tool.black]
 line-length = 120
 skip-string-normalization = true
-target-version = ['py310', 'py38', 'py39']
+target-version = ['py311', 'py310', 'py38', 'py39']
 include = '\.pyi?$'
 exclude = '''
 /(
