@@ -173,7 +173,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
         self._ruptures_with_rupture_rates = self.rupture_rates.join(
             self.ruptures.drop(columns="Rupture Index"), on=self.rupture_rates["Rupture Index"]
-        ).drop(columns=['key_0'])
+        )
+        if 'key_0' in self._ruptures_with_rupture_rates.columns:
+            self._ruptures_with_rupture_rates.drop(columns=['key_0'], inplace=True)
         toc = time.perf_counter()
         log.debug(
             'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
