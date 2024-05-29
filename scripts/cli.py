@@ -108,8 +108,8 @@ def fetch_toshi_files(work_folder, file_ids):
     return file_map
 
 
-def build_fault_system_solution(work_folder, fault_system):
-    current_model = nzshm_model.get_model_version(nzshm_model.CURRENT_VERSION)
+def build_fault_system_solution(work_folder, fault_system, model_version=nzshm_model.CURRENT_VERSION):
+    current_model = nzshm_model.get_model_version(model_version)
     slt = current_model.source_logic_tree()
     branch = None
     for fslt in slt.fault_system_lts:
@@ -225,7 +225,7 @@ def build(ctx, archive_name, model_id):
     if ctx.obj['fault_system'] == 'ALL':
         solution = build_composite_all(ctx.obj['work_folder'], archive_name, model_id)
     else:
-        solution = build_fault_system_solution(ctx.obj['work_folder'], ctx.obj['fault_system'])
+        solution = build_fault_system_solution(ctx.obj['work_folder'], ctx.obj['fault_system'], model_id)
 
 
 @cli.command('ls')
