@@ -17,7 +17,6 @@ nav:
       - api/solvis/index.md
       - api/solvis/config.md
       - api/solvis/geometry.md
-      - api/solvis/get_secret.md
       - inversion_solution [module]:
         - api/inversion_solution/index.md
         - api/inversion_solution/composite_solution.md
@@ -28,6 +27,7 @@ nav:
         - api/inversion_solution/inversion_solution_file.md
         - api/inversion_solution/solution_surfaces_builder.md
         - api/inversion_solution/typing.md
+      - Secrets Management [AWS]: api/solvis/get_secret.md
       - api/solvis/solvis.md
   - Development and Contributing:
     - contributing.md
@@ -56,7 +56,7 @@ theme:
     - navigation.indexes
     - navigation.instant
     - navigation.tabs
-  #   - navigation.tabs.sticky
+    # - navigation.tabs.sticky
 
 markdown_extensions:
   - admonition
@@ -90,9 +90,10 @@ plugins:
           options:
             show_root_heading: true
             show_root_full_path: false
+            show_signature_annotations: true
             show_if_no_docstring: true
-            show_source: true
             signature_crossrefs: true
+            # show_source: true
 
 extra:
   social:

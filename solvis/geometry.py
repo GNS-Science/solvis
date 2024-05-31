@@ -1,7 +1,13 @@
+"""
+Functions for working with Shapely geometries.
+
+These functions require [Shapely](https://shapely.readthedocs.io/en/stable/index.html) to be installed.
+"""
+
 import logging
 import math
 from functools import partial
-from typing import Union
+from typing import Tuple, Union
 
 import numpy as np
 from pyproj import Transformer
@@ -21,11 +27,15 @@ EARTH_RADIUS_MEAN = 6371.0072
 log = logging.getLogger(__name__)
 
 
-def reverse_geom(geom: BaseGeometry):
+def reverse_geom(geom: BaseGeometry) -> BaseGeometry:
     """
-    Reverse the order of the points of the geometry
-    :param geom: geometry
-    :return: a copy of the geometry with the order of the points reversed
+    Reverse the order of the points of a geometry object.
+
+    Parameters:
+        geom: A geometry object
+
+    Returns:
+        A copy of the geometry with the order of the points reversed
     """
 
     def _reverse(x, y):
@@ -34,16 +44,22 @@ def reverse_geom(geom: BaseGeometry):
     return transform(_reverse, geom)
 
 
-def translate_horizontally(azimuth: float, distance: float, lon: float, lat: float):
+def translate_horizontally(azimuth: float, distance: float, lon: float, lat: float) -> Tuple[float, float]:
     """
-    Takes a lat/lon location as the origin and creates a new location at the specified distance and azimuth on a sphere.
-    Written so that it can be curried and used with shapely.ops.transform.
-    From Java: org.opensha.commons.geo.LocationUtils.location()
-    :param azimuth: a horizontal angle in degrees
-    :param distance: distance in km
-    :param lon: longitude in degrees. Note that longitude comes before latitude
-    :param lat: latitude in degrees
-    :return: a tuple lon, lat of the new location
+    Taking a `lat, lon` location as the origin, create a new location at the specified distance and azimuth on a sphere.
+
+    Written so that it can be curried and used with []`shapely.ops.transform`](https://shapely.readthedocs.io/en/stable/manual.html#shapely.ops.transform).
+
+    From Java: [`org.opensha.commons.geo.LocationUtils.location()`](https://github.com/opensha/opensha/blob/master/src/main/java/org/opensha/commons/geo/LocationUtils.java)
+
+    Parameters:
+        azimuth: a horizontal angle in degrees
+        distance: distance in km
+        lon: longitude in degrees. Note that longitude comes before latitude
+        lat: latitude in degrees
+
+    Returns:
+        a `(lon, lat)` tuple of the new location
     """
     azimuth = math.radians(azimuth)
     lat = math.radians(lat)
@@ -60,15 +76,30 @@ def translate_horizontally(azimuth: float, distance: float, lon: float, lat: flo
 
 def create_surface(
     trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float
-) -> Union[LineString, Polygon]:
+) -> Polygon:
     """
     Creates a projection of the fault surface onto the geodetic sphere.
-    :param trace: the fault trace
-    :param dip_dir: the azimuth of the dip
-    :param dip_deg: the dip
-    :param upper_depth: the height of the upper edge of the fault in km
-    :param lower_depth: the height of the lower edge of the fault in km
-    :return: a Polygon
+
+    Parameters:
+        trace: the fault trace
+        dip_dir: the azimuth of the dip in degrees
+        dip_deg: the dip (inclination) in degrees
+        upper_depth: the height of the upper edge of the fault in kilometres
+        lower_depth: the height of the lower edge of the fault in kilometres
+
+    Returns:
+        the projection for the fault surface
+
+    Examples:
+        ```py
+        >>> from shapely.geometry import LineString
+        >>> from solvis.geometry import create_surface
+        >>> trace = LineString([[178.017654, -38.662334], [178.017654, -38.762334]])
+        >>> upper, lower = 39.5, 53.5
+        >>> dip = 28.667
+        >>> create_surface(trace, 180.0, dip, upper, lower)
+        <POLYGON ((178.018 -38.662, 178.018 -38.762, 178.018 -38.993, 178.018 -38.89...>
+        ```
     """
     if dip_deg == 90:
         return trace
@@ -85,14 +116,37 @@ def create_surface(
 
 def bearing(point_a: Point, point_b: Point) -> float:
     """
-    Computes the bearing in degrees from the point A(a1,a2) to
-    the point B(b1,b2). Point(lat, lon))
+    Computes the bearing in degrees from one Point to another Point.
 
-    Note that A and B are given in decimal.degrees
+    Points are treated as `(lat, lon)` pairs of decimal degrees.
 
-    :param point_a: the first point
-    :param point_b: the second point
+    Parameters:
+        point_a: the first point
+        point_b: the second point
+
+    Returns:
+        A bearing in degrees
+
+    Raises:
+        ValueError: If the points are identical, they cannot be compared.
+
+    Examples:
+        ```py
+        >>> from shapely.geometry import Point
+        >>> from solvis.geometry import bearing
+        >>> loc_chc = Point(-43.53, 172.63)
+        >>> loc_akl = Point(-41.3, 174.78)
+        >>> bearing(loc_chc, loc_akl)
+        36.17316361836124
+        >>> bearing(loc_akl, loc_chc)
+        214.72263050205407
+        >>> bearing(loc_akl, loc_akl)
+        Traceback (most recent call last):
+        [...]
+        ValueError: cannot compute bearing, points A & B are identical
+        ```
     """
+
     """
     ref:  https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
 
@@ -133,15 +187,20 @@ def bearing(point_a: Point, point_b: Point) -> float:
 
 
 strike = bearing  # alias for bearing function
+"""An alias for the [`bearing`][solvis.geometry.bearing] function."""
 
 
 def refine_dip_direction(point_a: Point, point_b: Point, original_direction: float) -> float:
     """
     Compute a dip direction that fits the orientation established by the original_direction.
 
-    :param point_a: the first point
-    :param point_b: the second point
-    :param original_direction: the original direction in decimal degrees
+    Parameters:
+        point_a: the first point
+        point_b: the second point
+        original_direction: the original direction in decimal degrees
+
+    Returns:
+        The refined dip direction in decimal degrees
     """
     # log.info(f"original dir_dir: {original_direction}")
     dip_dir = dip_direction(point_a, point_b)
@@ -155,26 +214,51 @@ def refine_dip_direction(point_a: Point, point_b: Point, original_direction: flo
 
 def dip_direction(point_a: Point, point_b: Point) -> float:
     """
-    Computes the dip_direction in degrees from the points A & B
+    Computes the dip direction for a strike from Point A to Point B.
 
-    :param point_a: the first point
-    :param point_b: the second point
+    Parameters:
+        point_a: the first point
+        point_b: the second point
+
+    Returns:
+        the dip direction in degrees
     """
     dip_dir = strike(point_a, point_b) + 90
     return dip_dir + 360 if dip_dir < 0 else dip_dir
 
 
-def circle_polygon(radius_m: int, lat: float, lon: float):
+def circle_polygon(radius_m: int, lat: float, lon: float) -> Polygon:
     """
-    Creates a cirle polygon at a given radius in metres from the coordinates.
+    Creates a circular `Polygon` at a given radius in metres around the `lat, lon` coordinate.
 
-    based on https://gis.stackexchange.com/a/359748
-    updated with https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1
+    Calculation based on: [https://gis.stackexchange.com/a/359748](https://gis.stackexchange.com/a/359748),<br/>
+    updated with: [https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1](https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1)
 
-    :param radius_m: the ridues in metres
-    :param lat: the latitude in degrees  azimuth of the dip
-    :param lon: the longitude in degrees  azimuth of the dip
-    :return: a Polygon
+    This process transforms from an azimuthal equidistant projection (AEQD) to WGS 84 geodetic
+    coordinate system when calculating the circle.
+
+    The number of points in the polygon is determined by [shapely.buffer](https://shapely.readthedocs.io/en/stable/reference/shapely.buffer.html) defaults.
+
+    Parameters:
+        radius_m: the radius in metres
+        lat: the latitude in degrees azimuth of the dip
+        lon: the longitude in degrees azimuth of the dip
+
+    Returns:
+        A `Polygon` encompassing the buffer zone around the `lat, lon` coordinate at the specified radius.
+
+    Examples:
+        200km circle around Gisborne:
+        ```py
+        >>> from solvis.geometry import circle_polygon
+        >>> gis_extent = circle_polygon(2e5, -38.662334, 178.017654)
+        >>> gis_extent
+        <POLYGON ((180.321 -38.64, 180.315 -38.816, 180.288 -38.991, 180.238 -39.164...>
+        >>> gis_extent.bounds
+        (175.7146696515645, -40.46097721183747, 180.32063834843552, -36.86369078816255)
+        >>> len(gis_extent.exterior.coords)
+        65
+        ```
     """
 
     local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
@@ -200,15 +284,21 @@ def circle_polygon(radius_m: int, lat: float, lon: float):
     return Polygon(points)
 
 
-def section_distance(transformer, surface_geometry, upper_depth, lower_depth):
+def section_distance(transformer: Transformer, surface_geometry: Union[Polygon, LineString], upper_depth: float, lower_depth: float) -> float:
     """
     Calculate minimum distance from the transformer datum to a surface built from the surface projection of the fault.
 
-    :param transformer:
-    :param surface_geometry: the the surface projection of the fault plane
-    :param upper_depth: the upper depth in km
-    :param upper_depth: the lower depth in km
-    :return: distance in meters
+    Parameters:
+        transformer: typically from WGS84 to azimuthal
+        surface_geometry: the surface projection of the fault plane
+        upper_depth: the upper depth in km
+        upper_depth: the lower depth in km
+
+    Returns:
+        distance in meters
+
+    Raises:
+        ValueError: The `surface_geometry` was of an unsupported type.
     """
     # print(f'trace coords: {surface_geometry.exterior.coords.xy}')
     if isinstance(surface_geometry, Polygon):
