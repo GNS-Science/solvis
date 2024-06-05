@@ -43,7 +43,8 @@ class CompositeSolution(CompositeSolutionOperations):
         """
         Calculate (and cache) the rates.
 
-        :return: a gpd.GeoDataFrame
+        Returns:
+            a `gpd.GeoDataFrame`
         """
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
@@ -57,7 +58,8 @@ class CompositeSolution(CompositeSolutionOperations):
         """
         Calculate (and cache) the composite_rates.
 
-        :return: a gpd.GeoDataFrame
+        Returns:
+            a `gpd.GeoDataFrame`
         """
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates

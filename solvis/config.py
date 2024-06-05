@@ -21,7 +21,7 @@ def boolean_env(environ_name: EnvMode) -> bool:
     Check whether the code is running in a specific EnvMode.
 
     Parameters:
-        environ_name
+        environ_name: an EnvMode member name (e.g. CLUSTER)
 
     Returns:
         Whether the mode is set via environment variable.

@@ -83,7 +83,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         """
         Calculate and cache the fault sections and their rupture rates.
 
-        :return: a gpd.GeoDataFrame
+        Returns:
+            a gpd.GeoDataFrame
         """
         if self._fs_with_rates is not None:
             return self._fs_with_rates
@@ -115,7 +116,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         Calculate and cache fault sections and their solution slip rates.
         Solution slip rate combines input (avg slips) and solution (rupture rates).
 
-        :return: a gpd.GeoDataFrame
+        Returns:
+            a gpd.GeoDataFrame
         """
         if self._fs_with_soln_rates is not None:
             return self._fs_with_soln_rates
