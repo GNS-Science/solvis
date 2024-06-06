@@ -78,13 +78,3 @@ python3 -m demo
 
 or python3 demo.py
 ```
-
-## Plotting
-
-```py
-f = plt.figure()
-#nx = int(f.get_figwidth() * f.dpi)
-#ny = int(f.get_figheight() * f.dpi)
-f.figimage(data)
-plt.show()
-```

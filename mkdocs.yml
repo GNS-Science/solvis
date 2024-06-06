@@ -17,7 +17,7 @@ nav:
       - api/solvis/index.md
       - api/solvis/config.md
       - api/solvis/geometry.md
-      - inversion_solution [module]:
+      - inversion_solution [package]:
         - api/inversion_solution/index.md
         - api/inversion_solution/composite_solution.md
         - api/inversion_solution/fault_system_solution.md

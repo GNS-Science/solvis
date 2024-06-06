@@ -1,7 +1,7 @@
 """
-A module for Inversion Solutions.
+A package for Inversion Solutions.
 
-For convenience, importing this module includes the following classes by default:
+For convenience, importing this package includes the following classes by default:
 
 - [`CompositeSolution`][solvis.inversion_solution.CompositeSolution]
 - [`FaultSystemSolution`][solvis.inversion_solution.FaultSystemSolution]
