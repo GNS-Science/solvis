@@ -63,6 +63,7 @@ Inversion Solution archive file:
 """
 "A warning added to archives that have been modified by Solvis."
 
+
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
     new_df.index = new_df.index.rename('Rupture Index')

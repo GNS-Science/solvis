@@ -7,7 +7,7 @@ These functions require [Shapely](https://shapely.readthedocs.io/en/stable/index
 import logging
 import math
 from functools import partial
-from typing import Tuple, Union
+from typing import Tuple
 
 import numpy as np
 from pyproj import Transformer
@@ -48,9 +48,11 @@ def translate_horizontally(azimuth: float, distance: float, lon: float, lat: flo
     """
     Taking a `lat, lon` location as the origin, create a new location at the specified distance and azimuth on a sphere.
 
-    Written so that it can be curried and used with []`shapely.ops.transform`](https://shapely.readthedocs.io/en/stable/manual.html#shapely.ops.transform).
+    Written so that it can be curried and used with
+    [`shapely.ops.transform`](https://shapely.readthedocs.io/en/stable/manual.html#shapely.ops.transform).
 
-    From Java: [`org.opensha.commons.geo.LocationUtils.location()`](https://github.com/opensha/opensha/blob/master/src/main/java/org/opensha/commons/geo/LocationUtils.java)
+    From Java:
+    [`org.opensha.commons.geo.LocationUtils.location()`](https://github.com/opensha/opensha/blob/master/src/main/java/org/opensha/commons/geo/LocationUtils.java)
 
     Parameters:
         azimuth: a horizontal angle in degrees
@@ -231,13 +233,16 @@ def circle_polygon(radius_m: int, lat: float, lon: float) -> Polygon:
     """
     Creates a circular `Polygon` at a given radius in metres around the `lat, lon` coordinate.
 
-    Calculation based on: [https://gis.stackexchange.com/a/359748](https://gis.stackexchange.com/a/359748),<br/>
-    updated with: [https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1](https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1)
+    Calculation based on:
+    [https://gis.stackexchange.com/a/359748](https://gis.stackexchange.com/a/359748),<br/>
+    updated with:
+    [https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1](https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1)
 
     This process transforms from an azimuthal equidistant projection (AEQD) to WGS 84 geodetic
     coordinate system when calculating the circle.
 
-    The number of points in the polygon is determined by [shapely.buffer](https://shapely.readthedocs.io/en/stable/reference/shapely.buffer.html) defaults.
+    The number of points in the polygon is determined by
+    [shapely.buffer](https://shapely.readthedocs.io/en/stable/reference/shapely.buffer.html) defaults.
 
     Parameters:
         radius_m: the radius in metres
@@ -284,13 +289,18 @@ def circle_polygon(radius_m: int, lat: float, lon: float) -> Polygon:
     return Polygon(points)
 
 
-def section_distance(transformer: Transformer, surface_geometry: Union[Polygon, LineString], upper_depth: float, lower_depth: float) -> float:
+def section_distance(
+    transformer: Transformer,
+    surface_geometry: Polygon | LineString,
+    upper_depth: float,
+    lower_depth: float,
+) -> float:
     """
     Calculate minimum distance from the transformer datum to a surface built from the surface projection of the fault.
 
     Parameters:
         transformer: typically from WGS84 to azimuthal
-        surface_geometry: the surface projection of the fault plane
+        surface_geometry: the surface projection of the fault plane (`Polygon` or `LineString`)
         upper_depth: the upper depth in km
         upper_depth: the lower depth in km
 
@@ -319,6 +329,9 @@ def section_distance(transformer: Transformer, surface_geometry: Union[Polygon, 
         ]
     )
 
-    closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
+    closest_cells, closest_points = surface.find_closest_cell(
+        origin.points,
+        return_closest_point=True,
+    )  # type: ignore[misc]
     d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
     return d_exact[0] / 1000

@@ -1,5 +1,5 @@
 # Solvis
-A library to support the analysis of OpenSHA inversion solution data.
+A library to support the analysis of [OpenSHA](https://opensha.org/) inversion solution data.
 
 Solvis is used in the geospatial investigation of National Seismic Hazard
 Model inversion sources and rates. It supports both individual inversions
@@ -18,7 +18,8 @@ and the composite model.
 
 # Features / Goals
 
- - analysis of OpenSHA modular solution files.
+ - analysis of OpenSHA
+   [Modular Fault System Solution](https://opensha.org/Modular-Fault-System-Solution) files.
  - OpenSHA modular documentation
  - pandas, geopanda references
 
