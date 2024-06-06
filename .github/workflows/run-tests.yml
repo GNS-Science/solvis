@@ -62,5 +62,5 @@ jobs:
         if: runner.os == 'Linux'
         uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: true # optional (default = false)
+          fail_ci_if_error: false # optional (default = false)
           verbose: true # optional (default = false)
