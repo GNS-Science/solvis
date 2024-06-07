@@ -27,7 +27,6 @@ nav:
         - api/inversion_solution/inversion_solution_file.md
         - api/inversion_solution/solution_surfaces_builder.md
         - api/inversion_solution/typing.md
-      - Secrets Management [AWS]: api/solvis/get_secret.md
       - api/solvis/solvis.md
   - Development and Contributing:
     - contributing.md
