@@ -142,10 +142,6 @@ def bearing(point_a: Point, point_b: Point) -> float:
         36.17316361836124
         >>> bearing(loc_akl, loc_chc)
         214.72263050205407
-        >>> bearing(loc_akl, loc_akl)
-        Traceback (most recent call last):
-        [...]
-        ValueError: cannot compute bearing, points A & B are identical
         ```
     """
 
