@@ -41,10 +41,16 @@ class CompositeSolution(CompositeSolutionOperations):
     @property
     def rupture_rates(self) -> pd.DataFrame:
         """
-        Calculate (and cache) the rates.
+        Calculate (and cache) the rupture rates.
 
         Returns:
-            a `gpd.GeoDataFrame`
+            a `pandas.DataFrame` with columns: </br>
+                fault_system,
+                Rupture Index,
+                rate_max,
+                rate_min,
+                rate_count,
+                rate_weighted_mean
         """
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
@@ -56,10 +62,16 @@ class CompositeSolution(CompositeSolutionOperations):
     @property
     def composite_rates(self) -> pd.DataFrame:
         """
-        Calculate (and cache) the composite_rates.
+        Calculate (and cache) the composite rates.
 
         Returns:
-            a `gpd.GeoDataFrame`
+            a `pandas.DataFrame` with columns: <br/>
+                Rupture Index,
+                fault_system,
+                weight,
+                rupture_set_id,
+                solution_id,
+                Annual Rate
         """
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
