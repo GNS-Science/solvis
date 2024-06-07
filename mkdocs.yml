@@ -92,6 +92,7 @@ plugins:
             show_signature_annotations: true
             show_if_no_docstring: true
             signature_crossrefs: true
+            annotations_path: full
             # show_source: true
 
 extra:
