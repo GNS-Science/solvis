@@ -188,26 +188,48 @@ strike = bearing  # alias for bearing function
 """An alias for the [`bearing`][solvis.geometry.bearing] function."""
 
 
-def refine_dip_direction(point_a: Point, point_b: Point, original_direction: float) -> float:
+def refine_dip_direction(point_a: Point, point_b: Point, original_dip_direction: float) -> float:
     """
-    Compute a dip direction that fits the orientation established by the original_direction.
+    Compute the dip direction given two points along strike.
+
+    Rather than obey the right-hand rule for dip direction, this function will return a dip
+    oriented in the same direction as the `original_dip_direction`.
+
+    This is useful when re-calculating the dip direction of OpenSHA fault subsections from the
+    fault surface trace, but keeping the orientation (i.e. resolving the 180 degree ambiguity
+    when not obeying the right-hand rule).
 
     Parameters:
         point_a: the first point
         point_b: the second point
-        original_direction: the original direction in decimal degrees
+        original_dip_direction: the original dip direction in decimal degrees
 
     Returns:
         The refined dip direction in decimal degrees
     """
+    original_dip_direction = resolve_azimuth(original_dip_direction)
+
     # log.info(f"original dir_dir: {original_direction}")
     dip_dir = dip_direction(point_a, point_b)
 
     # log.info(f"calculated dip_dir: {dip_dir}")
-    if abs(original_direction - dip_dir) > 45:
+    if abs(original_dip_direction - dip_dir) > 45:
         dip_dir -= 180
         # log.info(f"refined dip_dir is now {dip_dir}")
     return dip_dir + 360 if dip_dir < 0 else dip_dir
+
+
+def resolve_azimuth(az: float) -> float:
+    """
+    Resolve an azimuth angle to be between -360° and 360°.
+
+    Parameters:
+        az: the azimuth angle in decimal degrees
+
+    Returns:
+        The resolved azimuth angle in decimal degrees
+    """
+    return math.copysign(az % 360.0, az)
 
 
 def dip_direction(point_a: Point, point_b: Point) -> float:
