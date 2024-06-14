@@ -6,7 +6,7 @@ import pathlib
 import numpy as np
 import pandas as pd
 from nzshm_common.location.location import location_by_id
-from pytest import approx
+from pytest import approx, raises
 
 from solvis import InversionSolution, circle_polygon
 from solvis.inversion_solution.typing import SetOperationEnum
@@ -92,8 +92,14 @@ class TestInversionSolution(object):
             corupture_fault_names=[PARENT_FAULT_1, PARENT_FAULT_2],
             fault_join_type=SetOperationEnum.INTERSECTION,
         )
-        print("INT", len(rupture_ids_intersection))
+
         assert len(rupture_ids_intersection) == len(PF1_IDS.intersection(PF2_IDS))
+
+        with raises(ValueError):
+            sol.get_rupture_ids_for_fault_names(
+                corupture_fault_names=[PARENT_FAULT_1, PARENT_FAULT_2],
+                fault_join_type=SetOperationEnum.DIFFERENCE,
+            )
 
     def test_slip_rate_soln(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
