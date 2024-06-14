@@ -9,6 +9,7 @@ from nzshm_common.location.location import location_by_id
 from pytest import approx
 
 from solvis import InversionSolution, circle_polygon
+from solvis.inversion_solution.typing import SetOperationEnum
 
 folder = pathlib.PurePath(os.path.realpath(__file__)).parent
 
@@ -49,29 +50,50 @@ class TestInversionSolution(object):
     #     assert isinstance(sol, InversionSolution)
     #     assert sol.fault_regime == 'SUBDUCTION'
 
-    def test_ruptures_intersecting_crustal(self, crustal_solution_fixture):
+    def test_get_rupture_ids_intersecting_crustal(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
 
         WLG = location_by_id('WLG')
         # polygon = circle_polygon(5e5, -38.662334, 178.017654)
         polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 00km circle around WLG
 
-        ruptures = sol.get_ruptures_intersecting(polygon)
+        ruptures = sol.get_rupture_ids_intersecting(polygon)
         all_rupture_ids = list(sol.ruptures.index)
 
         assert len(sol.ruptures) > len(ruptures)
         assert set(all_rupture_ids).issuperset(set(ruptures))
 
-    def test_get_ruptures_for_parent_fault(self, crustal_solution_fixture):
+    def test_get_rupture_ids_for_parent_fault(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
 
-        df0 = set(sol.get_ruptures_for_parent_fault("Alpine Kaniere to Springs Junction"))
-        df1 = set(sol.get_ruptures_for_parent_fault("Alpine Jacksons to Kaniere"))
+        df0 = set(sol.get_rupture_ids_for_parent_fault("Alpine Kaniere to Springs Junction"))
+        df1 = set(sol.get_rupture_ids_for_parent_fault("Alpine Jacksons to Kaniere"))
         print(list(df0))
 
         assert df0 is not df1
         assert len(df0) is not len(df1)
         assert len(df0.intersection(df1)) > 0
+
+    def test_get_rupture_ids_for_fault_names(self, crustal_solution_fixture):
+        sol = crustal_solution_fixture
+
+        PARENT_FAULT_1 = "Alpine Jacksons to Kaniere"
+        PARENT_FAULT_2 = "Alpine Kaniere to Springs Junction"
+        PF1_IDS = set(sol.get_rupture_ids_for_parent_fault(PARENT_FAULT_1))
+        PF2_IDS = set(sol.get_rupture_ids_for_parent_fault(PARENT_FAULT_2))
+
+        rupture_ids_union = sol.get_rupture_ids_for_fault_names(
+            corupture_fault_names=[PARENT_FAULT_1, PARENT_FAULT_2],
+            fault_join_type=SetOperationEnum.UNION,
+        )
+        assert len(rupture_ids_union) == len(PF1_IDS.union(PF2_IDS))
+
+        rupture_ids_intersection = sol.get_rupture_ids_for_fault_names(
+            corupture_fault_names=[PARENT_FAULT_1, PARENT_FAULT_2],
+            fault_join_type=SetOperationEnum.INTERSECTION,
+        )
+        print("INT", len(rupture_ids_intersection))
+        assert len(rupture_ids_intersection) == len(PF1_IDS.intersection(PF2_IDS))
 
     def test_slip_rate_soln(self, crustal_solution_fixture):
         sol = crustal_solution_fixture

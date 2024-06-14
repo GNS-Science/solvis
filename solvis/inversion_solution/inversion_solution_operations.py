@@ -1,12 +1,13 @@
 import logging
 import time
-from typing import List
+import warnings
+from typing import Iterable, List, Set
 
 import geopandas as gpd
 import pandas as pd
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import CompositeSolutionProtocol, InversionSolutionProtocol
+from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
 
 log = logging.getLogger(__name__)
 
@@ -185,19 +186,86 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return self._ruptures_with_rupture_rates
 
     # return the rupture ids for any ruptures intersecting the polygon
-    def get_ruptures_intersecting(self, polygon) -> pd.Series:
+    def get_rupture_ids_intersecting(self, polygon) -> pd.Series:
+        """Return IDs for any ruptures intersecting the polygon."""
         q0 = gpd.GeoDataFrame(self.fault_sections)
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
         sr = self.rs_with_rupture_rates
         qdf = sr.join(q1, 'section', how='inner')
         return qdf["Rupture Index"].unique()
 
-    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+    def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
         # sr = sol.rs_with_rupture_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
         qdf = self.rupture_sections.join(sects, 'section', how='inner')
         return qdf.rupture.unique()
+
+    def get_rupture_ids_for_fault_names(
+        self,
+        corupture_fault_names: Iterable[str],
+        fault_join_type: SetOperationEnum = SetOperationEnum.UNION,
+    ) -> Set[int]:
+        """
+        Retrieve a set of rupture IDs, for the specified corupture fault names.
+
+        Parameters:
+            corupture_fault_names: a collection of corupture fault names
+            fault_join_type: where there are multiple faults, determine whether
+                to return the IDs for their UNION or INTERSECTION
+
+        Raises:
+            ValueError: on an unsupported fault join type
+
+        Returns:
+            a Set of rupture IDs
+
+        Examples:
+            ```
+            rupture_ids = solution.get_rupture_ids_for_fault_names(
+                corupture_fault_names=[
+                    "Alpine Jacksons to Kaniere",
+                    "Alpine Kaniere to Springs Junction",
+                ],
+                fault_joint_type=SetOperationEnum.INTERSECTION,
+                }
+            )
+            ```
+            Returns a set of 1440 rupture IDs in the intersection of the two datasets.
+        """
+        first = True
+        rupture_ids: Set[int]
+        for fault_name in corupture_fault_names:
+            if fault_name not in self.parent_fault_names:
+                raise ValueError("Invalid fault name: %s" % fault_name)
+            tic22 = time.perf_counter()
+            fault_rupture_ids = self.get_rupture_ids_for_parent_fault(fault_name)
+            tic23 = time.perf_counter()
+            log.debug('get_ruptures_for_parent_fault %s: %2.3f seconds' % (fault_name, (tic23 - tic22)))
+
+            if first:
+                rupture_ids = set(fault_rupture_ids)
+                first = False
+            else:
+                log.debug(f"fault_join_type {fault_join_type}")
+                if fault_join_type == SetOperationEnum.INTERSECTION:
+                    rupture_ids = rupture_ids.intersection(fault_rupture_ids)
+                elif fault_join_type == SetOperationEnum.UNION:
+                    rupture_ids = rupture_ids.union(fault_rupture_ids)
+                else:
+                    raise ValueError(
+                        "Only INTERSECTION and UNION operations are supported for option 'multiple_faults'"
+                    )
+
+        return rupture_ids
+
+    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+        warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
+        return self.get_rupture_ids_for_parent_fault(parent_fault_name)
+
+    def get_ruptures_intersecting(self, polygon) -> pd.Series:
+        warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
+        return self.get_rupture_ids_intersecting(polygon)
 
     def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
 

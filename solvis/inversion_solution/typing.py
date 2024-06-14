@@ -1,5 +1,6 @@
 import io
 import zipfile
+from enum import Enum
 from pathlib import Path
 from typing import Any, List, Mapping, Optional, Protocol, Union
 
@@ -110,3 +111,11 @@ class BranchSolutionProtocol(InversionSolutionProtocol):
     fault_system: Union[str, None] = ""
     rupture_set_id: Union[str, None] = ""
     branch: ModelLogicTreeBranch
+
+
+class SetOperationEnum(Enum):
+    """Enumerated type for common set operations."""
+
+    UNION = 1
+    INTERSECTION = 2
+    DIFFERENCE = 3
