@@ -41,8 +41,8 @@ class SolutionSurfacesBuilder:
         """
         Calculate the geometry of the solution fault surfaces projected onto the earth surface.
 
-        :param refine_dip_dir: option to override the dip_directon supplied, only applies to CRUSTAL
-        :return: a gpd.GeoDataFrame
+        Returns:
+            a gpd.GeoDataFrame
         """
         tic = time.perf_counter()
         new_geometry_df = self._solution.fault_sections.copy()
@@ -62,8 +62,11 @@ class SolutionSurfacesBuilder:
         """
         Calculate the geometry of the rupture fault surfaces projected onto the earth surface.
 
-        :param rupture_id: ID of the rupture
-        :return: a gpd.GeoDataFrame
+        Parameters:
+            rupture_id: ID of the rupture
+
+        Returns:
+            a gpd.GeoDataFrame
         """
         tic = time.perf_counter()
         df0 = self._solution.fault_sections_with_rupture_rates.copy()

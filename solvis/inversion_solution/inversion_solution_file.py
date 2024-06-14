@@ -51,7 +51,7 @@ WARNING = """
 # Attention
 
 This Inversion Solution archive has been modified
-using the solvis python library.
+using the Solvis Python library.
 
 Data may have been filtered out of an original
 Inversion Solution archive file:
@@ -61,6 +61,7 @@ Inversion Solution archive file:
  - 'ruptures/average_slips.csv'
 
 """
+"A warning added to archives that have been modified by Solvis."
 
 
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -72,7 +73,7 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 class InversionSolutionFile(InversionSolutionProtocol):
     """
-    Class to handle the opensha modular archive file form
+    Class to handle the OpenSHA modular archive file form.
     """
 
     RATES_PATH = 'solution/rates.csv'
@@ -191,8 +192,10 @@ class InversionSolutionFile(InversionSolutionProtocol):
     @property
     def logic_tree_branch(self) -> list:
         """
-        get values from the opensha logic_tree_branch data file.
-        :return: list of value objects
+        Get values from the opensha `logic_tree_branch` data file.
+
+        Returns:
+            list of value objects
         """
         if not self._logic_tree_branch:
             ltb = json.load(self.archive.open(self.LOGIC_TREE_PATH))
@@ -209,7 +212,8 @@ class InversionSolutionFile(InversionSolutionProtocol):
         """
         get the fault regime as defined in the opensha logic_tree_branch data file.
 
-        :return: "CRUSTAL" or "SUBDUCTION"
+        Returns:
+            `CRUSTAL` or `SUBDUCTION` respectively.
         """
 
         def get_regime() -> str:

@@ -1,4 +1,9 @@
-# solvis
+# Solvis
+A library to support the analysis of [OpenSHA](https://opensha.org/) inversion solution data.
+
+Solvis is used in the geospatial investigation of National Seismic Hazard
+Model inversion sources and rates. It supports both individual inversions
+and the composite model.
 
 [![pypi](https://img.shields.io/pypi/v/solvis.svg)](https://pypi.org/project/solvis/)
 [![python](https://img.shields.io/pypi/pyversions/solvis.svg)](https://pypi.org/project/solvis/)
@@ -13,22 +18,23 @@
 
 # Features / Goals
 
- - analysis of opensha modular solution files.
- - opensha modular documentation
+ - analysis of OpenSHA
+   [Modular Fault System Solution](https://opensha.org/Modular-Fault-System-Solution) files.
+ - OpenSHA modular documentation
  - pandas, geopanda references
 
-From a typical modular opensha Inversion Solution archive, we want to produce views that allow deep exploration 
+From a typical modular OpenSHA Inversion Solution archive, we want to produce views that allow deep exploration
 of the solution and rupture set characteristics. Features:
 
  - [ ] user can choose from regions already defined in the solution
- - user can select ruptures matching 
+ - user can select ruptures matching
     - [x] parent fault
     - [ ] named fault (fault system)
     - [ ] constraint region (from TargetMFDs)
  - [x] user can create new region polygons
- - [ ] user can compare selections (e.g. Wellington East vs Wellington CBD vs Hutt Valley) 
+ - [ ] user can compare selections (e.g. Wellington East vs Wellington CBD vs Hutt Valley)
  - for a given query result show me dimensions...
-    - mag, length, area, rate, section count, parent fault count, ~jump-length, jump angles~, slip (various), partication, nucleation 
+    - mag, length, area, rate, section count, parent fault count, ~jump-length, jump angles~, slip (various), partication, nucleation
     - filter, group on any of the dimensions
 
 
@@ -72,12 +78,3 @@ python3 -m demo
 
 or python3 demo.py
 ```
-
-## Plotting
-
-
-f = plt.figure()
-#nx = int(f.get_figwidth() * f.dpi)
-#ny = int(f.get_figheight() * f.dpi)
-f.figimage(data)
-plt.show()
