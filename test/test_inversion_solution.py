@@ -55,7 +55,7 @@ class TestInversionSolution(object):
 
         WLG = location_by_id('WLG')
         # polygon = circle_polygon(5e5, -38.662334, 178.017654)
-        polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 00km circle around WLG
+        polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
 
         ruptures = sol.get_rupture_ids_intersecting(polygon)
         all_rupture_ids = list(sol.ruptures.index)
@@ -99,6 +99,53 @@ class TestInversionSolution(object):
             sol.get_rupture_ids_for_fault_names(
                 corupture_fault_names=[PARENT_FAULT_1, PARENT_FAULT_2],
                 fault_join_type=SetOperationEnum.DIFFERENCE,
+            )
+
+    def test_get_rupture_ids_for_location_radius(self, crustal_solution_fixture):
+        sol = crustal_solution_fixture
+
+        def _rupture_ids_for_location(location_id: str, radius_km: int = 100):
+            """Helper: ruptures in polygon around location."""
+            loc = location_by_id(location_id)
+            loc_polygon = circle_polygon(radius_km * 1000, loc["latitude"], loc["longitude"])
+            rupids = sol.get_rupture_ids_intersecting(loc_polygon)
+            return rupids
+
+        ruptures_wlg = _rupture_ids_for_location("WLG")
+        ruptures_bhe = _rupture_ids_for_location("BHE")
+        # All WLG results should also in BHE set for this fixture
+        expected_intersection_ruptures = set(ruptures_wlg).intersection(ruptures_bhe)
+        expected_union_ruptures = set(ruptures_wlg).union(ruptures_bhe)
+        # Pre-checks on assumptions
+        assert len(ruptures_wlg) == len(expected_intersection_ruptures)
+        assert len(ruptures_bhe) == len(expected_union_ruptures)
+
+        wlg_rupture_ids = sol.get_rupture_ids_for_location_radius(
+            location_ids=["WLG"],
+            radius_km=100,
+            location_join_type=SetOperationEnum.INTERSECTION,
+        )
+        assert len(wlg_rupture_ids) == len(ruptures_wlg)
+
+        intersection_rupture_ids = sol.get_rupture_ids_for_location_radius(
+            location_ids=["WLG", "BHE"],
+            radius_km=100,
+            location_join_type=SetOperationEnum.INTERSECTION,
+        )
+        assert len(intersection_rupture_ids) == len(expected_intersection_ruptures)
+
+        union_rupture_ids = sol.get_rupture_ids_for_location_radius(
+            location_ids=["WLG", "BHE"],
+            radius_km=100,
+            location_join_type=SetOperationEnum.UNION,
+        )
+        assert len(union_rupture_ids) == len(expected_union_ruptures)
+
+        with raises(ValueError):
+            sol.get_rupture_ids_for_location_radius(
+                location_ids=["WLG", "BHE"],
+                radius_km=100,
+                location_join_type=SetOperationEnum.DIFFERENCE,
             )
 
     def test_slip_rate_soln(self, crustal_solution_fixture):

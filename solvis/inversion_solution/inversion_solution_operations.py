@@ -5,6 +5,9 @@ from typing import Iterable, List, Set
 
 import geopandas as gpd
 import pandas as pd
+from nzshm_common.location.location import location_by_id
+
+from solvis.geometry import circle_polygon
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
@@ -194,7 +197,44 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         qdf = sr.join(q1, 'section', how='inner')
         return qdf["Rupture Index"].unique()
 
+    def get_rupture_ids_for_location_radius(
+        self,
+        location_ids: Iterable[str],
+        radius_km: float,
+        location_join_type: SetOperationEnum = SetOperationEnum.UNION,
+    ) -> Set[int]:
+        """TODO: Docs here"""
+        log.info('get_rupture_ids_for_location_radius: %s %s %s' % (self, radius_km, location_ids))
+        first = True
+        rupture_ids: Set[int]
+        for loc_id in location_ids:
+            loc = location_by_id(loc_id)
+            polygon = circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude'])
+            location_rupture_ids = set(self.get_rupture_ids_intersecting(polygon))
+
+            if first:
+                rupture_ids = location_rupture_ids
+                first = False
+            else:
+                log.debug('location_join_type %s' % location_join_type)
+                if location_join_type == SetOperationEnum.INTERSECTION:
+                    rupture_ids = rupture_ids.intersection(location_rupture_ids)
+                elif location_join_type == SetOperationEnum.UNION:
+                    rupture_ids = rupture_ids.union(location_rupture_ids)
+                else:
+                    raise ValueError("unsupported SetOperation")
+        return rupture_ids
+
     def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+        """
+        Return rupture IDs from fault sections for a given parent fault.
+
+        Parameters:
+            parent_fault_name: The name of the parent fault, e.g. "Alpine Jacksons to Kaniere"
+
+        Returns:
+            a Pandas series of rupture IDs
+        """
         # sr = sol.rs_with_rupture_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
@@ -207,12 +247,14 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         fault_join_type: SetOperationEnum = SetOperationEnum.UNION,
     ) -> Set[int]:
         """
-        Retrieve a set of rupture IDs, for the specified corupture fault names.
+        Retrieve a set of rupture IDs for the specified corupture fault names.
+
+        Where there are multiple faults, the rupture IDs represent a set joining
+        of the specified faults.
 
         Parameters:
             corupture_fault_names: a collection of corupture fault names
-            fault_join_type: where there are multiple faults, determine whether
-                to return the IDs for their UNION or INTERSECTION
+            fault_join_type: UNION or INTERSECTION
 
         Raises:
             ValueError: on an unsupported fault join type
@@ -221,7 +263,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             a Set of rupture IDs
 
         Examples:
-            ```
+            ```py
             rupture_ids = solution.get_rupture_ids_for_fault_names(
                 corupture_fault_names=[
                     "Alpine Jacksons to Kaniere",
@@ -260,10 +302,12 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return rupture_ids
 
     def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+        """Deprecated signature for get_rupture_ids_for_parent_fault."""
         warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
         return self.get_rupture_ids_for_parent_fault(parent_fault_name)
 
     def get_ruptures_intersecting(self, polygon) -> pd.Series:
+        """Deprecated signature for get_rupture_ids_intersecting."""
         warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
         return self.get_rupture_ids_intersecting(polygon)
 

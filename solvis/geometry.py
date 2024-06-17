@@ -247,7 +247,7 @@ def dip_direction(point_a: Point, point_b: Point) -> float:
     return dip_dir + 360 if dip_dir < 0 else dip_dir
 
 
-def circle_polygon(radius_m: int, lat: float, lon: float) -> Polygon:
+def circle_polygon(radius_m: float, lat: float, lon: float) -> Polygon:
     """
     Creates a circular `Polygon` at a given radius in metres around the `lat, lon` coordinate.
 
