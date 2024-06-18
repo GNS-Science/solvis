@@ -203,7 +203,48 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         radius_km: float,
         location_join_type: SetOperationEnum = SetOperationEnum.UNION,
     ) -> Set[int]:
-        """TODO: Docs here"""
+        """
+        Return IDs for ruptures within a radius around one or more locations.
+
+        Where there are multiple locations, the rupture IDs represent a set joining
+        of the specified radii.
+
+        Locations are resolved using [`nzshm-common`](https://pypi.org/project/nzshm-common/)
+        location ID values.
+
+        Parameters:
+            location_ids: one or more defined location IDs
+            radius_km: radius around the point(s) in kilometres
+            location_join_type: UNION or INTERSECTION
+
+        Returns:
+            a Set of rupture IDs
+
+        Examples:
+            Get all rupture IDs from the solution that are within 100km of Blenheim:
+            ```py
+                bhe_rupture_ids = sol.get_rupture_ids_for_location_radius(
+                    location_ids=["BHE"],
+                    radius_km=100,
+                )
+            ```
+            Get all rupture IDs from the solution that are within 50km of Blenheim
+            or within 50km of Wellington:
+            ```py
+                intersect_rupture_ids = sol.get_rupture_ids_for_location_radius(
+                    location_ids=["BHE"],
+                    radius_km=50,
+                    location_joint_type=SetOperationEnum.UNION,
+                )
+            ```
+
+        Note:
+            If you want to do this kind of joining between locations with different
+            radii or points that are not defined by location IDs, consider using
+            [circle_polygon][solvis.geometry.circle_polygon] and
+            [get_rupture_ids_intersecting][solvis.inversion_solution.inversion_solution_operations.InversionSolutionOperations.get_rupture_ids_intersecting]
+            then use set operations to join each rupture ID set.
+        """
         log.info('get_rupture_ids_for_location_radius: %s %s %s' % (self, radius_km, location_ids))
         first = True
         rupture_ids: Set[int]
