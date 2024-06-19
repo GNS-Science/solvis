@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.0-alpha.1] - 2024-06-19
+## Added
+- `SetOperationEnum` for set joining operations
+- `InversionSolutionOperations.get_rupture_ids_for_fault_names`
+- `InversionSolutionOperations.get_rupture_ids_for_location_radius`
+## Changed
+- Updated dependencies:
+    - nzhsm-common to ^0.7
+    - nzshm-model to ^0.6 (will need further refactoring for higher versions)
+- `circle_polygon` radius typed for float, so it can work work floats or ints
+## Deprecated
+- `get_ruptures_intersecting` renamed to `get_rupture_ids_intersecting`
+- `get_ruptures_for_parent_fault` renamed to `get_rupture_ids_for_parent_fault`
+
+
 ## [0.12.0-alpha] - 2024-06-14
 ## Added
 - Support for Python 3.10, 3.11
