@@ -66,13 +66,13 @@ class TestInversionSolution(object):
     def test_get_rupture_ids_for_parent_fault(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
 
-        df0 = set(sol.get_rupture_ids_for_parent_fault("Alpine Kaniere to Springs Junction"))
-        df1 = set(sol.get_rupture_ids_for_parent_fault("Alpine Jacksons to Kaniere"))
-        print(list(df0))
+        pf1_ids = set(sol.get_rupture_ids_for_parent_fault("Alpine Kaniere to Springs Junction"))
+        pf2_ids = set(sol.get_rupture_ids_for_parent_fault("Alpine Jacksons to Kaniere"))
+        print(list(pf1_ids))
 
-        assert df0 is not df1
-        assert len(df0) is not len(df1)
-        assert len(df0.intersection(df1)) > 0
+        assert pf1_ids is not pf2_ids, "Should return different rupture ID sets"
+        assert len(pf1_ids) is not len(pf2_ids), "Sets should have different lengths"
+        assert len(pf1_ids.intersection(pf2_ids)) > 0, "Sets are expected to overlap"
 
     def test_get_rupture_ids_for_fault_names(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
@@ -81,6 +81,8 @@ class TestInversionSolution(object):
         PARENT_FAULT_2 = "Alpine Kaniere to Springs Junction"
         PF1_IDS = set(sol.get_rupture_ids_for_parent_fault(PARENT_FAULT_1))
         PF2_IDS = set(sol.get_rupture_ids_for_parent_fault(PARENT_FAULT_2))
+
+        # Ensure we get the same results as when joining sets manually.
 
         rupture_ids_union = sol.get_rupture_ids_for_fault_names(
             corupture_fault_names=[PARENT_FAULT_1, PARENT_FAULT_2],
