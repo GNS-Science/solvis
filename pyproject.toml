@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solvis"
-version = "0.12.0-alpha"
+version = "0.12.0-alpha.1"
 description = "analysis of opensha modular solution files."
 authors = ["Chris Chamberlain <chrisbc@artisan.co.nz>"]
 license = "AGPL3"
@@ -38,7 +38,7 @@ pyvista = {version = "^0.37.0", optional = true, extras = ["vtk"]}
 urllib3 = "<2"
 geopandas = "^0.13.2"
 numpy = "<1.25"
-nzshm-model = {version = "^0.4.0"}
+nzshm-model = {version = "^0.6"}
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
@@ -49,7 +49,7 @@ flake8-docstrings = { version = "^1.6.0", optional = true }
 pytest = { version = "^6.2.4"}
 pytest-cov  = { version = "^2.12.0"}
 twine = "^4.0.2"
-nzshm-common = "^0.4.0"
+nzshm-common = "^0.7.0"
 matplotlib = "^3.6.3"
 tox = "^4.4.4"
 ipython = "^8.11.0"

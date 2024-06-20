@@ -1,12 +1,16 @@
 import logging
 import time
-from typing import List
+import warnings
+from typing import Iterable, List, Set
 
 import geopandas as gpd
 import pandas as pd
+from nzshm_common.location.location import location_by_id
+
+from solvis.geometry import circle_polygon
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import CompositeSolutionProtocol, InversionSolutionProtocol
+from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
 
 log = logging.getLogger(__name__)
 
@@ -185,19 +189,168 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return self._ruptures_with_rupture_rates
 
     # return the rupture ids for any ruptures intersecting the polygon
-    def get_ruptures_intersecting(self, polygon) -> pd.Series:
+    def get_rupture_ids_intersecting(self, polygon) -> pd.Series:
+        """Return IDs for any ruptures intersecting the polygon."""
         q0 = gpd.GeoDataFrame(self.fault_sections)
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
         sr = self.rs_with_rupture_rates
         qdf = sr.join(q1, 'section', how='inner')
         return qdf["Rupture Index"].unique()
 
-    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+    def get_rupture_ids_for_location_radius(
+        self,
+        location_ids: Iterable[str],
+        radius_km: float,
+        location_join_type: SetOperationEnum = SetOperationEnum.UNION,
+    ) -> Set[int]:
+        """
+        Return IDs for ruptures within a radius around one or more locations.
+
+        Where there are multiple locations, the rupture IDs represent a set joining
+        of the specified radii.
+
+        Locations are resolved using [`nzshm-common`](https://pypi.org/project/nzshm-common/)
+        location ID values.
+
+        Parameters:
+            location_ids: one or more defined location IDs
+            radius_km: radius around the point(s) in kilometres
+            location_join_type: UNION or INTERSECTION
+
+        Returns:
+            a Set of rupture IDs
+
+        Examples:
+            Get all rupture IDs from the solution that are within 100km of Blenheim:
+            ```py
+                bhe_rupture_ids = sol.get_rupture_ids_for_location_radius(
+                    location_ids=["BHE"],
+                    radius_km=100,
+                )
+            ```
+            Get all rupture IDs from the solution that are within 50km of Blenheim
+            or within 50km of Wellington:
+            ```py
+                intersect_rupture_ids = sol.get_rupture_ids_for_location_radius(
+                    location_ids=["BHE"],
+                    radius_km=50,
+                    location_joint_type=SetOperationEnum.UNION,
+                )
+            ```
+
+        Note:
+            If you want to do this kind of joining between locations with different
+            radii or points that are not defined by location IDs, consider using
+            [circle_polygon][solvis.geometry.circle_polygon] and
+            [get_rupture_ids_intersecting][solvis.inversion_solution.inversion_solution_operations.InversionSolutionOperations.get_rupture_ids_intersecting]
+            then use set operations to join each rupture ID set.
+        """
+        log.info('get_rupture_ids_for_location_radius: %s %s %s' % (self, radius_km, location_ids))
+        first = True
+        rupture_ids: Set[int]
+        for loc_id in location_ids:
+            loc = location_by_id(loc_id)
+            polygon = circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude'])
+            location_rupture_ids = set(self.get_rupture_ids_intersecting(polygon))
+
+            if first:
+                rupture_ids = location_rupture_ids
+                first = False
+            else:
+                log.debug('location_join_type %s' % location_join_type)
+                if location_join_type == SetOperationEnum.INTERSECTION:
+                    rupture_ids = rupture_ids.intersection(location_rupture_ids)
+                elif location_join_type == SetOperationEnum.UNION:
+                    rupture_ids = rupture_ids.union(location_rupture_ids)
+                else:
+                    raise ValueError("unsupported SetOperation")
+        return rupture_ids
+
+    def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+        """
+        Return rupture IDs from fault sections for a given parent fault.
+
+        Parameters:
+            parent_fault_name: The name of the parent fault, e.g. "Alpine Jacksons to Kaniere"
+
+        Returns:
+            a Pandas series of rupture IDs
+        """
         # sr = sol.rs_with_rupture_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
         qdf = self.rupture_sections.join(sects, 'section', how='inner')
         return qdf.rupture.unique()
+
+    def get_rupture_ids_for_fault_names(
+        self,
+        corupture_fault_names: Iterable[str],
+        fault_join_type: SetOperationEnum = SetOperationEnum.UNION,
+    ) -> Set[int]:
+        """
+        Retrieve a set of rupture IDs for the specified corupture fault names.
+
+        Where there are multiple faults, the rupture IDs represent a set joining
+        of the specified faults.
+
+        Parameters:
+            corupture_fault_names: a collection of corupture fault names
+            fault_join_type: UNION or INTERSECTION
+
+        Raises:
+            ValueError: on an unsupported fault join type
+
+        Returns:
+            a Set of rupture IDs
+
+        Examples:
+            ```py
+            rupture_ids = solution.get_rupture_ids_for_fault_names(
+                corupture_fault_names=[
+                    "Alpine Jacksons to Kaniere",
+                    "Alpine Kaniere to Springs Junction",
+                ],
+                fault_joint_type=SetOperationEnum.INTERSECTION,
+                }
+            )
+            ```
+            Returns a set of 1440 rupture IDs in the intersection of the two datasets.
+        """
+        first = True
+        rupture_ids: Set[int]
+        for fault_name in corupture_fault_names:
+            if fault_name not in self.parent_fault_names:
+                raise ValueError("Invalid fault name: %s" % fault_name)
+            tic22 = time.perf_counter()
+            fault_rupture_ids = self.get_rupture_ids_for_parent_fault(fault_name)
+            tic23 = time.perf_counter()
+            log.debug('get_ruptures_for_parent_fault %s: %2.3f seconds' % (fault_name, (tic23 - tic22)))
+
+            if first:
+                rupture_ids = set(fault_rupture_ids)
+                first = False
+            else:
+                log.debug(f"fault_join_type {fault_join_type}")
+                if fault_join_type == SetOperationEnum.INTERSECTION:
+                    rupture_ids = rupture_ids.intersection(fault_rupture_ids)
+                elif fault_join_type == SetOperationEnum.UNION:
+                    rupture_ids = rupture_ids.union(fault_rupture_ids)
+                else:
+                    raise ValueError(
+                        "Only INTERSECTION and UNION operations are supported for option 'multiple_faults'"
+                    )
+
+        return rupture_ids
+
+    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+        """Deprecated signature for get_rupture_ids_for_parent_fault."""
+        warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
+        return self.get_rupture_ids_for_parent_fault(parent_fault_name)
+
+    def get_ruptures_intersecting(self, polygon) -> pd.Series:
+        """Deprecated signature for get_rupture_ids_intersecting."""
+        warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
+        return self.get_rupture_ids_intersecting(polygon)
 
     def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
 
