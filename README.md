@@ -1,15 +1,16 @@
 # Solvis
 A library to support the analysis of [OpenSHA](https://opensha.org/) inversion solution data.
 
-Solvis is used in the geospatial investigation of National Seismic Hazard
-Model inversion sources and rates. It supports both individual inversions
-and the composite model.
-
 [![pypi](https://img.shields.io/pypi/v/solvis.svg)](https://pypi.org/project/solvis/)
 [![python](https://img.shields.io/pypi/pyversions/solvis.svg)](https://pypi.org/project/solvis/)
 [![Build Status](https://github.com/GNS-Science/solvis/actions/workflows/dev.yml/badge.svg)](https://github.com/GNS-Science/solvis/actions/workflows/dev.yml)
 [![codecov](https://codecov.io/gh/GNS-Science/solvis/branch/main/graphs/badge.svg)](https://codecov.io/github/GNS-Science/solvis)
 
+Solvis is used in the geospatial investigation of the New Zealand
+[National Seismic Hazard
+Model](https://www.gns.cri.nz/research-projects/national-seismic-hazard-model/)
+inversion sources and rates. It supports both individual inversions
+and the composite model.
 
 * Documentation: <https://GNS-Science.github.io/solvis>
 * GitHub: <https://github.com/GNS-Science/solvis>

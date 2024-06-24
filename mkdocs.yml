@@ -1,7 +1,7 @@
 site_name: Solvis Documentation
 site_url: https://gns-science.github.io/solvis
-repo_url: https://github.com/gns-science/solvis
-repo_name: gns-science/solvis
+repo_url: https://github.com/GNS-Science/solvis
+repo_name: GNS-Science/solvis
 strict: true
 watch:
   - solvis
@@ -98,7 +98,7 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/gns-science/solvis
-      name: Github
+      link: https://github.com/GNS-Science/solvis
+      name: GitHub
     - icon: material/email
       link: "mailto:nshm@gns.cri.nz"
