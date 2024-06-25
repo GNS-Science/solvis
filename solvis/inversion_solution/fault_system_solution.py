@@ -149,9 +149,16 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         # combine the rupture rates from all solutions
         composite_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
         for branch_solution in solutions:
+            # NZSHM Model 0.6: take inversion ID from first InversionSource
+            for source in branch_solution.branch.sources:
+                if source.type == "inversion":
+                    inversion_solution_id = source.inversion_id
+                    break
+            else:
+                raise Exception("Could not find inversion solution ID for branch solution")
             solution_df = branch_solution.rupture_rates.copy()
             solution_df.insert(
-                0, 'solution_id', branch_solution.branch.inversion_solution_id
+                0, 'solution_id', inversion_solution_id
             )  # CategoricalDtype(categories=['PUY'], ordered=False)
             solution_df.insert(
                 0, 'rupture_set_id', branch_solution.rupture_set_id

@@ -55,8 +55,16 @@ def get_solution(id: str, archive: str) -> InversionSolution:
 
 def branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID'):
     for branch in fslt.branches:
+        # NZSHM Model 0.6: take inversion ID from first InversionSource
+        for source in branch.sources:
+            if source.type == "inversion":
+                inversion_solution_id = source.inversion_id
+                break
+        else:
+            raise Exception("Could not find inversion solution ID for branch")
+
         yield BranchInversionSolution.new_branch_solution(
-            get_solution(branch.inversion_solution_id, archive), branch, fslt.short_name, rupt_set_id
+            get_solution(inversion_solution_id, archive), branch, fslt.short_name, rupt_set_id
         )
 
 
