@@ -66,9 +66,10 @@ Python environment:
 $ pip install .
 ```
 
-Or with Poetry (use `--all-extras` to install all extra dependencies):
+Or with Poetry (using `--all-extras` to install all extra dependencies is
+recommended for development):
 ```console
-$ poetry install
+$ poetry install --all-extras
 ```
 
 
