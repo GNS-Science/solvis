@@ -53,9 +53,6 @@ screen_handler = logging.StreamHandler(stream=sys.stdout)
 screen_handler.setFormatter(formatter)
 log.addHandler(screen_handler)
 
-log.debug('DEBUG message')
-log.info('INFO message')
-
 
 class SourceSolution(ToshiFile):
     def get_source(self, fid):

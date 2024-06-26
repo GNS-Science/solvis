@@ -6,8 +6,6 @@ strict: true
 watch:
   - solvis
   - docs
-  - scripts
-
 nav:
   - Home: index.md
   - Usage: usage.md

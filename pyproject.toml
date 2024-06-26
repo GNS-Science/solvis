@@ -21,7 +21,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-cli = 'scripts.cli:cli'
+cli = 'solvis.scripts.cli:cli'
 
 [tool.poetry.dependencies]
 boto3 = {version = "^1.26.82", optional = true, extras = ["scripts"]}

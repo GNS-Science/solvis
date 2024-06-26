@@ -1,4 +1,4 @@
 ::: mkdocs-click
-    :module: scripts.cli
+    :module: solvis.scripts.cli
     :command: cli
     :prog_name: CLI
