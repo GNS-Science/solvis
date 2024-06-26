@@ -39,6 +39,7 @@ urllib3 = "<2"
 geopandas = "^0.13.2"
 numpy = "<1.25"
 nzshm-model = {version = "^0.6"}
+mkdocs-click = "^0.8.1"
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
