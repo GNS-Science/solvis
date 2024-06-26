@@ -7,11 +7,12 @@ from typing import Iterable, Union
 import geopandas as gpd
 import numpy as np
 import numpy.typing as npt
+import nzshm_model as nm
 import pandas as pd
 
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
-from .typing import BranchSolutionProtocol
+from .typing import BranchSolutionProtocol, ModelLogicTreeBranch
 
 log = logging.getLogger(__name__)
 
@@ -144,18 +145,36 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         return ns
 
     @staticmethod
-    def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'FaultSystemSolution':
+    def get_branch_inversion_solution_id(branch: ModelLogicTreeBranch) -> str:
+        """
+        Return a single inversion solution ID from an NZSHM Model logic tree branch (v1 or v2).
 
-        # combine the rupture rates from all solutions
-        composite_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
-        for branch_solution in solutions:
-            # NZSHM Model 0.6: take inversion ID from first InversionSource
-            for source in branch_solution.branch.sources:
+        Note:
+            This distinction may go away in future versions, simplifying this issue:
+            https://github.com/GNS-Science/nzshm-model/issues/81
+        """
+        if isinstance(branch, nm.source_logic_tree.version2.logic_tree.Branch):
+            # NZSHM Model 0.6: v2 branches take inversion ID from first InversionSource
+            for source in branch.sources:
                 if source.type == "inversion":
                     inversion_solution_id = source.inversion_id
                     break
             else:
                 raise Exception("Could not find inversion solution ID for branch solution")
+        else:
+            # Fall back to v1 behaviour
+            inversion_solution_id = branch.inversion_solution_id
+
+        return inversion_solution_id
+
+    @staticmethod
+    def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'FaultSystemSolution':
+
+        # combine the rupture rates from all solutions
+        composite_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
+        for branch_solution in solutions:
+            inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(branch_solution.branch)
+
             solution_df = branch_solution.rupture_rates.copy()
             solution_df.insert(
                 0, 'solution_id', inversion_solution_id
