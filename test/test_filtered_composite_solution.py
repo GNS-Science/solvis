@@ -31,9 +31,9 @@ def test_composite_filtering():
 
     new_composite = solvis.CompositeSolution(slt)
 
-    for fss_key in composite_v1_0_4._solutions:
+    for fss_key in composite_v1_0_4.get_fault_system_codes():
         #
-        fault_system_solution = composite_v1_0_4._solutions[fss_key]
+        fault_system_solution = composite_v1_0_4.get_fault_system_solution(fss_key)
         #
         rupts = fault_system_solution.ruptures
         rupt_ids = set(rupts['Rupture Index'].unique())

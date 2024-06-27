@@ -223,7 +223,12 @@ def cli(ctx, work_folder, fault_system):
 
 
 @cli.command()
-@click.option('--archive_name', '-a', default="CompositeSolution.zip", help="An OpenSHA solution archive name (default: CompositeSolution.zip)")
+@click.option(
+    '--archive_name',
+    '-a',
+    default="CompositeSolution.zip",
+    help="An OpenSHA solution archive name (default: CompositeSolution.zip)",
+)
 @click.option('--model_id', '-m', default="NSHM_v1.0.4", help=MODEL_ID_HELP)
 @click.pass_context
 def build(ctx, archive_name, model_id):
@@ -234,7 +239,12 @@ def build(ctx, archive_name, model_id):
 
 
 @cli.command('ls')
-@click.option('--archive_name', '-a', default="NSHM_v1.0.4_CompositeSolution.zip", help="An OpenSHA solution archive name (NSHM_v1.0.4_CompositeSolution.zip)")
+@click.option(
+    '--archive_name',
+    '-a',
+    default="NSHM_v1.0.4_CompositeSolution.zip",
+    help="An OpenSHA solution archive name (NSHM_v1.0.4_CompositeSolution.zip)",
+)
 @click.option('--model_id', '-m', default="NSHM_v1.0.4", help=MODEL_ID_HELP)
 @click.pass_context
 def perf(ctx, archive_name, model_id):
