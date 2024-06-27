@@ -2,20 +2,18 @@
 # noqa
 import logging
 import os
-import sys
 import pathlib
-import click
+import sys
 import time
+
+import click
 import nzshm_model
-
 from nshm_toshi_client.toshi_file import ToshiFile
-from solvis.get_secret import get_secret
-from solvis import circle_polygon
-
-from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
-from solvis import FaultSystemSolution, CompositeSolution
-
 from nzshm_common.location.location import location_by_id
+
+from solvis import CompositeSolution, FaultSystemSolution, circle_polygon, export_geojson
+from solvis.get_secret import get_secret
+from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
 
 # Get API key from AWS secrets manager
 API_URL = os.getenv('NZSHM22_TOSHI_API_URL', "http://127.0.0.1:5000/graphql")
@@ -46,12 +44,14 @@ logging.getLogger('botocore').setLevel(logging.INFO)
 # logging.getLogger('pynamodb').setLevel(logging.DEBUG)
 logging.getLogger('fiona').setLevel(logging.INFO)
 logging.getLogger('gql.transport.requests').setLevel(logging.WARN)
-logging.getLogger('solvis').setLevel(logging.DEBUG)
+logging.getLogger('solvis').setLevel(logging.INFO)
 
 formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 screen_handler = logging.StreamHandler(stream=sys.stdout)
 screen_handler.setFormatter(formatter)
 log.addHandler(screen_handler)
+
+MODEL_ID_HELP = "An nzshm_model ID (default: NSHM_v1.0.4)"
 
 
 class SourceSolution(ToshiFile):
@@ -117,11 +117,11 @@ def build_fault_system_solution(work_folder, fault_system, model_version=nzshm_m
     click.echo(f"branch {branch.short_name} {branch.long_name}")
     # click.echo(branch)
 
-    file_ids = [b.inversion_solution_id for b in branch.branches]
+    file_ids = [FaultSystemSolution.get_branch_inversion_solution_id(b) for b in branch.branches]
     filemap = fetch_toshi_files(work_folder, file_ids)
 
     # prepare BranchSolutions
-    click.echo(f"load branch solutions...")
+    click.echo("load branch solutions...")
     solutions = []
     for fslt_branch in branch.branches:
         solutions.append(
@@ -134,11 +134,11 @@ def build_fault_system_solution(work_folder, fault_system, model_version=nzshm_m
         )
 
     # build time ....
-    click.echo(f"build fault_system_solution ...")
+    click.echo("build fault_system_solution ...")
     tic = time.perf_counter()
     fault_system_solution = FaultSystemSolution.from_branch_solutions(solutions)
     toc = time.perf_counter()
-    click.echo(f'time to build fault_system_solution: {toc-tic} seconds')
+    click.echo(f"time to build fault_system_solution: {toc-tic} seconds")
 
     # ensure fast indices
     fault_system_solution.enable_fast_indices()
@@ -154,11 +154,12 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
 
     def branch_solutions(fslt, filemap):
         for fslt_branch in fslt.branches:
+            inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(fslt_branch)
             yield BranchInversionSolution.new_branch_solution(
-                InversionSolution.from_archive(filemap[fslt_branch.inversion_solution_id]['filepath']),
+                InversionSolution.from_archive(filemap[inversion_solution_id]['filepath']),
                 branch=fslt_branch,
                 fault_system=fslt.short_name,
-                rupture_set_id=filemap[fslt_branch.inversion_solution_id]['rupt_set_id'],
+                rupture_set_id=filemap[inversion_solution_id]['rupt_set_id'],
             )
 
     composite = CompositeSolution(slt)  # create the new composite solutoin
@@ -166,7 +167,7 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
 
     for fault_system_lt in slt.fault_system_lts:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
-            file_ids = [b.inversion_solution_id for b in fault_system_lt.branches]
+            file_ids = [FaultSystemSolution.get_branch_inversion_solution_id(b) for b in fault_system_lt.branches]
             filemap = fetch_toshi_files(work_folder, file_ids)
 
             # prepare BranchSolutions
@@ -204,7 +205,14 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
 @click.option('--work_folder', '-w', default=lambda: os.getcwd())
 @click.pass_context
 def cli(ctx, work_folder, fault_system):
-    """FaultSystemSolution tasks - build, analyse."""
+    """
+    FaultSystemSolution tasks - build, analyse.
+
+    Note:
+    This script relies on access to the NSHM Toshi GraphQL API (nshm-toshi-api)
+    for build operations. If you do not have this installed locally, the
+    NZSHM22_TOSHI_API_URL environment variable must be set accordingly.
+    """
     click.echo("FaultSystemSolution tasks - build, analyse.")
     click.echo(f"work folder: {work_folder}")
     click.echo(f"fault system: {fault_system}")
@@ -215,26 +223,26 @@ def cli(ctx, work_folder, fault_system):
 
 
 @cli.command()
-@click.option('--archive_name', '-a', default="CompositeSolution.zip")
-@click.option('--model_id', '-m', default="NSHM_v1.0.4")
+@click.option('--archive_name', '-a', default="CompositeSolution.zip", help="An OpenSHA solution archive name (default: CompositeSolution.zip)")
+@click.option('--model_id', '-m', default="NSHM_v1.0.4", help=MODEL_ID_HELP)
 @click.pass_context
 def build(ctx, archive_name, model_id):
     if ctx.obj['fault_system'] == 'ALL':
         solution = build_composite_all(ctx.obj['work_folder'], archive_name, model_id)
     else:
-        solution = build_fault_system_solution(ctx.obj['work_folder'], ctx.obj['fault_system'], model_id)
+        solution = build_fault_system_solution(ctx.obj['work_folder'], ctx.obj['fault_system'], model_id)  # noqa: F841
 
 
 @cli.command('ls')
-@click.option('--archive_name', '-a', default="NSHM_v1.0.4_CompositeSolution.zip")
-@click.option('--model_id', '-m', default="NSHM_v1.0.4")
+@click.option('--archive_name', '-a', default="NSHM_v1.0.4_CompositeSolution.zip", help="An OpenSHA solution archive name (NSHM_v1.0.4_CompositeSolution.zip)")
+@click.option('--model_id', '-m', default="NSHM_v1.0.4", help=MODEL_ID_HELP)
 @click.pass_context
 def perf(ctx, archive_name, model_id):
     # click.echo(ctx.obj['work_folder'] , ctx.obj['fault_system'] )
 
     tic = time.perf_counter()
     # Load archive with SLT
-    work_folder, fault_system = ctx.obj['work_folder'], ctx.obj['fault_system']
+    work_folder, fault_system = ctx.obj['work_folder'], ctx.obj['fault_system']  # noqa: F841
     current_model = nzshm_model.get_model_version(model_id)
     slt = current_model.source_logic_tree()
 
@@ -250,7 +258,7 @@ def perf(ctx, archive_name, model_id):
     click.echo(f'time to load 1st rupture_surface_gdf: {toc-tic:2.3f} seconds')
     tic = toc
 
-    rupture_surface_gdf = comp._solutions[ctx.obj['fault_system']].rupture_surface(4)
+    rupture_surface_gdf = comp._solutions[ctx.obj['fault_system']].rupture_surface(4)  # noqa: F841
     toc = time.perf_counter()
     click.echo(f'time to load 2nd rupture_surface_gdf: {toc-tic:2.3f} seconds')
     tic = toc
@@ -271,7 +279,7 @@ def query(ctx):
 
     LOC = location_by_id('KBZ')
     polygon = circle_polygon(2e5, LOC['latitude'], LOC['longitude'])  # 50km circle around WLG
-    ruptures = sol.get_ruptures_intersecting(polygon)
+    ruptures = sol.get_ruptures_intersecting(polygon)  # noqa: F841
     loc_filtered = list(sol.ruptures.index)
 
     rr = sol.rate
@@ -283,7 +291,7 @@ def query(ctx):
     print(len(combo))
 
     for rupt in combo:
-        solvis.export_geojson(sol.rupture_surface(rupt), f"{work_folder}/CRU_rupture_{rupt}.geojson", indent=2)
+        export_geojson(sol.rupture_surface(rupt), f"{work_folder}/CRU_rupture_{rupt}.geojson", indent=2)
 
     toc = time.perf_counter()
     click.echo(f'time to get ruptures: {toc-tic} seconds')
