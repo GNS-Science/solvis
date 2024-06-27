@@ -1,5 +1,9 @@
 # Contributing
 
+This project is provided by
+**[GNS Science | Te Pū Ao](https://github.com/GNS-Science/)**
+to support the wider seismic hazard analysis community.
+
 Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given.
 
@@ -33,6 +37,11 @@ Solvis could always use more documentation, whether as part of the
 official solvis docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
+The project has Markdown-based documentation, using
+[MkDocs](https://www.mkdocs.org/user-guide/) with
+[mkdocstrings-python](https://mkdocstrings.github.io/python/) in the
+[Google](https://mkdocstrings.github.io/griffe/docstrings/) style.
+
 ### Submit Feedback
 
 The best way to send feedback is to file an issue at [https://github.com/GNS-Science/solvis/issues](https://github.com/GNS-Science/solvis/issues).
@@ -41,9 +50,9 @@ If you are proposing a feature:
 
 - Explain in detail how it would work.
 - Keep the scope as narrow as possible, to make it easier to implement.
-- Remember that this is a volunteer-driven project, and that contributions
-  are welcome :)
 
 ## Get Started!
 
-**TODO**
+* [Install solvis from source code](docs/installation.md#from-source-code)
+* [Run the tests](docs/testing.md)
+* [Fix bugs or contribute features](https://github.com/GNS-Science/solvis/issues)
