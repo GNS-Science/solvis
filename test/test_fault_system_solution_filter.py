@@ -11,7 +11,7 @@ import solvis
 
 @pytest.fixture(scope='module')
 def composite_fixture(request):
-    slt = nm.get_model_version("NSHM_v1.0.4").source_logic_tree()
+    slt = nm.get_model_version("NSHM_v1.0.4").source_logic_tree
     archive = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures/TinyCompositeSolution.zip"
     yield solvis.CompositeSolution.from_archive(archive, slt)
 
