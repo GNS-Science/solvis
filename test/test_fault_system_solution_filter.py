@@ -11,7 +11,7 @@ import solvis
 
 @pytest.fixture(scope='module')
 def composite_fixture(request):
-    slt = nm.get_model_version("NSHM_v1.0.4").source_logic_tree()
+    slt = nm.get_model_version("NSHM_v1.0.4").source_logic_tree
     archive = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures/TinyCompositeSolution.zip"
     yield solvis.CompositeSolution.from_archive(archive, slt)
 
@@ -20,7 +20,7 @@ def test_filter_from_complete_composite(composite_fixture):
     """
     reproduce KeyError: "There is no item named 'ruptures/indices.csv' in the archive"
     """
-    sol = composite_fixture._solutions['HIK']
+    sol = composite_fixture.get_fault_system_solution('HIK')
     ruptures = solvis.rupt_ids_above_rate(sol, 1e-4, rate_column="rate_weighted_mean")
 
     print(ruptures)

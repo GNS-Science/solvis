@@ -12,9 +12,11 @@ from solvis.inversion_solution import CompositeSolution
 from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
 
-current_model = nm.get_model_version(nm.CURRENT_VERSION)
-slt = current_model.source_logic_tree()
+current_model = nm.get_model_version("NSHM_v1.0.0")
+slt = current_model.source_logic_tree
 fslt = slt.fault_system_lts[0]  # PUY is used always, just for the 3 solution_ids
+
+# assert fslt.short_name == "PUY-"
 
 folder = pathlib.PurePath(os.path.realpath(__file__)).parent
 
@@ -55,8 +57,9 @@ def get_solution(id: str, archive: str) -> InversionSolution:
 
 def branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID'):
     for branch in fslt.branches:
+        inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(branch)
         yield BranchInversionSolution.new_branch_solution(
-            get_solution(branch.inversion_solution_id, archive), branch, fslt.short_name, rupt_set_id
+            get_solution(inversion_solution_id, archive), branch, fslt.short_name, rupt_set_id
         )
 
 
@@ -72,13 +75,15 @@ def composite_fixture():
 
 def build_composite_fixture(archives=ARCHIVES):
 
+    # CBC This doesn't work now ??
     # fudge the model branches because we have too few fixtures
     for idx in [1, 2]:
         slt.fault_system_lts[idx].branches = deepcopy(slt.fault_system_lts[0].branches)
 
     composite = CompositeSolution(slt)  # create the new composite solutoin
+
     for fault_system_lt in slt.fault_system_lts:
-        if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
+        if fault_system_lt.short_name in ['PUY', 'CRU', 'HIK']:
             composite.add_fault_system_solution(
                 fault_system_lt.short_name,
                 FaultSystemSolution.from_branch_solutions(

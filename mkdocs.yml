@@ -1,0 +1,105 @@
+site_name: Solvis Documentation
+site_url: https://gns-science.github.io/solvis
+repo_url: https://github.com/GNS-Science/solvis
+repo_name: GNS-Science/solvis
+strict: true
+watch:
+  - solvis
+  - docs
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - Installation: installation.md
+  - API Reference:
+    - Solvis [package]:
+      - api/solvis/index.md
+      - api/solvis/config.md
+      - api/solvis/geometry.md
+      - inversion_solution [package]:
+        - api/inversion_solution/index.md
+        - api/inversion_solution/composite_solution.md
+        - api/inversion_solution/fault_system_solution.md
+        - api/inversion_solution/fault_system_solution_file.md
+        - api/inversion_solution/inversion_solution.md
+        - api/inversion_solution/inversion_solution_operations.md
+        - api/inversion_solution/inversion_solution_file.md
+        - api/inversion_solution/solution_surfaces_builder.md
+        - api/inversion_solution/typing.md
+      - api/solvis/solvis.md
+  - Development and Contributing:
+    - contributing.md
+    - Testing: testing.md
+  - Addendum:
+    - Scripts:
+      - scripts.md
+      - CLI script: scripts/cli.md
+    - Changelog: changelog.md
+
+theme:
+  name: material
+  language: en
+  #logo: assets/logo.png
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.indexes
+    - navigation.instant
+    - navigation.tabs
+    # - navigation.tabs.sticky
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - mkdocs-click
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      baselevel: 2
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+  - tables
+
+plugins:
+  - include-markdown
+  - search:
+      lang: en
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_if_no_docstring: true
+            signature_crossrefs: true
+            annotations_path: source
+            # show_source: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/GNS-Science/solvis
+      name: GitHub
+    - icon: material/email
+      link: "mailto:nshm@gns.cri.nz"

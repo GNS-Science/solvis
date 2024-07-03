@@ -1,7 +1,7 @@
 import io
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Iterable, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -41,9 +41,16 @@ class CompositeSolution(CompositeSolutionOperations):
     @property
     def rupture_rates(self) -> pd.DataFrame:
         """
-        Calculate (and cache) the rates.
+        Calculate (and cache) the rupture rates.
 
-        :return: a gpd.GeoDataFrame
+        Returns:
+            a `pandas.DataFrame` with columns: </br>
+                fault_system,
+                Rupture Index,
+                rate_max,
+                rate_min,
+                rate_count,
+                rate_weighted_mean
         """
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
@@ -55,9 +62,16 @@ class CompositeSolution(CompositeSolutionOperations):
     @property
     def composite_rates(self) -> pd.DataFrame:
         """
-        Calculate (and cache) the composite_rates.
+        Calculate (and cache) the composite rates.
 
-        :return: a gpd.GeoDataFrame
+        Returns:
+            a `pandas.DataFrame` with columns: <br/>
+                Rupture Index,
+                fault_system,
+                weight,
+                rupture_set_id,
+                solution_id,
+                Annual Rate
         """
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
@@ -106,3 +120,31 @@ class CompositeSolution(CompositeSolutionOperations):
 
         new_solution._archive_path = archive_path
         return new_solution
+
+    def get_fault_system_codes(self) -> Iterable[str]:
+        """
+        List fault systems contained within the composite solution.
+
+        For the NSHM model this will typically be **PUY** for Puysegur,
+        **HIK** for Hikurangi, **CRU** for Crustal.
+
+        Returns:
+            A list of fault system keys.
+        """
+        return list(self._solutions.keys())
+
+    def get_fault_system_solution(self, fault_system_code: str) -> FaultSystemSolution:
+        """
+        Retrieve a `FaultSystemSolution` from within the composite solution.
+
+        Codes can be retrieved with
+        [`get_fault_system_codes`][solvis.inversion_solution.composite_solution.CompositeSolution.get_fault_system_codes]
+
+
+        Parameters:
+            fault_system_code: a named fault system code
+
+        Returns:
+            a specific FaultSystemSolution
+        """
+        return self._solutions[fault_system_code]

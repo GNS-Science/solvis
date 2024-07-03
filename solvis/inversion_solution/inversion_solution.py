@@ -13,6 +13,17 @@ from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
 class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':
+        """
+        Read an inversion solution from an archive zipfile.
+
+        Archive validity is checked with the presence of a `ruptures/indices.csv` file within.
+
+        Parameters:
+            instance_or_path: a Path object, filename or in-memory binary IO stream
+
+        Returns:
+            A new InversionSolution with the archive location associated.
+        """
         new_solution = InversionSolution()
 
         if isinstance(instance_or_path, io.BytesIO):
@@ -27,6 +38,16 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
 
     @staticmethod
     def filter_solution(solution: InversionSolutionProtocol, rupture_ids: npt.ArrayLike) -> 'InversionSolution':
+        """
+        Filter an InversionSolution by a subset of its rupture IDs.
+
+        Parameters:
+            solution: inversion solution data
+            rupture_ids: A NumPy sequence of rupture ID numbers
+
+        Returns:
+            A new InversionSolution only containing data for the rupture IDs specified.
+        """
         rr = solution.ruptures
         ra = solution.rupture_rates
         ri = solution.indices

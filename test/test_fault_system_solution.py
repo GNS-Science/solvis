@@ -8,7 +8,7 @@ import solvis
 from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
-slt = current_model.source_logic_tree()
+slt = current_model.source_logic_tree
 fslt = slt.fault_system_lts[0]  # PUY is used always , just for the 3 solution_ids
 
 FSR_COLUMNS_A = 26
