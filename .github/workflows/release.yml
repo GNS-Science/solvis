@@ -21,8 +21,8 @@ jobs:
     name: Create Release
     # needs: call-test-workflow
 
-    permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    # permissions:
+    #   id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
     runs-on: ubuntu-latest
 
@@ -80,6 +80,6 @@ jobs:
       - name: publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          # user: __token__
-          # password: ${{ secrets.PYPI_API_TOKEN }}
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
