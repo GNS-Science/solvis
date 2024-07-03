@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.12.0-alpha.2] - 2024-07-03
+## Changed
+ - nzshm-common now ^0.8.1
+ - use python3.9 compatible typing syntax (`Union` vs `|`)
+
 ## [0.12.0-alpha.1] - 2024-06-19
 ## Added
 - `SetOperationEnum` for set joining operations
