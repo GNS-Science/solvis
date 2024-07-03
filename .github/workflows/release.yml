@@ -20,6 +20,10 @@ jobs:
   release:
     name: Create Release
     # needs: call-test-workflow
+
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
