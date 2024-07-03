@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solvis"
-version = "0.12.0-alpha.2"
+version = "0.12.1"
 description = "analysis of opensha modular solution files."
 authors = ["Chris Chamberlain <chrisbc@artisan.co.nz>"]
 license = "AGPL3"
@@ -24,23 +24,26 @@ packages = [
 cli = 'solvis.scripts.cli:cli'
 
 [tool.poetry.dependencies]
-boto3 = {version = "^1.26.82", optional = true, extras = ["scripts"]}
-click = "^8.1.3"
-click-plugins = "^1.1.1"
-nshm-toshi-client = {version = "^1.0.0", optional = true, extras = ["scripts"]}
+boto3 = {version = "^1.26.82", optional = true}
+click = {version = "^8.1.3", optional = true}
+click-plugins = {version = "^1.1.1", optional = true}
+nshm-toshi-client = {version = "^1.0.0", optional = true}
 pyproj = "^3.3"
 python = ">=3.9,<4.0"
 python-dateutil = "^2.8.2"
 pytz = "2021.3"
-pyvista = {version = "^0.37.0", optional = true, extras = ["vtk"]}
+pyvista = {version = "^0.37.0", optional = true}
+
+nzshm-common = "^0.8.1"
+nzshm-model = "^0.10.6"
+geopandas = "^0.13.2"
 
 # see https://github.com/orgs/python-poetry/discussions/7937
-urllib3 = "<2"
-geopandas = "^0.13.2"
+# urllib3 = "<2"
+
+# Later numpy introduces typing changes that impact tests
 numpy = "<1.25"
-nzshm-model = {version = "^0.6"}
-mkdocs-click = "^0.8.1"
-nzshm-common = "^0.8.1"
+
 
 [tool.poetry.group.dev.dependencies]
 black  = { version = "^22.3"}
@@ -50,7 +53,6 @@ flake8  = { version = "^3.9.2"}
 flake8-docstrings = { version = "^1.6.0", optional = true }
 pytest = { version = "^6.2.4"}
 pytest-cov  = { version = "^2.12.0"}
-twine = "^4.0.2"
 matplotlib = "^3.6.3"
 tox = "^4.4.4"
 ipython = "^8.11.0"
@@ -69,11 +71,14 @@ mkdocs-material = "^9.5.21"
 mkdocs-material-extensions = "^1.3.1"
 mkdocs-pymdownx-material-extras = "^2.5.6"
 mkdocs-with-pdf = "^0.9.3"
+mkdocs-click = "^0.8.1"
 
 [tool.poetry.extras]
 scripts = [
     "nshm-toshi-client",
-    "boto3"
+    "boto3",
+    "click",
+    "click-plugins"
 ]
 vtk = [
     "pyvista"

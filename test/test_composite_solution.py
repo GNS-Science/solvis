@@ -12,7 +12,7 @@ import pytest
 from solvis import CompositeSolution, FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
-slt = current_model.source_logic_tree()
+slt = current_model.source_logic_tree
 fslt = slt.fault_system_lts[0]  # PUY is used always , just for the 3 solution_ids
 
 
@@ -89,7 +89,7 @@ def test_composite_serialisation(small_archives):
     # folder = pathlib.Path(pathlib.PurePath(os.path.realpath(__file__)).parent.parent, "SCRATCH")
 
     v1_0_0 = nm.get_model_version('NSHM_v1.0.0')
-    slt = v1_0_0.source_logic_tree()
+    slt = v1_0_0.source_logic_tree
     print(slt.fault_system_lts[0])
 
     # fudge the model branches because we have too few fixtures
