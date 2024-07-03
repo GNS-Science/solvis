@@ -20,7 +20,7 @@ def test_filter_from_complete_composite(composite_fixture):
     """
     reproduce KeyError: "There is no item named 'ruptures/indices.csv' in the archive"
     """
-    sol = composite_fixture._solutions['HIK']
+    sol = composite_fixture.get_fault_system_solution('HIK')
     ruptures = solvis.rupt_ids_above_rate(sol, 1e-4, rate_column="rate_weighted_mean")
 
     print(ruptures)

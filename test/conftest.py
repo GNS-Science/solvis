@@ -55,8 +55,10 @@ def get_solution(id: str, archive: str) -> InversionSolution:
 
 def branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID'):
     for branch in fslt.branches:
+        inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(branch)
+
         yield BranchInversionSolution.new_branch_solution(
-            get_solution(branch.inversion_solution_id, archive), branch, fslt.short_name, rupt_set_id
+            get_solution(inversion_solution_id, archive), branch, fslt.short_name, rupt_set_id
         )
 
 
