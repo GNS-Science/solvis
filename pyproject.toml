@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solvis"
-version = "0.12.2"
+version = "0.12.3"
 description = "analysis of opensha modular solution files."
 authors = ["Chris Chamberlain <chrisbc@artisan.co.nz>"]
 license = "AGPL3"
