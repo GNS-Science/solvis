@@ -15,7 +15,7 @@ and the composite model.
 * Documentation: <https://GNS-Science.github.io/solvis>
 * GitHub: <https://github.com/GNS-Science/solvis>
 * PyPI: <https://pypi.org/project/solvis/>
-* Free software: GPL-3.0-only
+* Free software: GNU Affero General Public License v3.0
 
 # Features / Goals
 
