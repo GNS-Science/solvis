@@ -11,3 +11,4 @@ jobs:
   call-test-workflow:
     #https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
     uses: ./.github/workflows/run-tests.yml
+    secrets: inherit
