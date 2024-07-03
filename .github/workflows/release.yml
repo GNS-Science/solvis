@@ -11,19 +11,16 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Allows you to run this workflow manually from the Actions tab
-  call-test-workflow:
-    #https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
-    uses: ./.github/workflows/run-tests.yml
-    secrets: inherit
+
+  # call-test-workflow:
+  #   #https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
+  #   uses: ./.github/workflows/run-tests.yml
+  #   secrets: inherit
 
   release:
     name: Create Release
-    needs: call-test-workflow
+    # needs: call-test-workflow
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-versions: ["3.9", "3.10"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -44,9 +41,10 @@ jobs:
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./CHANGELOG.md
 
+      # run build using the minimum supported python version
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-versions }}
+          python-version: "3.9"
 
       - name: Install and configure Poetry
         uses: GNS-Science/install-poetry@main
@@ -78,6 +76,6 @@ jobs:
       - name: publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
+          # user: __token__
+          # password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.12.2] 2024-07-04
+
+bump version to verify new pypi workflow
+
 ## [0.12.1] 2024-07-04
 
 ## Changed
