@@ -7,7 +7,7 @@ These functions require [Shapely](https://shapely.readthedocs.io/en/stable/index
 import logging
 import math
 from functools import partial
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 from pyproj import Transformer
@@ -309,7 +309,7 @@ def circle_polygon(radius_m: float, lat: float, lon: float) -> Polygon:
 
 def section_distance(
     transformer: Transformer,
-    surface_geometry: Polygon | LineString,
+    surface_geometry: Union[Polygon, LineString],
     upper_depth: float,
     lower_depth: float,
 ) -> float:
