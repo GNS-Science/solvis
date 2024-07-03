@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0] 2024-07-04
+
+## Changed
+ - nzshm-model to 0.10.6
+ - fixes for above
+ - removed twine from tox config
+
 ## [0.12.0-alpha.2] - 2024-07-03
 ## Changed
  - nzshm-common now ^0.8.1
