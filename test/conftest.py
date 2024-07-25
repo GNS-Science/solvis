@@ -68,7 +68,7 @@ def small_composite_fixture():
     return build_composite_fixture(archives=MINI_ARCHIVES)
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='module')
 def composite_fixture():
     return build_composite_fixture()
 

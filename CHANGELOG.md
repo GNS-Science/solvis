@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.0] 2024-07-25
+
+## Added
+ - helper module to assist with participation rates
+
+
 ## [0.12.3] 2024-07-04
 bump version to verify new pypi workflow
 
