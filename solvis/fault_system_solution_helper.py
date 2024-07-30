@@ -1,8 +1,8 @@
 from collections import namedtuple
-from typing import Iterator, Set
+from typing import Dict, Iterator, Set
 
-import solvis.inversion_solution.typing
-from solvis.inversion_solution import FaultSystemSolution
+from solvis.inversion_solution import FaultSystemSolution, InversionSolution
+from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 """
 NAMES
@@ -25,7 +25,7 @@ class FaultSystemSolutionHelper:
 
     """
 
-    def __init__(self, fault_system_solution: solvis.inversion_solution.typing.InversionSolutionProtocol):
+    def __init__(self, fault_system_solution: InversionSolutionProtocol):
         self._fss = fault_system_solution
 
     def subsections_for_ruptures(self, rupture_ids: Set[int]) -> Set[int]:
@@ -91,7 +91,7 @@ class FaultSystemSolutionHelper:
             df0 = df0.join(self._fss.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
                 [rate_column, "rupture", "section"]
             ]
-            df0 = df0[df0[rate_column] >0]
+            df0 = df0[df0[rate_column] > 0]
 
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
         return set([int(id) for id in ids])
@@ -117,7 +117,7 @@ class FaultSystemSolutionHelper:
         return set([int(id) for id in ids])
 
 
-def section_participation_rate(solution: solvis.InversionSolution, section: int):
+def section_participation_rate(solution: InversionSolution, section: int):
     """
     get the 'participation rate" of a (sub)section.
 
@@ -130,7 +130,7 @@ def section_participation_rate(solution: solvis.InversionSolution, section: int)
     return df[df["Rupture Index"].isin(list(ruptures))]["Annual Rate"].sum()
 
 
-def fault_participation_rate(solution: solvis.InversionSolution, fault_name: str):
+def fault_participation_rate(solution: InversionSolution, fault_name: str):
     """
     get the 'participation rate" of a given parent fault.
 
@@ -143,3 +143,41 @@ def fault_participation_rate(solution: solvis.InversionSolution, fault_name: str
     return df[df["Rupture Index"].isin(list(ruptures))]["Annual Rate"].sum()
 
 
+def build_rupture_groups(solution: InversionSolutionProtocol) -> Iterator[Dict]:
+    dfrs = solution.rupture_sections
+    ruptures = dfrs['rupture'].unique().tolist()
+    print(f"there are {len(ruptures)} unique ruptures")
+    count = 0
+    sample_sections = None
+    sample_rupt = None
+    sample_ruptures = []
+
+    for rupt_id in ruptures:
+        sections = dfrs[dfrs.rupture == rupt_id]['section'].tolist()
+        # first or reset
+        if sample_rupt is None:
+            sample_ruptures = []
+            sample_rupt = rupt_id
+            sample_sections = set(sections)
+            sample_len = len(sections)
+            continue
+
+        if rupt_id is not sample_rupt:
+            sample_ruptures.append(rupt_id)
+
+        # otherwise compare overlap
+        diff = len(set(sections).symmetric_difference(sample_sections))
+        overlap = len(set(sections).intersection(sample_sections))
+
+        if overlap:  # and there must be some non-zero score
+            score = (sample_len - diff) / sample_len
+
+        # print(f'rupt_id {rupt_id} score {score} overlap {overlap} sample_len: {sample_len} diff {diff}')
+        if (score < 0.7) or not overlap:  # (overlap < 0.8 * sample_len):
+            yield {'rupture': sample_rupt, 'ruptures': sample_ruptures, 'sample_sections': sample_len}
+
+            # signal reset
+            sample_rupt = None
+            count += 1
+
+    print(f"built {count} rupture groups")
