@@ -83,7 +83,7 @@ class FaultSystemSolutionHelper:
         subsection_ids = self.subsections_for_faults(parent_ids)
         df0 = self._fss.rupture_sections
         # print(df0)
-        print(self._fss.rupture_rates)
+        # print(self._fss.rupture_rates)
 
         # TODO this is needed becuase the rupture rate concept differs between IS and FSS classes
         rate_column = "rate_weighted_mean" if isinstance(self._fss, FaultSystemSolution) else "Annual Rate"
