@@ -58,5 +58,4 @@ def test_build_rupture_groups(composite_fixture):
 
 	for rep in build_rupture_groups(fss):
 		print(rep)
-
-	assert 0
+	# assert 0
