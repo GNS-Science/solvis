@@ -75,6 +75,9 @@ def translate_horizontally(azimuth: float, distance: float, lon: float, lat: flo
     lon2 = lon + math.atan2(math.sin(azimuth) * sin_d * cos_lat1, cos_d - sin_lat1 * math.sin(lat2))
     return math.degrees(lon2), math.degrees(lat2)
 
+def add_z(coords, z):
+    x, y = coords
+    return [x, y, z]
 
 def create_surface(
     trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float
@@ -113,7 +116,7 @@ def create_surface(
     transformation = partial(translate_horizontally, dip_dir, width)
 
     bottom_edge = reverse_geom(transform(transformation, trace))
-    return Polygon([x for x in trace.coords] + [x for x in bottom_edge.coords])
+    return Polygon([add_z(x, upper_depth) for x in trace.coords] + [add_z(x, lower_depth) for x in bottom_edge.coords])
 
 
 def bearing(point_a: Point, point_b: Point) -> float:
