@@ -1,11 +1,9 @@
 from collections import namedtuple
-from typing import Dict, Iterator, Set
+from typing import Dict, Iterator, List, Set
 
-from solvis.inversion_solution import FaultSystemSolution, InversionSolution
-from solvis.inversion_solution.typing import InversionSolutionProtocol
-
+from solvis.inversion_solution import InversionSolution
 from solvis.inversion_solution.rupture_id_filter import FilterRuptureIds
-from solvis.inversion_solution.subsection_id_filter import FilterSubsectionIds
+from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 """
 NAMES
@@ -18,10 +16,11 @@ NAMES
 
 ParentFaultMapping = namedtuple('ParentFaultMapping', ['id', 'parent_fault_name'])
 
+
 class FaultSystemSolutionHelper:
     """
     A helper class for solvis.InversionSolutionProtocol instances providing
-      set analysis functions on major fss attribute
+      set analysis functions on major fss attributes
 
     NB these functions might be added to the class itself eventually
 
@@ -29,8 +28,8 @@ class FaultSystemSolutionHelper:
 
     def __init__(self, fault_system_solution: InversionSolutionProtocol):
         self._fss = fault_system_solution
-        self.filter_subsection_ids = FilterSubsectionIds(fault_system_solution)
-        self.filter_rupture_ids = FilterRuptureIds(fault_system_solution)
+        # self.filter_subsection_ids = FilterSubsectionIds(fault_system_solution)
+        # self.filter_rupture_ids = FilterRuptureIds(fault_system_solution)
 
     def ids_for_parent_fault_names(self, fault_names: Set[str]) -> Set[int]:
         """
@@ -55,15 +54,15 @@ class FaultSystemSolutionHelper:
             # print(idx, parent_id, unique_names[idx])
             yield ParentFaultMapping(parent_id, unique_names[idx])
 
-    def ruptures_for_parent_fault_names(self, fault_names: Set[str], drop_zero_rates: bool = True) -> Set[int]:
-        """
-        get all ruptures (by id) for the given parent fault names
+    # def ruptures_for_parent_fault_names(self, fault_names: Set[str], drop_zero_rates: bool = True) -> Set[int]:
+    #     """
+    #     get all ruptures (by id) for the given parent fault names
 
-        convenience function that resolves fault names before
-        calling self.ruptures_for_faults.
-        """
-        fault_ids = self.fault_names_as_ids(fault_names)
-        return self.filter_rupture_ids.for_parent_fault_ids(fault_ids, drop_zero_rates)
+    #     convenience function that resolves fault names before
+    #     calling self.ruptures_for_faults.
+    #     """
+    #     fault_ids = self.fault_names_as_ids(fault_names)
+    #     return self.filter_rupture_ids.for_parent_fault_ids(fault_ids, drop_zero_rates)
 
 
 def section_participation_rate(solution: InversionSolution, section: int):
@@ -74,7 +73,6 @@ def section_participation_rate(solution: InversionSolution, section: int):
     """
     filter_rupture_ids = FilterRuptureIds(solution)
     ruptures = filter_rupture_ids.for_subsections([section])
-    # ruptures = {5,6}  # mocking helper.ruptures_given_subsections()
     df = solution.ruptures_with_rupture_rates[["Rupture Index", "Annual Rate"]]
     return df[df["Rupture Index"].isin(list(ruptures))]["Annual Rate"].sum()
 
@@ -85,8 +83,9 @@ def fault_participation_rate(solution: InversionSolution, fault_name: str):
 
     That is, the sum of rates for all ruptures that involve the requested parent fault .
     """
-    helper = FaultSystemSolutionHelper(solution)
-    ruptures = helper.ruptures_for_parent_fault_names([fault_name])
+    # helper = FaultSystemSolutionHelper(solution)
+    # filter_rupture_ids = FilterRuptureIds(solution)
+    ruptures = FilterRuptureIds(solution).for_parent_fault_names([fault_name])
     # ruptures = {8, 9, 10}  # mocking helper.ruptures_given_subsections()
     df = solution.ruptures_with_rupture_rates[["Rupture Index", "Annual Rate"]]
     return df[df["Rupture Index"].isin(list(ruptures))]["Annual Rate"].sum()
@@ -99,7 +98,7 @@ def build_rupture_groups(solution: InversionSolutionProtocol) -> Iterator[Dict]:
     count = 0
     sample_sections = None
     sample_rupt = None
-    sample_ruptures = []
+    sample_ruptures: List[int] = []
 
     for rupt_id in ruptures:
         sections = dfrs[dfrs.rupture == rupt_id]['section'].tolist()

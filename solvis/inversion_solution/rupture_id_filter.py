@@ -1,9 +1,12 @@
-from typing import Set, Optional
-from solvis.inversion_solution.typing import InversionSolutionProtocol
+from typing import Iterable, Optional, Set
+
 from solvis.inversion_solution import FaultSystemSolution
+from solvis.inversion_solution.typing import InversionSolutionProtocol
+
 from .subsection_id_filter import FilterSubsectionIds
 
-class FilterRuptureIds():
+
+class FilterRuptureIds:
     """
     A class to filter ruptures, returning the qualifying rupture_ids.
     """
@@ -28,11 +31,12 @@ class FilterRuptureIds():
         ### return self.ids_for_parent_faults(parent_fault_names)
         raise NotImplementedError()
 
-    def for_parent_fault_names(self, parent_fault_names: Set[str]) -> Set[int]:
+    def for_parent_fault_names(self, parent_fault_names: Iterable[str], drop_zero_rates: bool = True) -> Set[int]:
         """Find ruptures that occur on any of the given parent_fault names.
 
         Args:
             parent_fault_names: A list of one or more `parent_fault` names.
+            drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
 
         Returns:
             The rupture_ids matching the filter.
@@ -40,10 +44,12 @@ class FilterRuptureIds():
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
         """
-        raise NotImplementedError()
+        df0 = self._solution.fault_sections
+        # this is split out in fss_helper in ....
+        ids = df0[df0['ParentName'].isin(list(parent_fault_names))]['ParentID'].tolist()
+        return self.for_parent_fault_ids(parent_fault_ids=ids, drop_zero_rates=drop_zero_rates)
 
-
-    def for_parent_fault_ids(self, parent_fault_ids: Set[str], drop_zero_rates: bool = True) -> Set[int]:
+    def for_parent_fault_ids(self, parent_fault_ids: Iterable[str], drop_zero_rates: bool = True) -> Set[int]:
         """Find ruptures that occur on any of the given parent_fault ids.
 
         Args:
@@ -67,8 +73,7 @@ class FilterRuptureIds():
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
         return set([int(id) for id in ids])
 
-
-    def for_subsections(self, fault_section_ids: Set[int]) -> Set[int]:
+    def for_subsections(self, fault_section_ids: Iterable[int]) -> Set[int]:
         """Find ruptures that occur on any of the given fault_section_ids.
 
         Args:
@@ -81,7 +86,7 @@ class FilterRuptureIds():
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         return set([int(id) for id in ids])
 
-    def for_fault_sections(self, fault_section_ids: Set[int]) -> Set[int]:
+    def for_fault_sections(self, fault_section_ids: Iterable[int]) -> Set[int]:
         '''alias'''
         return self.for_subsections(fault_section_ids)
 
@@ -111,5 +116,3 @@ class FilterRuptureIds():
 
     def ids_within_polygon(self, polygon, contained=True):
         raise NotImplementedError()
-
-

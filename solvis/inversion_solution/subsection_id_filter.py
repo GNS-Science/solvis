@@ -1,8 +1,9 @@
-from typing import Set, Optional
+from typing import Iterable, Set
+
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 
-class FilterSubsectionIds():
+class FilterSubsectionIds:
     """
     A class to filter fault subsections, returning qualifying section_ids
     """
@@ -10,7 +11,7 @@ class FilterSubsectionIds():
     def __init__(self, solution: InversionSolutionProtocol):
         self._solution = solution
 
-    def for_named_faults(self, named_fault_names: Set[str]):
+    def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
 
     def for_parent_fault_names(self, parent_fault_names: Set[str]):
@@ -36,7 +37,7 @@ class FilterSubsectionIds():
         ids = df0[df0['ParentName'].isin(list(parent_fault_names))]['FaultID'].tolist()
         return set([int(id) for id in ids])
 
-    def for_parent_fault_ids(self, parent_fault_ids: Set[str]):
+    def for_parent_fault_ids(self, parent_fault_ids: Iterable[str]):
         """Find fault subsection ids for the given parent_fault ids.
 
         Args:
@@ -49,8 +50,7 @@ class FilterSubsectionIds():
         ids = df0[df0['ParentID'].isin(list(parent_fault_ids))]['FaultID'].tolist()
         return set([int(id) for id in ids])
 
-
-    def for_ruptures(self, rupture_ids: Set[int]):
+    def for_ruptures(self, rupture_ids: Iterable[int]):
         """Find fault subsection ids for the given rupture_ids.
 
         Args:
