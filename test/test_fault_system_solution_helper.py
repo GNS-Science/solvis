@@ -57,12 +57,12 @@ def test_subsection_filter_for_parent_fault_ids(fss_helper, filter_subsection_id
         range(31)
     ).union(set(range(83, 86)))
 
-# <<<<<<<<<<<<<<<<<<<<
 
-
-def test_ruptures_for_subsections(fss_helper, filter_subsection_ids):
+def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
     ruptures = set([2, 3])
-    assert fss_helper.ruptures_for_subsections(filter_subsection_ids.for_ruptures(ruptures)).issuperset(ruptures)
+    assert filter_rupture_ids.for_subsections(filter_subsection_ids.for_ruptures(ruptures)).issuperset(ruptures)
+
+# <<<<<<<<<<<<<<<<<<<<
 
 def test_fault_names_as_ids(fss_helper):
     assert fss_helper.fault_names_as_ids(['Alpine Jacksons to Kaniere']) == set([23])

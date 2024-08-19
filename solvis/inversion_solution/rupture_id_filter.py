@@ -41,7 +41,12 @@ class FilterRuptureIds():
         """
         pass
 
+
     def for_fault_sections(self, fault_section_ids: Set[int]) -> Set[int]:
+        '''alias'''
+        return self.for_fault_sections(fault_section_ids)
+
+    def for_subsections(self, fault_section_ids: Set[int]) -> Set[int]:
         """Find ruptures that occur on any of the given fault_section_ids.
 
         Args:
@@ -50,7 +55,9 @@ class FilterRuptureIds():
         Returns:
             The rupture_ids matching the filter.
         """
-        pass
+        df0 = self._solution.rupture_sections
+        ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
+        return set([int(id) for id in ids])
 
     def for_rupture_rate(self, min_rate: Optional[float] = None, max_rate: Optional[float] = None):
         """Find ruptures that occur within given rates bounds.

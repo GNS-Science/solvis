@@ -88,16 +88,6 @@ class FaultSystemSolutionHelper:
         fault_ids = self.fault_names_as_ids(fault_names)
         return self.ruptures_for_faults(fault_ids, drop_zero_rates)
 
-    def ruptures_for_subsections(self, subsection_ids: Set[int]):
-        """
-        get all ruptures (by id) on the given subsections (any match is enough)
-
-        any (INTERSECTION) or all (UNION)
-        """
-        df0 = self._fss.rupture_sections
-        ids = df0[df0.section.isin(list(subsection_ids))].rupture.tolist()
-        return set([int(id) for id in ids])
-
 
 def section_participation_rate(solution: InversionSolution, section: int):
     """
@@ -105,8 +95,8 @@ def section_participation_rate(solution: InversionSolution, section: int):
 
     That is, the sum of rates for all ruptures that involve the requested section.
     """
-    helper = FaultSystemSolutionHelper(solution)
-    ruptures = helper.ruptures_for_subsections([section])
+    filter_rupture_ids = FilterRuptureIds(solution)
+    ruptures = filter_rupture_ids.for_subsections([section])
     # ruptures = {5,6}  # mocking helper.ruptures_given_subsections()
     df = solution.ruptures_with_rupture_rates[["Rupture Index", "Annual Rate"]]
     return df[df["Rupture Index"].isin(list(ruptures))]["Annual Rate"].sum()
