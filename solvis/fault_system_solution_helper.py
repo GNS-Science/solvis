@@ -55,29 +55,6 @@ class FaultSystemSolutionHelper:
             # print(idx, parent_id, unique_names[idx])
             yield ParentFaultMapping(parent_id, unique_names[idx])
 
-
-    def ruptures_for_faults(self, parent_ids: Set[int], drop_zero_rates: bool = True) -> Set[int]:
-        """
-        get all ruptures (by id) on the given faults
-
-        TODO: any (INTERSECTION) or all (UNION)
-        """
-        subsection_ids = self.filter_subsection_ids.for_parent_fault_ids(parent_ids)
-        df0 = self._fss.rupture_sections
-        # print(df0)
-        # print(self._fss.rupture_rates)
-
-        # TODO this is needed becuase the rupture rate concept differs between IS and FSS classes
-        rate_column = "rate_weighted_mean" if isinstance(self._fss, FaultSystemSolution) else "Annual Rate"
-        if drop_zero_rates:
-            df0 = df0.join(self._fss.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
-                [rate_column, "rupture", "section"]
-            ]
-            df0 = df0[df0[rate_column] > 0]
-
-        ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
-        return set([int(id) for id in ids])
-
     def ruptures_for_parent_fault_names(self, fault_names: Set[str], drop_zero_rates: bool = True) -> Set[int]:
         """
         get all ruptures (by id) for the given parent fault names
@@ -86,7 +63,7 @@ class FaultSystemSolutionHelper:
         calling self.ruptures_for_faults.
         """
         fault_ids = self.fault_names_as_ids(fault_names)
-        return self.ruptures_for_faults(fault_ids, drop_zero_rates)
+        return self.filter_rupture_ids.for_parent_fault_ids(fault_ids, drop_zero_rates)
 
 
 def section_participation_rate(solution: InversionSolution, section: int):

@@ -68,11 +68,16 @@ def test_fault_names_as_ids(fss_helper):
     assert fss_helper.fault_names_as_ids(['Alpine Jacksons to Kaniere']) == set([23])
     assert fss_helper.fault_names_as_ids(['Alpine Jacksons to Kaniere', 'Vernon 4']) == set([23, 585])
 
+# def test_ruptures_for_faults(fss_helper):
+#     fault_ids = fss_helper.fault_names_as_ids(['Vernon 4'])
+#     assert fss_helper.ruptures_for_faults(fault_ids).issuperset(
+#         set([2090, 2618, 1595, 76, 77, 594, 595, 2134, 1126, 1127, 1648, 1649, 2177, 664, 665, 154, 2723])
+#     )
 
 
-def test_ruptures_for_faults(fss_helper):
+def test_ruptures_for_faults(filter_rupture_ids, fss_helper):
     fault_ids = fss_helper.fault_names_as_ids(['Vernon 4'])
-    assert fss_helper.ruptures_for_faults(fault_ids).issuperset(
+    assert filter_rupture_ids.for_parent_fault_ids(fault_ids).issuperset(
         set([2090, 2618, 1595, 76, 77, 594, 595, 2134, 1126, 1127, 1648, 1649, 2177, 664, 665, 154, 2723])
     )
 

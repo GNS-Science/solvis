@@ -1,6 +1,7 @@
 from typing import Set, Optional
 from solvis.inversion_solution.typing import InversionSolutionProtocol
-
+from solvis.inversion_solution import FaultSystemSolution
+from .subsection_id_filter import FilterSubsectionIds
 
 class FilterRuptureIds():
     """
@@ -9,7 +10,7 @@ class FilterRuptureIds():
 
     def __init__(self, solution: InversionSolutionProtocol):
         self._solution = solution
-
+        self.filter_subsection_ids = FilterSubsectionIds(solution)
 
     def for_named_faults(self, named_fault_names: Set[str]) -> Set[int]:
         """Find ruptures that occur on any of the given named_fault names.
@@ -25,9 +26,9 @@ class FilterRuptureIds():
         """
         ### get the parent_fault_names from the mapping
         ### return self.ids_for_parent_faults(parent_fault_names)
-        pass
+        raise NotImplementedError()
 
-    def for_parent_faults(self, parent_fault_names: Set[str]) -> Set[int]:
+    def for_parent_fault_names(self, parent_fault_names: Set[str]) -> Set[int]:
         """Find ruptures that occur on any of the given parent_fault names.
 
         Args:
@@ -39,12 +40,33 @@ class FilterRuptureIds():
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
         """
-        pass
+        raise NotImplementedError()
 
 
-    def for_fault_sections(self, fault_section_ids: Set[int]) -> Set[int]:
-        '''alias'''
-        return self.for_fault_sections(fault_section_ids)
+    def for_parent_fault_ids(self, parent_fault_ids: Set[str], drop_zero_rates: bool = True) -> Set[int]:
+        """Find ruptures that occur on any of the given parent_fault ids.
+
+        Args:
+            parent_fault_ids: A list of one or more `parent_fault` ids.
+            drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
+
+        Returns:
+            The rupture_ids matching the filter.
+        """
+        subsection_ids = self.filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
+        df0 = self._solution.rupture_sections
+
+        # TODO this is needed becuase the rupture rate concept differs between IS and FSS classes
+        rate_column = "rate_weighted_mean" if isinstance(self._solution, FaultSystemSolution) else "Annual Rate"
+        if drop_zero_rates:
+            df0 = df0.join(self._solution.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
+                [rate_column, "rupture", "section"]
+            ]
+            df0 = df0[df0[rate_column] > 0]
+
+        ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
+        return set([int(id) for id in ids])
+
 
     def for_subsections(self, fault_section_ids: Set[int]) -> Set[int]:
         """Find ruptures that occur on any of the given fault_section_ids.
@@ -59,6 +81,10 @@ class FilterRuptureIds():
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         return set([int(id) for id in ids])
 
+    def for_fault_sections(self, fault_section_ids: Set[int]) -> Set[int]:
+        '''alias'''
+        return self.for_subsections(fault_section_ids)
+
     def for_rupture_rate(self, min_rate: Optional[float] = None, max_rate: Optional[float] = None):
         """Find ruptures that occur within given rates bounds.
 
@@ -69,7 +95,7 @@ class FilterRuptureIds():
         Returns:
             The rupture_ids matching the filter arguments.
         """
-        pass
+        raise NotImplementedError()
 
     def for_magnitude(self, min_mag: Optional[float] = None, max_mag: Optional[float] = None):
         """Find ruptures that occur within given magnitude bounds.
@@ -81,9 +107,9 @@ class FilterRuptureIds():
         Returns:
             The rupture_ids matching the filter arguments.
         """
-        pass
+        raise NotImplementedError()
 
     def ids_within_polygon(self, polygon, contained=True):
-        pass
+        raise NotImplementedError()
 
 
