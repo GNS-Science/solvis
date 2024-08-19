@@ -1,26 +1,6 @@
 from typing import Set, Optional
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
-#### Some candidate code for discussion....
-class FaultSectionIdFilter():
-    """
-    A class to filter fault_sections based on criteria and return qualifying section_ids
-    """
-
-    def __init__(self, solution: InversionSolutionProtocol):
-        self._solution = solution
-
-    def ids_for_named_faults(self, named_fault_names: Set[str]):
-        pass
-
-    def ids_for_parent_faults(self, named_fault_names: Set[str]):
-        pass
-
-    def ids_for_ruptures(self, rupture_ids: Set[int]):
-        pass
-
-    def ids_within_polygon(self, polygon, contained=True):
-        pass
 
 class FilterRuptureIds():
     """
@@ -29,6 +9,7 @@ class FilterRuptureIds():
 
     def __init__(self, solution: InversionSolutionProtocol):
         self._solution = solution
+
 
     def for_named_faults(self, named_fault_names: Set[str]) -> Set[int]:
         """Find ruptures that occur on any of the given named_fault names.
@@ -58,16 +39,7 @@ class FilterRuptureIds():
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
         """
-        df0 = self._solution.fault_sections
-
-        # validate the names ....
-        all_parent_names = set(df0['ParentName'].unique().tolist())
-        unknown = set(parent_fault_names).difference(all_parent_names)
-        if unknown:
-            raise ValueError(f"the solution {self._solution} does not contain the parent_fault_names: {unknown}.")
-
-        ids = df0[df0['ParentName'].isin(list(parent_fault_names))]['ParentID'].tolist()
-        return set([int(id) for id in ids])
+        pass
 
     def for_fault_sections(self, fault_section_ids: Set[int]) -> Set[int]:
         """Find ruptures that occur on any of the given fault_section_ids.
