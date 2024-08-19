@@ -6,6 +6,7 @@ from solvis.fault_system_solution_helper import (
     section_participation_rate,
 )
 
+from solvis.inversion_solution.rupture_id_filter import FilterRuptureIds
 
 @pytest.fixture
 def fault_names():
@@ -18,6 +19,12 @@ def fss_helper(composite_fixture):
     yield FaultSystemSolutionHelper(fss)
 
 
+@pytest.fixture
+def fss_filter_rupture_ids(composite_fixture):
+    fss = composite_fixture._solutions['CRU']
+    yield FilterRuptureIds(fss)
+
+
 def test_subsections_for_ruptures(fss_helper):
     assert fss_helper.subsections_for_ruptures([2, 3]) == set([0, 1, 2, 3, 4])
     assert fss_helper.subsections_for_ruptures([10]) == set(range(12))
@@ -28,9 +35,20 @@ def test_ruptures_for_subsections(fss_helper):
     assert fss_helper.ruptures_for_subsections(fss_helper.subsections_for_ruptures(ruptures)).issuperset(ruptures)
 
 
-def test_fault_names_as_ids(fss_helper):
-    assert fss_helper.fault_names_as_ids(['Alpine Jacksons to Kaniere']) == set([23])
-    assert fss_helper.fault_names_as_ids(['Alpine Jacksons to Kaniere', 'Vernon 4']) == set([23, 585])
+# @pytest.mark.skip('superceded')
+# def test_fault_names_as_ids(fss_helper):
+#     assert fss_helper.fault_names_as_ids(['Alpine Jacksons to Kaniere']) == set([23])
+#     assert fss_helper.fault_names_as_ids(['Alpine Jacksons to Kaniere', 'Vernon 4']) == set([23, 585])
+
+def test_rupture_filter_fault_names(fss_filter_rupture_ids):
+    assert fss_filter_rupture_ids.for_parent_faults(['Alpine Jacksons to Kaniere']) == set([23])
+    assert fss_filter_rupture_ids.for_parent_faults(['Alpine Jacksons to Kaniere', 'Vernon 4']) == set([23, 585])
+
+def test_rupture_filter_unknown_fault_names_raises(fss_filter_rupture_ids):
+    with pytest.raises(ValueError) as exc:
+        ids = fss_filter_rupture_ids.for_parent_faults(['noIdea', "Lost"])
+        assert 'noIdea' in str(exc)
+        assert 'Lost' in str(exc)
 
 
 def test_subsections_for_faults(fss_helper):

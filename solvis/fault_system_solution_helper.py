@@ -4,6 +4,7 @@ from typing import Dict, Iterator, Set
 from solvis.inversion_solution import FaultSystemSolution, InversionSolution
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
+from solvis.inversion_solution.rupture_id_filter import FilterRuptureIds
 """
 NAMES
 
@@ -14,7 +15,6 @@ NAMES
 """
 
 ParentFaultMapping = namedtuple('ParentFaultMapping', ['id', 'parent_fault_name'])
-
 
 class FaultSystemSolutionHelper:
     """
@@ -27,6 +27,7 @@ class FaultSystemSolutionHelper:
 
     def __init__(self, fault_system_solution: InversionSolutionProtocol):
         self._fss = fault_system_solution
+        self.filter_rupture_ids = FilterRuptureIds(fault_system_solution)
 
     def subsections_for_ruptures(self, rupture_ids: Set[int]) -> Set[int]:
         """get all subsections for the given rupture_ids"""
@@ -34,15 +35,17 @@ class FaultSystemSolutionHelper:
         ids = df0[df0.rupture.isin(list(rupture_ids))].section.tolist()
         return set([int(id) for id in ids])
 
-    def ids_for_parent_fault_names(self, fault_names: Set[str]):
+    def ids_for_parent_fault_names(self, fault_names: Set[str]) -> Set[int]:
         """
-        get Parent_fault_ids for the given parent fault names
+        get fault_section.ids for the given parent fault names.
         """
-        df0 = self._fss.fault_sections
-        # print("fault_sections")
-        # print(df0[["ParentID", "ParentName"]])
-        ids = df0[df0['ParentName'].isin(list(fault_names))]['ParentID'].tolist()
-        return set([int(id) for id in ids])
+        return self.filter_rupture_ids.for_parent_faults(fault_names)
+
+
+    def fault_names_as_ids(self, fault_names: Set[str]):
+        '''alias fn'''
+        return self.ids_for_parent_fault_names(fault_names)
+
 
     def parent_fault_name_id_mapping(self, parent_ids: Set[int]) -> Iterator[ParentFaultMapping]:
         df0 = self._fss.fault_sections
@@ -54,10 +57,6 @@ class FaultSystemSolutionHelper:
         for idx, parent_id in enumerate(unique_ids):
             # print(idx, parent_id, unique_names[idx])
             yield ParentFaultMapping(parent_id, unique_names[idx])
-
-    def fault_names_as_ids(self, fault_names: Set[str]):
-        '''alias fn'''
-        return self.ids_for_parent_fault_names(fault_names)
 
     def subsections_for_faults(self, parent_ids: Set[int]) -> Set[int]:
         df0 = self._fss.fault_sections
@@ -119,7 +118,7 @@ class FaultSystemSolutionHelper:
 
 def section_participation_rate(solution: InversionSolution, section: int):
     """
-    get the 'participation rate" of a (sub)section.
+    get the 'participation rate' of a (sub)section.
 
     That is, the sum of rates for all ruptures that involve the requested section.
     """
