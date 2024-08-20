@@ -1,7 +1,7 @@
 from typing import Iterable, Set
 
 from solvis.inversion_solution.typing import InversionSolutionProtocol
-
+from .parent_fault_id_filter import FilterParentFaultIds
 
 class FilterSubsectionIds:
     """
@@ -13,6 +13,7 @@ class FilterSubsectionIds:
 
     def __init__(self, solution: InversionSolutionProtocol):
         self._solution = solution
+        self.filter_parent_fault_ids = FilterParentFaultIds(solution)
 
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
@@ -29,16 +30,8 @@ class FilterSubsectionIds:
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
         """
-        df0 = self._solution.fault_sections
-
-        # validate the names ....
-        all_parent_names = set(df0['ParentName'].unique().tolist())
-        unknown = set(parent_fault_names).difference(all_parent_names)
-        if unknown:
-            raise ValueError(f"the solution {self._solution} does not contain the parent_fault_names: {unknown}.")
-
-        ids = df0[df0['ParentName'].isin(list(parent_fault_names))]['FaultID'].tolist()
-        return set([int(id) for id in ids])
+        parent_ids = self.filter_parent_fault_ids.for_parent_fault_names(parent_fault_names)
+        return self.for_parent_fault_ids(parent_ids)
 
     def for_parent_fault_ids(self, parent_fault_ids: Iterable[str]) -> Set[int]:
         """Find fault subsection ids for the given parent_fault ids.
