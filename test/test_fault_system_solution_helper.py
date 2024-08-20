@@ -10,11 +10,6 @@ from solvis.inversion_solution.subsection_id_filter import FilterSubsectionIds
 
 
 @pytest.fixture
-def fault_names():
-    return ['Alpine Jacksons to Kaniere', 'Vernon 4']
-
-
-@pytest.fixture
 def fss_helper(composite_fixture):
     fss = composite_fixture._solutions['CRU']
     yield FaultSystemSolutionHelper(fss)
@@ -33,8 +28,8 @@ def filter_subsection_ids(composite_fixture):
 
 
 def test_subsections_for_ruptures(filter_subsection_ids):
-    assert filter_subsection_ids.for_ruptures([2, 3]) == set([0, 1, 2, 3, 4])
-    assert filter_subsection_ids.for_ruptures([10]) == set(range(12))
+    assert filter_subsection_ids.for_rupture_ids([2, 3]) == set([0, 1, 2, 3, 4])
+    assert filter_subsection_ids.for_rupture_ids([10]) == set(range(12))
 
 
 def test_subsection_filter_for_parent_fault_names(filter_subsection_ids):
@@ -62,7 +57,7 @@ def test_subsection_filter_for_parent_fault_ids(fss_helper, filter_subsection_id
 
 def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
     ruptures = set([2, 3])
-    assert filter_rupture_ids.for_subsections(filter_subsection_ids.for_ruptures(ruptures)).issuperset(ruptures)
+    assert filter_rupture_ids.for_subsection_ids(filter_subsection_ids.for_rupture_ids(ruptures)).issuperset(ruptures)
 
 
 def test_fault_names_as_ids(fss_helper):
@@ -125,6 +120,7 @@ def test_parent_fault_participation_rate(crustal_solution_fixture):
     assert pytest.approx(rate) == 0.0158445
 
 
+@pytest.mark.skip("based on an incorrect assumption")
 def test_parent_fault_vs_section_participation(crustal_solution_fixture):
     # show that the max participation of all the subsections of a given parent fault
     # equals the partipcation rate for the parent fault.

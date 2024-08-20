@@ -25,6 +25,9 @@ Example:
     ```
 """
 
+from solvis.inversion_solution.rupture_id_filter import FilterRuptureIds
+from solvis.inversion_solution.subsection_id_filter import FilterSubsectionIds
+
 from .geometry import circle_polygon
 from .inversion_solution import CompositeSolution, FaultSystemSolution, InversionSolution
 from .solvis import export_geojson, mfd_hist, parent_fault_names, rupt_ids_above_rate, section_participation

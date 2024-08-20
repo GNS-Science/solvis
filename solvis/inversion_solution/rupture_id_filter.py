@@ -8,7 +8,10 @@ from .subsection_id_filter import FilterSubsectionIds
 
 class FilterRuptureIds:
     """
-    A class to filter ruptures, returning the qualifying rupture_ids.
+    A helper class to filter ruptures, returning the qualifying rupture_ids.
+
+    Class methods all return sets to make it easy to combine filters with
+    set operands like `union`, `intersection`, `difference` etc).
     """
 
     def __init__(self, solution: InversionSolutionProtocol):
@@ -62,7 +65,7 @@ class FilterRuptureIds:
         subsection_ids = self.filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
         df0 = self._solution.rupture_sections
 
-        # TODO this is needed becuase the rupture rate concept differs between IS and FSS classes
+        # TODO: this is needed becuase the rupture rate concept differs between IS and FSS classes
         rate_column = "rate_weighted_mean" if isinstance(self._solution, FaultSystemSolution) else "Annual Rate"
         if drop_zero_rates:
             df0 = df0.join(self._solution.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
@@ -73,7 +76,7 @@ class FilterRuptureIds:
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
         return set([int(id) for id in ids])
 
-    def for_subsections(self, fault_section_ids: Iterable[int]) -> Set[int]:
+    def for_subsection_ids(self, fault_section_ids: Iterable[int]) -> Set[int]:
         """Find ruptures that occur on any of the given fault_section_ids.
 
         Args:
@@ -86,7 +89,7 @@ class FilterRuptureIds:
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         return set([int(id) for id in ids])
 
-    def for_fault_sections(self, fault_section_ids: Iterable[int]) -> Set[int]:
+    def for_fault_section_ids(self, fault_section_ids: Iterable[int]) -> Set[int]:
         '''alias'''
         return self.for_subsections(fault_section_ids)
 
@@ -114,5 +117,5 @@ class FilterRuptureIds:
         """
         raise NotImplementedError()
 
-    def ids_within_polygon(self, polygon, contained=True):
+    def for_polygon(self, polygon, contained=True):
         raise NotImplementedError()

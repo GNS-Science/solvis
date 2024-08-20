@@ -28,8 +28,6 @@ class FaultSystemSolutionHelper:
 
     def __init__(self, fault_system_solution: InversionSolutionProtocol):
         self._fss = fault_system_solution
-        # self.filter_subsection_ids = FilterSubsectionIds(fault_system_solution)
-        # self.filter_rupture_ids = FilterRuptureIds(fault_system_solution)
 
     def ids_for_parent_fault_names(self, fault_names: Set[str]) -> Set[int]:
         """
@@ -54,16 +52,6 @@ class FaultSystemSolutionHelper:
             # print(idx, parent_id, unique_names[idx])
             yield ParentFaultMapping(parent_id, unique_names[idx])
 
-    # def ruptures_for_parent_fault_names(self, fault_names: Set[str], drop_zero_rates: bool = True) -> Set[int]:
-    #     """
-    #     get all ruptures (by id) for the given parent fault names
-
-    #     convenience function that resolves fault names before
-    #     calling self.ruptures_for_faults.
-    #     """
-    #     fault_ids = self.fault_names_as_ids(fault_names)
-    #     return self.filter_rupture_ids.for_parent_fault_ids(fault_ids, drop_zero_rates)
-
 
 def section_participation_rate(solution: InversionSolution, section: int):
     """
@@ -72,7 +60,7 @@ def section_participation_rate(solution: InversionSolution, section: int):
     That is, the sum of rates for all ruptures that involve the requested section.
     """
     filter_rupture_ids = FilterRuptureIds(solution)
-    ruptures = filter_rupture_ids.for_subsections([section])
+    ruptures = filter_rupture_ids.for_subsection_ids([section])
     df = solution.ruptures_with_rupture_rates[["Rupture Index", "Annual Rate"]]
     return df[df["Rupture Index"].isin(list(ruptures))]["Annual Rate"].sum()
 
@@ -83,10 +71,7 @@ def fault_participation_rate(solution: InversionSolution, fault_name: str):
 
     That is, the sum of rates for all ruptures that involve the requested parent fault .
     """
-    # helper = FaultSystemSolutionHelper(solution)
-    # filter_rupture_ids = FilterRuptureIds(solution)
     ruptures = FilterRuptureIds(solution).for_parent_fault_names([fault_name])
-    # ruptures = {8, 9, 10}  # mocking helper.ruptures_given_subsections()
     df = solution.ruptures_with_rupture_rates[["Rupture Index", "Annual Rate"]]
     return df[df["Rupture Index"].isin(list(ruptures))]["Annual Rate"].sum()
 

@@ -17,8 +17,8 @@ from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 CFM_1_0A_DOM_SANSTVZ_MAP = 'resources/named_faults/cfm_1_0A_no_tvz.xml.FaultsByNameAlt.txt'
 
-csv_list = csv.reader(open(RESOURCE_FILE, mode='r', encoding='utf-8-sig'), delimiter='\t')
-df = pd.DataFFrame(cf)
+csv_rows = csv.reader(open(CFM_1_0A_DOM_SANSTVZ_MAP, mode='r', encoding='utf-8-sig'), delimiter='\t')
+df = pd.DataFFrame(csv_rows)
 
 
 def ids_for_parent_fault_names(self, named_faults: Set[str]) -> Set[int]:

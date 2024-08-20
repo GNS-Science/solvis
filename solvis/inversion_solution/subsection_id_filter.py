@@ -5,7 +5,10 @@ from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 class FilterSubsectionIds:
     """
-    A class to filter fault subsections, returning qualifying section_ids
+    A helper class to filter subsections, returning qualifying section_ids.
+
+    Class methods all return sets to make it easy to combine filters with
+    set operands like `union`, `intersection`, `difference` etc).
     """
 
     def __init__(self, solution: InversionSolutionProtocol):
@@ -14,7 +17,7 @@ class FilterSubsectionIds:
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
 
-    def for_parent_fault_names(self, parent_fault_names: Set[str]):
+    def for_parent_fault_names(self, parent_fault_names: Set[str]) -> Set[int]:
         """Find fault subsection ids for the given parent_fault names.
 
         Args:
@@ -37,7 +40,7 @@ class FilterSubsectionIds:
         ids = df0[df0['ParentName'].isin(list(parent_fault_names))]['FaultID'].tolist()
         return set([int(id) for id in ids])
 
-    def for_parent_fault_ids(self, parent_fault_ids: Iterable[str]):
+    def for_parent_fault_ids(self, parent_fault_ids: Iterable[str]) -> Set[int]:
         """Find fault subsection ids for the given parent_fault ids.
 
         Args:
@@ -50,7 +53,7 @@ class FilterSubsectionIds:
         ids = df0[df0['ParentID'].isin(list(parent_fault_ids))]['FaultID'].tolist()
         return set([int(id) for id in ids])
 
-    def for_ruptures(self, rupture_ids: Iterable[int]):
+    def for_rupture_ids(self, rupture_ids: Iterable[int]) -> Set[int]:
         """Find fault subsection ids for the given rupture_ids.
 
         Args:
@@ -63,5 +66,5 @@ class FilterSubsectionIds:
         ids = df0[df0.rupture.isin(list(rupture_ids))].section.tolist()
         return set([int(id) for id in ids])
 
-    def within_polygon(self, polygon, contained=True):
+    def for_polygon(self, polygon, contained=True):
         raise NotImplementedError()
