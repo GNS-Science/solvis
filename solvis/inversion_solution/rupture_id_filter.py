@@ -3,6 +3,7 @@ from typing import Iterable, Optional, Set
 from solvis.inversion_solution import FaultSystemSolution
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
+from .parent_fault_id_filter import FilterParentFaultIds
 from .subsection_id_filter import FilterSubsectionIds
 
 
@@ -17,6 +18,7 @@ class FilterRuptureIds:
     def __init__(self, solution: InversionSolutionProtocol):
         self._solution = solution
         self.filter_subsection_ids = FilterSubsectionIds(solution)
+        self.filter_parent_fault_ids = FilterParentFaultIds(solution)
 
     def for_named_faults(self, named_fault_names: Set[str]) -> Set[int]:
         """Find ruptures that occur on any of the given named_fault names.
@@ -47,12 +49,10 @@ class FilterRuptureIds:
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
         """
-        df0 = self._solution.fault_sections
-        # this is split out in fss_helper in ....
-        ids = df0[df0['ParentName'].isin(list(parent_fault_names))]['ParentID'].tolist()
-        return self.for_parent_fault_ids(parent_fault_ids=ids, drop_zero_rates=drop_zero_rates)
+        parent_fault_ids = self.filter_parent_fault_ids.for_parent_fault_names(parent_fault_names)
+        return self.for_parent_fault_ids(parent_fault_ids=parent_fault_ids, drop_zero_rates=drop_zero_rates)
 
-    def for_parent_fault_ids(self, parent_fault_ids: Iterable[str], drop_zero_rates: bool = True) -> Set[int]:
+    def for_parent_fault_ids(self, parent_fault_ids: Iterable[int], drop_zero_rates: bool = True) -> Set[int]:
         """Find ruptures that occur on any of the given parent_fault ids.
 
         Args:
@@ -89,9 +89,9 @@ class FilterRuptureIds:
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         return set([int(id) for id in ids])
 
-    def for_fault_section_ids(self, fault_section_ids: Iterable[int]) -> Set[int]:
-        '''alias'''
-        return self.for_subsections(fault_section_ids)
+    # def for_fault_section_ids(self, fault_section_ids: Iterable[int]) -> Set[int]:
+    #     '''alias'''
+    #     return self.for_subsection_ids(fault_section_ids)
 
     def for_rupture_rate(self, min_rate: Optional[float] = None, max_rate: Optional[float] = None):
         """Find ruptures that occur within given rates bounds.

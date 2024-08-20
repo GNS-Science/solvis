@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Iterable, Union
 
 import geopandas as gpd
-import numpy as np
 import numpy.typing as npt
 import nzshm_model as nm
 import pandas as pd
@@ -118,15 +117,17 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
 
         aggregate_rates_df = composite_rates_df.pivot_table(
             index=['fault_system', 'Rupture Index'],
-            aggfunc={"Annual Rate": [np.min, np.max, 'count'], "weighted_rate": np.sum},
+            aggfunc={"Annual Rate": ['min', 'max', 'count'], "weighted_rate": 'sum'},
         )
 
+        # print(aggregate_rates_df.columns)
+        # assert 0
         # drop the top index level
         aggregate_rates_df.columns = aggregate_rates_df.columns.get_level_values(1)
         aggregate_rates_df = aggregate_rates_df.reset_index().rename(
             columns={
-                "amax": "rate_max",
-                "amin": "rate_min",
+                "max": "rate_max",
+                "min": "rate_min",
                 "count": "rate_count",
                 "sum": "rate_weighted_mean",
             }

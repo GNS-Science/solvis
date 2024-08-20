@@ -1,5 +1,4 @@
-from collections import namedtuple
-from typing import Dict, Iterator, List, Set
+from typing import Dict, Iterator, List
 
 from solvis.inversion_solution import InversionSolution
 from solvis.inversion_solution.rupture_id_filter import FilterRuptureIds
@@ -13,44 +12,6 @@ NAMES
     - `named_fault` => Opensha:NamedFault => CFM: ??
     - `rupture`      => Opensha:Rupture => CFM: n/a
 """
-
-ParentFaultMapping = namedtuple('ParentFaultMapping', ['id', 'parent_fault_name'])
-
-
-class FaultSystemSolutionHelper:
-    """
-    A helper class for solvis.InversionSolutionProtocol instances providing
-      set analysis functions on major fss attributes
-
-    NB these functions might be added to the class itself eventually
-
-    """
-
-    def __init__(self, fault_system_solution: InversionSolutionProtocol):
-        self._fss = fault_system_solution
-
-    def ids_for_parent_fault_names(self, fault_names: Set[str]) -> Set[int]:
-        """
-        get fault_section.ids for the given parent fault names.
-        """
-        df0 = self._fss.fault_sections
-        ids = df0[df0['ParentName'].isin(list(fault_names))]['ParentID'].tolist()
-        return set([int(id) for id in ids])
-
-    def fault_names_as_ids(self, fault_names: Set[str]):
-        '''alias fn'''
-        return self.ids_for_parent_fault_names(fault_names)
-
-    def parent_fault_name_id_mapping(self, parent_ids: Set[int]) -> Iterator[ParentFaultMapping]:
-        df0 = self._fss.fault_sections
-        # print("fault_sections")
-        # print(df0[["ParentID", "ParentName"]])
-        df1 = df0[df0['ParentID'].isin(list(parent_ids))][['ParentID', 'ParentName']]
-        unique_ids = list(df1.ParentID.unique())
-        unique_names = list(df1.ParentName.unique())
-        for idx, parent_id in enumerate(unique_ids):
-            # print(idx, parent_id, unique_names[idx])
-            yield ParentFaultMapping(parent_id, unique_names[idx])
 
 
 def section_participation_rate(solution: InversionSolution, section: int):

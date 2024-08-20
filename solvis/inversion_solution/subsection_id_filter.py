@@ -1,7 +1,9 @@
 from typing import Iterable, Set
 
 from solvis.inversion_solution.typing import InversionSolutionProtocol
+
 from .parent_fault_id_filter import FilterParentFaultIds
+
 
 class FilterSubsectionIds:
     """
@@ -33,7 +35,7 @@ class FilterSubsectionIds:
         parent_ids = self.filter_parent_fault_ids.for_parent_fault_names(parent_fault_names)
         return self.for_parent_fault_ids(parent_ids)
 
-    def for_parent_fault_ids(self, parent_fault_ids: Iterable[str]) -> Set[int]:
+    def for_parent_fault_ids(self, parent_fault_ids: Iterable[int]) -> Set[int]:
         """Find fault subsection ids for the given parent_fault ids.
 
         Args:

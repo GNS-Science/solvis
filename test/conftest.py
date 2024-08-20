@@ -2,6 +2,7 @@
 
 import os
 import pathlib
+import warnings
 from copy import deepcopy
 from itertools import chain
 
@@ -14,7 +15,10 @@ from solvis.inversion_solution.inversion_solution import BranchInversionSolution
 
 current_model = nm.get_model_version("NSHM_v1.0.0")
 slt = current_model.source_logic_tree
-fslt = slt.fault_system_lts[0]  # PUY is used always, just for the 3 solution_ids
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")  # until fixed in nzshm_model
+    fslt = slt.fault_system_lts[0]  # PUY is used always, just for the 3 solution_ids
 
 # assert fslt.short_name == "PUY-"
 
