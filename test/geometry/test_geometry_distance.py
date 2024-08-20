@@ -18,7 +18,7 @@ TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
 class TestPyvistaDistances(unittest.TestCase):
     def test_basic_0_rake_90(self):
 
-        mesh0 = pv.PolyData([0, 0, 0], force_float=False)
+        mesh0 = pv.PolyData([[0, 0, 0]], force_float=False)
 
         p0 = [0, 1, 0]  # 1st top-trace point
         p1 = [0, 2, 0]  # 2nd top-trace point

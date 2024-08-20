@@ -109,7 +109,7 @@ def build_fault_system_solution(work_folder, fault_system, model_version=nzshm_m
     current_model = nzshm_model.get_model_version(model_version)
     slt = current_model.source_logic_tree()
     branch = None
-    for fslt in slt.fault_system_lts:
+    for fslt in slt.branch_sets:
         if fslt.short_name == fault_system:
             branch = fslt
             break
@@ -165,7 +165,7 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
     composite = CompositeSolution(slt)  # create the new composite solutoin
     tic = time.perf_counter()
 
-    for fault_system_lt in slt.fault_system_lts:
+    for fault_system_lt in slt.branch_sets:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
             file_ids = [FaultSystemSolution.get_branch_inversion_solution_id(b) for b in fault_system_lt.branches]
             filemap = fetch_toshi_files(work_folder, file_ids)

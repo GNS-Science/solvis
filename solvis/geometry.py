@@ -337,7 +337,7 @@ def section_distance(
         raise ValueError(f'unable to handle geometry: {surface_geometry}')  # pragma: no cover
 
     # print(f'trace offsets: {trace} (in metres relative to datum)')
-    origin = pv.PolyData([0.0, 0.0, 0.0])  # , force_float=False)
+    origin = pv.PolyData([[0.0, 0.0, 0.0]], force_float=False)
     surface = pv.PolyData(
         [
             [float(trace[0][0]), float(trace[1][0]), float(upper_depth * 1000)],  # OK

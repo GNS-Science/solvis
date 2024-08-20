@@ -3,7 +3,6 @@
 import os
 import pathlib
 
-import numpy as np
 import pandas as pd
 from nzshm_common.location.location import location_by_id
 from pytest import approx, raises
@@ -34,7 +33,7 @@ class TestInversionSolution(object):
         assert sol.fault_regime == 'CRUSTAL'
         assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
 
-        assert sol.rupture_rates["Annual Rate"].dtype == np.float32
+        assert sol.rupture_rates["Annual Rate"].dtype == pd.Float32Dtype()
         # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
         # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
         # assert 0

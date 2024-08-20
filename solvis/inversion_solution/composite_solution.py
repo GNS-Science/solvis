@@ -106,7 +106,7 @@ class CompositeSolution(CompositeSolutionOperations):
     def from_archive(archive_path: Path, source_logic_tree: Any) -> 'CompositeSolution':
         new_solution = CompositeSolution(source_logic_tree)
 
-        for fault_system_lt in source_logic_tree.fault_system_lts:
+        for fault_system_lt in source_logic_tree.branch_sets:
             if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
                 assert zipfile.Path(archive_path, at=f'{fault_system_lt.short_name}_fault_system_solution.zip').exists()
                 fss = FaultSystemSolution.from_archive(

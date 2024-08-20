@@ -1,9 +1,7 @@
 import logging
 import zipfile
-from collections import defaultdict
 
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 
 from .inversion_solution_file import InversionSolutionFile, data_to_zip_direct
@@ -68,9 +66,8 @@ class FaultSystemSolutionFile(InversionSolutionFile):
 
     @property
     def composite_rates(self) -> gpd.GeoDataFrame:
-        # dtypes: defaultdict = defaultdict(np.float32)
+        # dtypes: defaultdict = defaultdict(pd.Float32Dtype)
         dtypes = {}
-
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
         df = self._dataframe_from_csv(self._composite_rates, self.COMPOSITE_RATES_PATH, dtypes)
@@ -82,15 +79,18 @@ class FaultSystemSolutionFile(InversionSolutionFile):
 
     @property
     def aggregate_rates(self) -> gpd.GeoDataFrame:
-        dtypes: defaultdict = defaultdict(np.float32)
+        # dtypes: defaultdict = defaultdict(np.float32)
+        dtypes = {}
         dtypes["Rupture Index"] = pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
+        dtypes["Annual Rate"] = pd.Float32Dtype()
         df = self._dataframe_from_csv(self._aggregate_rates, self.AGGREGATE_RATES_PATH, dtypes)
         return df.set_index(["fault_system", "Rupture Index"], drop=False)
 
     @property
     def fast_indices(self) -> gpd.GeoDataFrame:
-        dtypes: defaultdict = defaultdict(pd.UInt32Dtype)
+        # dtypes: defaultdict = defaultdict(pd.UInt32Dtype)
+        dtypes = {}
         dtypes["ruptures"] = pd.UInt32Dtype()
         dtypes["sections"] = pd.UInt32Dtype()
-        return self._dataframe_from_csv(self._fast_indices, self.FAST_INDICES_PATH)  # , dtypes)
+        return self._dataframe_from_csv(self._fast_indices, self.FAST_INDICES_PATH, dtypes)

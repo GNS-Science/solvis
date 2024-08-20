@@ -18,7 +18,7 @@ slt = current_model.source_logic_tree
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")  # until fixed in nzshm_model
-    fslt = slt.fault_system_lts[0]  # PUY is used always, just for the 3 solution_ids
+fslt = slt.branch_sets[0]  # PUY is used always, just for the 3 solution_ids
 
 # assert fslt.short_name == "PUY-"
 
@@ -82,11 +82,11 @@ def build_composite_fixture(archives=ARCHIVES):
     # CBC This doesn't work now ??
     # fudge the model branches because we have too few fixtures
     for idx in [1, 2]:
-        slt.fault_system_lts[idx].branches = deepcopy(slt.fault_system_lts[0].branches)
+        slt.branch_sets[idx].branches = deepcopy(slt.branch_sets[0].branches)
 
     composite = CompositeSolution(slt)  # create the new composite solutoin
 
-    for fault_system_lt in slt.fault_system_lts:
+    for fault_system_lt in slt.branch_sets:
         if fault_system_lt.short_name in ['PUY', 'CRU', 'HIK']:
             composite.add_fault_system_solution(
                 fault_system_lt.short_name,
