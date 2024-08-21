@@ -63,6 +63,10 @@ class InversionSolutionProtocol(Protocol):
     def indices(self) -> gpd.GeoDataFrame:
         """the fault sections involved in each rupture."""
 
+    @property
+    def parent_fault_names(self) -> List[str]:
+        """The parent_fault_names."""
+
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         """builder method returning the fault surfaces."""
 

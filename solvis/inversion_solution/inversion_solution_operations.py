@@ -1,7 +1,7 @@
 import logging
 import time
 import warnings
-from typing import Iterable, List, Set
+from typing import Iterable, List, Set, TYPE_CHECKING
 
 import geopandas as gpd
 import pandas as pd
@@ -11,6 +11,8 @@ from solvis.geometry import circle_polygon
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
+
+import shapely.geometry
 
 log = logging.getLogger(__name__)
 
@@ -108,11 +110,14 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         #     on=self.fault_sections["Rupture Index"] )
         return self._fs_with_rates
 
+    # def parent_fault_names(self) -> List[str]:
+    #     fault_names = list(set(list(self.fault_sections['ParentName'])))
+    #     fault_names.sort()
+    #     return fault_names
+
     @property
     def parent_fault_names(self) -> List[str]:
-        fault_names = list(set(list(self.fault_sections['ParentName'])))
-        fault_names.sort()
-        return fault_names
+        return sorted(self.fault_sections.ParentName.unique())
 
     @property
     def fault_sections_with_solution_slip_rates(self) -> gpd.GeoDataFrame:
@@ -188,9 +193,10 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         )
         return self._ruptures_with_rupture_rates
 
-    # return the rupture ids for any ruptures intersecting the polygon
-    def get_rupture_ids_intersecting(self, polygon) -> pd.Series:
+    def get_rupture_ids_intersecting(self, polygon: shapely.geometry.Polygon) -> pd.Series:
         """Return IDs for any ruptures intersecting the polygon."""
+        warnings.warn("Please use solvis.filter.classes *.for_polygons method instead", DeprecationWarning)
+
         q0 = gpd.GeoDataFrame(self.fault_sections)
         q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
         sr = self.rs_with_rupture_rates

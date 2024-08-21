@@ -1,7 +1,9 @@
 from collections import namedtuple
-from typing import Iterable, Iterator, Set
+from typing import Iterable, Iterator, Set, TYPE_CHECKING
 
 from solvis.inversion_solution.typing import InversionSolutionProtocol
+
+import shapely.geometry
 
 ParentFaultMapping = namedtuple('ParentFaultMapping', ['id', 'parent_fault_name'])
 
@@ -9,6 +11,14 @@ ParentFaultMapping = namedtuple('ParentFaultMapping', ['id', 'parent_fault_name'
 def parent_fault_name_id_mapping(
     solution: InversionSolutionProtocol, parent_fault_ids: Iterable[int]
 ) -> Iterator[ParentFaultMapping]:
+    """For each unique parent_fault_id yield a ParentFaultMapping object.
+
+    Args:
+        parent_fault_ids: A list of `parent_fault_is`.
+
+    Yields:
+        A mapping object.
+    """
     df0 = solution.fault_sections
     df1 = df0[df0['ParentID'].isin(list(parent_fault_ids))][['ParentID', 'ParentName']]
     unique_ids = list(df1.ParentID.unique())
@@ -17,14 +27,22 @@ def parent_fault_name_id_mapping(
         yield ParentFaultMapping(parent_id, unique_names[idx])
 
 
-def valid_parent_fault_names(solution, parent_fault_names: Iterable[str]) -> Set[str]:
-    # validate the names ....
-    df0 = solution.fault_sections
-    all_parent_names = set(df0['ParentName'].unique().tolist())
-    unknown = set(parent_fault_names).difference(all_parent_names)
+def valid_parent_fault_names(solution, validate_names: Iterable[str]) -> Set[str]:
+    """Check that parent_fault_names are valid for the given solution.
+
+    Args:
+        validate_names: A list of `parent_fault_names` to check.
+
+    Returns:
+        The set of valid fault names.
+
+    Raises:
+        ValueError: If any member of `validate_names` argument is not valid.
+    """
+    unknown = set(validate_names).difference(set(solution.parent_fault_names))
     if unknown:
-        raise ValueError(f"the solution {solution} does not contain the parent_fault_names: {unknown}.")
-    return set(parent_fault_names)
+        raise ValueError(f"The solution {solution} does not contain the parent_fault_names: {unknown}.")
+    return set(validate_names)
 
 
 class FilterParentFaultIds:
@@ -66,11 +84,26 @@ class FilterParentFaultIds:
             fault_section_ids: A list of one or more fault_section ids.
 
         Returns:
-            The rupture_ids matching the filter.
+            The fault_ids matching the filter.
         """
-        df0 = self._solution.rupture_sections
-        ids = df0[df0.section.isin(list(fault_section_ids))]['ParentName'].unique().tolist()
+        df0 = self._solution.fault_sections
+        ids = df0[df0['FaultID'].isin(list(fault_section_ids))]['ParentID'].unique().tolist()
         return set([int(id) for id in ids])
 
-    def for_polygon(self, polygon, contained=True):
+    def for_polygon(self, polygon: shapely.geometry.Polygon, contained: bool=True):
         raise NotImplementedError()
+
+    def for_rupture_ids(self, rupture_ids: Iterable[int]) -> Set[int]:
+        """Find parent_fault_ids for the given rupture_ids.
+
+        Args:
+            rupture_ids: A list of one or more rupture ids.
+
+        Returns:
+            The parent_fault_ids matching the filter.
+        """
+        # df0 = self._solution.rupture_sections
+        df0 = self._solution.fault_sections_with_rupture_rates
+        print(df0.columns)
+        ids = df0[df0['Rupture Index'].isin(list(rupture_ids))].ParentID.unique().tolist()
+        return set([int(id) for id in ids])

@@ -1,7 +1,7 @@
 from typing import Dict, Iterator, List
 
+from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.inversion_solution import InversionSolution
-from solvis.inversion_solution.rupture_id_filter import FilterRuptureIds
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 """

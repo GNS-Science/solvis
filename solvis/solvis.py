@@ -1,6 +1,7 @@
 #!python3
 
 # from functools import partial
+import warnings
 from pathlib import Path
 from typing import Callable, Iterable, List, Union
 
@@ -12,11 +13,12 @@ from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 
 def parent_fault_names(
-    sol: InversionSolutionProtocol, sort: Union[None, Callable[[Iterable], List]] = sorted
+    solution: InversionSolutionProtocol, sort: Union[None, Callable[[Iterable], List]] = sorted
 ) -> List[str]:
+    warnings.warn("Please use InversionSolutionProtocol.parent_fault_names property instead", DeprecationWarning)
     if sort:
-        return sort(sol.fault_sections.ParentName.unique())
-    return list(sol.fault_sections.ParentName.unique())
+        return sort(solution.parent_fault_names)
+    return solution.parent_fault_names
 
 
 # filtered_rupture_sections (with geometry)

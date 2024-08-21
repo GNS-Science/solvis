@@ -10,10 +10,14 @@ and classes by default:
     - [`CompositeSolution`][solvis.inversion_solution.CompositeSolution]
     - [`FaultSystemSolution`][solvis.inversion_solution.FaultSystemSolution]
     - [`InversionSolution`][solvis.inversion_solution.InversionSolution]
+- From [solvis.filter][]:
+    - [`FilterParentFaultIds`]solvis.filter.rupture_id_filter.FilterParentFaultIds]
+    - [`FilterRuptureIds`][solvis.filter.rupture_id_filter.FilterRuptureIds]
+    - [`FilterSubsectionIds`][solvis.filter.subsection_id_filter.FilterSubsectionIds]
 - From [solvis.solvis][]:
     - [`export_geojson`][solvis.solvis.export_geojson]
     - [`mfd_hist`][solvis.solvis.mfd_hist]
-    - [`parent_fault_names`][solvis.solvis.parent_fault_names]
+    - [`parent_fault_names`][solvis.solvis.parent_fault_names] (deprecated)
     - [`rupt_ids_above_rate`][solvis.solvis.rupt_ids_above_rate]
     - [`section_participation`][solvis.solvis.section_participation]
 
@@ -25,8 +29,9 @@ Example:
     ```
 """
 
-from solvis.inversion_solution.rupture_id_filter import FilterRuptureIds
-from solvis.inversion_solution.subsection_id_filter import FilterSubsectionIds
+from solvis.filter.parent_fault_id_filter import FilterParentFaultIds
+from solvis.filter.rupture_id_filter import FilterRuptureIds
+from solvis.filter.subsection_id_filter import FilterSubsectionIds
 
 from .geometry import circle_polygon
 from .inversion_solution import CompositeSolution, FaultSystemSolution, InversionSolution

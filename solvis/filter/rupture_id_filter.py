@@ -1,5 +1,7 @@
 from typing import Iterable, Optional, Set
 
+import geopandas as gpd
+
 from solvis.inversion_solution import FaultSystemSolution
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
@@ -117,5 +119,26 @@ class FilterRuptureIds:
         """
         raise NotImplementedError()
 
-    def for_polygon(self, polygon, contained=True):
-        raise NotImplementedError()
+    def for_polygon(self, polygon, contained=True, drop_zero_rates: bool = True) -> Set[int]:
+        """Find ruptures that intersecting the polygon..
+
+        Args:
+            min_mag: The minumum rupture magnitude bound.
+            max_mag: The maximum rupture magnitude bound.
+
+        Returns:
+            The rupture_ids matching the filter arguments.
+        """
+        # df0 = self._solution.rupture_sections
+        # TODO: this is needed becuase the rupture rate concept differs between IS and FSS classes
+        # rate_column = "rate_weighted_mean" if isinstance(self._solution, FaultSystemSolution) else "Annual Rate"
+        # if drop_zero_rates:
+        #     df0 = df0.join(self._solution.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
+        #         [rate_column, "rupture", "section"]
+
+        # >>>> lifted from inversion_solution_operations
+        q0 = gpd.GeoDataFrame(self._solution.fault_sections)
+        q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
+        sr = self._solution.rs_with_rupture_rates
+        qdf = sr.join(q1, 'section', how='inner')
+        return set(qdf["Rupture Index"].unique())

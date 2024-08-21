@@ -56,7 +56,7 @@ def get_solution(id: str, archive: str) -> InversionSolution:
     )
     folder = pathlib.PurePath(os.path.realpath(__file__)).parent
     filename = pathlib.PurePath(folder, f"fixtures/{files[id]}")
-    return InversionSolution().from_archive(str(filename))
+    return InversionSolution.from_archive(str(filename))
 
 
 def branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID'):
@@ -132,7 +132,7 @@ def puysegur_fixture(request):
 def puysegur_solution_fixture(request):
     print("setup puysegur")
     filename = pathlib.PurePath(folder, f"fixtures/{ARCHIVES['PUY']}")
-    yield InversionSolution().from_archive(str(filename))
+    yield InversionSolution.from_archive(str(filename))
 
 
 @pytest.fixture(scope='module')
@@ -143,7 +143,7 @@ def puy_branch_solutions():
 @pytest.fixture(scope='module')
 def puysegur_small_fixture(request):
     filename = pathlib.PurePath(folder, f"fixtures/{MINI_ARCHIVES['PUY']}")
-    yield InversionSolution().from_archive(str(filename))
+    yield InversionSolution.from_archive(str(filename))
 
 
 @pytest.fixture(scope='module')
@@ -168,7 +168,7 @@ def cru_branch_solutions():
 @pytest.fixture(scope='class')
 def crustal_solution_fixture(request):
     filename = pathlib.PurePath(folder, f"fixtures/{ARCHIVES['CRU']}")
-    yield InversionSolution().from_archive(str(filename))
+    yield InversionSolution.from_archive(str(filename))
 
 
 @pytest.fixture(scope='module')
@@ -193,7 +193,7 @@ def hik_branch_solutions():
 @pytest.fixture(scope='class')
 def hikurangi_solution_fixture(request):
     filename = pathlib.PurePath(folder, f"fixtures/{MINI_ARCHIVES['HIK']}")
-    yield InversionSolution().from_archive(str(filename))
+    yield InversionSolution.from_archive(str(filename))
 
 
 @pytest.fixture(scope='module')
