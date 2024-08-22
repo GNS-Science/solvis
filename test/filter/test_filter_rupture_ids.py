@@ -61,7 +61,7 @@ def test_ruptures_for_polygon_intersecting_with_drop_zero(fss, filter_rupture_id
 
 
 @pytest.mark.skip('WIP')
-def test_ruptures_for_polygon_intersecting_with_contianed(fss, filter_rupture_ids):
+def test_ruptures_for_polygon_intersecting_with_contained(fss, filter_rupture_ids):
     WLG = location_by_id('WLG')
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
     rupture_ids = filter_rupture_ids.for_polygon(polygon, contained=True)  # noqa
@@ -69,3 +69,42 @@ def test_ruptures_for_polygon_intersecting_with_contianed(fss, filter_rupture_id
     # all_rupture_ids = filter_rupture_ids.for_polygon(polygon, drop_zero_rates=False)
     # assert all_rupture_ids.issuperset(rupture_ids)
     # assert len(all_rupture_ids) > len(rupture_ids)
+
+
+@pytest.mark.parametrize("drop_zero_input", [True, False])
+def test_ruptures_for_min_mag(filter_rupture_ids, drop_zero_input):
+    m6plus = filter_rupture_ids.for_magnitude(min_mag=6.0, drop_zero_rates=drop_zero_input)
+    m7plus = filter_rupture_ids.for_magnitude(min_mag=7.0, drop_zero_rates=drop_zero_input)
+
+    assert len(m6plus)
+    assert len(m7plus)
+    assert m6plus.issuperset(m7plus)
+    assert m6plus.difference(m7plus) == filter_rupture_ids.for_magnitude(
+        min_mag=6.0, max_mag=7.0, drop_zero_rates=drop_zero_input
+    )
+
+
+@pytest.mark.parametrize("drop_zero_input", [True, False])
+def test_ruptures_for_max_mag(filter_rupture_ids, drop_zero_input):
+    m8less = filter_rupture_ids.for_magnitude(max_mag=8.0, drop_zero_rates=drop_zero_input)
+    m7less = filter_rupture_ids.for_magnitude(max_mag=7.5, drop_zero_rates=drop_zero_input)
+
+    assert len(m8less)
+    assert len(m7less)
+    assert m7less.issubset(m8less)
+    assert m8less.difference(m7less) == filter_rupture_ids.for_magnitude(
+        min_mag=7.5, max_mag=8.0, drop_zero_rates=drop_zero_input
+    )
+
+
+@pytest.mark.parametrize("drop_zero_input", [True, False])
+def test_ruptures_for_min_rate(filter_rupture_ids, drop_zero_input):
+    r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6, drop_zero_rates=drop_zero_input)
+    r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7, drop_zero_rates=drop_zero_input)
+
+    assert len(r6less)
+    assert len(r7less)
+    assert r6less.issubset(r7less)
+    assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(
+        min_rate=1e-7, max_rate=1e-6, drop_zero_rates=drop_zero_input
+    )

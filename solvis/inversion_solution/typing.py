@@ -83,6 +83,10 @@ class InversionSolutionProtocol(Protocol):
         """the event rate for each rupture section."""
 
     @property
+    def ruptures_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        """the event rate for each rupture."""
+
+    @property
     def archive_path(self) -> Optional[Path]:
         """the path to the archive file"""
 
