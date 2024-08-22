@@ -97,14 +97,17 @@ def test_ruptures_for_max_mag(filter_rupture_ids, drop_zero_input):
     )
 
 
-@pytest.mark.parametrize("drop_zero_input", [True, False])
-def test_ruptures_for_min_rate(filter_rupture_ids, drop_zero_input):
-    r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6, drop_zero_rates=drop_zero_input)
-    r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7, drop_zero_rates=drop_zero_input)
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_ruptures_for_min_rate(filter_rupture_ids, drop_zero_rates):
+    r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6, drop_zero_rates=drop_zero_rates)
+    r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7, drop_zero_rates=drop_zero_rates)
 
     assert len(r6less)
     assert len(r7less)
     assert r6less.issubset(r7less)
     assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(
-        min_rate=1e-7, max_rate=1e-6, drop_zero_rates=drop_zero_input
+        min_rate=1e-7, max_rate=1e-6, drop_zero_rates=drop_zero_rates
     )
+    # if not drop_zero_rates:
+    #     print(list(r7less.difference(r6less))[:10])
+    #     assert 0

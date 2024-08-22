@@ -100,6 +100,14 @@ class FilterRuptureIds:
     #     '''alias'''
     #     return self.for_subsection_ids(fault_section_ids)
 
+    def _ruptures_with_and_without_rupture_rates(self):
+        """Helper method
+        # TODO this dataframe could be cached?? And used by above??
+        """
+        df_rr = self._solution.rupture_rates.drop(columns=["Rupture Index", "fault_system"])
+        df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without "fault_system"
+        return self._solution.ruptures.join(df_rr, on=self._solution.ruptures["Rupture Index"], rsuffix='_r')
+
     def for_rupture_rate(
         self, min_rate: Optional[float] = None, max_rate: Optional[float] = None, drop_zero_rates: bool = True
     ):
@@ -116,14 +124,15 @@ class FilterRuptureIds:
         if drop_zero_rates:
             df0 = self._solution.ruptures_with_rupture_rates
         else:
-            # TODO this dataframe could be cached?? And used by above??
-            df_rr = self._solution.rupture_rates.drop(columns=["Rupture Index", "fault_system"]).reset_index()
-            df0 = self._solution.ruptures.join(df_rr, on=self._solution.ruptures["Rupture Index"], rsuffix='_r')
+            df0 = self._ruptures_with_and_without_rupture_rates()
 
         # rate col is different for InversionSolution
         df0 = df0 if not max_rate else df0[df0.rate_weighted_mean <= max_rate]
         df0 = df0 if not min_rate else df0[df0.rate_weighted_mean > min_rate]
-        return set(df0[index].unique().tolist())
+
+        print(df0)  # [index].unique().tolist())
+
+        return set(df0[index].tolist())
 
     def for_magnitude(
         self, min_mag: Optional[float] = None, max_mag: Optional[float] = None, drop_zero_rates: bool = True
@@ -142,13 +151,11 @@ class FilterRuptureIds:
         if drop_zero_rates:
             df0 = self._solution.ruptures_with_rupture_rates
         else:
-            # TODO this dataframe could be cached?? And used by above??
-            df_rr = self._solution.rupture_rates.drop(columns=["Rupture Index", "fault_system"]).reset_index()
-            df0 = self._solution.ruptures.join(df_rr, on=self._solution.ruptures["Rupture Index"], rsuffix='_r')
+            df0 = self._ruptures_with_and_without_rupture_rates()
 
         df0 = df0 if not max_mag else df0[df0.Magnitude <= max_mag]
         df0 = df0 if not min_mag else df0[df0.Magnitude > min_mag]
-        return set(df0[index].unique().tolist())
+        return set(df0[index].tolist())
 
     def for_polygon(
         self, polygon: shapely.geometry.Polygon, contained: bool = False, drop_zero_rates: bool = True
