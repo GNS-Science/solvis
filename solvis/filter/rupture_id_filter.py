@@ -129,9 +129,6 @@ class FilterRuptureIds:
         # rate col is different for InversionSolution
         df0 = df0 if not max_rate else df0[df0.rate_weighted_mean <= max_rate]
         df0 = df0 if not min_rate else df0[df0.rate_weighted_mean > min_rate]
-
-        print(df0)  # [index].unique().tolist())
-
         return set(df0[index].tolist())
 
     def for_magnitude(
