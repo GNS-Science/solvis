@@ -1,9 +1,9 @@
 from collections import namedtuple
-from typing import Iterable, Iterator, Set, TYPE_CHECKING
-
-from solvis.inversion_solution.typing import InversionSolutionProtocol
+from typing import Iterable, Iterator, Set
 
 import shapely.geometry
+
+from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 ParentFaultMapping = namedtuple('ParentFaultMapping', ['id', 'parent_fault_name'])
 
@@ -90,7 +90,7 @@ class FilterParentFaultIds:
         ids = df0[df0['FaultID'].isin(list(fault_section_ids))]['ParentID'].unique().tolist()
         return set([int(id) for id in ids])
 
-    def for_polygon(self, polygon: shapely.geometry.Polygon, contained: bool=True):
+    def for_polygon(self, polygon: shapely.geometry.Polygon, contained: bool = True):
         raise NotImplementedError()
 
     def for_rupture_ids(self, rupture_ids: Iterable[int]) -> Set[int]:

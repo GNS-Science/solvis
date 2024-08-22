@@ -1,8 +1,9 @@
 from typing import Iterable, Optional, Set
 
 import geopandas as gpd
+import shapely.geometry
 
-from solvis.inversion_solution import FaultSystemSolution
+import solvis.inversion_solution
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 from .parent_fault_id_filter import FilterParentFaultIds
@@ -68,7 +69,11 @@ class FilterRuptureIds:
         df0 = self._solution.rupture_sections
 
         # TODO: this is needed becuase the rupture rate concept differs between IS and FSS classes
-        rate_column = "rate_weighted_mean" if isinstance(self._solution, FaultSystemSolution) else "Annual Rate"
+        rate_column = (
+            "rate_weighted_mean"
+            if isinstance(self._solution, solvis.inversion_solution.FaultSystemSolution)
+            else "Annual Rate"
+        )
         if drop_zero_rates:
             df0 = df0.join(self._solution.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
                 [rate_column, "rupture", "section"]
@@ -119,26 +124,31 @@ class FilterRuptureIds:
         """
         raise NotImplementedError()
 
-    def for_polygon(self, polygon, contained=True, drop_zero_rates: bool = True) -> Set[int]:
-        """Find ruptures that intersecting the polygon..
+    def for_polygon(
+        self, polygon: shapely.geometry.Polygon, contained: bool = False, drop_zero_rates: bool = True
+    ) -> Set[int]:
+        """Find ruptures that intersect the polygon.
 
         Args:
-            min_mag: The minumum rupture magnitude bound.
-            max_mag: The maximum rupture magnitude bound.
+            polygon: The polygon defining the area of intersection.
+            contained: Exclude ruptures with sections that fall outside the polygon (default = False).
+            drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True).
 
         Returns:
             The rupture_ids matching the filter arguments.
         """
-        # df0 = self._solution.rupture_sections
-        # TODO: this is needed becuase the rupture rate concept differs between IS and FSS classes
-        # rate_column = "rate_weighted_mean" if isinstance(self._solution, FaultSystemSolution) else "Annual Rate"
-        # if drop_zero_rates:
-        #     df0 = df0.join(self._solution.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
-        #         [rate_column, "rupture", "section"]
+        if contained:
+            raise NotImplementedError()
 
-        # >>>> lifted from inversion_solution_operations
-        q0 = gpd.GeoDataFrame(self._solution.fault_sections)
-        q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
-        sr = self._solution.rs_with_rupture_rates
-        qdf = sr.join(q1, 'section', how='inner')
-        return set(qdf["Rupture Index"].unique())
+        df0 = gpd.GeoDataFrame(self._solution.fault_sections)
+        df0 = df0[df0['geometry'].intersects(polygon)]
+
+        if drop_zero_rates:
+            index = "Rupture Index"
+            df1 = self._solution.rs_with_rupture_rates  # this implies we
+        else:
+            index = "rupture"
+            df1 = self._solution.rupture_sections
+
+        df2 = df1.join(df0, 'section', how='inner')
+        return set(df2[index].unique())

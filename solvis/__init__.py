@@ -29,12 +29,21 @@ Example:
     ```
 """
 
-from solvis.filter.parent_fault_id_filter import FilterParentFaultIds
-from solvis.filter.rupture_id_filter import FilterRuptureIds
-from solvis.filter.subsection_id_filter import FilterSubsectionIds
+
+import importlib
 
 from .geometry import circle_polygon
 from .inversion_solution import CompositeSolution, FaultSystemSolution, InversionSolution
 from .solvis import export_geojson, mfd_hist, parent_fault_names, rupt_ids_above_rate, section_participation
+
+# # from solvis.filter.subsection_id_filter import FilterSubsectionIds
+# def __getattr__(name):
+#     if name == 'FilterRuptureIds':
+#         return importlib.import_module('solvis.filter.rupture_id_filter').FilterRuptureIds
+#     if name == 'FilterParentFaultIds':
+#         return importlib.import_module('solvis.filter.parent_fault_id_filter').FilterParentFaultIds
+#     if name == 'FilterSubsectionIds':
+#         return importlib.import_module('solvis.filter.subsection_id_filter').FilterSubsectionIds
+
 
 __version__ = '0.12.3'

@@ -1,18 +1,18 @@
 import logging
 import time
 import warnings
-from typing import Iterable, List, Set, TYPE_CHECKING
+from typing import Iterable, List, Set
 
 import geopandas as gpd
 import pandas as pd
+import shapely.geometry
 from nzshm_common.location.location import location_by_id
 
+from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.geometry import circle_polygon
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
-
-import shapely.geometry
 
 log = logging.getLogger(__name__)
 
@@ -196,12 +196,13 @@ class InversionSolutionOperations(InversionSolutionProtocol):
     def get_rupture_ids_intersecting(self, polygon: shapely.geometry.Polygon) -> pd.Series:
         """Return IDs for any ruptures intersecting the polygon."""
         warnings.warn("Please use solvis.filter.classes *.for_polygons method instead", DeprecationWarning)
+        return pd.Series(list(FilterRuptureIds(self).for_polygon(polygon)))
 
-        q0 = gpd.GeoDataFrame(self.fault_sections)
-        q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
-        sr = self.rs_with_rupture_rates
-        qdf = sr.join(q1, 'section', how='inner')
-        return qdf["Rupture Index"].unique()
+        # q0 = gpd.GeoDataFrame(self.fault_sections)
+        # q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
+        # sr = self.rs_with_rupture_rates
+        # qdf = sr.join(q1, 'section', how='inner')
+        # return qdf["Rupture Index"].unique()
 
     def get_rupture_ids_for_location_radius(
         self,
