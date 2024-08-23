@@ -198,20 +198,13 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         warnings.warn("Please use solvis.filter.classes *.for_polygons method instead", DeprecationWarning)
         return pd.Series(list(FilterRuptureIds(self).for_polygon(polygon)))
 
-        # q0 = gpd.GeoDataFrame(self.fault_sections)
-        # q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
-        # sr = self.rs_with_rupture_rates
-        # qdf = sr.join(q1, 'section', how='inner')
-        # return qdf["Rupture Index"].unique()
-
     def get_rupture_ids_for_location_radius(
         self,
         location_ids: Iterable[str],
         radius_km: float,
         location_join_type: SetOperationEnum = SetOperationEnum.UNION,
     ) -> Set[int]:
-        """
-        Return IDs for ruptures within a radius around one or more locations.
+        """Return IDs for ruptures within a radius around one or more locations.
 
         Where there are multiple locations, the rupture IDs represent a set joining
         of the specified radii.
@@ -228,23 +221,15 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             a Set of rupture IDs
 
         Examples:
-            Get all rupture IDs from the solution that are within 100km of Blenheim:
-            ```py
-                bhe_rupture_ids = sol.get_rupture_ids_for_location_radius(
-                    location_ids=["BHE"],
-                    radius_km=100,
-                )
-            ```
             Get all rupture IDs from the solution that are within 50km of Blenheim
-            or within 50km of Wellington:
+            or Wellington:
             ```py
                 intersect_rupture_ids = sol.get_rupture_ids_for_location_radius(
-                    location_ids=["BHE"],
+                    location_ids=["BHE", "WLG"],
                     radius_km=50,
                     location_joint_type=SetOperationEnum.UNION,
                 )
             ```
-
         Note:
             If you want to do this kind of joining between locations with different
             radii or points that are not defined by location IDs, consider using
@@ -252,26 +237,13 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             [get_rupture_ids_intersecting][solvis.inversion_solution.inversion_solution_operations.InversionSolutionOperations.get_rupture_ids_intersecting]
             then use set operations to join each rupture ID set.
         """
+        warnings.warn("Please use solvis.filter.classes *.for_polygons method instead.", DeprecationWarning)
         log.info('get_rupture_ids_for_location_radius: %s %s %s' % (self, radius_km, location_ids))
-        first = True
-        rupture_ids: Set[int]
+        polygons = []
         for loc_id in location_ids:
             loc = location_by_id(loc_id)
-            polygon = circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude'])
-            location_rupture_ids = set(self.get_rupture_ids_intersecting(polygon))
-
-            if first:
-                rupture_ids = location_rupture_ids
-                first = False
-            else:
-                log.debug('location_join_type %s' % location_join_type)
-                if location_join_type == SetOperationEnum.INTERSECTION:
-                    rupture_ids = rupture_ids.intersection(location_rupture_ids)
-                elif location_join_type == SetOperationEnum.UNION:
-                    rupture_ids = rupture_ids.union(location_rupture_ids)
-                else:
-                    raise ValueError("unsupported SetOperation")
-        return rupture_ids
+            polygons.append(circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude']))
+        return FilterRuptureIds(self).for_polygons(polygons, location_join_type)
 
     def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
         """

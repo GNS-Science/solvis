@@ -1,5 +1,5 @@
 """
-The `filter` package provides classes to simplify filtering solutions by
+The `filter` package provides classes to filter solutions by
 various attributes of InversionSolution:
 
 Classes:

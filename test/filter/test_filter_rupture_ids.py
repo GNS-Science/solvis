@@ -5,6 +5,8 @@ import pytest
 from nzshm_common.location.location import location_by_id
 
 from solvis import circle_polygon
+from solvis.filter.rupture_id_filter import FilterRuptureIds
+from solvis.inversion_solution.typing import SetOperationEnum
 
 
 def test_top_level_import(fss):
@@ -17,10 +19,10 @@ def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
     assert filter_rupture_ids.for_subsection_ids(filter_subsection_ids.for_rupture_ids(ruptures)).issuperset(ruptures)
 
 
-def test_ruptures_for_parent_fault_ids(filter_rupture_ids, filter_parent_fault_ids):
+def test_ruptures_for_parent_fault_ids(filter_rupture_ids, filter_parent_fault_ids, fss):
     fault_ids = filter_parent_fault_ids.for_parent_fault_names(['Vernon 4'])
     rupt_ids_with_rate = filter_rupture_ids.for_parent_fault_ids(fault_ids)
-    rupt_ids_all = filter_rupture_ids.for_parent_fault_ids(fault_ids, drop_zero_rates=False)
+    rupt_ids_all = FilterRuptureIds(fss, drop_zero_rates=False).for_parent_fault_ids(fault_ids)
 
     assert rupt_ids_with_rate.issuperset(
         set([2090, 2618, 1595, 76, 77, 594, 595, 2134, 1126, 1127, 1648, 1649, 2177, 664, 665, 154, 2723])
@@ -50,12 +52,27 @@ def test_ruptures_for_polygon_intersecting(fss, filter_rupture_ids):
     ).issubset(rupture_ids)
 
 
+def test_ruptures_for_polygons(fss, filter_rupture_ids):
+    WLG = location_by_id('WLG')
+    MRO = location_by_id('MRO')
+    polyA = circle_polygon(3e4, WLG['latitude'], WLG['longitude'])  # 30km circle around WLG
+    polyB = circle_polygon(3e4, MRO['latitude'], MRO['longitude'])  # 30km circle around MRO
+
+    ridsA = filter_rupture_ids.for_polygons([polyA])
+    ridsB = filter_rupture_ids.for_polygons([polyB])
+
+    assert filter_rupture_ids.for_polygons(
+        [polyA, polyA], join_type=SetOperationEnum.INTERSECTION
+    ) == ridsA.intersection(ridsB)
+    assert filter_rupture_ids.for_polygons([polyA, polyA], join_type=SetOperationEnum.UNION) == ridsA.union(ridsB)
+
+
 def test_ruptures_for_polygon_intersecting_with_drop_zero(fss, filter_rupture_ids):
     WLG = location_by_id('WLG')
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
     rupture_ids = filter_rupture_ids.for_polygon(polygon)
 
-    all_rupture_ids = filter_rupture_ids.for_polygon(polygon, drop_zero_rates=False)
+    all_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=False).for_polygon(polygon)
     assert all_rupture_ids.issuperset(rupture_ids)
     assert len(all_rupture_ids) > len(rupture_ids)
 
@@ -64,50 +81,50 @@ def test_ruptures_for_polygon_intersecting_with_drop_zero(fss, filter_rupture_id
 def test_ruptures_for_polygon_intersecting_with_contained(fss, filter_rupture_ids):
     WLG = location_by_id('WLG')
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
-    rupture_ids = filter_rupture_ids.for_polygon(polygon, contained=True)  # noqa
+    rupture_ids = filter_rupture_ids.for_polygon(polygon)  # noqa
 
     # all_rupture_ids = filter_rupture_ids.for_polygon(polygon, drop_zero_rates=False)
     # assert all_rupture_ids.issuperset(rupture_ids)
     # assert len(all_rupture_ids) > len(rupture_ids)
 
 
-@pytest.mark.parametrize("drop_zero_input", [True, False])
-def test_ruptures_for_min_mag(filter_rupture_ids, drop_zero_input):
-    m6plus = filter_rupture_ids.for_magnitude(min_mag=6.0, drop_zero_rates=drop_zero_input)
-    m7plus = filter_rupture_ids.for_magnitude(min_mag=7.0, drop_zero_rates=drop_zero_input)
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_ruptures_for_min_mag(fss, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+
+    m6plus = filter_rupture_ids.for_magnitude(min_mag=6.0)
+    m7plus = filter_rupture_ids.for_magnitude(min_mag=7.0)
 
     assert len(m6plus)
     assert len(m7plus)
     assert m6plus.issuperset(m7plus)
-    assert m6plus.difference(m7plus) == filter_rupture_ids.for_magnitude(
-        min_mag=6.0, max_mag=7.0, drop_zero_rates=drop_zero_input
-    )
+    assert m6plus.difference(m7plus) == filter_rupture_ids.for_magnitude(min_mag=6.0, max_mag=7.0)
 
 
-@pytest.mark.parametrize("drop_zero_input", [True, False])
-def test_ruptures_for_max_mag(filter_rupture_ids, drop_zero_input):
-    m8less = filter_rupture_ids.for_magnitude(max_mag=8.0, drop_zero_rates=drop_zero_input)
-    m7less = filter_rupture_ids.for_magnitude(max_mag=7.5, drop_zero_rates=drop_zero_input)
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_ruptures_for_max_mag(fss, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+
+    m8less = filter_rupture_ids.for_magnitude(max_mag=8.0)
+    m7less = filter_rupture_ids.for_magnitude(max_mag=7.5)
 
     assert len(m8less)
     assert len(m7less)
     assert m7less.issubset(m8less)
-    assert m8less.difference(m7less) == filter_rupture_ids.for_magnitude(
-        min_mag=7.5, max_mag=8.0, drop_zero_rates=drop_zero_input
-    )
+    assert m8less.difference(m7less) == filter_rupture_ids.for_magnitude(min_mag=7.5, max_mag=8.0)
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_min_rate(filter_rupture_ids, drop_zero_rates):
-    r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6, drop_zero_rates=drop_zero_rates)
-    r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7, drop_zero_rates=drop_zero_rates)
+def test_ruptures_for_min_rate(fss, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+
+    r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6)
+    r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7)
 
     assert len(r6less)
     assert len(r7less)
     assert r6less.issubset(r7less)
-    assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(
-        min_rate=1e-7, max_rate=1e-6, drop_zero_rates=drop_zero_rates
-    )
+    assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(min_rate=1e-7, max_rate=1e-6)
     # if not drop_zero_rates:
     #     print(list(r7less.difference(r6less))[:10])
     #     assert 0
