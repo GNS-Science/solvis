@@ -6,11 +6,12 @@ import shapely.geometry
 import solvis.inversion_solution
 from solvis.inversion_solution.typing import InversionSolutionProtocol, SetOperationEnum
 
+from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 from .subsection_id_filter import FilterSubsectionIds
 
 
-class FilterRuptureIds:
+class FilterRuptureIds(ChainableSetBase):
     """
     A helper class to filter ruptures, returning the qualifying rupture_ids.
 
@@ -29,7 +30,7 @@ class FilterRuptureIds:
         self.filter_subsection_ids = FilterSubsectionIds(solution)
         self.filter_parent_fault_ids = FilterParentFaultIds(solution)
 
-    def for_named_faults(self, named_fault_names: Set[str]) -> Set[int]:
+    def for_named_faults(self, named_fault_names: Set[str]) -> 'FilterRuptureIds':
         """Find ruptures that occur on any of the given named_fault names.
 
         Args:
@@ -86,7 +87,8 @@ class FilterRuptureIds:
             df0 = df0[df0[rate_column] > 0]
 
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
-        return set([int(id) for id in ids])
+        result = set([int(id) for id in ids])
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
 
     def for_subsection_ids(self, fault_section_ids: Iterable[int]) -> Set[int]:
         """Find ruptures that occur on any of the given fault_section_ids.
@@ -99,7 +101,8 @@ class FilterRuptureIds:
         """
         df0 = self._solution.rupture_sections
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
-        return set([int(id) for id in ids])
+        result = set([int(id) for id in ids])
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
 
     def _ruptures_with_and_without_rupture_rates(self):
         """Helper method
@@ -128,7 +131,8 @@ class FilterRuptureIds:
         # rate col is different for InversionSolution
         df0 = df0 if not max_rate else df0[df0.rate_weighted_mean <= max_rate]
         df0 = df0 if not min_rate else df0[df0.rate_weighted_mean > min_rate]
-        return set(df0[index].tolist())
+        result = set(df0[index].tolist())
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
 
     def for_magnitude(self, min_mag: Optional[float] = None, max_mag: Optional[float] = None):
         """Find ruptures that occur within given magnitude bounds.
@@ -148,11 +152,12 @@ class FilterRuptureIds:
 
         df0 = df0 if not max_mag else df0[df0.Magnitude <= max_mag]
         df0 = df0 if not min_mag else df0[df0.Magnitude > min_mag]
-        return set(df0[index].tolist())
+        result = set(df0[index].tolist())
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
 
     def for_polygons(
         self, polygons: Iterable[shapely.geometry.Polygon], join_type: SetOperationEnum = SetOperationEnum.UNION
-    ) -> Set[int]:
+    ) -> 'FilterRuptureIds':
         """Find ruptures that involve several polygon areas.
 
         Args:
@@ -163,7 +168,7 @@ class FilterRuptureIds:
         """
         rupture_id_sets: List[Set[int]] = []
         for polygon in polygons:
-            rupture_id_sets.append(self.for_polygon(polygon))
+            rupture_id_sets.append(self.for_polygon(polygon).chained_set)
 
         if join_type == SetOperationEnum.INTERSECTION:
             rupture_ids = set.intersection(*rupture_id_sets)
@@ -171,9 +176,9 @@ class FilterRuptureIds:
             rupture_ids = set.union(*rupture_id_sets)
         else:
             raise ValueError("Only INTERSECTION and UNION operations are supported for `join_type`")
-        return rupture_ids
+        return self.new_chainable_set(rupture_ids, self._solution, self._drop_zero_rates)
 
-    def for_polygon(self, polygon: shapely.geometry.Polygon) -> Set[int]:
+    def for_polygon(self, polygon: shapely.geometry.Polygon) -> 'FilterRuptureIds':
         """Find ruptures that involve a polygon area.
 
         Args:
@@ -196,4 +201,5 @@ class FilterRuptureIds:
             df1 = self._solution.rupture_sections
 
         df2 = df1.join(df0, 'section', how='inner')
-        return set(df2[index].unique())
+        result = set(df2[index].unique())
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)

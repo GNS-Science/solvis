@@ -243,7 +243,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         for loc_id in location_ids:
             loc = location_by_id(loc_id)
             polygons.append(circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude']))
-        return FilterRuptureIds(self).for_polygons(polygons, location_join_type)
+        return set(FilterRuptureIds(self).for_polygons(polygons, location_join_type))
 
     def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
         """

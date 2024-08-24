@@ -16,7 +16,10 @@ def test_top_level_import(fss):
 
 def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
     ruptures = set([2, 3])
-    assert filter_rupture_ids.for_subsection_ids(filter_subsection_ids.for_rupture_ids(ruptures)).issuperset(ruptures)
+    all_rupts = filter_rupture_ids.for_subsection_ids(filter_subsection_ids.for_rupture_ids(ruptures))
+
+    print(all_rupts, ruptures)
+    assert all_rupts.issuperset(ruptures)
 
 
 def test_ruptures_for_parent_fault_ids(filter_rupture_ids, filter_parent_fault_ids, fss):
@@ -128,3 +131,31 @@ def test_ruptures_for_min_rate(fss, drop_zero_rates):
     # if not drop_zero_rates:
     #     print(list(r7less.difference(r6less))[:10])
     #     assert 0
+
+
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_filter_chaining_rates(fss, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+
+    r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6)
+    r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7)
+
+    chained = filter_rupture_ids.for_rupture_rate(min_rate=1e-7).for_rupture_rate(max_rate=1e-6)
+
+    assert r7less.difference(r6less) == chained
+
+    # assert len(r6less)
+    # assert len(r7less)
+    # assert r6less.issubset(r7less)
+    # assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(min_rate=1e-7, max_rate=1e-6)
+
+
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_filter_chaining_fault_namese(fss, drop_zero_rates):
+    frids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+
+    n0 = frids.for_parent_fault_names(['Vernon 4'])
+    n1 = frids.for_parent_fault_names(['Alpine Jacksons to Kaniere'])
+    chained = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(['Alpine Jacksons to Kaniere'])
+
+    assert n0.intersection(n1) == chained

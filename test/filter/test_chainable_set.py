@@ -1,90 +1,21 @@
-# from pytest import approx, raises
-
-from typing import Any, Set
-
 import pytest
 
-
-class ChainableSetBase:
-    """A base class to help subclasses filter methods chainable
-
-    And they must also `look like' sets.....
-
-    Class methods all return sets to make it easy to combine filters with
-    set operands like `union`, `intersection`, `difference` etc).
-
-    """
-
-    _chained_set: Set[Any] = set()
-
-    @property
-    def chained_set(self):
-        return self._chained_set
-
-    def chainable_instance(self, cls, chain_result, *init_args):
-        print(f'chainable_instance {cls} {chain_result} {init_args}')
-        instance = cls(*init_args)
-        instance._chained_set = chain_result
-        return instance
-
-    def __example_proxy__(self, *args, **kwargs):
-        """methods necessary to behave like a set
-
-        Maybe can use getattr here??
-        """
-        self._chained_set.__example_proxy__(*args, **kwargs)
-
-    def __eq__(self, other):
-        return other == self._chained_set
-
-    def __iter__(self):
-        return self._chained_set.__iter__()
-
-    def or_(self, *others):
-        return self._chained_set.union(*others)
-
-    def and_(self, *others):
-        return self._chained_set.intersection(*others)
-
-    def union(self, *others):
-        return self._chained_set.union(*others)
-
-    def intersection(self, *others):
-        return self._chained_set.intersection(*others)
-
-    def difference(self, *others):
-        return self._chained_set.difference(*others)
-
-    def symmetric_difference(self, other):
-        return self._chained_set.symmetric_difference(*other)
+from solvis.filter.chainable_set_base import ChainableSetBase
 
 
 class FilterExampleClass(ChainableSetBase):
     """
-    An example helper class to filter ruptures, returning the qualifying rupture_ids.
-
-    Class methods all return sets to make it easy to combine filters with
-    set operands like `union`, `intersection`, `difference` etc).
+    An example helper class ...
     """
 
-    def __init__(self, solution, drop_zero_rates: bool = True):
-        """
-        Args:
-            solution: The solution instance to act on.
-            drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
-        """
+    def __init__(self, solution):
         self._solution = solution
-        super(ChainableSetBase, self).__init__()
 
-    def for_example_a(self, _input={1, 2, 3, 4}) -> Set[int]:
-        res = _input
-        chained_set = set.intersection(res, self.chained_set) if self.chained_set else res
-        return self.chainable_instance(FilterExampleClass, chained_set, self._solution)
+    def for_example_a(self, _input={1, 2, 3, 4}):
+        return self.new_chainable_set(_input, self._solution)
 
-    def for_example_b(self, _input={3, 4, 5, 6}) -> Set[int]:
-        res = _input
-        chained_set = set.intersection(res, self.chained_set) if self.chained_set else res
-        return self.chainable_instance(FilterExampleClass, chained_set, self._solution)
+    def for_example_b(self, _input={3, 4, 5, 6}):
+        return self.new_chainable_set(_input, self._solution)
 
 
 @pytest.fixture
