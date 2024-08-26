@@ -5,6 +5,11 @@ from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.filter.subsection_id_filter import FilterSubsectionIds
 
 
+def pytest_configure(config):
+    # register your new marker to avoid warnings
+    config.addinivalue_line("markers", "review: tests for review")
+
+
 @pytest.fixture
 def fss(composite_fixture):
     yield composite_fixture._solutions['CRU']

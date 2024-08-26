@@ -55,19 +55,34 @@ def test_ruptures_for_polygon_intersecting(fss, filter_rupture_ids):
     ).issubset(rupture_ids)
 
 
-def test_ruptures_for_polygons(fss, filter_rupture_ids):
+@pytest.mark.review
+def test_ruptures_for_polygons_join_iterable(fss, filter_rupture_ids):
     WLG = location_by_id('WLG')
     MRO = location_by_id('MRO')
-    polyA = circle_polygon(3e4, WLG['latitude'], WLG['longitude'])  # 30km circle around WLG
-    polyB = circle_polygon(3e4, MRO['latitude'], MRO['longitude'])  # 30km circle around MRO
+    polyA = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
+    polyB = circle_polygon(1.5e5, MRO['latitude'], MRO['longitude'])  # 150km circle around MRO
 
     ridsA = filter_rupture_ids.for_polygons([polyA])
     ridsB = filter_rupture_ids.for_polygons([polyB])
 
+    print(set(ridsA))
+    print(set(ridsB))
+
+    # default == union
+    assert filter_rupture_ids.for_polygons([polyA, polyB]) == ridsA.union(ridsB)
+
+    # intersection
     assert filter_rupture_ids.for_polygons(
-        [polyA, polyA], join_type=SetOperationEnum.INTERSECTION
+        [polyA, polyB], join_polygons=SetOperationEnum.INTERSECTION
     ) == ridsA.intersection(ridsB)
-    assert filter_rupture_ids.for_polygons([polyA, polyA], join_type=SetOperationEnum.UNION) == ridsA.union(ridsB)
+
+    # union
+    assert filter_rupture_ids.for_polygons([polyA, polyB], join_polygons=SetOperationEnum.UNION) == ridsA.union(ridsB)
+
+    # difference
+    assert filter_rupture_ids.for_polygons(
+        [polyA, polyB], join_polygons=SetOperationEnum.DIFFERENCE
+    ) == ridsA.difference(ridsB)
 
 
 def test_ruptures_for_polygon_intersecting_with_drop_zero(fss, filter_rupture_ids):
@@ -150,12 +165,27 @@ def test_filter_chaining_rates(fss, drop_zero_rates):
     # assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(min_rate=1e-7, max_rate=1e-6)
 
 
+@pytest.mark.review
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_filter_chaining_fault_namese(fss, drop_zero_rates):
+def test_filter_chaining_join_chain(fss, drop_zero_rates):
     frids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
 
     n0 = frids.for_parent_fault_names(['Vernon 4'])
     n1 = frids.for_parent_fault_names(['Alpine Jacksons to Kaniere'])
-    chained = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(['Alpine Jacksons to Kaniere'])
+    chained_default = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(['Alpine Jacksons to Kaniere'])
+    assert n1.intersection(n0) == chained_default
 
-    assert n0.intersection(n1) == chained
+    chained_intersect = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(
+        ['Alpine Jacksons to Kaniere'], join_prior=SetOperationEnum.INTERSECTION
+    )
+    assert n1.intersection(n0) == chained_intersect
+
+    chained_union = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(
+        ['Alpine Jacksons to Kaniere'], join_prior=SetOperationEnum.UNION
+    )
+    assert n1.union(n0) == chained_union
+
+    chained_diff = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(
+        ['Alpine Jacksons to Kaniere'], join_prior=SetOperationEnum.DIFFERENCE
+    )
+    assert n1.difference(n0) == chained_diff

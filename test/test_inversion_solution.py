@@ -117,6 +117,8 @@ class TestInversionSolution(object):
         # All WLG results should also in BHE set for this fixture
         expected_intersection_ruptures = set(ruptures_wlg).intersection(ruptures_bhe)
         expected_union_ruptures = set(ruptures_wlg).union(ruptures_bhe)
+        expected_diff_ruptures = set(ruptures_wlg).difference(ruptures_bhe)
+
         # Pre-checks on assumptions
         assert len(ruptures_wlg) == len(expected_intersection_ruptures)
         assert len(ruptures_bhe) == len(expected_union_ruptures)
@@ -142,12 +144,13 @@ class TestInversionSolution(object):
         )
         assert len(union_rupture_ids) == len(expected_union_ruptures)
 
-        with raises(ValueError):
-            sol.get_rupture_ids_for_location_radius(
-                location_ids=["WLG", "BHE"],
-                radius_km=100,
-                location_join_type=SetOperationEnum.DIFFERENCE,
-            )
+        # with raises(ValueError):
+        diff_rupture_ids = sol.get_rupture_ids_for_location_radius(
+            location_ids=["WLG", "BHE"],
+            radius_km=100,
+            location_join_type=SetOperationEnum.DIFFERENCE,
+        )
+        assert len(diff_rupture_ids) == len(expected_diff_ruptures)
 
     def test_slip_rate_soln(self, crustal_solution_fixture):
         sol = crustal_solution_fixture

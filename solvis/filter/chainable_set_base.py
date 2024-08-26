@@ -1,21 +1,27 @@
-"""
-
-"""
 from typing import Any, Set
+
+from solvis.inversion_solution.typing import SetOperationEnum
 
 
 class ChainableSetBase:
     """A base class to make subclasse filter methods chainable & set-like"""
 
-    _chained_set: Set[Any] = set()
+    _chained_set: Set[Any] = set()  # the set
 
     @property
     def chained_set(self) -> Set[Any]:
         return self._chained_set
 
-    def new_chainable_set(self, result, *init_args):
+    def new_chainable_set(self, result, *init_args, join_prior: SetOperationEnum = SetOperationEnum.INTERSECTION):
         instance = self.__class__(*init_args)
-        instance._chained_set = set.intersection(result, self.chained_set) if self.chained_set else result
+        if join_prior == SetOperationEnum.INTERSECTION:
+            instance._chained_set = set.intersection(result, self.chained_set) if self.chained_set else result
+        elif join_prior == SetOperationEnum.UNION:
+            instance._chained_set = set.union(result, self.chained_set) if self.chained_set else result
+        elif join_prior == SetOperationEnum.DIFFERENCE:
+            instance._chained_set = set.difference(result, self.chained_set) if self.chained_set else result
+        else:
+            raise ValueError(f"Unsupported join type {join_prior}")
         return instance
 
     def __eq__(self, other):
