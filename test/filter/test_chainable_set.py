@@ -101,3 +101,37 @@ def test_set_operands(filter_example):
     assert filter_example.for_example_a(SET_A) & filter_example.for_example_a(SET_B) == SET_B.intersection(SET_A)
     assert filter_example.for_example_a(SET_A) | filter_example.for_example_a(SET_B) == SET_B.union(SET_A)
     assert filter_example.for_example_a(SET_A) - filter_example.for_example_a(SET_B) == SET_A.difference(SET_B)
+
+
+def test_set_proxy_methods_return_class_wrapper(filter_example):
+
+    SET_A = {0, 1, 2, 3}
+    SET_B = {1, 2, 3, 4}
+    SET_C = {0, 1}
+
+    res0 = filter_example.for_example_a(SET_A)
+    res1 = filter_example.for_example_b(SET_B)
+    res2 = filter_example.for_example_b(SET_C)
+
+    assert isinstance(res0.intersection(res1), FilterExampleClass)
+    assert isinstance(res0.intersection(res1.intersection(res2)), FilterExampleClass)
+
+    assert isinstance(res0 & res1 & res2, FilterExampleClass)
+    assert isinstance(res0 | res1 | res2, FilterExampleClass)
+    assert isinstance(res0 - res1 - res2, FilterExampleClass)
+
+    # we can't use set.interection without casting
+    with pytest.raises(TypeError):
+        set.intersection(res0, res1, res2)
+
+    FilterExampleClass.intersection(res0, res1, res2)
+
+    # but we can call the filter's equivalent method
+    assert isinstance(FilterExampleClass.intersection(res0, res1, res2), FilterExampleClass)
+    assert res0 & res1 & res2 == set.intersection(SET_A, SET_B, SET_C)
+
+    assert isinstance(FilterExampleClass.union(res0, res1, res2), FilterExampleClass)
+    assert res0 | res1 | res2 == set.union(SET_A, SET_B, SET_C)
+
+    assert isinstance(FilterExampleClass.difference(res0, res1, res2), FilterExampleClass)
+    assert res0 - res1 - res2 == set.difference(SET_A, SET_B, SET_C)

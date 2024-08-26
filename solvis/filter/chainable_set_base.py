@@ -1,3 +1,4 @@
+import copy
 from typing import Any, Set, Union
 
 from solvis.inversion_solution.typing import SetOperationEnum
@@ -43,29 +44,35 @@ class ChainableSetBase:
     # Set logical operands (&, |, -)
 
     def __or__(self, *others):
-        return self.chained_set.union(*others)
+        return self.union(*others)
 
     def __and__(self, *others):
-        return self.chained_set.intersection(*others)
+        return self.intersection(*others)
 
     def __sub__(self, *others):
-        return self.chained_set.difference(*others)
+        return self.difference(*others)
 
     # Set methods are proxied to the _chained_set ...
     def union(self, *others):
-        return self.chained_set.union(*others)
+        instance = copy.deepcopy(self)
+        instance._chained_set = self.chained_set.union(*others)
+        return instance
 
     def intersection(self, *others):
-        return self.chained_set.intersection(*others)
+        instance = copy.deepcopy(self)
+        instance._chained_set = self.chained_set.intersection(*others)
+        return instance
 
     def difference(self, *others):
-        return self.chained_set.difference(*others)
+        instance = copy.deepcopy(self)
+        instance._chained_set = self.chained_set.difference(*others)
+        return instance
 
-    def symmetric_difference(self, other):
-        return self.chained_set.symmetric_difference(*other)
+    # def symmetric_difference(self, other):
+    #     return self.chained_set.symmetric_difference(*other)
 
-    def issuperset(self, *others):
-        return self.chained_set.issuperset(*others)
+    # def issuperset(self, *others):
+    #     return self.chained_set.issuperset(*others)
 
-    def issubset(self, other):
-        return self.chained_set.issubset(other)
+    # def issubset(self, other):
+    #     return self.chained_set.issubset(other)
