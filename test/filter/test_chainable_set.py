@@ -90,3 +90,14 @@ def test_chained_set_join_types(filter_example):
 
     # difference
     assert filter_example.for_example_a(SET_A).for_example_b(SET_B, join_prior='difference') == SET_B.difference(SET_A)
+
+
+def test_set_operands(filter_example):
+    SET_A = {0, 1, 2, 3}
+    SET_B = {1, 2, 3, 4}
+
+    assert filter_example.for_example_a().union(filter_example.for_example_a())
+
+    assert filter_example.for_example_a(SET_A) & filter_example.for_example_a(SET_B) == SET_B.intersection(SET_A)
+    assert filter_example.for_example_a(SET_A) | filter_example.for_example_a(SET_B) == SET_B.union(SET_A)
+    assert filter_example.for_example_a(SET_A) - filter_example.for_example_a(SET_B) == SET_A.difference(SET_B)

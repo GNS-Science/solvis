@@ -40,14 +40,18 @@ class ChainableSetBase:
     def __len__(self):
         return self.chained_set.__len__()
 
-    # Set methods are proxied to the _chained_set ...
+    # Set logical operands (&, |, -)
 
-    def or_(self, *others):
+    def __or__(self, *others):
         return self.chained_set.union(*others)
 
-    def and_(self, *others):
+    def __and__(self, *others):
         return self.chained_set.intersection(*others)
 
+    def __sub__(self, *others):
+        return self.chained_set.difference(*others)
+
+    # Set methods are proxied to the _chained_set ...
     def union(self, *others):
         return self.chained_set.union(*others)
 
