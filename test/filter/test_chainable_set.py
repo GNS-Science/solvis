@@ -12,10 +12,10 @@ class FilterExampleClass(ChainableSetBase):
     def __init__(self, solution):
         self._solution = solution
 
-    def for_example_a(self, _input={1, 2, 3, 4}):
-        return self.new_chainable_set(_input, self._solution)
+    def for_example_a(self, _input={1, 2, 3, 4}, join_prior: str = 'intersection'):
+        return self.new_chainable_set(_input, self._solution, join_prior=join_prior)
 
-    def for_example_b(self, _input={3, 4, 5, 6}, join_prior: SetOperationEnum = SetOperationEnum.INTERSECTION):
+    def for_example_b(self, _input={3, 4, 5, 6}, join_prior: str = 'intersection'):
         return self.new_chainable_set(_input, self._solution, join_prior=join_prior)
 
 
@@ -81,12 +81,12 @@ def test_chained_set_join_types(filter_example):
         SET_B, join_prior=SetOperationEnum.INTERSECTION
     ) == SET_B.intersection(SET_A)
 
-    # union
-    assert filter_example.for_example_a(SET_A).for_example_b(SET_B, join_prior=SetOperationEnum.UNION) == SET_B.union(
+    assert filter_example.for_example_a(SET_A).for_example_b(SET_B, join_prior='intersection') == SET_B.intersection(
         SET_A
     )
 
+    # union
+    assert filter_example.for_example_a(SET_A).for_example_b(SET_B, join_prior='union') == SET_B.union(SET_A)
+
     # difference
-    assert filter_example.for_example_a(SET_A).for_example_b(
-        SET_B, join_prior=SetOperationEnum.DIFFERENCE
-    ) == SET_B.difference(SET_A)
+    assert filter_example.for_example_a(SET_A).for_example_b(SET_B, join_prior='difference') == SET_B.difference(SET_A)

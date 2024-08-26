@@ -1,4 +1,4 @@
-from typing import Any, Set
+from typing import Any, Set, Union
 
 from solvis.inversion_solution.typing import SetOperationEnum
 
@@ -12,8 +12,15 @@ class ChainableSetBase:
     def chained_set(self) -> Set[Any]:
         return self._chained_set
 
-    def new_chainable_set(self, result, *init_args, join_prior: SetOperationEnum = SetOperationEnum.INTERSECTION):
+    def new_chainable_set(
+        self, result, *init_args, join_prior: Union[SetOperationEnum, str] = SetOperationEnum.INTERSECTION
+    ):
+
+        if isinstance(join_prior, str):
+            join_prior = SetOperationEnum.__members__[join_prior.upper()]
+
         instance = self.__class__(*init_args)
+
         if join_prior == SetOperationEnum.INTERSECTION:
             instance._chained_set = set.intersection(result, self.chained_set) if self.chained_set else result
         elif join_prior == SetOperationEnum.UNION:

@@ -1,4 +1,4 @@
-from typing import Iterable, List, Optional, Set
+from typing import Iterable, List, Optional, Set, Union
 
 import geopandas as gpd
 import shapely.geometry
@@ -49,14 +49,14 @@ class FilterRuptureIds(ChainableSetBase):
     def for_parent_fault_names(
         self,
         parent_fault_names: Iterable[str],
-        join_prior: SetOperationEnum = SetOperationEnum.INTERSECTION,
-    ) -> Set[int]:
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> 'FilterRuptureIds':
         """Find ruptures that occur on any of the given parent_fault names.
 
         Args:
             parent_fault_names: A list of one or more `parent_fault` names.
             drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
-
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             The rupture_ids matching the filter.
@@ -70,12 +70,13 @@ class FilterRuptureIds(ChainableSetBase):
     def for_parent_fault_ids(
         self,
         parent_fault_ids: Iterable[int],
-        join_prior: SetOperationEnum = SetOperationEnum.INTERSECTION,
-    ) -> Set[int]:
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> 'FilterRuptureIds':
         """Find ruptures that occur on any of the given parent_fault ids.
 
         Args:
             parent_fault_ids: A list of one or more `parent_fault` ids.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             The rupture_ids matching the filter.
@@ -83,7 +84,7 @@ class FilterRuptureIds(ChainableSetBase):
         subsection_ids = self.filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
         df0 = self._solution.rupture_sections
 
-        # TODO: this is needed becuase the rupture rate concept differs between IS and FSS classes
+        # TODO: this is needed because the rupture rate concept differs between IS and FSS classes
         rate_column = (
             "rate_weighted_mean"
             if isinstance(self._solution, solvis.inversion_solution.FaultSystemSolution)
@@ -99,11 +100,16 @@ class FilterRuptureIds(ChainableSetBase):
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
-    def for_subsection_ids(self, fault_section_ids: Iterable[int]) -> Set[int]:
+    def for_subsection_ids(
+        self,
+        fault_section_ids: Iterable[int],
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> 'FilterRuptureIds':
         """Find ruptures that occur on any of the given fault_section_ids.
 
         Args:
             fault_section_ids: A list of one or more fault_section ids.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             The rupture_ids matching the filter.
@@ -111,7 +117,7 @@ class FilterRuptureIds(ChainableSetBase):
         df0 = self._solution.rupture_sections
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         result = set([int(id) for id in ids])
-        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
     def _ruptures_with_and_without_rupture_rates(self):
         """Helper method
@@ -121,12 +127,19 @@ class FilterRuptureIds(ChainableSetBase):
         df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without "fault_system"
         return self._solution.ruptures.join(df_rr, on=self._solution.ruptures["Rupture Index"], rsuffix='_r')
 
-    def for_rupture_rate(self, min_rate: Optional[float] = None, max_rate: Optional[float] = None):
+    def for_rupture_rate(
+        self,
+        min_rate: Optional[float] = None,
+        max_rate: Optional[float] = None,
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> 'FilterRuptureIds':
         """Find ruptures that occur within given rates bounds.
 
         Args:
             min_rate: The minumum rupture _rate bound.
             max_rate: The maximum rupture _rate bound.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+
 
         Returns:
             The rupture_ids matching the filter arguments.
@@ -141,14 +154,20 @@ class FilterRuptureIds(ChainableSetBase):
         df0 = df0 if not max_rate else df0[df0.rate_weighted_mean <= max_rate]
         df0 = df0 if not min_rate else df0[df0.rate_weighted_mean > min_rate]
         result = set(df0[index].tolist())
-        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
-    def for_magnitude(self, min_mag: Optional[float] = None, max_mag: Optional[float] = None):
+    def for_magnitude(
+        self,
+        min_mag: Optional[float] = None,
+        max_mag: Optional[float] = None,
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> 'FilterRuptureIds':
         """Find ruptures that occur within given magnitude bounds.
 
         Args:
             min_mag: The minumum rupture magnitude bound.
             max_mag: The maximum rupture magnitude bound.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             The rupture_ids matching the filter arguments.
@@ -162,25 +181,33 @@ class FilterRuptureIds(ChainableSetBase):
         df0 = df0 if not max_mag else df0[df0.Magnitude <= max_mag]
         df0 = df0 if not min_mag else df0[df0.Magnitude > min_mag]
         result = set(df0[index].tolist())
-        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
     def for_polygons(
         self,
         polygons: Iterable[shapely.geometry.Polygon],
-        # join_type: SetOperationEnum = SetOperationEnum.UNION,
-        join_polygons: SetOperationEnum = SetOperationEnum.UNION,
-        join_prior: SetOperationEnum = SetOperationEnum.INTERSECTION,
+        join_polygons: Union[SetOperationEnum, str] = SetOperationEnum.UNION,
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> 'FilterRuptureIds':
-        """Find ruptures that involve several polygon areas.
+        """Find ruptures involving several polygon areas.
+
+        Each polygon will return a set of matching rupture ids, so the user may choose to override the
+        default set operation (UNION) between these.
 
         Args:
             polygons: Polygons defining the areas of interest.
-            # join_type: How to join the polygon results.
             join_polygons: How to join the polygon results (default= UNION).
-            join_prior: How to join the result with the chain (default = INTERSECTION).
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+
         Returns:
             The rupture_ids matching the filter arguments.
         """
+        if isinstance(join_polygons, str):
+            try:
+                join_polygons = SetOperationEnum.__members__[join_polygons.upper()]
+            except KeyError:
+                raise ValueError(f'Unsupported set operation `{join_polygons}` for `join_polygons` argument. ')
+
         rupture_id_sets: List[Set[int]] = []
         for polygon in polygons:
             rupture_id_sets.append(self.for_polygon(polygon).chained_set)
@@ -195,18 +222,20 @@ class FilterRuptureIds(ChainableSetBase):
             raise ValueError("Only INTERSECTION, UNION & DIFFERENCE operations are supported for `join_type`")
         return self.new_chainable_set(rupture_ids, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
-    def for_polygon(self, polygon: shapely.geometry.Polygon) -> 'FilterRuptureIds':
-        """Find ruptures that involve a polygon area.
+    def for_polygon(
+        self,
+        polygon: shapely.geometry.Polygon,
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> 'FilterRuptureIds':
+        """Find ruptures that involve a single polygon area.
 
         Args:
             polygon: The polygon defining the area of intersection.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             The rupture_ids matching the filter arguments.
         """
-        # if contained:
-        #     raise NotImplementedError()
-
         df0 = gpd.GeoDataFrame(self._solution.fault_sections)
         df0 = df0[df0['geometry'].intersects(polygon)]
 
@@ -219,4 +248,4 @@ class FilterRuptureIds(ChainableSetBase):
 
         df2 = df1.join(df0, 'section', how='inner')
         result = set(df2[index].unique())
-        return self.new_chainable_set(result, self._solution, self._drop_zero_rates)
+        return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)

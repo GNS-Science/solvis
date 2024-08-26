@@ -44,8 +44,6 @@ def test_ruptures_for_polygon_intersecting(fss, filter_rupture_ids):
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
     rupture_ids = filter_rupture_ids.for_polygon(polygon)
 
-    print(rupture_ids)
-
     # check vs the legacy solvis function
     assert rupture_ids == set(fss.get_rupture_ids_intersecting(polygon))
 
@@ -55,7 +53,6 @@ def test_ruptures_for_polygon_intersecting(fss, filter_rupture_ids):
     ).issubset(rupture_ids)
 
 
-@pytest.mark.review
 def test_ruptures_for_polygons_join_iterable(fss, filter_rupture_ids):
     WLG = location_by_id('WLG')
     MRO = location_by_id('MRO')
@@ -81,7 +78,7 @@ def test_ruptures_for_polygons_join_iterable(fss, filter_rupture_ids):
 
     # difference
     assert filter_rupture_ids.for_polygons(
-        [polyA, polyB], join_polygons=SetOperationEnum.DIFFERENCE
+        [polyA, polyB], join_polygons='difference'  # SetOperationEnum.DIFFERENCE'
     ) == ridsA.difference(ridsB)
 
 
@@ -93,17 +90,6 @@ def test_ruptures_for_polygon_intersecting_with_drop_zero(fss, filter_rupture_id
     all_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=False).for_polygon(polygon)
     assert all_rupture_ids.issuperset(rupture_ids)
     assert len(all_rupture_ids) > len(rupture_ids)
-
-
-@pytest.mark.skip('WIP')
-def test_ruptures_for_polygon_intersecting_with_contained(fss, filter_rupture_ids):
-    WLG = location_by_id('WLG')
-    polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
-    rupture_ids = filter_rupture_ids.for_polygon(polygon)  # noqa
-
-    # all_rupture_ids = filter_rupture_ids.for_polygon(polygon, drop_zero_rates=False)
-    # assert all_rupture_ids.issuperset(rupture_ids)
-    # assert len(all_rupture_ids) > len(rupture_ids)
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
@@ -143,9 +129,6 @@ def test_ruptures_for_min_rate(fss, drop_zero_rates):
     assert len(r7less)
     assert r6less.issubset(r7less)
     assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(min_rate=1e-7, max_rate=1e-6)
-    # if not drop_zero_rates:
-    #     print(list(r7less.difference(r6less))[:10])
-    #     assert 0
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
@@ -159,13 +142,7 @@ def test_filter_chaining_rates(fss, drop_zero_rates):
 
     assert r7less.difference(r6less) == chained
 
-    # assert len(r6less)
-    # assert len(r7less)
-    # assert r6less.issubset(r7less)
-    # assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(min_rate=1e-7, max_rate=1e-6)
 
-
-@pytest.mark.review
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
 def test_filter_chaining_join_chain(fss, drop_zero_rates):
     frids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
@@ -181,11 +158,21 @@ def test_filter_chaining_join_chain(fss, drop_zero_rates):
     assert n1.intersection(n0) == chained_intersect
 
     chained_union = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(
-        ['Alpine Jacksons to Kaniere'], join_prior=SetOperationEnum.UNION
+        ['Alpine Jacksons to Kaniere'], join_prior='union'  # SetOperationEnum.UNION
     )
     assert n1.union(n0) == chained_union
 
     chained_diff = frids.for_parent_fault_names(['Vernon 4']).for_parent_fault_names(
-        ['Alpine Jacksons to Kaniere'], join_prior=SetOperationEnum.DIFFERENCE
+        ['Alpine Jacksons to Kaniere'], join_prior='difference'  # SetOperationEnum.DIFFERENCE
     )
     assert n1.difference(n0) == chained_diff
+
+
+def test_filter_invalid_polygon_join_raises(filter_rupture_ids):
+    WLG = location_by_id('WLG')
+    polyA = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
+
+    with pytest.raises(ValueError) as exc:
+        filter_rupture_ids.for_polygons([polyA], join_polygons='bad')
+
+    assert "Unsupported set operation `bad` for `join_polygons` argument" in str(exc)
