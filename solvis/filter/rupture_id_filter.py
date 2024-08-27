@@ -15,8 +15,27 @@ class FilterRuptureIds(ChainableSetBase):
     """
     A helper class to filter ruptures, returning the qualifying rupture_ids.
 
-    Class methods all return sets to make it easy to combine filters with
-    set operands like `union`, `intersection`, `difference` etc).
+    Class `for_*` methods all return set-like objects, making  it possible to combine results using
+    `set` operands e.g. `union`, `intersection`, `difference`.
+
+    Class `for_* methods are 'chainable', so that multiple `for_` method calls can be linked
+    together (see example below). The  default join operation is "intersection" so
+    that each chained method call is 'refining' results from the prior method call(s).
+    This behaviour can be overridden using the `join_prior` argument.
+
+    Examples:
+        ```py
+        # ruptures on any of faults A, B, with magnitude and rupture rate limits
+        rupture_ids = FilterRuptureIds(solution)\\
+            .for_parent_fault_names(["Alpine Jacksons to Kaniere", "Vernon"])\\
+            .for_magnitude(7.0, 8.0)\\
+            .for_rupture_rate(1e-6, 1e-2)
+
+        # ruptures on fault A that do not involve fault B:
+        rupture_ids = FilterRuptureIds(solution)\\n
+            .for_parent_fault_names(["Alpine Jacksons to Kaniere"])\\
+            .for_parent_fault_names(["Vernon], join_prior='difference')
+        ```
     """
 
     def __init__(self, solution: InversionSolutionProtocol, drop_zero_rates: bool = True):
@@ -192,12 +211,19 @@ class FilterRuptureIds(ChainableSetBase):
         """Find ruptures involving several polygon areas.
 
         Each polygon will return a set of matching rupture ids, so the user may choose to override the
-        default set operation (UNION) between these.
+        default set operation (UNION) between these using the `join_polygons' argument.
+
+        This method
 
         Args:
             polygons: Polygons defining the areas of interest.
             join_polygons: How to join the polygon results (default= UNION).
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+
+
+        Example:
+
+
 
         Returns:
             The rupture_ids matching the filter arguments.
@@ -206,7 +232,7 @@ class FilterRuptureIds(ChainableSetBase):
             try:
                 join_polygons = SetOperationEnum.__members__[join_polygons.upper()]
             except KeyError:
-                raise ValueError(f'Unsupported set operation `{join_polygons}` for `join_polygons` argument. ')
+                raise ValueError(f'Unsupported set operation `{join_polygons}` for `join_polygons` argument.')
 
         rupture_id_sets: List[Set[int]] = []
         for polygon in polygons:

@@ -52,6 +52,33 @@ class ChainableSetBase:
     def __sub__(self, *others):
         return self.difference(*others)
 
+    def __xor__(self, *other):
+        return self.symmetric_difference(*other)
+
+    def __le__(self, *other) -> bool:
+        """set <= other
+        Test whether every element in the set is in other.
+        """
+        return self.issubset(*other)
+
+    def __lt__(self, *other) -> bool:
+        """set < other
+        Test whether the set is a proper subset of other, that is, set <= other and set != other.
+        """
+        return self.issubset(*other) and not self.__eq__(*other)
+
+    def __ge__(self, *other) -> bool:
+        """set >= other
+        Test whether every element in other is in the set.
+        """
+        return self.issuperset(*other)
+
+    def __gt__(self, *other) -> bool:
+        """set > other
+        Test whether the set is a proper superset of other, that is, set >= other and set != other.
+        """
+        return self.issuperset(*other) and not self.__eq__(*other)
+
     # Set methods are proxied to the _chained_set ...
     def union(self, *others):
         instance = copy.deepcopy(self)
@@ -68,11 +95,13 @@ class ChainableSetBase:
         instance._chained_set = self.chained_set.difference(*others)
         return instance
 
-    # def symmetric_difference(self, other):
-    #     return self.chained_set.symmetric_difference(*other)
+    def symmetric_difference(self, *other):
+        instance = copy.deepcopy(self)
+        instance._chained_set = self.chained_set.symmetric_difference(*other)
+        return instance
 
-    # def issuperset(self, *others):
-    #     return self.chained_set.issuperset(*others)
+    def issuperset(self, *others) -> bool:
+        return self.chained_set.issuperset(*others)
 
-    # def issubset(self, other):
-    #     return self.chained_set.issubset(other)
+    def issubset(self, *other) -> bool:
+        return self.chained_set.issubset(*other)

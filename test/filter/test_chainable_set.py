@@ -126,7 +126,6 @@ def test_set_proxy_methods_return_class_wrapper(filter_example):
 
     FilterExampleClass.intersection(res0, res1, res2)
 
-    # but we can call the filter's equivalent method
     assert isinstance(FilterExampleClass.intersection(res0, res1, res2), FilterExampleClass)
     assert res0 & res1 & res2 == set.intersection(SET_A, SET_B, SET_C)
 
@@ -135,3 +134,21 @@ def test_set_proxy_methods_return_class_wrapper(filter_example):
 
     assert isinstance(FilterExampleClass.difference(res0, res1, res2), FilterExampleClass)
     assert res0 - res1 - res2 == set.difference(SET_A, SET_B, SET_C)
+
+    assert isinstance(FilterExampleClass.symmetric_difference(res0, res1), FilterExampleClass)
+    assert res0.symmetric_difference(res1) == set.symmetric_difference(SET_A, SET_B)
+    assert (res0 ^ res1) == (SET_A ^ SET_B)
+
+    assert isinstance(FilterExampleClass.issubset(res0, res1), bool)
+    assert res0.issubset(res1) == SET_A.issubset(SET_B)
+    # brackets needed here for operator precedence
+    assert (res0 <= res1) == (SET_A <= SET_B)  # __le__()
+    assert (res0 < res1) == (SET_A < SET_B)  # __lt__()
+
+    assert isinstance(FilterExampleClass.issuperset(res0, res1), bool)
+    assert res0.issuperset(res1) == SET_A.issuperset(SET_B)
+    assert (res0 >= res1) == (SET_A >= SET_B)  # __ge__()
+    assert (res0 > res1) == (SET_A > SET_B)  # __gt__()
+
+    # TODO there are more set methods to support
+    # ref https://docs.python.org/2/library/stdtypes.html#set-types-set-frozenset
