@@ -78,9 +78,9 @@ def translate_horizontally(azimuth: float, distance: float, lon: float, lat: flo
 
 def create_surface(
     trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float
-) -> Polygon:
+) -> Union[Polygon, LineString]:
     """
-    Creates a projection of the fault surface onto the geodetic sphere.
+    legacy alias for fault_surface_projection()
 
     Parameters:
         trace: the fault trace
@@ -90,7 +90,7 @@ def create_surface(
         lower_depth: the height of the lower edge of the fault in kilometres
 
     Returns:
-        the projection for the fault surface
+        the fault surface coordinates
 
     Examples:
         ```py
@@ -103,17 +103,67 @@ def create_surface(
         <POLYGON ((178.018 -38.662, 178.018 -38.762, 178.018 -38.993, 178.018 -38.89...>
         ```
     """
+    return fault_surface_projection(trace, dip_dir, dip_deg, upper_depth, lower_depth)
+
+
+def fault_surface_projection(
+    trace: LineString,
+    dip_dir: float,
+    dip_deg: float,
+    upper_depth: float,
+    lower_depth: float,
+) -> Union[Polygon, LineString]:
+    """
+    Calculate a projection of the fault surface onto the geodetic sphere
+
+    Note: Any fault having a vertical dispostion (deg_deg == 90) will be rendered as a line.
+
+    """
     if dip_deg == 90:
         return trace
-        # return LineString([x for x in trace.coords])
+    else:
+        return build_surface(trace, dip_dir, dip_deg, upper_depth, lower_depth, with_z_dimension=False)
+
+
+def fault_surface_3d(
+    trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float
+) -> Polygon:
+    """
+    Calculate the fault suface in 3 dimensions, suitable for rendering in either 2d or 3d render tools.
+
+    Arguments:
+        trace: the fault trace
+        dip_dir: the azimuth of the dip in degrees
+        dip_deg: the dip (inclination) in degrees
+        upper_depth: the height of the upper edge of the fault in kilometres
+        lower_depth: the height of the lower edge of the fault in kilome
+
+    Returns:
+        the fault surface coordinates
+    """
+    return build_surface(trace, dip_dir, dip_deg, upper_depth, lower_depth, with_z_dimension=True)
+
+
+def build_surface(
+    trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float, with_z_dimension=False
+) -> Polygon:
 
     trace = LineString(get_coordinates(trace))
     depth = lower_depth - upper_depth
     width = depth / math.tan(math.radians(dip_deg))
     transformation = partial(translate_horizontally, dip_dir, width)
-
     bottom_edge = reverse_geom(transform(transformation, trace))
-    return Polygon([x for x in trace.coords] + [x for x in bottom_edge.coords])
+
+    def add_z(coords, z):
+        x, y = coords
+        return [x, y, z]
+
+    if with_z_dimension:
+        return Polygon(
+            [add_z(x, upper_depth) for x in trace.coords] + [add_z(x, lower_depth) for x in bottom_edge.coords]
+        )
+    else:
+        return Polygon([x for x in trace.coords] + [x for x in bottom_edge.coords])
 
 
 def bearing(point_a: Point, point_b: Point) -> float:
