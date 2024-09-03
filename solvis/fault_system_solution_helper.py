@@ -51,7 +51,13 @@ def fault_participation_rates(
         df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
 
     df1 = df0.join(solution.fault_sections[['ParentID']], on='section')
-    return df1.groupby(["ParentID", "Rupture Index"]).agg('first').groupby("ParentID").agg('sum')
+    return (
+        df1[["ParentID", "Rupture Index", 'Annual Rate']]
+        .groupby(["ParentID", "Rupture Index"])
+        .agg('first')
+        .groupby("ParentID")
+        .agg('sum')
+    )
 
 
 def build_rupture_groups(solution: InversionSolutionProtocol) -> Iterator[Dict]:
