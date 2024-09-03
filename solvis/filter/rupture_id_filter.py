@@ -217,13 +217,8 @@ class FilterRuptureIds(ChainableSetBase):
 
         Args:
             polygons: Polygons defining the areas of interest.
-            join_polygons: How to join the polygon results (default= UNION).
+            join_polygons: How to join the polygon results (default = 'union').
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
-
-
-        Example:
-
-
 
         Returns:
             The rupture_ids matching the filter arguments.

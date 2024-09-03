@@ -29,7 +29,7 @@ def test_fault_surface_3d_has_3_dimensions():
     )
 
 
-def test_fault_surface_projection_vertical():
+def test_fault_surface_projection_vertical_is_linestring():
     trace = LineString([[178.017654, -38.662334], [178.017654, -38.762334]])
     upper, lower = 39.5, 53.5
     dip = 90
@@ -39,8 +39,7 @@ def test_fault_surface_projection_vertical():
     assert str(surface) == "LINESTRING (178.017654 -38.662334, 178.017654 -38.762334)"
 
 
-# @pytest.mark.skip("thi")
-def test_fault_surface_projection_non_vertical():
+def test_fault_surface_projection_non_vertical_is_polygon():
     trace = LineString([[178.017654, -38.662334], [178.017654, -38.762334]])
     upper, lower = 39.5, 53.5
     dip = 28.667

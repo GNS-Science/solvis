@@ -20,7 +20,7 @@ class FilterSubsectionIds:
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
 
-    def for_parent_fault_names(self, parent_fault_names: Set[str]) -> Set[int]:
+    def for_parent_fault_names(self, parent_fault_names: Iterable[str]) -> Set[int]:
         """Find fault subsection ids for the given parent_fault names.
 
         Args:
