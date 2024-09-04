@@ -54,8 +54,10 @@ def get_solution(id: str, archive: str) -> InversionSolution:
         U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTE4NTQz=archive,
         U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTE4NTQ1=archive,
     )
-    folder = pathlib.PurePath(os.path.realpath(__file__)).parent
-    filename = pathlib.PurePath(folder, f"fixtures/{files[id]}")
+    folder = pathlib.Path(os.path.realpath(__file__)).parent
+    filename = folder / "fixtures" / files[id]
+    assert filename.exists(), f"file {filename} not found."
+
     return InversionSolution.from_archive(str(filename))
 
 
@@ -173,7 +175,11 @@ def crustal_solution_fixture(request):
 
 @pytest.fixture(scope='module')
 def crustal_small_fss_fixture(request):
-    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=MINI_ARCHIVES['CRU']))
+    folder = pathlib.Path(os.path.realpath(__file__)).parent
+    archive = folder / 'fixtures' / MINI_ARCHIVES['CRU']
+    print(archive)
+    assert archive.exists()
+    yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=archive))
 
 
 # HIK fixtures

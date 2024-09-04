@@ -1,8 +1,9 @@
 import io
 import logging
+import time
 import zipfile
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 import geopandas as gpd
 import numpy.typing as npt
@@ -19,6 +20,7 @@ log = logging.getLogger(__name__)
 class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
 
     _composite_rates: pd.DataFrame = ...
+    _rs_with_composite_rupture_rates: pd.DataFrame = None
 
     def set_props(
         self, composite_rates, aggregate_rates, ruptures, indices, fault_sections, fault_regime, average_slips
@@ -213,3 +215,97 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         """make sure that the fast_indices dataframe is available at serialisation time"""
         rs = self.rupture_sections  # noqa
         return self._fast_indices is not None
+
+    @property
+    def rs_with_composite_rupture_rates(self):
+        if self._rs_with_composite_rupture_rates is not None:
+            return self._rs_with_composite_rupture_rates  # pragma: no cover
+
+        tic = time.perf_counter()
+
+        df0 = self.composite_rates.drop(columns=["Rupture Index", 'solution_id']).reset_index()
+        df0['weighted_rate'] = df0['Annual Rate'] * df0['weight']
+        df1 = df0.join(self.rupture_sections.set_index("rupture"), on=df0["Rupture Index"])
+
+        toc = time.perf_counter()
+        log.info('time to build Dataframe: rs_with_composite_rupture_rates: %2.3f seconds' % (toc - tic))
+
+        self._rs_with_composite_rupture_rates = df1
+        return self._rs_with_composite_rupture_rates
+
+    def section_participation_rates(
+        self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
+        """
+        get the 'participation rate' for fault subsections.
+
+        That is, the sum of rupture rates on the requested fault sections.
+        """
+        # ALERT: does this actually work if we have FSS. what is the sum of rate_weighted_mean ??
+        rate_column = "weighted_rate"  # if isinstance(self.solution, InversionSolution) else "rate_weighted_mean"
+
+        df0 = self.rs_with_composite_rupture_rates
+        # print(df0)
+        if subsection_ids:
+            df0 = df0[df0["section"].isin(subsection_ids)]
+        if rupture_ids:
+            df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
+        return df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
+
+
+"""
+TOOD: notes for fault_system_solution participation
+
+>>> csol.rs_with_rupture_rates.head()
+                            key_0 fault_system  Rupture Index  rate_max      rate_min  rate_count  rate_weighted_mean  Magnitude  Average Rake (degrees)    Area (m^2)  Length (m)  section
+fault_system Rupture Index
+CRU          3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      0.0
+             3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      1.0
+             3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      2.0
+             9                  9          CRU              9  0.000110  7.749647e-07          24            0.000032   7.285888              -95.056915  1.218684e+09    60601.45      3.0
+             9                  9          CRU              9  0.000110  7.749647e-07          24            0.000032   7.285888              -95.056915  1.218684e+09    60601.45      4.0
+>>> csol.composite_rates.head()
+                                                        Rupture Index fault_system    weight    rupture_set_id                               solution_id  Annual Rate
+solution_id                              Rupture Index
+U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy 9                          9          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000020
+                                         142                      142          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000022
+                                         399                      399          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000008
+                                         607                      607          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000010
+                                         613                      613          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000020
+>>> csol.composite_rates.index
+MultiIndex([('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',      9),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    142),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    399),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    607),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    613),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    626),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    628),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    634),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    721),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    722),
+            ...
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 405506),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 407596),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 407597),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408843),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408852),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408858),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409076),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409087),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409919),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409995)],
+           names=['solution_id', 'Rupture Index'], length=37389)
+>>> csol.ruptures_with_rupture_rates.shape
+(3884, 10)
+>>> csol.ruptures_with_rupture_rates.head()
+                           fault_system  Rupture Index  rate_max      rate_min  rate_count  rate_weighted_mean  Magnitude  Average Rake (degrees)    Area (m^2)  Length (m)
+fault_system Rupture Index
+CRU          3                      CRU              3  0.000047  6.097353e-06          12        1.012588e-05   7.237556              110.000000  1.090333e+09    34817.69
+             9                      CRU              9  0.000110  7.749647e-07          24        3.237533e-05   7.285888              -95.056915  1.218684e+09    60601.45
+             55                     CRU             55  0.000067  5.627826e-06          12        1.531652e-05   8.092601              169.242100  7.809173e+09   340323.75
+             140                    CRU            140  0.000001  5.418595e-07           6        1.826545e-08   8.197684             -177.146090  9.946928e+09   455076.94
+             142                    CRU            142  0.000051  2.222447e-05           6        5.750140e-06   8.225152             -172.993900  1.059636e+10   483159.47
+>>> help(csol.ruptures_with_rupture_rates)
+
+>>>
+"""  # noqa

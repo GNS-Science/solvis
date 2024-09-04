@@ -2,7 +2,7 @@ import io
 import zipfile
 from enum import Enum
 from pathlib import Path
-from typing import Any, List, Mapping, Optional, Protocol, Union
+from typing import Any, Iterable, List, Mapping, Optional, Protocol, Union
 
 import geopandas as gpd
 import numpy.typing as npt
@@ -72,6 +72,16 @@ class InversionSolutionProtocol(Protocol):
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
         """builder method returning the rupture surface of a given rupture id."""
+
+    def section_participation_rates(
+        self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
+        pass
+
+    def fault_participation_rates(
+        self, fault_names: Optional[Iterable[str]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
+        pass
 
     @staticmethod
     def filter_solution(solution: Any, rupture_ids: npt.ArrayLike) -> Any:
