@@ -10,9 +10,13 @@ import numpy.typing as npt
 import nzshm_model as nm
 import pandas as pd
 
+from solvis.filter import FilterSubsectionIds
+
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .typing import BranchSolutionProtocol, ModelLogicTreeBranch
+
+# from solvis.filter.rupture_id_filter import FilterRuptureIds
 
 log = logging.getLogger(__name__)
 
@@ -242,7 +246,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         That is, the sum of rupture rates on the requested fault sections.
         """
         # ALERT: does this actually work if we have FSS. what is the sum of rate_weighted_mean ??
-        rate_column = "weighted_rate"  # if isinstance(self.solution, InversionSolution) else "rate_weighted_mean"
+        # rate_column = "weighted_rate"  # if isinstance(self.solution, InversionSolution) else "rate_weighted_mean"
 
         df0 = self.rs_with_composite_rupture_rates
         # print(df0)
@@ -250,7 +254,56 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             df0 = df0[df0["section"].isin(subsection_ids)]
         if rupture_ids:
             df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
-        return df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
+
+        # print('section_participation_rates')
+        # print(df0.columns)
+        # print(df0[["Rupture Index", 'Annual Rate', 'weight', 'weighted_rate', 'section']][df0['section']==0])
+        # print()
+
+        # return df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
+        return df0.groupby("section").agg('sum')
+
+    def fault_participation_rates(
+        self, fault_names: Optional[Iterable[str]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
+        """
+        get the 'participation rate' for parent faults.
+
+        That is, the sum of rupture rates on the requested parent faults.
+        """
+        subsection_ids = FilterSubsectionIds(self).for_parent_fault_names(fault_names) if fault_names else None
+
+        # print(f'subsection_ids: {subsection_ids}')
+
+        df0 = self.rs_with_composite_rupture_rates
+        if subsection_ids:
+            df0 = df0[df0["section"].isin(subsection_ids)]
+
+        # print(df0)
+        if rupture_ids:
+            df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
+
+        df1 = df0.join(self.fault_sections[['ParentID']], on='section')
+
+        # print('df1')
+        # print(df1.columns)
+        # print(df1[["ParentID", "Rupture Index", 'weighted_rate', 'section']])
+        # print()
+        # df = (
+        #     df1[["ParentID", "Rupture Index", 'weighted_rate']]
+        #         .groupby(["ParentID", "Rupture Index"])
+        #         .agg('first')
+        # )
+        # print(df)
+        # print()
+
+        return (
+            df1[["ParentID", "Rupture Index", "weighted_rate", "solution_id"]]
+            .groupby(["ParentID", "Rupture Index", "solution_id"])
+            .agg('first')
+            .groupby("ParentID")
+            .agg('sum')
+        )
 
 
 """

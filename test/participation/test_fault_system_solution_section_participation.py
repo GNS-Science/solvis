@@ -1,6 +1,6 @@
 import pytest
 
-from solvis.filter import FilterRuptureIds
+from solvis.filter import FilterRuptureIds, FilterSubsectionIds
 
 RATE_COLUMN = 'weighted_rate'  # 'Annual Rate'
 
@@ -29,8 +29,25 @@ def test_section_participation_rate_default_all_sections(crustal_small_fss_fixtu
     # sec_id = 5
     solution = crustal_small_fss_fixture
     rates = solution.section_participation_rates()
+
     section_rates = solution.rs_with_composite_rupture_rates.groupby("section").agg('sum')[RATE_COLUMN]
+
+    # print(solution.rs_with_composite_rupture_rates)
+    # print()
+    # print(solution.composite_rates)
+    # print(solution.rupture_sections)
+    # print(section_rates)
+
     assert section_rates.all() == rates[RATE_COLUMN].all()
+
+    # print(sum(section_rates))
+    # assert pytest.approx(sum(section_rates)) == 0.023329016054049134
+    # df0 = solution.rs_with_composite_rupture_rates
+
+    # use this to check what 'good' expected result looks like
+    # print(df0.columns)
+    # print(df0[['section', 'Rupture Index', 'weight', 'Annual Rate', 'weighted_rate']] )
+    # assert 0
 
 
 section_fault_rates = [
@@ -43,22 +60,24 @@ section_fault_rates = [
 def test_section_participation_rates(crustal_small_fss_fixture, fault_name, subsection_id, expected_rate):
     solution = crustal_small_fss_fixture
 
-    # print(solution.fault_sections[["FaultName"]])
-    # subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name])
+    print(solution.fault_sections[["FaultName"]])
+    subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name])
     # print(subsection_ids)
     # print()
     # print(solution.composite_rates)
     # print(solution.rupture_sections)
+    srdf = solution.section_participation_rates(subsection_ids)
+    print(srdf)
 
-    # srdf = solution.section_participation_rates(subsection_ids)
-    # print(srdf)
-
-    # section_rate = srdf[srdf.index == subsection_id].agg('sum')[RATE_COLUMN]
+    section_rate = srdf[srdf.index == subsection_id].agg('sum')[RATE_COLUMN]
     # print(section_rate)
-    # assert pytest.approx(section_rate) == expected_rate
-    srdf = solution.section_participation_rates([subsection_id])
-    # print(srdf)
-    assert pytest.approx(srdf[RATE_COLUMN].tolist()[0]) == expected_rate
+
+    assert pytest.approx(section_rate) == expected_rate
+
+    srdf2 = solution.section_participation_rates([subsection_id])
+    print(srdf2)
+    assert pytest.approx(srdf2[RATE_COLUMN].tolist()[0]) == expected_rate
+    # assert 0
 
 
 @pytest.mark.parametrize("fault_name, subsection_id, expected_rate", section_fault_rates)
@@ -74,3 +93,28 @@ def test_section_participation_rates_conditional(crustal_small_fss_fixture, faul
     srdf = solution.section_participation_rates([subsection_id], rids_subset)
     print(srdf)
     assert srdf[RATE_COLUMN].tolist()[0] - 1e-10 < expected_rate
+
+
+@pytest.mark.parametrize("fault_name, subsection_id, expected_rate", section_fault_rates)
+def test_section_participation_rates_detail(crustal_small_fss_fixture, fault_name, subsection_id, expected_rate):
+    solution = crustal_small_fss_fixture
+
+    rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
+    rids_subset = rids[2:]
+
+    print(rids_subset)
+
+    df0 = solution.rs_with_composite_rupture_rates
+    df1 = df0[df0['Rupture Index'].isin(rids_subset)]
+    df2 = df1[df1['section'] == subsection_id]
+
+    # use this to check what 'good' expected result looks like
+    print(df2.columns)
+    print(df2[['section', 'Rupture Index', 'weight', 'Annual Rate', 'weighted_rate']])
+
+    new_expected_rate = sum(df2[RATE_COLUMN])
+
+    srdf = solution.section_participation_rates([subsection_id], rids_subset)
+    print(srdf)
+    assert pytest.approx(srdf[RATE_COLUMN].tolist()[0]) == new_expected_rate
+    # assert 0
