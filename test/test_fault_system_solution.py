@@ -40,7 +40,7 @@ class TestSmallCrustal(object):
         print(sol.rupture_rates.info())
         assert sol.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
         assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
-        # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.indices["Rupture Index"].dtype == pd.Int32Dtype()
 
     def test_check_types(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture
@@ -50,8 +50,8 @@ class TestSmallCrustal(object):
         assert infer_dtype(sol.rupture_rates["fault_system"]) == "string"
         assert sol.rupture_rates["rate_weighted_mean"].dtype == 'float32'
         assert infer_dtype(sol.indices["Num Sections"]) == "integer"
-        # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
-        # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
+        assert sol.indices["Num Sections"].dtype == "Int32"  # pd.UInt16Dtype()
+        assert sol.indices["# 1"].dtype == "Int32"  # pd.UInt16Dtype()
 
     def test_filter_solution_ruptures(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture

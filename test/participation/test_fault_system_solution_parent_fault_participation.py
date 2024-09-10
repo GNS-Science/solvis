@@ -2,7 +2,7 @@ import pytest
 
 from solvis.filter import FilterRuptureIds, FilterSubsectionIds
 
-RATE_COLUMN = 'weighted_rate'  # 'Annual Rate'
+RATE_COLUMN = 'rate_weighted_mean'  # 'Annual Rate'
 
 # PROBLEM: our test fixture only has ruptures for 1 parent fault
 parent_fault_rates = [
@@ -20,7 +20,7 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
     solution = crustal_small_fss_fixture
 
     # # calc rate by hand ...
-    df0 = solution.rs_with_composite_rupture_rates
+    df0 = solution.rs_with_rupture_rates
     df1 = df0.join(solution.fault_sections[['ParentID', 'ParentName']], on='section')
 
     print(df1['ParentName'].unique())
@@ -30,15 +30,10 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
 
     print(f'parent_fault id: {pfid}')
 
-    df2 = df1[["Rupture Index", "ParentID", "section", RATE_COLUMN]]
-    print(df2[df2[RATE_COLUMN] > 0])
+    df2 = df1[["ParentID", "section", RATE_COLUMN]]
+    # print(df2[df2[RATE_COLUMN] > 0])
 
-    parent_rate = (
-        df1.groupby(["ParentID", "Rupture Index", "solution_id"])
-        .agg('first')
-        .groupby("ParentID")
-        .agg('sum')[RATE_COLUMN]
-    )
+    parent_rate = df2.groupby(["ParentID", "Rupture Index"]).agg('first').groupby("ParentID").agg('sum')[RATE_COLUMN]
     print(parent_rate)
     assert pytest.approx(parent_rate) == expected_rate  # the original test value
 

@@ -3,6 +3,7 @@ import json
 import logging
 import time
 import zipfile
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, List, Optional
 
@@ -231,37 +232,38 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def rupture_rates(self) -> gpd.GeoDataFrame:
-        # dtypes: defaultdict = defaultdict(np.float32)
-        dtypes = {}
-        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        dtypes: defaultdict = defaultdict(lambda: 'Float32')
+        # dtypes = {}
+        dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
-        dtypes["Annual Rate"] = pd.Float32Dtype()
+        # dtypes["Annual Rate"] = 'Float32' # pd.Float32Dtype()
         # return pd.read_csv(zipfile.Path(self._archive_path, at=self.RATES_PATH).open(), dtype=dtypes)
         return self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
 
     @property
     def ruptures(self) -> gpd.GeoDataFrame:
-        # dtypes: defaultdict = defaultdict(np.float32)
-        dtypes = {}
-        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        dtypes: defaultdict = defaultdict(lambda: 'Float32')
+        # dtypes = {}
+        dtypes["Rupture Index"] = 'UInt32'
         return self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH, dtypes)
 
     @property
     def indices(self) -> gpd.GeoDataFrame:
-        return self._dataframe_from_csv(self._indices, self.INDICES_PATH)
+        dtypes: defaultdict = defaultdict(lambda: 'Int32')
+        return self._dataframe_from_csv(self._indices, self.INDICES_PATH, dtypes)
 
     @property
     def average_slips(self) -> gpd.GeoDataFrame:
         # dtypes: defaultdict = defaultdict(np.float64)
         dtypes = {}
-        dtypes["Rupture Index"] = pd.UInt32Dtype()
+        dtypes["Rupture Index"] = 'UInt32'
         return self._dataframe_from_csv(self._average_slips, self.AVG_SLIPS_PATH)  # , dtypes)
 
     @property
     def section_target_slip_rates(self) -> gpd.GeoDataFrame:
         # dtypes: defaultdict = defaultdict(np.float32)
         dtypes = {}
-        dtypes["Section Index"] = pd.UInt32Dtype()
+        dtypes["Section Index"] = 'UInt32'
         return self._dataframe_from_csv(self._section_target_slip_rates, self.SECT_SLIP_RATES_PATH)
 
     def set_props(

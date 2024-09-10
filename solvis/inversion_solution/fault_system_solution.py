@@ -1,16 +1,13 @@
 import io
 import logging
-import time
 import zipfile
 from pathlib import Path
-from typing import Iterable, Optional, Union
+from typing import Iterable, Union
 
 import geopandas as gpd
 import numpy.typing as npt
 import nzshm_model as nm
 import pandas as pd
-
-from solvis.filter import FilterSubsectionIds
 
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
@@ -220,6 +217,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         rs = self.rupture_sections  # noqa
         return self._fast_indices is not None
 
+    '''
     @property
     def rs_with_composite_rupture_rates(self):
         if self._rs_with_composite_rupture_rates is not None:
@@ -304,6 +302,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
             .groupby("ParentID")
             .agg('sum')
         )
+    '''
 
 
 """

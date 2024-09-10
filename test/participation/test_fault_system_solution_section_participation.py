@@ -2,7 +2,7 @@ import pytest
 
 from solvis.filter import FilterRuptureIds, FilterSubsectionIds
 
-RATE_COLUMN = 'weighted_rate'  # 'Annual Rate'
+RATE_COLUMN = 'rate_weighted_mean'  # 'Annual Rate'
 
 
 def test_section_participation_rate(crustal_small_fss_fixture):
@@ -30,7 +30,7 @@ def test_section_participation_rate_default_all_sections(crustal_small_fss_fixtu
     solution = crustal_small_fss_fixture
     rates = solution.section_participation_rates()
 
-    section_rates = solution.rs_with_composite_rupture_rates.groupby("section").agg('sum')[RATE_COLUMN]
+    section_rates = solution.rs_with_rupture_rates.groupby("section").agg('sum')[RATE_COLUMN]
 
     # print(solution.rs_with_composite_rupture_rates)
     # print()
@@ -50,10 +50,54 @@ def test_section_participation_rate_default_all_sections(crustal_small_fss_fixtu
     # assert 0
 
 
+def test_sum_vs_weighted_mean_all_sections(crustal_small_fss_fixture):
+
+    solution = crustal_small_fss_fixture
+    rates = solution.section_participation_rates()
+    print("rates")
+    print(rates)
+
+    df0 = solution.rs_with_rupture_rates  # property
+
+    weighted_mean_rates = df0.pivot_table(values="rate_weighted_mean", index=['section'], aggfunc='sum')
+
+    print("weighted_mean_rates")
+    print(weighted_mean_rates)
+
+    for section in rates.index:
+        assert pytest.approx(rates['rate_weighted_mean'][section]) == weighted_mean_rates['rate_weighted_mean'][section]
+
+
 section_fault_rates = [
     ("Alpine Jacksons to Kaniere", 0, 0.0026206877),
     ("Alpine Jacksons to Kaniere", 10, 0.000590668118),
 ]
+
+
+@pytest.mark.parametrize("fault_name, subsection_id, expected_rate", section_fault_rates)
+def test_sum_vs_weighted_mean_conditional(crustal_small_fss_fixture, fault_name, subsection_id, expected_rate):
+
+    solution = crustal_small_fss_fixture
+
+    rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
+    print(rids)
+
+    rids_subset = rids[2:]
+    print(rids_subset)
+
+    srdf = solution.section_participation_rates([subsection_id], rids_subset)
+    print("srdf")
+    print(srdf)
+
+    df0 = solution.rs_with_rupture_rates  # property
+    df0 = df0[df0["section"] == subsection_id]
+    df0 = df0[df0["Rupture Index"].isin(rids_subset)]
+
+    weighted_mean_rates = df0.pivot_table(values="rate_weighted_mean", index=['section'], aggfunc='sum')
+
+    print("weighted_mean_rates")
+    print(weighted_mean_rates)
+    assert pytest.approx(srdf.rate_weighted_mean) == weighted_mean_rates.rate_weighted_mean
 
 
 @pytest.mark.parametrize("fault_name, subsection_id, expected_rate", section_fault_rates)
@@ -104,13 +148,13 @@ def test_section_participation_rates_detail(crustal_small_fss_fixture, fault_nam
 
     print(rids_subset)
 
-    df0 = solution.rs_with_composite_rupture_rates
+    df0 = solution.rs_with_rupture_rates
     df1 = df0[df0['Rupture Index'].isin(rids_subset)]
     df2 = df1[df1['section'] == subsection_id]
 
     # use this to check what 'good' expected result looks like
     print(df2.columns)
-    print(df2[['section', 'Rupture Index', 'weight', 'Annual Rate', 'weighted_rate']])
+    print(df2[['section', 'Rupture Index', RATE_COLUMN]])
 
     new_expected_rate = sum(df2[RATE_COLUMN])
 

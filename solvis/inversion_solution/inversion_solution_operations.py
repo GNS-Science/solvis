@@ -8,12 +8,15 @@ import pandas as pd
 import shapely.geometry
 from nzshm_common.location.location import location_by_id
 
+
 from solvis.filter import FilterSubsectionIds
 from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.geometry import circle_polygon
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
+
+# from .inversion_solution import InversionSolution
 
 log = logging.getLogger(__name__)
 
@@ -33,15 +36,32 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         That is, the sum of rupture rates on the requested fault sections.
         """
-        # ALERT: does this actually work if we have FSS. what is the sum of rate_weighted_mean ??
-        rate_column = "Annual Rate"  # if isinstance(self.solution, InversionSolution) else "rate_weighted_mean"
 
+        rate_column = "Annual Rate" if self.__class__.__name__ == "InversionSolution" else "rate_weighted_mean"
+
+        t0 = time.perf_counter()
         df0 = self.rs_with_rupture_rates
+
+        log.info(f"df0 shape: {df0.shape}")
+
         if subsection_ids:
             df0 = df0[df0["section"].isin(subsection_ids)]
+
+        t1 = time.perf_counter()
+        log.info(f'apply section filter took : {t1-t0} seconds')
+
         if rupture_ids:
             df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
-        return df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
+
+        t2 = time.perf_counter()
+        log.info(f'apply rupture_ids filter took : {t2-t1} seconds')
+
+        # result = df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
+        result = df0[["section", "Rupture Index", rate_column]].groupby("section").agg('sum')
+
+        t3 = time.perf_counter()
+        log.info(f'dataframe aggregation took : {t3-t2} seconds')
+        return result
 
     def fault_participation_rates(
         self, fault_names: Optional[Iterable[str]] = None, rupture_ids: Optional[Iterable[int]] = None
@@ -54,7 +74,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         subsection_ids = FilterSubsectionIds(self).for_parent_fault_names(fault_names) if fault_names else None
 
         # print(f'subsection_ids: {subsection_ids}')
-
+        rate_column = "Annual Rate" if self.__class__.__name__ == "InversionSolution" else "rate_weighted_mean"
         df0 = self.rs_with_rupture_rates
         if subsection_ids:
             df0 = df0[df0["section"].isin(subsection_ids)]
@@ -64,8 +84,13 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
 
         df1 = df0.join(self.fault_sections[['ParentID']], on='section')
+        # print(df1[["ParentID", "Rupture Index", rate_column]]
+        #     .reset_index(drop=True)
+        #     )
+        # assert 0
         return (
-            df1[["ParentID", "Rupture Index", 'Annual Rate']]
+            df1[["ParentID", "Rupture Index", rate_column]]
+            .reset_index(drop=True)
             .groupby(["ParentID", "Rupture Index"])
             .agg('first')
             .groupby("ParentID")
@@ -214,7 +239,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         )
 
         toc = time.perf_counter()
-        log.debug(
+        log.info(
             (
                 'rs_with_rupture_rates: time to load ruptures_with_rupture_rates '
                 'and join with rupture_sections: %2.3f seconds'
