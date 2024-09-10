@@ -11,7 +11,7 @@ def test_section_participation_rate(crustal_small_fss_fixture):
     solution = crustal_small_fss_fixture
     rates = solution.section_participation_rates([sec_id])
     print(rates)
-    assert pytest.approx(rates[RATE_COLUMN].tolist()[0]) == 0.0026206877  # 0.0099396
+    assert pytest.approx(rates.participation_rate.tolist()[0]) == 0.0026206877  # 0.0099396
 
 
 def test_section_participation_rate_default_spot_check(crustal_small_fss_fixture):
@@ -21,7 +21,7 @@ def test_section_participation_rate_default_spot_check(crustal_small_fss_fixture
     rates = solution.section_participation_rates()
     # print(f"participation rate for section {sec_id}: {rates['Annual Rate'].tolist()[0]} /yr")
     # rates=r
-    assert pytest.approx(rates[rates.index == sec_id][RATE_COLUMN].tolist()[0]) == 0.0026206877
+    assert pytest.approx(rates[rates.index == sec_id].participation_rate.tolist()[0]) == 0.0026206877
 
 
 def test_section_participation_rate_default_all_sections(crustal_small_fss_fixture):
@@ -38,7 +38,7 @@ def test_section_participation_rate_default_all_sections(crustal_small_fss_fixtu
     # print(solution.rupture_sections)
     # print(section_rates)
 
-    assert section_rates.all() == rates[RATE_COLUMN].all()
+    assert section_rates.all() == rates.participation_rate.all()
 
     # print(sum(section_rates))
     # assert pytest.approx(sum(section_rates)) == 0.023329016054049134
@@ -65,7 +65,7 @@ def test_sum_vs_weighted_mean_all_sections(crustal_small_fss_fixture):
     print(weighted_mean_rates)
 
     for section in rates.index:
-        assert pytest.approx(rates['rate_weighted_mean'][section]) == weighted_mean_rates['rate_weighted_mean'][section]
+        assert pytest.approx(rates.participation_rate[section]) == weighted_mean_rates['rate_weighted_mean'][section]
 
 
 section_fault_rates = [
@@ -97,7 +97,7 @@ def test_sum_vs_weighted_mean_conditional(crustal_small_fss_fixture, fault_name,
 
     print("weighted_mean_rates")
     print(weighted_mean_rates)
-    assert pytest.approx(srdf.rate_weighted_mean) == weighted_mean_rates.rate_weighted_mean
+    assert pytest.approx(srdf.participation_rate) == weighted_mean_rates.rate_weighted_mean
 
 
 @pytest.mark.parametrize("fault_name, subsection_id, expected_rate", section_fault_rates)
@@ -113,14 +113,14 @@ def test_section_participation_rates(crustal_small_fss_fixture, fault_name, subs
     srdf = solution.section_participation_rates(subsection_ids)
     print(srdf)
 
-    section_rate = srdf[srdf.index == subsection_id].agg('sum')[RATE_COLUMN]
+    section_rate = srdf[srdf.index == subsection_id].agg('sum').participation_rate
     # print(section_rate)
 
     assert pytest.approx(section_rate) == expected_rate
 
     srdf2 = solution.section_participation_rates([subsection_id])
     print(srdf2)
-    assert pytest.approx(srdf2[RATE_COLUMN].tolist()[0]) == expected_rate
+    assert pytest.approx(srdf2.participation_rate.tolist()[0]) == expected_rate
     # assert 0
 
 
@@ -136,7 +136,7 @@ def test_section_participation_rates_conditional(crustal_small_fss_fixture, faul
 
     srdf = solution.section_participation_rates([subsection_id], rids_subset)
     print(srdf)
-    assert srdf[RATE_COLUMN].tolist()[0] - 1e-10 < expected_rate
+    assert srdf.participation_rate.tolist()[0] - 1e-10 < expected_rate
 
 
 @pytest.mark.parametrize("fault_name, subsection_id, expected_rate", section_fault_rates)
@@ -160,5 +160,5 @@ def test_section_participation_rates_detail(crustal_small_fss_fixture, fault_nam
 
     srdf = solution.section_participation_rates([subsection_id], rids_subset)
     print(srdf)
-    assert pytest.approx(srdf[RATE_COLUMN].tolist()[0]) == new_expected_rate
+    assert pytest.approx(srdf.participation_rate.tolist()[0]) == new_expected_rate
     # assert 0

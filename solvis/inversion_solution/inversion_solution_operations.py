@@ -8,7 +8,6 @@ import pandas as pd
 import shapely.geometry
 from nzshm_common.location.location import location_by_id
 
-
 from solvis.filter import FilterSubsectionIds
 from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.geometry import circle_polygon
@@ -61,35 +60,30 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         t3 = time.perf_counter()
         log.info(f'dataframe aggregation took : {t3-t2} seconds')
-        return result
+        return result.rename(columns={rate_column: 'participation_rate'})
 
     def fault_participation_rates(
-        self, fault_names: Optional[Iterable[str]] = None, rupture_ids: Optional[Iterable[int]] = None
+        self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
     ):
         """
         get the 'participation rate' for parent faults.
 
         That is, the sum of rupture rates on the requested parent faults.
         """
-        subsection_ids = FilterSubsectionIds(self).for_parent_fault_names(fault_names) if fault_names else None
+        subsection_ids = FilterSubsectionIds(self).for_parent_fault_ids(parent_fault_ids) if parent_fault_ids else None
 
-        # print(f'subsection_ids: {subsection_ids}')
         rate_column = "Annual Rate" if self.__class__.__name__ == "InversionSolution" else "rate_weighted_mean"
         df0 = self.rs_with_rupture_rates
         if subsection_ids:
             df0 = df0[df0["section"].isin(subsection_ids)]
 
-        # print(df0)
         if rupture_ids:
             df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
 
         df1 = df0.join(self.fault_sections[['ParentID']], on='section')
-        # print(df1[["ParentID", "Rupture Index", rate_column]]
-        #     .reset_index(drop=True)
-        #     )
-        # assert 0
         return (
             df1[["ParentID", "Rupture Index", rate_column]]
+            .rename(columns={rate_column: 'participation_rate'})
             .reset_index(drop=True)
             .groupby(["ParentID", "Rupture Index"])
             .agg('first')

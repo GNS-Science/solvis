@@ -232,7 +232,7 @@ def test_subsection_filtering_options():
     assert old_rates["Annual Rate"].all() == new_rates["Annual Rate"].all()
 
 
-@pytest.mark.skip('parked')
+# @pytest.mark.skip('parked')
 def test_section_performance():
     solution = solvis.InversionSolution.from_archive(single_sol)
 
@@ -250,19 +250,19 @@ def test_section_performance():
         t01 = time.perf_counter()
         print(f'filter ruptures took {t01-t0} seconds')
 
-        # get rupture fault sections (rs) with rates for those ruptures
-        df0 = solution.rs_with_rupture_rates
+        # # get rupture fault sections (rs) with rates for those ruptures
+        # df0 = solution.rs_with_rupture_rates
 
-        rupture_sections_df = df0[df0["Rupture Index"].isin(ruptures)]
-        rupture_ids = list(rupture_sections_df["Rupture Index"].unique())
+        # rupture_sections_df = df0[df0["Rupture Index"].isin(ruptures)]
+        # rupture_ids = list(rupture_sections_df["Rupture Index"].unique())
 
-        print(f' {len(ruptures)} unique ruptures...')
-        print(f"rupture_sections_df shape: {rupture_sections_df.shape}")
+        # print(f' {len(ruptures)} unique ruptures...')
+        # print(f"rupture_sections_df shape: {rupture_sections_df.shape}")
 
-        t1 = time.perf_counter()
-        print(f'rupture_sections_df took {t1-t0} seconds')
+        # t1 = time.perf_counter()
+        # print(f'rupture_sections_df took {t1-t0} seconds')
 
-        return rupture_ids
+        return ruptures
 
     def process_2(solution, rupture_ids):
         t1 = time.perf_counter()
@@ -275,7 +275,7 @@ def test_section_performance():
         t2 = time.perf_counter()
         print(f'filter rupture subsections took : {t2-t1} seconds')
 
-        section_rates = solution.section_participation_rates(list(subsection_ids), list(rupture_ids))
+        section_rates = solution.section_participation_rates(list(subsection_ids))  # , list(rupture_ids))
 
         t3 = time.perf_counter()
         print(f'section rates took {t3-t2} seconds')
@@ -288,14 +288,16 @@ def test_section_performance():
         rupture_ids = process_1(solution)
         print()
 
-    for _pass in range(2):
+    print(list(rupture_ids))
+
+    for _pass in range(1):
         print(f'pass: 2.{_pass}')
         print('===========')
 
         process_2(solution, rupture_ids)
         print()
 
-    assert 0
+    # assert 0
     """
      21 unique ruptures...
     rupture_sections_df shape: (666, 8)

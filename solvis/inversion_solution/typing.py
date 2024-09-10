@@ -79,7 +79,7 @@ class InversionSolutionProtocol(Protocol):
         pass
 
     def fault_participation_rates(
-        self, fault_names: Optional[Iterable[str]] = None, rupture_ids: Optional[Iterable[int]] = None
+        self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
     ):
         pass
 
