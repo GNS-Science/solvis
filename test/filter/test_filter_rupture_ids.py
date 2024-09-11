@@ -8,10 +8,18 @@ from solvis import circle_polygon
 from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.inversion_solution.typing import SetOperationEnum
 
+# TODO: these tests should also cover InversionSolution, not just FSS
+
 
 def test_top_level_import(fss):
     flt = importlib.import_module('solvis.filter')
     assert {0, 1, 2}.issubset(flt.FilterRuptureIds(fss).for_subsection_ids([1]))
+
+
+def test_ruptures_all(filter_rupture_ids, fss):
+    all_ruptures = filter_rupture_ids.all()
+    print(list(all_ruptures))
+    assert len(all_ruptures) == fss.ruptures.shape[0]
 
 
 def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):

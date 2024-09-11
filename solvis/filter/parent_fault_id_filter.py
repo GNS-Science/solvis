@@ -59,6 +59,17 @@ class FilterParentFaultIds:
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
 
+    def all(self) -> Set[int]:
+        """Convenience method returning ids for all solution parent faults.
+
+        NB the usual `join_prior` argument is not implemented as it doesn't seem useful here.
+
+        Returns:
+            the parent_fault_ids.
+        """
+        result = set(self._solution.fault_sections['ParentID'].tolist())
+        return result
+
     def for_parent_fault_names(self, parent_fault_names: Iterable[str]) -> Set[int]:
         """Find parent fault ids for the given parent_fault names.
 

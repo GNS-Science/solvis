@@ -3,6 +3,12 @@ import random
 from solvis.filter.parent_fault_id_filter import parent_fault_name_id_mapping
 
 
+def test_parent_fault_names_all(filter_parent_fault_ids, fss):
+    all_fault_ids = filter_parent_fault_ids.all()
+    print(list(all_fault_ids))
+    assert len(all_fault_ids) == len(fss.fault_sections['ParentID'].unique())
+
+
 def test_fault_names_as_ids(filter_parent_fault_ids):
     assert filter_parent_fault_ids.for_parent_fault_names(['Alpine Jacksons to Kaniere']) == set([23])
     assert filter_parent_fault_ids.for_parent_fault_names(['Alpine Jacksons to Kaniere', 'Vernon 4']) == set([23, 585])

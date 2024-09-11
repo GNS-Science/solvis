@@ -21,6 +21,17 @@ class FilterSubsectionIds(ChainableSetBase):
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
 
+    def all(self) -> 'FilterSubsectionIds':
+        """Convenience method returning ids for all solution fault subsections.
+
+        NB the usual `join_prior` argument is not implemented as it doesn't seem useful here.
+
+        Returns:
+            A chainable set of all the subsection_ids.
+        """
+        result = set(self._solution.fault_sections.index.to_list())
+        return self.new_chainable_set(result, self._solution)
+
     def for_parent_fault_names(
         self, parent_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
     ) -> Set[int]:

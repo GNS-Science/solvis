@@ -49,6 +49,17 @@ class FilterRuptureIds(ChainableSetBase):
         self.filter_subsection_ids = FilterSubsectionIds(solution)
         self.filter_parent_fault_ids = FilterParentFaultIds(solution)
 
+    def all(self) -> 'FilterRuptureIds':
+        """Convenience method returning ids for all solution ruptures.
+
+        NB the usual `join_prior` argument is not implemented as it doesn't seem useful here.
+
+        Returns:
+            A chainable set of all the rupture_ids.
+        """
+        result = set(self._solution.ruptures['Rupture Index'].to_list())
+        return self.new_chainable_set(result, self._solution)
+
     def for_named_faults(self, named_fault_names: Set[str]) -> 'FilterRuptureIds':
         """Find ruptures that occur on any of the given named_fault names.
 
@@ -78,7 +89,7 @@ class FilterRuptureIds(ChainableSetBase):
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The rupture_ids matching the filter.
+            A chainable set of rupture_ids matching the filter.
 
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
@@ -98,7 +109,7 @@ class FilterRuptureIds(ChainableSetBase):
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The rupture_ids matching the filter.
+            A chainable set of rupture_ids matching the filter.
         """
         subsection_ids = self.filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
         df0 = self._solution.rupture_sections
@@ -131,7 +142,7 @@ class FilterRuptureIds(ChainableSetBase):
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The rupture_ids matching the filter.
+            A chainable set of rupture_ids matching the filter.
         """
         df0 = self._solution.rupture_sections
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
@@ -161,7 +172,7 @@ class FilterRuptureIds(ChainableSetBase):
 
 
         Returns:
-            The rupture_ids matching the filter arguments.
+            A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
         if self._drop_zero_rates:
@@ -169,9 +180,15 @@ class FilterRuptureIds(ChainableSetBase):
         else:
             df0 = self._ruptures_with_and_without_rupture_rates()
 
+        rate_column = (
+            "rate_weighted_mean"
+            if isinstance(self._solution, solvis.inversion_solution.FaultSystemSolution)
+            else "Annual Rate"
+        )
+
         # rate col is different for InversionSolution
-        df0 = df0 if not max_rate else df0[df0.rate_weighted_mean <= max_rate]
-        df0 = df0 if not min_rate else df0[df0.rate_weighted_mean > min_rate]
+        df0 = df0 if not max_rate else df0[df0[rate_column] <= max_rate]
+        df0 = df0 if not min_rate else df0[df0[rate_column] > min_rate]
         result = set(df0[index].tolist())
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
@@ -189,7 +206,7 @@ class FilterRuptureIds(ChainableSetBase):
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The rupture_ids matching the filter arguments.
+            A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
         if self._drop_zero_rates:
@@ -221,7 +238,7 @@ class FilterRuptureIds(ChainableSetBase):
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The rupture_ids matching the filter arguments.
+            A chainable set of rupture_ids matching the filter arguments.
         """
         if isinstance(join_polygons, str):
             try:
@@ -255,7 +272,7 @@ class FilterRuptureIds(ChainableSetBase):
             join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The rupture_ids matching the filter arguments.
+            A chainable set of rupture_ids matching the filter arguments.
         """
         df0 = gpd.GeoDataFrame(self._solution.fault_sections)
         df0 = df0[df0['geometry'].intersects(polygon)]
