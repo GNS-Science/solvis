@@ -10,7 +10,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "review: tests for review")
 
 
-@pytest.fixture
+@pytest.fixture  # (scope='package')
 def fss(composite_fixture):
     yield composite_fixture._solutions['CRU']
 

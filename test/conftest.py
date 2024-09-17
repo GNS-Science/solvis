@@ -38,12 +38,12 @@ MINI_ARCHIVES = dict(
 )
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def archives():
     return ARCHIVES
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def small_archives():
     return MINI_ARCHIVES
 
@@ -69,12 +69,12 @@ def branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID'):
         )
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='session')
 def small_composite_fixture():
     return build_composite_fixture(archives=MINI_ARCHIVES)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def composite_fixture():
     return build_composite_fixture()
 
@@ -103,7 +103,7 @@ def build_composite_fixture(archives=ARCHIVES):
     return composite
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='session')
 def three_branch_solutions():
     return chain(
         branch_solutions(fslt, archive=ARCHIVES['PUY'], rupt_set_id='RUPTSET_ID'),
@@ -112,7 +112,7 @@ def three_branch_solutions():
     )
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='session')
 def three_small_branch_solutions():
     return chain(
         branch_solutions(fslt, archive=MINI_ARCHIVES['PUY'], rupt_set_id='RUPTSET_ID'),
@@ -122,33 +122,31 @@ def three_small_branch_solutions():
 
 
 # PUY fixtures
-
-
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def puysegur_fixture(request):
     print("setup puysegur")
     yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['PUY']))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def puysegur_solution_fixture(request):
     print("setup puysegur")
     filename = pathlib.PurePath(folder, f"fixtures/{ARCHIVES['PUY']}")
     yield InversionSolution.from_archive(str(filename))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def puy_branch_solutions():
     return branch_solutions(fslt, archive=ARCHIVES['PUY'], rupt_set_id='RUPTSET_ID')
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def puysegur_small_fixture(request):
     filename = pathlib.PurePath(folder, f"fixtures/{MINI_ARCHIVES['PUY']}")
     yield InversionSolution.from_archive(str(filename))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def puysegur_small_fss_fixture(request):
     yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=MINI_ARCHIVES['PUY']))
 
@@ -156,24 +154,24 @@ def puysegur_small_fss_fixture(request):
 # CRU fixtures
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def crustal_fixture(request):
     print("setup crustal")
     yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['CRU']))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def cru_branch_solutions():
     return branch_solutions(fslt, archive=ARCHIVES['CRU'], rupt_set_id='RUPTSET_ID')
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='session')
 def crustal_solution_fixture(request):
     filename = pathlib.PurePath(folder, f"fixtures/{ARCHIVES['CRU']}")
     yield InversionSolution.from_archive(str(filename))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def crustal_small_fss_fixture(request):
     folder = pathlib.Path(os.path.realpath(__file__)).parent
     archive = folder / 'fixtures' / MINI_ARCHIVES['CRU']
@@ -185,23 +183,23 @@ def crustal_small_fss_fixture(request):
 # HIK fixtures
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def hikurangi_fixture(request):
     print("setup hikurangi")
     yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=ARCHIVES['HIK']))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def hik_branch_solutions():
     return branch_solutions(fslt, archive=ARCHIVES['HIK'], rupt_set_id='RUPTSET_ID')
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='session')
 def hikurangi_solution_fixture(request):
     filename = pathlib.PurePath(folder, f"fixtures/{MINI_ARCHIVES['HIK']}")
     yield InversionSolution.from_archive(str(filename))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def hikurangi_small_fss_fixture(request):
     yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=MINI_ARCHIVES['HIK']))
