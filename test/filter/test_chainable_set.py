@@ -19,7 +19,7 @@ class FilterExampleClass(ChainableSetBase):
         return self.new_chainable_set(_input, self._solution, join_prior=join_prior)
 
 
-@pytest.fixture  # (scope='package')
+@pytest.fixture(scope='module')
 def filter_example(fss):
     yield FilterExampleClass(fss)
 

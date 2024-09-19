@@ -51,7 +51,9 @@ def test_round_trip_ids_and_names(filter_parent_fault_ids, fss):
 
 
 def test_parent_faults_for_ruptures(filter_parent_fault_ids, filter_rupture_ids, fss):
+    # pnames = ['Alpine Jacksons to Kaniere'] # small fss has rupture on only one parent
     pnames = random.sample(fss.parent_fault_names, 2)
+
     pids = filter_parent_fault_ids.for_parent_fault_names(pnames)
     rupt_ids = list(filter_rupture_ids.for_parent_fault_names(pnames))
 

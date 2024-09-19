@@ -10,21 +10,21 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "review: tests for review")
 
 
-@pytest.fixture  # (scope='package')
+@pytest.fixture(scope='package')
 def fss(composite_fixture):
     yield composite_fixture._solutions['CRU']
 
 
-@pytest.fixture
+@pytest.fixture(scope='package')
 def filter_rupture_ids(fss):
     yield FilterRuptureIds(fss)
 
 
-@pytest.fixture
+@pytest.fixture(scope='package')
 def filter_parent_fault_ids(fss):
     yield FilterParentFaultIds(fss)
 
 
-@pytest.fixture
+@pytest.fixture(scope='package')
 def filter_subsection_ids(fss):
     yield FilterSubsectionIds(fss)
