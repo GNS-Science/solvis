@@ -1,8 +1,11 @@
 #! python3
 """
-Configuration for the Solvis system.
+Configuration module for the solvis library.
 
 These values may be used in Solvis code itself, or in associated scripts.
+
+NB: most solvis users will never need this. It may be useful for NSHM develpers creating
+higher order FaultSystemSolutions and CompositeSolutions from existing InversionSolution archives.
 """
 import enum
 import os

@@ -2,7 +2,7 @@ site_name: Solvis Documentation
 site_url: https://gns-science.github.io/solvis
 repo_url: https://github.com/GNS-Science/solvis
 repo_name: GNS-Science/solvis
-strict: true
+# strict: true
 watch:
   - solvis
   - docs
@@ -11,22 +11,28 @@ nav:
   - Usage: usage.md
   - Installation: installation.md
   - API Reference:
-    - Solvis [package]:
+    - solvis:
       - api/solvis/index.md
-      - api/solvis/config.md
-      - api/solvis/geometry.md
-      - inversion_solution [package]:
+      - filter:
+        - filter: api/filter/index.md
+        - parent_fault_id_filter: api/filter/parent_fault_id_filter.md
+        - rupture_id_filter: api/filter/rupture_id_filter.md
+        - subsection_id_filter: api/filter/subsection_id_filter.md
+        - chainable_set_base: api/filter/chainable_set_base.md
+      - inversion_solution:
         - api/inversion_solution/index.md
-        - api/inversion_solution/composite_solution.md
-        - api/inversion_solution/fault_system_solution.md
-        - api/inversion_solution/fault_system_solution_file.md
-        - api/inversion_solution/inversion_solution.md
-        - api/inversion_solution/inversion_solution_file.md
-        - api/inversion_solution/inversion_solution_operations.md
-        - api/inversion_solution/solution_surfaces_builder.md
-        - api/inversion_solution/subsection_id_filter.md
-        - api/inversion_solution/typing.md
-      - api/solvis/solvis.md
+        - InversionSolution: api/inversion_solution/inversion_solution.md
+        - FaultSystemSolution: api/inversion_solution/fault_system_solution.md
+        - CompositeSolution: api/inversion_solution/composite_solution.md
+        - Support modules:
+          - api/inversion_solution/fault_system_solution_file.md
+          - api/inversion_solution/inversion_solution_file.md
+          - api/inversion_solution/inversion_solution_operations.md
+          - api/inversion_solution/solution_surfaces_builder.md
+          - api/inversion_solution/typing.md
+      - config [module]: api/solvis/config.md
+      - geometry [module]: api/solvis/geometry.md
+      - solvis [module]: api/solvis/solvis.md
   - Development and Contributing:
     - contributing.md
     - Testing: testing.md

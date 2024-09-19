@@ -1,5 +1,10 @@
 #!python3
+"""
+The original solvis API helper functions are defined in this module.
 
+NB please be aware that most functions in this module are deprecated and replaced
+in the 2nd generation Solvis API.
+"""
 # from functools import partial
 import warnings
 from pathlib import Path
@@ -43,6 +48,7 @@ def export_geojson(gdf: gpd.GeoDataFrame, filename: Union[str, Path], **kwargs):
 
 
 def rupt_ids_above_rate(sol: InversionSolutionProtocol, rate: float, rate_column: str = "Annual Rate"):
+    warnings.warn("Please use solvis.filter.FilterRuptureIds.for_rupture_rate()", DeprecationWarning)
     rr = sol.rupture_rates
     if not rate:
         return rr["Rupture Index"].unique()

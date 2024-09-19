@@ -47,10 +47,17 @@ def valid_parent_fault_names(solution, validate_names: Iterable[str]) -> Set[str
 
 class FilterParentFaultIds:
     """
-    A helper class to filter parentfaults, returning qualifying fault_ids.
+    A helper class to filter parent faults, returning qualifying fault_ids.
 
     Class methods all return sets to make it easy to combine filters with
     set operands like `union`, `intersection`, `difference` etc).
+
+    Examples:
+        ```py
+        >>> solution = InversionSolution.from_archive(filename)
+        >>> parent_fault_ids = FilterParentFaultIds(solution)\\
+                .for_parent_fault_names(['Alpine Jacksons to Kaniere'])
+        ```
     """
 
     def __init__(self, solution: InversionSolutionProtocol):
@@ -115,6 +122,5 @@ class FilterParentFaultIds:
         """
         # df0 = self._solution.rupture_sections
         df0 = self._solution.fault_sections_with_rupture_rates
-        print(df0.columns)
         ids = df0[df0['Rupture Index'].isin(list(rupture_ids))].ParentID.unique().tolist()
         return set([int(id) for id in ids])

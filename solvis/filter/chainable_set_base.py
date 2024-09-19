@@ -5,7 +5,10 @@ from solvis.inversion_solution.typing import SetOperationEnum
 
 
 class ChainableSetBase:
-    """A base class to make subclasse filter methods chainable & set-like"""
+    """A base class to help making subclass methods chainable & set-like.
+
+    NB: This class is used internally, and is not intended for use by solvis API users.
+    """
 
     _chained_set: Set[Any] = set()  # the set
 
@@ -15,7 +18,7 @@ class ChainableSetBase:
 
     def new_chainable_set(
         self, result, *init_args, join_prior: Union[SetOperationEnum, str] = SetOperationEnum.INTERSECTION
-    ):
+    ) -> 'ChainableSetBase':
 
         if isinstance(join_prior, str):
             join_prior = SetOperationEnum.__members__[join_prior.upper()]
@@ -32,7 +35,7 @@ class ChainableSetBase:
             raise ValueError(f"Unsupported join type {join_prior}")
         return instance
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return other == self.chained_set
 
     def __iter__(self):

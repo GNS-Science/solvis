@@ -1,5 +1,5 @@
 """
-Functions for working with Shapely geometries.
+Functions for working with fault system geometries.
 
 These functions require [Shapely](https://shapely.readthedocs.io/en/stable/index.html) to be installed.
 """

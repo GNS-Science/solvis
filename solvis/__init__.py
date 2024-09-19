@@ -14,8 +14,8 @@ and classes by default:
     - [`export_geojson`][solvis.solvis.export_geojson]
     - [`mfd_hist`][solvis.solvis.mfd_hist]
     - [`parent_fault_names`][solvis.solvis.parent_fault_names] (deprecated)
-    - [`rupt_ids_above_rate`][solvis.solvis.rupt_ids_above_rate]
-    - [`section_participation`][solvis.solvis.section_participation]
+    - [`rupt_ids_above_rate`][solvis.solvis.rupt_ids_above_rate] (deprecated)
+    - [`section_participation`][solvis.solvis.section_participation] (deprecated)
 
 Example:
     ```py

@@ -1,3 +1,3 @@
 ::: solvis.geometry
-    options:
-        annotations_path: full
+<!--     options:
+        annotations_path: full -->
