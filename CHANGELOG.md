@@ -1,10 +1,24 @@
 # Changelog
 
-## [0.13.0] 2024-07-25
+## [0.13.0] 2024-09
+
+## Changed
+ - drop_zero_rate differentiates between FSS and IS;
+ - faster testing (~3 times faster)
+ - documentation improvements
+ - abc427e fixing many deprecation warnings; updated geopandas, pandas, numpy, pyvista libs;
+ - read_csv dtype configuration improvements;
+ - many old functions are deprecated/migrated to new filter package
+ - refactor dataframe dtypes
+ - standardise participation functions API and return columns;
 
 ## Added
- - helper module to assist with participation rates
-
+ - new filter package providing classes for filtering solotions
+ - support for 3d geometry (thanks @voj)
+ - c3ab6da simplify FSS participation using rate_weighted_mean
+ - participation performance testing;
+ - added participation methods to fault_system_solution
+ - a simple rupture grouping algorithm (can this be a different type of filter??);
 
 ## [0.12.3] 2024-07-04
 bump version to verify new pypi workflow

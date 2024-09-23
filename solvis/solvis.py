@@ -3,7 +3,7 @@
 The original solvis API helper functions are defined in this module.
 
 NB please be aware that most functions in this module are deprecated and replaced
-in the 2nd generation Solvis API.
+in the 2nd generation Solvis API (version == 0.13.0)
 """
 # from functools import partial
 import warnings

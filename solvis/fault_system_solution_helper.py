@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, List
+from typing import Dict, Iterator, List, Iterable
 
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
@@ -12,17 +12,20 @@ NAMES
 """
 
 
-def build_rupture_groups(solution: InversionSolutionProtocol) -> Iterator[Dict]:
+def build_rupture_groups(
+    solution: InversionSolutionProtocol, rupture_ids: Iterable[int] = None, min_overlap: float = 0.8
+) -> Iterator[Dict]:
     dfrs = solution.rupture_sections
-    ruptures = dfrs['rupture'].unique().tolist()
-    print(f"there are {len(ruptures)} unique ruptures")
+    rupture_ids = rupture_ids or dfrs['rupture'].unique().tolist()
+    print(f"there are {len(rupture_ids)} unique ruptures")
     count = 0
     sample_sections = None
     sample_rupt = None
     sample_ruptures: List[int] = []
 
-    for rupt_id in ruptures:
+    for rupt_id in rupture_ids:
         sections = dfrs[dfrs.rupture == rupt_id]['section'].tolist()
+
         # first or reset
         if sample_rupt is None:
             sample_ruptures = []
@@ -34,19 +37,19 @@ def build_rupture_groups(solution: InversionSolutionProtocol) -> Iterator[Dict]:
         if rupt_id is not sample_rupt:
             sample_ruptures.append(rupt_id)
 
-        # otherwise compare overlap
-        diff = len(set(sections).symmetric_difference(sample_sections))
-        overlap = len(set(sections).intersection(sample_sections))
+        # compare section overlap
+        section_overlap = len(set(sections).intersection(sample_sections))
 
-        if overlap:  # and there must be some non-zero score
-            score = (sample_len - diff) / sample_len
+        if section_overlap:  # and there must be some non-zero score
+            section_diff_count = len(set(sections).symmetric_difference(sample_sections))
+            score = (sample_len - section_diff_count) / sample_len
+            if score >= min_overlap:
+                continue
+            else:
+                count += 1
+                yield {'rupture': sample_rupt, 'ruptures': sample_ruptures, 'sample_sections': sample_len}
 
-        # print(f'rupt_id {rupt_id} score {score} overlap {overlap} sample_len: {sample_len} diff {diff}')
-        if (score < 0.7) or not overlap:  # (overlap < 0.8 * sample_len):
-            yield {'rupture': sample_rupt, 'ruptures': sample_ruptures, 'sample_sections': sample_len}
+        # signal reset
+        sample_rupt = None
 
-            # signal reset
-            sample_rupt = None
-            count += 1
-
-    print(f"built {count} rupture groups")
+    print(f"built {count} rupture groups from {len(rupture_ids)} unique ruptures.")

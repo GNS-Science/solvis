@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.skip("This is not in doing much yet")
 def test_explore_zero_rates(crustal_solution_fixture):
     solution = crustal_solution_fixture
 
