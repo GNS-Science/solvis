@@ -1,3 +1,9 @@
+"""
+This module handles the aggregation of InversionSolution instances which must share a common OpenSHA RuptureSet.
+
+Classes:
+    FaultSystemSolution: a class aggregating InversionSolution instances.
+"""
 import io
 import logging
 import zipfile
@@ -19,6 +25,11 @@ log = logging.getLogger(__name__)
 
 
 class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
+    """A class that aggregates InversionSolution instances sharing a common OpenSHA RuptureSet.
+
+    The class is largely interchangeable with InversionSolution, as only rupture rates
+    are  affected by the aggregation.
+    """
 
     _composite_rates: pd.DataFrame = ...
     _rs_with_composite_rupture_rates: pd.DataFrame = None
@@ -197,7 +208,10 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
 
     @property
     def rupture_sections(self) -> gpd.GeoDataFrame:
-        """FSS overrides InversionSolutionOperations so we can use fast_indices"""
+        """Get a geodataframe of the rupture sections shared by all solution instances:
+
+        FSS overrides InversionSolutionOperations so we can use fast_indices.
+        """
 
         if self._fast_indices is None:
             try:
