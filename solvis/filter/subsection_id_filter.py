@@ -1,3 +1,22 @@
+"""
+This module provides a class for filtering solution fault sections (subsections).
+
+Classes:
+ FilterSubsectionIds: a filter for ruptures, returning qualifying rupture ids.
+
+Examples:
+    ```py
+    >>> ham50 = solvis.circle_polygon(50000, -37.78, 175.28)  # 50km radius around Hamilton
+    <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
+    >>> solution = solvis.InversionSolution.from_archive(filename)
+    >>> rupture_ids = FilterRuptureIds(solution)\\
+            .for_magnitude(min_mag=5.75, max_mag=6.25)\\
+            .for_polygon(ham50)
+
+    >>> subsection_ids = FilterSubsectionIds(solution)\\
+    >>>     .for_rupture_ids(rupture_ids)
+    ```
+"""
 from typing import Iterable, Union
 
 from solvis.inversion_solution.typing import InversionSolutionProtocol, SetOperationEnum

@@ -1,3 +1,11 @@
+"""
+This module providesa superclass for filter class implementations.
+
+NB: This is used internally, and is not intended for use by solvis API users.
+
+Classes:
+ ChainableSetBase: a base class to help making subclass methods chainable & set-like
+"""
 import copy
 from typing import Any, Set, Union
 
@@ -5,10 +13,7 @@ from solvis.inversion_solution.typing import SetOperationEnum
 
 
 class ChainableSetBase:
-    """A base class to help making subclass methods chainable & set-like.
-
-    NB: This class is used internally, and is not intended for use by solvis API users.
-    """
+    """A base class to help making subclass methods chainable & set-like."""
 
     _chained_set: Set[Any] = set()  # the set
 

@@ -1,18 +1,13 @@
 """
-This package provides classes to filter solutions instances, of:
+This package provides classes to support filtering by key attributes of the solution classes:
 
  - [FaultSystemSolution][solvis.inversion_solution.fault_system_solution.FaultSystemSolution] aggregated solutions
  - [InversionSolution][solvis.inversion_solution.inversion_solution.InversionSolution] individual solutions
 
-The filter classes support filtering by the most useful attributes of these solution classes
-(see [InversionSolutionProtocol][solvis.inversion_solution]for more about these attributes)
-with the help of the ChainableSetBase class. (see below)
-
-This package imports the following classes by default:
-
-  - [FilterParentFaultIds](parent_fault_id_filter.md/#solvis.filter.parent_fault_id_filter.FilterParentFaultIds)
-  - [FilterRuptureIds](rupture_id_filter.md/#solvis.filter.rupture_id_filter.FilterRuptureIds)
-  - [FilterSubsectionIds](subsection_id_filter.md/#solvis.filter.subsection_id_filter.FilterSubsectionIds)
+Classes:
+  FilterParentFaultIds: for filtering solution parent faults.
+  FilterRuptureIds: for filtering solution ruptures.
+  FilterSubsectionIds: (subsection_id_filter.md/#solvis.filter.subsection_id_filter.FilterSubsectionIds)
 
 Examples:
     ```py
@@ -43,8 +38,6 @@ versatile:
  that each chained method call is 'refining' results from the prior method call(s).
  This behaviour can be overridden using the `join_prior` argument.
 -
-
-
 
 """
 from .parent_fault_id_filter import FilterParentFaultIds

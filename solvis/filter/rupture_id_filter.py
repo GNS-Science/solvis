@@ -1,3 +1,31 @@
+"""
+This module provides a class for filtering solution ruptures.
+
+Classes:
+ FilterRuptureIds: a filter for ruptures, returning qualifying rupture ids.
+
+Examples:
+    ```py
+    >>> # ruptures within 50km of Hamilton with magnitude between 5.75 and 6.25.
+    >>> ham50 = solvis.circle_polygon(50000, -37.78, 175.28)  # 50km radius around Hamilton
+    <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
+    >>> solution = solvis.InversionSolution.from_archive(filename)
+    >>> rupture_ids = FilterRuptureIds(solution)\\
+            .for_magnitude(min_mag=5.75, max_mag=6.25)\\
+            .for_polygon(ham50)
+
+    >>> # ruptures on any of faults A, B, with magnitude and rupture rate limits
+    >>> rupture_ids = FilterRuptureIds(solution)\\
+    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere", "Vernon"])\\
+    >>>    .for_magnitude(7.0, 8.0)\\
+    >>>    .for_rupture_rate(1e-6, 1e-2)
+
+    >>> # ruptures on fault A that do not involve fault B:
+    >>> rupture_ids = FilterRuptureIds(solution)\\
+    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere"])\\
+    >>>    .for_parent_fault_names(["Vernon], join_prior='difference')
+    ```
+"""
 from typing import Iterable, List, Optional, Set, Union
 
 import geopandas as gpd
@@ -13,21 +41,7 @@ from .subsection_id_filter import FilterSubsectionIds
 
 class FilterRuptureIds(ChainableSetBase):
     """
-    A helper class to filter ruptures, returning the qualifying rupture_ids.
-
-    Examples:
-        ```py
-        # ruptures on any of faults A, B, with magnitude and rupture rate limits
-        rupture_ids = FilterRuptureIds(solution)\\
-            .for_parent_fault_names(["Alpine Jacksons to Kaniere", "Vernon"])\\
-            .for_magnitude(7.0, 8.0)\\
-            .for_rupture_rate(1e-6, 1e-2)
-
-        # ruptures on fault A that do not involve fault B:
-        rupture_ids = FilterRuptureIds(solution)\\n
-            .for_parent_fault_names(["Alpine Jacksons to Kaniere"])\\
-            .for_parent_fault_names(["Vernon], join_prior='difference')
-        ```
+    A helper class to filter solution ruptures, returning the qualifying rupture_ids.
     """
 
     def __init__(self, solution: InversionSolutionProtocol, drop_zero_rates: bool = True):

@@ -1,1 +1,1 @@
-::: solvis.filter.rupture_id_filter.FilterRuptureIds
+::: solvis.filter.rupture_id_filter

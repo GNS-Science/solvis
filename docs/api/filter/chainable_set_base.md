@@ -1,1 +1,1 @@
-::: solvis.filter.chainable_set_base.ChainableSetBase
+::: solvis.filter.chainable_set_base

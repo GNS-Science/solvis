@@ -33,7 +33,7 @@ def test_parent_fault_name_id_mapping(filter_parent_fault_ids, fss):
     print(parent_ids)
     print(mapping)
     assert len(mapping) == 1
-    assert mapping[0].id == 585
+    assert mapping[0].parent_id == 585
     assert mapping[0].parent_fault_name == 'Vernon 4'
 
 
@@ -47,7 +47,7 @@ def test_round_trip_ids_and_names(filter_parent_fault_ids, fss):
     print(mapping)
 
     for parent in mapping:
-        assert filter_parent_fault_ids.for_parent_fault_names([parent.parent_fault_name]) == set([parent.id])
+        assert filter_parent_fault_ids.for_parent_fault_names([parent.parent_fault_name]) == set([parent.parent_id])
 
 
 def test_parent_faults_for_ruptures(filter_parent_fault_ids, filter_rupture_ids, fss):

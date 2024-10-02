@@ -1,11 +1,37 @@
+"""
+This module provides a class for filtering solution parent faults.
+
+Classes:
+ FilterParentFaultIds: a filter for parent faults, returning qualifying fault_ids.
+ ParentFaultMapping: a namedtuple representing id and name of a parent fault.
+
+Functions:
+ parent_fault_name_id_mapping: a method yielding ParentFaultMappings.
+ valid_parent_fault_names: to check parent_fault_names are valid.
+
+Examples:
+    ```py
+    >>> solution = InversionSolution.from_archive(filename)
+    >>> parent_fault_ids = FilterParentFaultIds(solution)\\
+            .for_parent_fault_names(['Alpine Jacksons to Kaniere', 'BooBoo'])
+    ```
+
+TODO:
+  - make FilterParentFaultIds chainable
+"""
 from collections import namedtuple
-from typing import Iterable, Iterator, Set
+from typing import Iterable, Iterator, Set, NamedTuple
 
 import shapely.geometry
 
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
-ParentFaultMapping = namedtuple('ParentFaultMapping', ['id', 'parent_fault_name'])
+
+class ParentFaultMapping(NamedTuple):
+    """A mapping class for ParentFault id -> name."""
+
+    parent_id: int
+    parent_fault_name: str
 
 
 def parent_fault_name_id_mapping(

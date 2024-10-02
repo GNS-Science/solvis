@@ -1,3 +1,12 @@
+'''
+This module defines type classes for the main interfaces shared
+across the `inversion_solution` package.
+
+Classes:
+    InversionSolutionProtocol: the interface for an InversionSolution
+    CompositeSolutionProtocol: interface for CompositeSolution
+
+'''
 import io
 import zipfile
 from enum import Enum

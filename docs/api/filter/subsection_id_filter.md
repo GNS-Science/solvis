@@ -1,1 +1,1 @@
-::: solvis.filter.subsection_id_filter.FilterSubsectionIds
+::: solvis.filter.subsection_id_filter
