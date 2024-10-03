@@ -21,6 +21,21 @@ log = logging.getLogger(__name__)
 
 
 class InversionSolutionOperations(InversionSolutionProtocol):
+    """
+    helper methods for analysis of InversionSolutionProtocol subtypes.
+
+    Deprecated:
+     the following methods are replaced by solvis.filter classes.
+
+     - get_rupture_ids_for_fault_names
+     - get_rupture_ids_for_location_radius
+     - get_rupture_ids_for_parent_fault
+     - get_rupture_ids_intersecting
+     - get_ruptures_for_parent_fault
+     - get_ruptures_intersecting
+     - get_solution_slip_rates_for_parent
+    """
+
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         return SolutionSurfacesBuilder(self).fault_surfaces()
 
@@ -188,12 +203,9 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     @property
     def fault_sections_with_solution_slip_rates(self) -> gpd.GeoDataFrame:
-        """
-        Calculate and cache fault sections and their solution slip rates.
-        Solution slip rate combines input (avg slips) and solution (rupture rates).
+        """Calculate and cache fault sections and their solution slip rates.
 
-        Returns:
-            a gpd.GeoDataFrame
+        NB: Solution slip rate combines input (avg slips) and solution (rupture rates).
         """
         if self._fs_with_soln_rates is not None:
             return self._fs_with_soln_rates
@@ -223,6 +235,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     @property
     def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        """Get a dataframe joining rupture_sections and rupture_rates."""
         if self._rs_with_rupture_rates is not None:
             return self._rs_with_rupture_rates  # pragma: no cover
 
@@ -244,6 +257,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     @property
     def ruptures_with_rupture_rates(self) -> pd.DataFrame:
+        """Get a dataframe joining ruptures and rupture_rates."""
         if self._ruptures_with_rupture_rates is not None:
             return self._ruptures_with_rupture_rates  # pragma: no cover
 
@@ -261,8 +275,12 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return self._ruptures_with_rupture_rates
 
     def get_rupture_ids_intersecting(self, polygon: shapely.geometry.Polygon) -> pd.Series:
-        """Return IDs for any ruptures intersecting the polygon."""
-        warnings.warn("Please use solvis.filter.classes *.for_polygons method instead", DeprecationWarning)
+        """Return IDs for any ruptures intersecting the polygon.
+
+        Warning:
+         Deprecated: please use solvis.filter.*.for_polygons method instead
+        """
+        warnings.warn("Please use solvis.filter.*.for_polygons method instead", DeprecationWarning)
         return pd.Series(list(FilterRuptureIds(self).for_polygon(polygon)))
 
     def get_rupture_ids_for_location_radius(
@@ -322,6 +340,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         Returns:
             a Pandas series of rupture IDs
         """
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
         # sr = sol.rs_with_rupture_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
@@ -362,6 +381,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             ```
             Returns a set of 1440 rupture IDs in the intersection of the two datasets.
         """
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
+
         first = True
         rupture_ids: Set[int]
         for fault_name in corupture_fault_names:
@@ -390,12 +411,14 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
         """Deprecated signature for get_rupture_ids_for_parent_fault."""
-        warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
+        # warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
         return self.get_rupture_ids_for_parent_fault(parent_fault_name)
 
     def get_ruptures_intersecting(self, polygon) -> pd.Series:
         """Deprecated signature for get_rupture_ids_intersecting."""
-        warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
+        # warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
         return self.get_rupture_ids_intersecting(polygon)
 
     def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:

@@ -2,4 +2,4 @@
     options:
         filters:
         - "!^_[^_]"
-        - "!^get_ruptures_"  # Deprecated function signatures
+        - "!^get_"  # Deprecated function signatures

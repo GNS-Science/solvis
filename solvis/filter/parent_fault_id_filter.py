@@ -19,8 +19,7 @@ Examples:
 TODO:
   - make FilterParentFaultIds chainable
 """
-from collections import namedtuple
-from typing import Iterable, Iterator, Set, NamedTuple
+from typing import Iterable, Iterator, NamedTuple, Set
 
 import shapely.geometry
 

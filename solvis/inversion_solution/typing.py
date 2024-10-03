@@ -117,7 +117,7 @@ class InversionSolutionProtocol(Protocol):
 class CompositeSolutionProtocol(Protocol):
 
     _solutions: Mapping[str, InversionSolutionProtocol] = {}
-    _archive_path: Union[Path, str] = ''
+    _archive_path: Optional[Path]
 
     def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
         """builder method returning the rupture surface of a given rupture id."""

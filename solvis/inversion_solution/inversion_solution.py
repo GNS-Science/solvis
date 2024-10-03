@@ -26,11 +26,16 @@ import numpy.typing as npt
 
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
-from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
+from .typing import ModelLogicTreeBranch
 
 
 class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
-    """A python interface for an OpenSHA Inversion Solution archive."""
+    """A python interface for an OpenSHA Inversion Solution archive.
+
+    Methods:
+     from_archive: deserialise an instance from zip archive.
+     filter_solution: get a new InversionSolution instance, filtered by rupture ids.
+    """
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':

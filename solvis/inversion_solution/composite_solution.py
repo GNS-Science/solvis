@@ -7,7 +7,7 @@ Classes:
 import io
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, Iterable, Union, Optional
+from typing import Any, Dict, Iterable, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -50,7 +50,7 @@ class CompositeSolution(CompositeSolutionOperations):
         return self
 
     @property
-    def archive_path(self) -> Path:
+    def archive_path(self) -> Union[Path, None]:
         """Get the path of the instance."""
         return self._archive_path
 

@@ -73,6 +73,22 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
 class InversionSolutionFile(InversionSolutionProtocol):
     """
     Class to handle the OpenSHA modular archive file form.
+
+    Methods:
+        to_archive: serialise an instance to a zip archive.
+        filter_solution: get a new InversionSolution instance, filtered by rupture ids.
+        set_props:
+
+    Attributes:
+        archive: the archive instance.
+        archive_path: the archive path name.
+        ruptures: get the solution ruptures dataframe.
+        fault_regime:
+        indices:
+        logic_tree_branch:
+        rupture_rates:
+        ruptures:
+        section_target_slip_rates:
     """
 
     RATES_PATH = 'solution/rates.csv'
@@ -160,6 +176,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def archive(self) -> zipfile.ZipFile:
+        """Get an in-memory archive instance."""
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
         archive = None
         if self._archive is None:
@@ -232,6 +249,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def rupture_rates(self) -> gpd.GeoDataFrame:
+        """Get a dataframe containing ruptures and their rates"""
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
@@ -242,6 +260,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def ruptures(self) -> gpd.GeoDataFrame:
+        """Ruptures ruptres."""
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'

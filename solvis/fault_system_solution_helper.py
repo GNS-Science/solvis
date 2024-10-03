@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, List, Iterable
+from typing import Dict, Iterator, List, Optional
 
 from solvis.inversion_solution.typing import InversionSolutionProtocol
 
@@ -13,7 +13,7 @@ NAMES
 
 
 def build_rupture_groups(
-    solution: InversionSolutionProtocol, rupture_ids: Iterable[int] = None, min_overlap: float = 0.8
+    solution: InversionSolutionProtocol, rupture_ids: Optional[List[int]] = None, min_overlap: float = 0.8
 ) -> Iterator[Dict]:
     dfrs = solution.rupture_sections
     rupture_ids = rupture_ids or dfrs['rupture'].unique().tolist()
