@@ -1,3 +1,12 @@
+"""
+An InversionSolution Archive file helper.
+
+This module handles files having the OpenSHA InversionSolution archive format.
+
+It provides conversions from the original file formats to pandas dataframe instances
+with cachign and some error handling.
+
+"""
 import io
 import json
 import logging
