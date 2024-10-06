@@ -36,6 +36,13 @@ class InversionSolutionOperations(InversionSolutionProtocol):
      - get_solution_slip_rates_for_parent
     """
 
+    _fault_sections: gpd.GeoDataFrame
+    _fs_with_rates: pd.DataFrame
+    _fs_with_soln_rates: pd.DataFrame
+    _rs_with_rupture_rates: pd.DataFrame
+    _rupture_sections: pd.DataFrame
+    _ruptures_with_rupture_rates: pd.DataFrame
+
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         return SolutionSurfacesBuilder(self).fault_surfaces()
 
