@@ -20,11 +20,11 @@ RATE_COLUMNS_A = 6
 class TestInversionSolution(object):
     def test_check_indexes(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
-        assert sol.rupture_rates.index == sol.rupture_rates["Rupture Index"]
-        assert sol.ruptures.index == sol.ruptures["Rupture Index"]
-        assert sol.indices.index.all() == sol.indices["Rupture Index"].all()
-        assert sol.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
-        assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.IO.rupture_rates.index == sol.IO.rupture_rates["Rupture Index"]
+        assert sol.IO.ruptures.index == sol.IO.ruptures["Rupture Index"]
+        assert sol.IO.indices.index.all() == sol.IO.indices["Rupture Index"].all()
+        assert sol.IO.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.IO.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
         # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
 
     def test_check_types(self, crustal_solution_fixture):

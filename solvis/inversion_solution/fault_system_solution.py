@@ -34,6 +34,13 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
     _composite_rates: pd.DataFrame = ...
     _rs_with_composite_rupture_rates: pd.DataFrame = None
 
+    @property
+    def IO(self):
+        """
+        Entry point for the io methods of InversionSolutionFile
+        """
+        return self
+
     def set_props(
         self, composite_rates, aggregate_rates, ruptures, indices, fault_sections, fault_regime, average_slips
     ):

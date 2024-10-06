@@ -23,19 +23,104 @@ from pathlib import Path
 from typing import Union
 
 import numpy.typing as npt
+import pandas as pd
 
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .typing import ModelLogicTreeBranch
 
 
-class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
+class InversionSolution(InversionSolutionOperations):
     """A python interface for an OpenSHA Inversion Solution archive.
 
     Methods:
      from_archive: deserialise an instance from zip archive.
      filter_solution: get a new InversionSolution instance, filtered by rupture ids.
     """
+
+    _inversion_solution_file: InversionSolutionFile
+
+    @property
+    def IO(self) -> InversionSolutionFile:
+        """
+        Entry point for the io methods of InversionSolutionFile
+        """
+        return self._inversion_solution_file
+
+    """
+    @property
+    def archive(self) -> self.IO.archive:
+        return self.IO.archive
+
+    @property
+    def archive_path(self):
+        return self.IO.archive_path
+
+    @property
+    def rupture_rates(self):
+        return self.IO.rupture_rates
+
+    @property
+    def ruptures(self):
+        return self.IO.ruptures
+
+    @property
+    def indices(self):
+        return self.IO.indices
+
+    @property
+    def fault_regime(self):
+        return self.IO.fault_regime
+
+    @property
+    def logic_tree_branch(self):
+        return self.IO.logic_tree_branch
+
+    @property
+    def average_slips(self):
+        return self.IO.average_slips
+
+    @property
+    def section_target_slip_rates(self):
+        return self.IO.section_target_slip_rates
+
+    @property
+    def fault_sections(self):
+        return self.IO.fault_sections
+
+    @property
+    def rupture_sections(self):
+        return self.IO.rupture_sections
+
+    @property
+    def ruptures_with_rupture_rates(self):
+        return self.IO.ruptures_with_rupture_rates
+
+    @property
+    def rs_with_rupture_rates(self):
+        return self.IO.rs_with_rupture_rates
+
+    @property
+    def fault_sections_with_solution_slip_rates(self):
+        return self.IO.fault_sections_with_solution_slip_rates
+
+    @property
+    def fault_sections_with_rupture_rates(self):
+        return self.IO.fault_sections_with_rupture_rates
+    """
+
+    def to_archive(self, archive_path, base_archive_path=None, compat=False):
+        return self.IO.to_archive(archive_path, base_archive_path, compat)
+
+    def set_props(
+        self,
+        rates: pd.DataFrame,
+        ruptures: pd.DataFrame,
+        indices: pd.DataFrame,
+        fault_sections: pd.DataFrame,
+        average_slips: pd.DataFrame,
+    ):
+        return self.IO.set_props(rates, ruptures, indices, fault_sections, average_slips)
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':
@@ -50,17 +135,21 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         Returns:
             An InversionSolution instance.
         """
-        new_solution = InversionSolution()
+
+        inversion_solution_file = InversionSolutionFile.from_archive(instance_or_path)
 
         if isinstance(instance_or_path, io.BytesIO):
             with zipfile.ZipFile(instance_or_path, 'r') as zf:
                 assert 'ruptures/indices.csv' in zf.namelist()
-            new_solution._archive = instance_or_path
+            inversion_solution_file._archive = instance_or_path
         else:
             assert Path(instance_or_path).exists()
             assert zipfile.Path(instance_or_path, at='ruptures/indices.csv').exists()
-            new_solution._archive_path = Path(instance_or_path)
-        return new_solution
+            inversion_solution_file._archive_path = Path(instance_or_path)
+
+        solution = InversionSolution()
+        solution._inversion_solution_file = inversion_solution_file
+        return solution
 
     @staticmethod
     def filter_solution(solution: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
@@ -87,8 +176,9 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         average_slips = avs[avs["Rupture Index"].isin(rupture_ids)].copy()
 
         ns = InversionSolution()
+        ns._inversion_solution_file = InversionSolutionFile()
         ns.set_props(rates, ruptures, indices, solution.fault_sections.copy(), average_slips)
-        ns._archive_path = solution._archive_path
+        ns._inversion_solution_file._archive_path = solution.archive_path
         return ns
 
 
@@ -127,11 +217,14 @@ class BranchInversionSolution(InversionSolution):
         indices = solution.indices.copy()
 
         bis = BranchInversionSolution()
+        bis._inversion_solution_file = InversionSolutionFile()
+        # print(solution._inversion_solution_file.archive_path)
+        bis._inversion_solution_file._archive_path = solution._inversion_solution_file.archive_path
+
         bis.branch = branch
         bis.fault_system = fault_system
         bis.rupture_set_id = rupture_set_id
         bis.set_props(rates, ruptures, indices, solution.fault_sections.copy(), solution.average_slips.copy())
-        bis._archive_path = solution._archive_path
         return bis
 
     def __repr__(self):

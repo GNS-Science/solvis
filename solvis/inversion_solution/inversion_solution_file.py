@@ -5,12 +5,10 @@ import time
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
-
-from .typing import InversionSolutionProtocol
 
 log = logging.getLogger(__name__)
 
@@ -70,7 +68,7 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     return new_df
 
 
-class InversionSolutionFile(InversionSolutionProtocol):
+class InversionSolutionFile:
     """
     Class to handle the OpenSHA modular archive file form.
 
@@ -113,11 +111,11 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._rs_with_rupture_rates = None
         self._fs_with_rates = None
         self._fs_with_soln_rates = None
-        self._ruptures_with_rupture_rates = None
+        self._ruptures_with_rupture_rates: Optional[pd.DataFrame] = None
         self._average_slips = None
         self._logic_tree_branch: List[Any] = []
         self._fault_regime: str = ''
-        self._fault_sections = None
+        self._fault_sections: Optional[gpd.GeoDataFrame] = None
         self._rupture_sections = None
         self._archive_path: Optional[Path] = None
         self._archive: Optional[io.BytesIO] = None
@@ -135,6 +133,32 @@ class InversionSolutionFile(InversionSolutionProtocol):
         data_to_zip_direct(zip_archive, rupts.to_csv(index=reindex), self.RUPTS_PATH)
         data_to_zip_direct(zip_archive, indices.to_csv(index=reindex), self.INDICES_PATH)
         data_to_zip_direct(zip_archive, slips.to_csv(index=reindex), self.AVG_SLIPS_PATH)
+
+    @staticmethod
+    def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolutionFile':
+        """
+        Read and return an inversion solution file from an OpenSHA archive file or byte-stream.
+
+        Archive validity is checked with the presence of a `ruptures/indices.csv` file.
+
+        Parameters:
+            instance_or_path: a Path object, filename or in-memory binary IO stream
+
+        Returns:
+            An InversionSolutionFile instance.
+        """
+        inversion_solution_file = InversionSolutionFile()
+
+        if isinstance(instance_or_path, io.BytesIO):
+            with zipfile.ZipFile(instance_or_path, 'r') as zf:
+                assert 'ruptures/indices.csv' in zf.namelist()
+            inversion_solution_file._archive = instance_or_path
+        else:
+            assert Path(instance_or_path).exists()
+            assert zipfile.Path(instance_or_path, at='ruptures/indices.csv').exists()
+            inversion_solution_file._archive_path = Path(instance_or_path)
+
+        return inversion_solution_file
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
         """
@@ -192,7 +216,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
             archive = zipfile.ZipFile(self._archive)
         return archive
 
-    def _dataframe_from_csv(self, prop, path, dtype=None):
+    def _dataframe_from_csv(self, prop, path, dtype=None) -> pd.DataFrame:
         log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))
         if not isinstance(prop, pd.DataFrame):
             tic = time.perf_counter()
@@ -203,6 +227,11 @@ class InversionSolutionFile(InversionSolutionProtocol):
             prop = pd.read_csv(data, dtype=dtype)
             toc = time.perf_counter()
             log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
+        return prop
+
+    def _geodataframe_from_geojson(self, prop, path) -> gpd.GeoDataFrame:
+        if not isinstance(prop, gpd.GeoDataFrame):
+            prop = gpd.read_file(self.archive.open(path))
         return prop
 
     @property
@@ -284,6 +313,161 @@ class InversionSolutionFile(InversionSolutionProtocol):
         dtypes = {}
         dtypes["Section Index"] = 'UInt32'
         return self._dataframe_from_csv(self._section_target_slip_rates, self.SECT_SLIP_RATES_PATH)
+
+    @property
+    def fault_sections(self) -> gpd.GeoDataFrame:
+        """
+        Get the fault sections and replace slip rates from rupture set with target rates from inverison.
+        Cache result.
+        """
+        if self._fault_sections is not None:
+            return self._fault_sections
+
+        tic = time.perf_counter()
+        self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
+        self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
+        mapper = {
+            "Slip Rate (m/yr)": "Target Slip Rate",
+            "Slip Rate Standard Deviation (m/yr)": "Target Slip Rate StdDev",
+        }
+        self._fault_sections.rename(columns=mapper, inplace=True)
+        toc = time.perf_counter()
+        log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
+        return self._fault_sections
+
+    @property
+    def rupture_sections(self) -> gpd.GeoDataFrame:
+        if self._rupture_sections is not None:
+            return self._rupture_sections  # pragma: no cover
+        self._rupture_sections = self.build_rupture_sections()
+        return self._rupture_sections
+
+    def build_rupture_sections(self) -> gpd.GeoDataFrame:
+
+        tic = time.perf_counter()
+
+        rs = self.indices  # _dataframe_from_csv(self._rupture_sections, 'ruptures/indices.csv').copy()
+
+        # remove "Rupture Index, Num Sections" column
+        df_table = rs.drop(rs.iloc[:, :2], axis=1)
+        tic0 = time.perf_counter()
+
+        # convert to relational table, turning headings index into plain column
+        df2 = df_table.stack().reset_index()
+
+        tic1 = time.perf_counter()
+        log.debug('rupture_sections(): time to convert indiced to table: %2.3f seconds' % (tic1 - tic0))
+
+        # remove the headings column
+        df2.drop(df2.iloc[:, 1:2], inplace=True, axis=1)
+        df2 = df2.set_axis(['rupture', 'section'], axis='columns', copy=False)
+
+        toc = time.perf_counter()
+        log.debug('rupture_sections(): time to load and conform rupture_sections: %2.3f seconds' % (toc - tic))
+        return df2
+
+    @property
+    def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        """Get a dataframe joining rupture_sections and rupture_rates."""
+        print(self)
+
+        if self._rs_with_rupture_rates is not None:
+            return self._rs_with_rupture_rates  # pragma: no cover
+
+        tic = time.perf_counter()
+        # df_rupt_rate = self.ruptures.join(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
+
+        self._rs_with_rupture_rates = self.ruptures_with_rupture_rates.join(
+            self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rupture_rates["Rupture Index"]
+        )
+
+        toc = time.perf_counter()
+        log.info(
+            (
+                'rs_with_rupture_rates: time to load ruptures_with_rupture_rates '
+                'and join with rupture_sections: %2.3f seconds'
+            )
+            % (toc - tic)
+        )
+        return self._rs_with_rupture_rates
+
+    @property
+    def ruptures_with_rupture_rates(self) -> pd.DataFrame:
+        """Get a dataframe joining ruptures and rupture_rates."""
+        if self._ruptures_with_rupture_rates is not None:
+            return self._ruptures_with_rupture_rates  # pragma: no cover
+
+        tic = time.perf_counter()
+        # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
+        self._ruptures_with_rupture_rates = self.rupture_rates.join(
+            self.ruptures.drop(columns="Rupture Index"), on=self.rupture_rates["Rupture Index"]
+        )
+        if 'key_0' in self._ruptures_with_rupture_rates.columns:
+            self._ruptures_with_rupture_rates.drop(columns=['key_0'], inplace=True)
+        toc = time.perf_counter()
+        log.debug(
+            'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
+        )
+        return self._ruptures_with_rupture_rates
+
+    @property
+    def fault_sections_with_solution_slip_rates(self) -> gpd.GeoDataFrame:
+        """Calculate and cache fault sections and their solution slip rates.
+
+        NB: Solution slip rate combines input (avg slips) and solution (rupture rates).
+        """
+        if self._fs_with_soln_rates is not None:
+            return self._fs_with_soln_rates
+
+        tic = time.perf_counter()
+        self._fs_with_soln_rates = self._get_soln_rates()
+        toc = time.perf_counter()
+        log.debug('fault_sections_with_solution_rates: time to calculate solution rates: %2.3f seconds' % (toc - tic))
+        return self._fs_with_soln_rates
+
+    def _get_soln_rates(self):
+
+        average_slips = self.average_slips
+        # for every subsection, find the ruptures on it
+        fault_sections_wr = self.fault_sections.copy()
+        for ind, fault_section in self.fault_sections.iterrows():
+            fault_id = fault_section['FaultID']
+            fswr_gt0 = self.fault_sections_with_rupture_rates[
+                (self.fault_sections_with_rupture_rates['FaultID'] == fault_id)
+                & (self.fault_sections_with_rupture_rates['Annual Rate'] > 0.0)
+            ]
+            fault_sections_wr.loc[ind, 'Solution Slip Rate'] = sum(
+                fswr_gt0['Annual Rate'] * average_slips.loc[fswr_gt0['Rupture Index']]['Average Slip (m)']
+            )
+
+        return fault_sections_wr
+
+    @property
+    def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        """
+        Calculate and cache the fault sections and their rupture rates.
+
+        Returns:
+            a gpd.GeoDataFrame
+        """
+        if self._fs_with_rates is not None:
+            return self._fs_with_rates
+
+        tic = time.perf_counter()
+        self._fs_with_rates = self.rs_with_rupture_rates.join(self.fault_sections, 'section', how='inner')
+        toc = time.perf_counter()
+        log.debug(
+            (
+                'fault_sections_with_rupture_rates: time to load rs_with_rupture_rates '
+                'and join with fault_sections: %2.3f seconds'
+            )
+            % (toc - tic)
+        )
+
+        # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rupture_rates,
+        #     on=self.fault_sections["Rupture Index"] )
+        return self._fs_with_rates
 
     def set_props(
         self,

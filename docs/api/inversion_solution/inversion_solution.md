@@ -3,20 +3,23 @@
 ::: solvis.inversion_solution.inversion_solution.InversionSolution
     options:
        inherited_members: true
-       members:
-       	- from_archive
+       members: true
+        <!-- - IO -->
+
+
+<!--        	- from_archive
         - filter_solution
+        # from InversionSolutionFile ...
        	- to_archive
        	- archive
        	- archive_path
-        - from_archive
-        # from InversionSolutionFile
         - ruptures
         - rupture_rates
         - logic_tree_branch
         - fault_regime
         - indices
         - average_slips
+        # from Operations
         - section_target_slip_rates
         - section_participation_rates
         - fault_participation_rates
@@ -27,4 +30,4 @@
         - fault_sections_with_solution_slip_rates
         - rs_with_rupture_rates
         - ruptures_with_rupture_rates
-
+ -->

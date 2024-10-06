@@ -99,7 +99,7 @@ class FilterParentFaultIds:
         Returns:
             the parent_fault_ids.
         """
-        result = set(self._solution.fault_sections['ParentID'].tolist())
+        result = set(self._solution.IO.fault_sections['ParentID'].tolist())
         return result
 
     def for_parent_fault_names(self, parent_fault_names: Iterable[str]) -> Set[int]:
@@ -114,7 +114,7 @@ class FilterParentFaultIds:
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
         """
-        df0 = self._solution.fault_sections
+        df0 = self._solution.IO.fault_sections
         ids = df0[df0['ParentName'].isin(list(valid_parent_fault_names(self._solution, parent_fault_names)))][
             'ParentID'
         ].tolist()
@@ -129,7 +129,7 @@ class FilterParentFaultIds:
         Returns:
             The fault_ids matching the filter.
         """
-        df0 = self._solution.fault_sections
+        df0 = self._solution.IO.fault_sections
         ids = df0[df0['FaultID'].isin(list(fault_section_ids))]['ParentID'].unique().tolist()
         return set([int(id) for id in ids])
 
@@ -145,7 +145,7 @@ class FilterParentFaultIds:
         Returns:
             The parent_fault_ids matching the filter.
         """
-        # df0 = self._solution.rupture_sections
-        df0 = self._solution.fault_sections_with_rupture_rates
+        # df0 = self._solution.IO.rupture_sections
+        df0 = self._solution.IO.fault_sections_with_rupture_rates
         ids = df0[df0['Rupture Index'].isin(list(rupture_ids))].ParentID.unique().tolist()
         return set([int(id) for id in ids])

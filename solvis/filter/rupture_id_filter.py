@@ -63,7 +63,7 @@ class FilterRuptureIds(ChainableSetBase):
         Returns:
             A chainable set of all the rupture_ids.
         """
-        result = set(self._solution.ruptures['Rupture Index'].to_list())
+        result = set(self._solution.IO.ruptures['Rupture Index'].to_list())
         return self.new_chainable_set(result, self._solution)
 
     def for_named_faults(self, named_fault_names: Set[str]) -> ChainableSetBase:
@@ -118,7 +118,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         subsection_ids = self._filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
-        df0 = self._solution.rupture_sections
+        df0 = self._solution.IO.rupture_sections
 
         # TODO: this is needed because the rupture rate concept differs between IS and FSS classes
         rate_column = (
@@ -127,7 +127,7 @@ class FilterRuptureIds(ChainableSetBase):
             else "Annual Rate"
         )
         if self._drop_zero_rates:
-            df0 = df0.join(self._solution.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
+            df0 = df0.join(self._solution.IO.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner')[
                 [rate_column, "rupture", "section"]
             ]
             df0 = df0[df0[rate_column] > 0]
@@ -150,7 +150,7 @@ class FilterRuptureIds(ChainableSetBase):
         Returns:
             A chainable set of rupture_ids matching the filter.
         """
-        df0 = self._solution.rupture_sections
+        df0 = self._solution.IO.rupture_sections
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
@@ -159,9 +159,9 @@ class FilterRuptureIds(ChainableSetBase):
         """Helper method
         # TODO this dataframe could be cached?? And used by above??
         """
-        df_rr = self._solution.rupture_rates.drop(columns=["Rupture Index", "fault_system"])
+        df_rr = self._solution.IO.rupture_rates.drop(columns=["Rupture Index", "fault_system"])
         df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without "fault_system"
-        return self._solution.ruptures.join(df_rr, on=self._solution.ruptures["Rupture Index"], rsuffix='_r')
+        return self._solution.IO.ruptures.join(df_rr, on=self._solution.IO.ruptures["Rupture Index"], rsuffix='_r')
 
     def for_rupture_rate(
         self,
@@ -182,7 +182,7 @@ class FilterRuptureIds(ChainableSetBase):
         """
         index = "Rupture Index"
         if self._drop_zero_rates:
-            df0 = self._solution.ruptures_with_rupture_rates
+            df0 = self._solution.IO.ruptures_with_rupture_rates
         else:
             df0 = self._ruptures_with_and_without_rupture_rates()
 
@@ -216,7 +216,7 @@ class FilterRuptureIds(ChainableSetBase):
         """
         index = "Rupture Index"
         if self._drop_zero_rates:
-            df0 = self._solution.ruptures_with_rupture_rates
+            df0 = self._solution.IO.ruptures_with_rupture_rates
         else:
             df0 = self._ruptures_with_and_without_rupture_rates()
 
@@ -280,15 +280,15 @@ class FilterRuptureIds(ChainableSetBase):
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
         """
-        df0 = gpd.GeoDataFrame(self._solution.fault_sections)
+        df0 = gpd.GeoDataFrame(self._solution.IO.fault_sections)
         df0 = df0[df0['geometry'].intersects(polygon)]
 
         if self._drop_zero_rates:
             index = "Rupture Index"
-            df1 = self._solution.rs_with_rupture_rates
+            df1 = self._solution.IO.rs_with_rupture_rates
         else:
             index = "rupture"
-            df1 = self._solution.rupture_sections
+            df1 = self._solution.IO.rupture_sections
 
         df2 = df1.join(df0, 'section', how='inner')
         result = set(df2[index].unique())

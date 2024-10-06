@@ -48,7 +48,7 @@ class FilterSubsectionIds(ChainableSetBase):
         Returns:
             A chainable set of all the subsection_ids.
         """
-        result = set(self._solution.fault_sections.index.to_list())
+        result = set(self._solution.IO.fault_sections.index.to_list())
         return self.new_chainable_set(result, self._solution)
 
     def for_parent_fault_names(
@@ -79,7 +79,7 @@ class FilterSubsectionIds(ChainableSetBase):
         Returns:
             The fault_subsection_ids matching the filter.
         """
-        df0 = self._solution.fault_sections
+        df0 = self._solution.IO.fault_sections
         ids = df0[df0['ParentID'].isin(list(parent_fault_ids))]['FaultID'].tolist()
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, join_prior=join_prior)
@@ -95,7 +95,7 @@ class FilterSubsectionIds(ChainableSetBase):
         Returns:
             The fault_subsection_ids matching the filter.
         """
-        df0 = self._solution.rupture_sections
+        df0 = self._solution.IO.rupture_sections
         ids = df0[df0.rupture.isin(list(rupture_ids))].section.tolist()
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, join_prior=join_prior)
