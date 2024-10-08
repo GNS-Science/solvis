@@ -113,21 +113,21 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     def __init__(self) -> None:
         # self._init_props()
-        self._rates = None
-        self._ruptures = None
+        self._rates: Optional[pd.DataFrame] = None
+        self._ruptures: Optional[pd.DataFrame] = None
         self._rupture_props = None
-        self._indices = None
+        self._indices: Optional[pd.DataFrame] = None
         self._section_target_slip_rates = None
         self._fast_indices = None
-        self._rs_with_rupture_rates = None
-        self._fs_with_rates = None
-        self._fs_with_soln_rates = None
-        self._ruptures_with_rupture_rates = None
-        self._average_slips = None
+        self._rs_with_rupture_rates: Optional[pd.DataFrame] = None
+        self._fs_with_rates: Optional[pd.DataFrame] = None
+        self._fs_with_soln_rates: Optional[pd.DataFrame] = None
+        self._ruptures_with_rupture_rates: Optional[pd.DataFrame] = None
+        self._average_slips: Optional[pd.DataFrame] = None
         self._logic_tree_branch: List[Any] = []
         self._fault_regime: str = ''
-        self._fault_sections = None
-        self._rupture_sections = None
+        self._fault_sections: Optional[pd.DataFrame] = None
+        self._rupture_sections: Optional[gpd.GeoDataFrame] = None
         self._archive_path: Optional[Path] = None
         self._archive: Optional[io.BytesIO] = None
         # self._surface_builder: SolutionSurfacesBuilder
@@ -135,10 +135,10 @@ class InversionSolutionFile(InversionSolutionProtocol):
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
         # write out the `self` dataframes
         log.info("%s write_dataframes with fast_indices: %s" % (type(self), self._fast_indices is not None))
-        rates = reindex_dataframe(self._rates) if reindex else self._rates
-        rupts = reindex_dataframe(self._ruptures) if reindex else self._ruptures
-        indices = reindex_dataframe(self._indices) if reindex else self._indices
-        slips = reindex_dataframe(self._average_slips) if reindex else self._average_slips
+        rates = reindex_dataframe(self.rupture_rates) if reindex else self.rupture_rates
+        rupts = reindex_dataframe(self.ruptures) if reindex else self.ruptures
+        indices = reindex_dataframe(self.indices) if reindex else self.indices
+        slips = reindex_dataframe(self.average_slips) if reindex else self.average_slips
 
         data_to_zip_direct(zip_archive, rates.to_csv(index=reindex), self.RATES_PATH)
         data_to_zip_direct(zip_archive, rupts.to_csv(index=reindex), self.RUPTS_PATH)

@@ -4,11 +4,11 @@
     options:
        inherited_members: true
        members:
-       	- from_archive
+        - from_archive
         - filter_solution
-       	- to_archive
-       	- archive
-       	- archive_path
+        - to_archive
+        - archive
+        - archive_path
         - from_archive
         # from InversionSolutionFile
         - ruptures
@@ -27,4 +27,3 @@
         - fault_sections_with_solution_slip_rates
         - rs_with_rupture_rates
         - ruptures_with_rupture_rates
-

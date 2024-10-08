@@ -1,7 +1,7 @@
 import logging
 import time
 import warnings
-from typing import Iterable, List, Optional, Set
+from typing import TYPE_CHECKING, Iterable, List, Optional, Set
 
 import geopandas as gpd
 import pandas as pd
@@ -15,7 +15,16 @@ from solvis.geometry import circle_polygon
 from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
 
-# from .inversion_solution import InversionSolution
+# from typing import TypeVar, Callable, Type
+
+
+# import pandera as pda
+# from pandera.typing import Index, Series, DataFrame
+# from pandera import Column, DataFrameSchema, Check
+
+if TYPE_CHECKING:
+    from pandera.typing import DataFrame
+    from .dataframe_models import FaultSectionSchema, ParentFaultParticipationSchema, SectionParticipationSchema, RuptureSectionSchema
 
 log = logging.getLogger(__name__)
 
@@ -36,12 +45,12 @@ class InversionSolutionOperations(InversionSolutionProtocol):
      - get_solution_slip_rates_for_parent
     """
 
-    _fault_sections: gpd.GeoDataFrame
-    _fs_with_rates: pd.DataFrame
-    _fs_with_soln_rates: pd.DataFrame
-    _rs_with_rupture_rates: pd.DataFrame
-    _rupture_sections: pd.DataFrame
-    _ruptures_with_rupture_rates: pd.DataFrame
+    _fault_sections: Optional[gpd.GeoDataFrame]
+    _fs_with_rates: Optional[pd.DataFrame]
+    _fs_with_soln_rates: Optional[pd.DataFrame]
+    _rs_with_rupture_rates: Optional[pd.DataFrame]
+    _rupture_sections: Optional[pd.DataFrame]
+    _ruptures_with_rupture_rates: Optional[pd.DataFrame]
 
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         return SolutionSurfacesBuilder(self).fault_surfaces()
@@ -51,13 +60,18 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
     def section_participation_rates(
         self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
-    ):
-        """
-        get the 'participation rate' for fault subsections.
+    ) -> 'DataFrame[SectionParticipationSchema]':
+        """Calculate the 'participation rate' for fault subsections.
 
-        That is, the sum of rupture rates on the requested fault sections.
-        """
+        Participation rate is the sum of rupture rate on each fault sections.
 
+        Args:
+            subsection_ids: the list of subsection_ids to return
+            rupture_ids: participation only for these ruptures (`conditional participation`).
+
+        Returns:
+            pd.DataFrame: participation rates dataframe
+        """
         rate_column = "Annual Rate" if self.__class__.__name__ == "InversionSolution" else "rate_weighted_mean"
 
         t0 = time.perf_counter()
@@ -79,18 +93,25 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         # result = df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
         result = df0[["section", "Rupture Index", rate_column]].groupby("section").agg('sum')
-
+        result = result[[rate_column]]
         t3 = time.perf_counter()
         log.info(f'dataframe aggregation took : {t3-t2} seconds')
-        return result.rename(columns={rate_column: 'participation_rate'})
+        result = result.rename(columns={rate_column: 'participation_rate'})
+        return result
 
     def fault_participation_rates(
         self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
-    ):
-        """
-        get the 'participation rate' for parent faults.
+    ) -> 'DataFrame[ParentFaultParticipationSchema]':
+        """Calculate the 'participation rate' for parent faults.
 
-        That is, the sum of rupture rates on the requested parent faults.
+        Participation rate is the sum of rupture rate on each parent fault.
+
+        Args:
+            parent_fault_ids: the list of parent_fault_ids to return
+            rupture_ids: participation only for these ruptures (`conditional participation`).
+
+        Returns:
+            pd.DataFrame: participation rates dataframe
         """
         subsection_ids = FilterSubsectionIds(self).for_parent_fault_ids(parent_fault_ids) if parent_fault_ids else None
 
@@ -103,7 +124,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
 
         df1 = df0.join(self.fault_sections[['ParentID']], on='section')
-        return (
+        result = (
             df1[["ParentID", "Rupture Index", rate_column]]
             .rename(columns={rate_column: 'participation_rate'})
             .reset_index(drop=True)
@@ -112,6 +133,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             .groupby("ParentID")
             .agg('sum')
         )
+        return result
 
     def _geodataframe_from_geojson(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
@@ -119,10 +141,14 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return prop
 
     @property
-    def fault_sections(self) -> gpd.GeoDataFrame:
+    def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
         """
         Get the fault sections and replace slip rates from rupture set with target rates from inverison.
         Cache result.
+
+        Returns:
+            pd.DataFrame: participation rates dataframe
+
         """
         if self._fault_sections is not None:
             return self._fault_sections
@@ -141,7 +167,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return self._fault_sections
 
     @property
-    def rupture_sections(self) -> gpd.GeoDataFrame:
+    def rupture_sections(self) -> 'DataFrame[RuptureSectionSchema]':
 
         if self._rupture_sections is not None:
             return self._rupture_sections  # pragma: no cover
@@ -149,7 +175,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         self._rupture_sections = self.build_rupture_sections()
         return self._rupture_sections
 
-    def build_rupture_sections(self) -> gpd.GeoDataFrame:
+    def build_rupture_sections(self) -> 'DataFrame[RuptureSectionSchema]':
 
         tic = time.perf_counter()
 

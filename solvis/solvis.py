@@ -8,7 +8,7 @@ in the 2nd generation Solvis API (version == 0.13.0)
 # from functools import partial
 import warnings
 from pathlib import Path
-from typing import Callable, Iterable, List, Union
+from typing import Callable, Iterable, List, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -26,7 +26,7 @@ def parent_fault_names(
 
 
 # filtered_rupture_sections (with geometry)
-def section_participation(sol: InversionSolutionProtocol, df_ruptures: pd.DataFrame = None):
+def section_participation(sol: InversionSolutionProtocol, df_ruptures: Optional[pd.DataFrame] = None):
     warnings.warn("Please use InversionSolutionProtocol participation methods instead.", DeprecationWarning)
     rupture_ids = df_ruptures['Rupture Index'].tolist() if df_ruptures else None
     return sol.section_participation_rates(rupture_ids=rupture_ids)

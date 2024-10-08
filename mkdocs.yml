@@ -21,10 +21,11 @@ nav:
         - chainable_set_base: api/filter/chainable_set_base.md
       - inversion_solution:
         - api/inversion_solution/index.md
-        - InversionSolution: api/inversion_solution/inversion_solution.md
-        - FaultSystemSolution: api/inversion_solution/fault_system_solution.md
-        - CompositeSolution: api/inversion_solution/composite_solution.md
-        - Support modules:
+        - Dataframe Models: api/inversion_solution/dataframe_models.md
+        - Inversion Solution: api/inversion_solution/inversion_solution.md
+        - Fault System Solution: api/inversion_solution/fault_system_solution.md
+        - Composite Solution: api/inversion_solution/composite_solution.md
+        - Supporting modules:
           - api/inversion_solution/fault_system_solution_file.md
           - api/inversion_solution/inversion_solution_file.md
           - api/inversion_solution/inversion_solution_operations.md

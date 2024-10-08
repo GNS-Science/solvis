@@ -8,7 +8,7 @@ import io
 import logging
 import zipfile
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 import geopandas as gpd
 import numpy.typing as npt
@@ -31,8 +31,8 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
     are  affected by the aggregation.
     """
 
-    _composite_rates: pd.DataFrame = ...
-    _rs_with_composite_rupture_rates: pd.DataFrame = None
+    _composite_rates: Optional[pd.DataFrame] = None
+    _rs_with_composite_rupture_rates: Optional[pd.DataFrame] = None
 
     def set_props(
         self, composite_rates, aggregate_rates, ruptures, indices, fault_sections, fault_regime, average_slips
