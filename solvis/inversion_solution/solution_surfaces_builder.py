@@ -5,7 +5,7 @@ import geopandas as gpd
 from shapely import get_coordinates
 from shapely.geometry import LineString, Point
 
-from solvis.geometry import create_surface, dip_direction
+from solvis.geometry import create_surface, dip_direction, fault_surface_3d
 
 from .typing import InversionSolutionProtocol
 
@@ -28,7 +28,10 @@ def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataF
 
 
 def create_crustal_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    return create_surface(
+    # return create_surface(
+    #     section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
+    # )
+    return fault_surface_3d(
         section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
     )
 

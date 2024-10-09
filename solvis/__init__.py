@@ -1,21 +1,18 @@
 """
 The base Solvis analysis package.
 
-For convenience, importing this package will also import the following functions
-and classes by default:
+Classes:
+ InversionSolution: handles the standard output of an opensha grand inversion.
+ FaultSystemSolution: a aggregation of multiple InversionSolutions sharing the same rupture set.
+ CompositeSolution: the container class for complete model and logic tree.
 
-- From [solvis.geometry][]:
-    - [`circle_polygon`][solvis.geometry.circle_polygon]
-- From [solvis.inversion_solution][]:
-    - [`CompositeSolution`][solvis.inversion_solution.CompositeSolution]
-    - [`FaultSystemSolution`][solvis.inversion_solution.FaultSystemSolution]
-    - [`InversionSolution`][solvis.inversion_solution.InversionSolution]
-- From [solvis.solvis][]:
-    - [`export_geojson`][solvis.solvis.export_geojson]
-    - [`mfd_hist`][solvis.solvis.mfd_hist]
-    - [`parent_fault_names`][solvis.solvis.parent_fault_names]
-    - [`rupt_ids_above_rate`][solvis.solvis.rupt_ids_above_rate]
-    - [`section_participation`][solvis.solvis.section_participation]
+Methods:
+ circle_polygon: a polygon builder.
+ export_geojson: solvis.solvis.export_geojson
+ mfd_hist: [solvis.solvis.mfd_hist]
+ parent_fault_names: [solvis.solvis.parent_fault_names] (deprecated)
+ rupt_ids_above_rate: solvis.solvis.rupt_ids_above_rate] (deprecated)
+ section_participation: solvis.solvis.section_participation] (deprecated)
 
 Example:
     ```py
@@ -24,9 +21,8 @@ Example:
     <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
     ```
 """
-
 from .geometry import circle_polygon
 from .inversion_solution import CompositeSolution, FaultSystemSolution, InversionSolution
 from .solvis import export_geojson, mfd_hist, parent_fault_names, rupt_ids_above_rate, section_participation
 
-__version__ = '0.12.3'
+__version__ = '0.13.0'
