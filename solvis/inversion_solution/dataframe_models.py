@@ -283,3 +283,11 @@ class RuptureRateSchema(pda.DataFrameModel):
     index: Index[pd.Int64Dtype]
     rupture_id: Series[pd.UInt32Dtype] = pda.Field(alias='Rupture Index')
     annual_rate: Series[pd.Float32Dtype] = pda.Field(alias='Annual Rate')
+
+
+class RuptureSchema(RuptureBaseSchema):
+    class Config:
+        strict = True
+
+    index: Index[pd.Int64Dtype]
+    rupture_id: Series[pd.UInt32Dtype] = pda.Field(alias='Rupture Index')

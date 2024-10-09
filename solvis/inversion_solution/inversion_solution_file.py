@@ -23,7 +23,7 @@ from .typing import InversionSolutionProtocol
 if TYPE_CHECKING:
     from pandera.typing import DataFrame
 
-    from .dataframe_models import RuptureRateSchema
+    from .dataframe_models import RuptureRateSchema, RuptureSchema
 
 log = logging.getLogger(__name__)
 
@@ -273,12 +273,13 @@ class InversionSolutionFile(InversionSolutionProtocol):
         return cast('DataFrame[RuptureRateSchema]', df)
 
     @property
-    def ruptures(self) -> gpd.GeoDataFrame:
+    def ruptures(self) -> 'DataFrame[RuptureSchema]':
         """Ruptures ruptres."""
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'
-        return self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH, dtypes)
+        df = self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH, dtypes)
+        return cast('DataFrame[RuptureSchema]', df)
 
     @property
     def indices(self) -> gpd.GeoDataFrame:

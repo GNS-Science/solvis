@@ -9,6 +9,7 @@ from solvis.inversion_solution.dataframe_models import (
     FSS_RupturesWithRuptureRatesSchema,
     ParentFaultParticipationSchema,
     RuptureRateSchema,
+    RuptureSchema,
     RuptureSectionSchema,
     RuptureSectionsWithRuptureRatesSchema,
     RupturesWithRuptureRatesSchema,
@@ -95,3 +96,37 @@ def test_IS_ONLY_rupture_rates(crustal_solution_fixture):
     df = crustal_solution_fixture.rupture_rates
     print(df)
     RuptureRateSchema.validate(df)
+
+
+@pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
+def test_ruptures_model(request, soln_fixture):
+    df = request.getfixturevalue(soln_fixture).ruptures
+    print(df)
+    RuptureSchema.validate(df)
+
+
+@pytest.mark.skip('who would ever need this in this form? Plus it`s awkward to model.')
+@pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
+def test_indices_model(request, soln_fixture):
+    df = request.getfixturevalue(soln_fixture).indices
+    print(df)
+    assert 0
+    # RuptureSchema.validate(df)
+
+
+@pytest.mark.skip('review if we should expose this.')
+@pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
+def test_average_slips_model(request, soln_fixture):
+    df = request.getfixturevalue(soln_fixture).average_slips
+    print(df)
+    assert 0
+    # RuptureSchema.validate(df)
+
+
+@pytest.mark.skip('review if we should expose this.')
+@pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
+def test_section_target_slip_rates_model(request, soln_fixture):
+    df = request.getfixturevalue(soln_fixture).section_target_slip_rates
+    print(df)
+    assert 0
+    # RuptureSchema.validate(df)
