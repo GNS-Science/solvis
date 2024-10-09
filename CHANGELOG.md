@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.13.0] 2024-09
+## [0.13.0] 2024-*
 
 ## Changed
  - drop_zero_rate differentiates between FSS and IS;
@@ -19,6 +19,7 @@
  - participation performance testing;
  - added participation methods to fault_system_solution
  - a simple rupture grouping algorithm (can this be a different type of filter??);
+ - `pandera` library for dataframe model validations and better docs
 
 ## [0.12.3] 2024-07-04
 bump version to verify new pypi workflow

@@ -274,7 +274,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def ruptures(self) -> 'DataFrame[RuptureSchema]':
-        """Ruptures ruptres."""
+        """Get a dataframe containing ruptures"""
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'
