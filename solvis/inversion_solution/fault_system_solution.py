@@ -19,8 +19,6 @@ from .fault_system_solution_file import FaultSystemSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .typing import BranchSolutionProtocol, ModelLogicTreeBranch
 
-# from solvis.filter.rupture_id_filter import FilterRuptureIds
-
 log = logging.getLogger(__name__)
 
 
@@ -33,6 +31,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
 
     _composite_rates: Optional[pd.DataFrame] = None
     _rs_with_composite_rupture_rates: Optional[pd.DataFrame] = None
+    _fast_indices: Optional[pd.DataFrame] = None
 
     def set_props(
         self, composite_rates, aggregate_rates, ruptures, indices, fault_sections, fault_regime, average_slips

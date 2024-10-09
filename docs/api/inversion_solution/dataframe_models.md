@@ -15,11 +15,23 @@
     options:
        members: false
 
+::: solvis.inversion_solution.dataframe_models.FaultSectionWithSolutionSlipRate
+    options:
+       members: false
+
 ::: solvis.inversion_solution.dataframe_models.ParentFaultParticipationSchema
     options:
        members: false
 
 ::: solvis.inversion_solution.dataframe_models.RuptureSectionSchema
+    options:
+       members: false
+
+::: solvis.inversion_solution.dataframe_models.RuptureSectionsWithRuptureRatesSchema
+    options:
+       members: false
+
+::: solvis.inversion_solution.dataframe_models.RupturesWithRuptureRatesSchema
     options:
        members: false
 

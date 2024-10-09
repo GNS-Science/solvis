@@ -31,6 +31,7 @@ class FaultSystemSolutionFile(InversionSolutionFile):
 
     _composite_rates: Optional[pd.DataFrame] = None
     _aggregate_rates: Optional[pd.DataFrame] = None
+    _fast_indices: Optional[pd.DataFrame] = None
 
     COMPOSITE_RATES_PATH = 'composite_rates.csv'
     AGGREGATE_RATES_PATH = 'aggregate_rates.csv'

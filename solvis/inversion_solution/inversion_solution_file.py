@@ -4,8 +4,7 @@ An InversionSolution Archive file helper.
 This module handles files having the OpenSHA InversionSolution archive format.
 
 It provides conversions from the original file formats to pandas dataframe instances
-with cachign and some error handling.
-
+with caching and some error handling.
 """
 import io
 import json
@@ -118,7 +117,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._rupture_props = None
         self._indices: Optional[pd.DataFrame] = None
         self._section_target_slip_rates = None
-        self._fast_indices = None
+        # self._fast_indices = None
         self._rs_with_rupture_rates: Optional[pd.DataFrame] = None
         self._fs_with_rates: Optional[pd.DataFrame] = None
         self._fs_with_soln_rates: Optional[pd.DataFrame] = None
@@ -134,7 +133,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
         # write out the `self` dataframes
-        log.info("%s write_dataframes with fast_indices: %s" % (type(self), self._fast_indices is not None))
+        # log.info("%s write_dataframes with fast_indices: %s" % (type(self), self._fast_indices is not None))
         rates = reindex_dataframe(self.rupture_rates) if reindex else self.rupture_rates
         rupts = reindex_dataframe(self.ruptures) if reindex else self.ruptures
         indices = reindex_dataframe(self.indices) if reindex else self.indices
