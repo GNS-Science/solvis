@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Iterable, List, Mapping, Optional, Protocol, Union
 
 import geopandas as gpd
-import numpy.typing as npt
 
 
 class InversionSolutionProtocol(Protocol):
@@ -77,7 +76,7 @@ class InversionSolutionProtocol(Protocol):
         pass
 
     @staticmethod
-    def filter_solution(solution: Any, rupture_ids: npt.ArrayLike) -> Any:
+    def filter_solution(solution: Any, rupture_ids: Iterable) -> Any:
         """return a new solution containing just the ruptures specified"""
         raise NotImplementedError()
 

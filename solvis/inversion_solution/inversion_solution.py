@@ -20,9 +20,7 @@ Examples:
 import io
 import zipfile
 from pathlib import Path
-from typing import Union
-
-import numpy.typing as npt
+from typing import Iterable, Union
 
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
@@ -63,7 +61,7 @@ class InversionSolution(InversionSolutionFile, InversionSolutionOperations):
         return new_solution
 
     @staticmethod
-    def filter_solution(solution: 'InversionSolution', rupture_ids: npt.ArrayLike) -> 'InversionSolution':
+    def filter_solution(solution: 'InversionSolution', rupture_ids: Iterable) -> 'InversionSolution':
         """
         Filter an InversionSolution by a subset of its rupture IDs, returing a new smaller InversionSolution.
 

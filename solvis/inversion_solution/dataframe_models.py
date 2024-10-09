@@ -273,3 +273,13 @@ class FSS_RuptureSectionsWithRuptureRatesSchema(RuptureBaseSchema):
 
     # from RuptureSectionSchema
     section: Series[pd.Int32Dtype]
+
+
+### Below are from InversionSolutionFile
+class RuptureRateSchema(pda.DataFrameModel):
+    class Config:
+        strict = True
+
+    index: Index[pd.Int64Dtype]
+    rupture_id: Series[pd.UInt32Dtype] = pda.Field(alias='Rupture Index')
+    annual_rate: Series[pd.Float32Dtype] = pda.Field(alias='Annual Rate')

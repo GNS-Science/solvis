@@ -13,12 +13,17 @@ import time
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, cast
 
 import geopandas as gpd
 import pandas as pd
 
 from .typing import InversionSolutionProtocol
+
+if TYPE_CHECKING:
+    from pandera.typing import DataFrame
+
+    from .dataframe_models import RuptureRateSchema
 
 log = logging.getLogger(__name__)
 
@@ -256,7 +261,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
         return self._fault_regime
 
     @property
-    def rupture_rates(self) -> gpd.GeoDataFrame:
+    def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
         """Get a dataframe containing ruptures and their rates"""
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
@@ -264,7 +269,8 @@ class InversionSolutionFile(InversionSolutionProtocol):
         dtypes["fault_system"] = pd.CategoricalDtype()
         # dtypes["Annual Rate"] = 'Float32' # pd.Float32Dtype()
         # return pd.read_csv(zipfile.Path(self._archive_path, at=self.RATES_PATH).open(), dtype=dtypes)
-        return self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
+        df = self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
+        return cast('DataFrame[RuptureRateSchema]', df)
 
     @property
     def ruptures(self) -> gpd.GeoDataFrame:

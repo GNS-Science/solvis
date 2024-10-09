@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Iterable, Optional, Union
 
 import geopandas as gpd
-import numpy.typing as npt
 import nzshm_model as nm
 import pandas as pd
 
@@ -71,7 +70,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         return new_solution
 
     @staticmethod
-    def filter_solution(solution: 'FaultSystemSolution', rupture_ids: npt.ArrayLike) -> 'FaultSystemSolution':
+    def filter_solution(solution: 'FaultSystemSolution', rupture_ids: Iterable) -> 'FaultSystemSolution':
         rr = solution.ruptures
         cr = solution.composite_rates
         ar = solution.aggregate_rates

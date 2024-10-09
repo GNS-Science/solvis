@@ -8,6 +8,7 @@ from solvis.inversion_solution.dataframe_models import (
     FSS_RuptureSectionsWithRuptureRatesSchema,
     FSS_RupturesWithRuptureRatesSchema,
     ParentFaultParticipationSchema,
+    RuptureRateSchema,
     RuptureSectionSchema,
     RuptureSectionsWithRuptureRatesSchema,
     RupturesWithRuptureRatesSchema,
@@ -87,3 +88,10 @@ def test_FSS_ONLY_rs_with_rupture_rates(crustal_fixture):
     print()
     print(FSS_RuptureSectionsWithRuptureRatesSchema.to_schema())
     FSS_RuptureSectionsWithRuptureRatesSchema.validate(df)
+
+
+### Below are from InversionSolutionFile
+def test_IS_ONLY_rupture_rates(crustal_solution_fixture):
+    df = crustal_solution_fixture.rupture_rates
+    print(df)
+    RuptureRateSchema.validate(df)
