@@ -13,7 +13,7 @@ from solvis import CompositeSolution, FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
 slt = current_model.source_logic_tree
-fslt = slt.fault_system_lts[0]  # PUY is used always , just for the 3 solution_ids
+fslt = slt.branch_sets[0]  # PUY is used always , just for the 3 solution_ids
 
 
 FSR_COLUMNS_A = 26
@@ -90,14 +90,14 @@ def test_composite_serialisation(small_archives):
 
     v1_0_0 = nm.get_model_version('NSHM_v1.0.0')
     slt = v1_0_0.source_logic_tree
-    print(slt.fault_system_lts[0])
+    print(slt.branch_sets[0])
 
     # fudge the model branches because we have too few fixtures
     for idx in [1, 2]:
-        slt.fault_system_lts[idx].branches = deepcopy(slt.fault_system_lts[0].branches)
+        slt.branch_sets[idx].branches = deepcopy(slt.branch_sets[0].branches)
 
     composite = CompositeSolution(slt)  # create the new composite solution
-    for fault_system_lt in slt.fault_system_lts:
+    for fault_system_lt in slt.branch_sets:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
             solutions = list(
                 branch_solutions(
@@ -146,12 +146,12 @@ def test_composite_serialisation(small_archives):
 
 #         v1_0_0 = nm.get_model_version('NSHM_1.0.0')
 #         slt = v1_0_0.source_logic_tree()
-#         print(slt.fault_system_lts[0])
+#         print(slt.branch_sets[0])
 
 #         # for idx in [1, 2]:
-#         #     slt.fault_system_lts[idx].branches = deepcopy(slt.fault_system_lts[0].branches)
+#         #     slt.branch_sets[idx].branches = deepcopy(slt.branch_sets[0].branches)
 
-#         # for fault_system_lt in slt.fault_system_lts:
+#         # for fault_system_lt in slt.branch_sets:
 #         #     if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
 #         #         print('extending', fault_system_lt.short_name)
 #         #         solutions.extend(
