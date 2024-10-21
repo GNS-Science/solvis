@@ -38,3 +38,7 @@
 ::: solvis.inversion_solution.dataframe_models.SectionParticipationSchema
     options:
        members: false
+
+::: solvis.inversion_solution.dataframe_models.RuptureRateSchema
+    options:
+       members: false

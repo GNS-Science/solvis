@@ -150,8 +150,18 @@ class InversionSolutionFile(InversionSolutionProtocol):
         data_to_zip_direct(zip_archive, slips.to_csv(index=reindex), self.AVG_SLIPS_PATH)
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
-        """
-        Writes the current solution to a new zip archive, cloning data from a base archive
+        """Write the current solution to a new zip archive.
+
+        Optionally cloning data from a base archive.
+
+        In non-compatible mode (the default) rupture ids may not be a contiguous, 0-based sequence,
+        so the archive will not be suitable for use with opensha. Compatible mode will reindex rupture tables,
+        so that the original rutpure ids are lost.
+
+        Args:
+            archive_path: path to write to.
+            base_archive_path: path to an InversionSolution archive to clone data from.
+            compat: if True reindex the dataframes so that the archive remains compatible with opensha.
         """
         if base_archive_path is None:
             # try to use this archive, rather than a base archive
@@ -173,8 +183,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
             zout.writestr(item, buffer)
 
         """
-        Non-compatible mode does not reindex the tables from 0 as required by opensha. So it cannot be
-        used to produce opensha reports etc.
+
         """
         if compat:
             self._write_dataframes(zout, reindex=True)
@@ -185,11 +194,16 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def archive_path(self) -> Optional[Path]:
+        """The path of the archive (if any).
+
+        Returns:
+            filepath: the file system path.
+        """
         return self._archive_path
 
     @property
     def archive(self) -> zipfile.ZipFile:
-        """Get an in-memory archive instance."""
+        """An in-memory archive instance."""
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
         archive = None
         if self._archive is None:
@@ -220,8 +234,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def logic_tree_branch(self) -> list:
-        """
-        Get values from the opensha `logic_tree_branch` data file.
+        """Values from the opensha `logic_tree_branch` data file.
 
         Returns:
             list of value objects
@@ -238,8 +251,7 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def fault_regime(self) -> str:
-        """
-        get the fault regime as defined in the opensha logic_tree_branch data file.
+        """The fault regime as defined in the opensha logic_tree_branch data file.
 
         Returns:
             `CRUSTAL` or `SUBDUCTION` respectively.
@@ -262,7 +274,11 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
-        """Get a dataframe containing ruptures and their rates"""
+        """A dataframe containing ruptures and their rates
+
+        Returns:
+            pd.DataFrame: rupture rates dataframe
+        """
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
@@ -274,7 +290,11 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def ruptures(self) -> 'DataFrame[RuptureSchema]':
-        """Get a dataframe containing ruptures"""
+        """A dataframe containing ruptures
+
+        Returns:
+            pd.DataFrame: ruptured dataframe
+        """
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'

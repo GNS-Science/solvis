@@ -277,6 +277,14 @@ class FSS_RuptureSectionsWithRuptureRatesSchema(RuptureBaseSchema):
 
 ### Below are from InversionSolutionFile
 class RuptureRateSchema(pda.DataFrameModel):
+    """A Dataframe schema for `InversionSolutionFile.rupture_rates`
+
+    Attributes:
+     index: unique index on rupture_id.
+     rupture_id: the id of each rupture
+     annual_rate: the rupture rate
+    """
+
     class Config:
         strict = True
 

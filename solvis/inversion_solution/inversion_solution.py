@@ -10,10 +10,10 @@ Examples:
     ```py
     >>> solution = solvis.InversionSolution.from_archive(filename)
     >>>
-    >>> rids = solvis.filter.FilterRuptureIds(solution)\\
+    >>> rupture_ids = solvis.filter.FilterRuptureIds(solution)\\
             .for_magnitude(min_mag=5.75, max_mag=6.25)
     >>>
-    >>> rates = solution.section_participation_rates(rupture_ids=rids)
+    >>> rates = solution.section_participation_rates(rupture_ids)
     >>> rates
     ```
 """
@@ -100,7 +100,7 @@ class BranchInversionSolution(InversionSolution):
 
     Todo:
         - can this functionality be done more simply and/or
-        - can we make better use of latest `nzshm_model` and it's dataclasses.
+        - can we make better use of latest `nzshm_model` and its' dataclasses.
 
     """
 
