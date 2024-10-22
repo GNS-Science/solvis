@@ -113,11 +113,12 @@ class CompositeSolution(CompositeSolutionOperations):
                 rate_weighted_mean
         """
         all = [
-            gpd.GeoDataFrame(sol.fault_sections_with_rupture_rates).to_crs("EPSG:4326")
+            sol.fault_sections_with_rupture_rates
             for sol in self._solutions.values()
         ]
+        print(all)
         all_df = pd.concat(all, ignore_index=True)
-        return all_df
+        return gpd.GeoDataFrame(all_df).to_crs("EPSG:4326")
 
     def to_archive(self, archive_path: Union[Path, str]):
         """Serialize a CompositeSolution instance to a zip archive.

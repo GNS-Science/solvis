@@ -82,8 +82,8 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     # print("NEW DF", new_df)
     return new_df
 
-
-class InversionSolutionFile(InversionSolutionProtocol):
+#InversionSolutionProtocol
+class InversionSolutionFile():
     """
     Class to handle the OpenSHA modular archive file form.
 
@@ -123,10 +123,10 @@ class InversionSolutionFile(InversionSolutionProtocol):
         self._indices: Optional[pd.DataFrame] = None
         self._section_target_slip_rates = None
         # self._fast_indices = None
-        self._rs_with_rupture_rates: Optional[pd.DataFrame] = None
+        ## self._rs_with_rupture_rates: Optional[pd.DataFrame] = None
         self._fs_with_rates: Optional[pd.DataFrame] = None
         self._fs_with_soln_rates: Optional[pd.DataFrame] = None
-        self._ruptures_with_rupture_rates: Optional[pd.DataFrame] = None
+        ## self._ruptures_with_rupture_rates: Optional[pd.DataFrame] = None
         self._average_slips: Optional[pd.DataFrame] = None
         self._logic_tree_branch: List[Any] = []
         self._fault_regime: str = ''
@@ -232,6 +232,37 @@ class InversionSolutionFile(InversionSolutionProtocol):
             log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
         return prop
 
+
+    def _geodataframe_from_geojson(self, prop, path):
+        if not isinstance(prop, pd.DataFrame):
+            prop = gpd.read_file(self.archive.open(path))
+        return prop
+
+    @property
+    def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
+        """
+        Get the fault sections and replace slip rates from rupture set with target rates from inverison.
+        Cache result.
+
+        Returns:
+            pd.DataFrame: participation rates dataframe
+        """
+        if self._fault_sections is not None:
+            return self._fault_sections
+
+        tic = time.perf_counter()
+        self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
+        self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
+        mapper = {
+            "Slip Rate (m/yr)": "Target Slip Rate",
+            "Slip Rate Standard Deviation (m/yr)": "Target Slip Rate StdDev",
+        }
+        self._fault_sections.rename(columns=mapper, inplace=True)
+        toc = time.perf_counter()
+        log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
+        return self._fault_sections
+
     @property
     def logic_tree_branch(self) -> list:
         """Values from the opensha `logic_tree_branch` data file.
@@ -274,11 +305,6 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
-        """A dataframe containing ruptures and their rates
-
-        Returns:
-            pd.DataFrame: rupture rates dataframe
-        """
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
@@ -290,11 +316,6 @@ class InversionSolutionFile(InversionSolutionProtocol):
 
     @property
     def ruptures(self) -> 'DataFrame[RuptureSchema]':
-        """A dataframe containing ruptures
-
-        Returns:
-            pd.DataFrame: ruptured dataframe
-        """
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
         # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'
