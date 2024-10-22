@@ -18,6 +18,13 @@ from solvis.inversion_solution.dataframe_models import (
 
 
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
+def test_model(request, soln_fixture):
+    soln = request.getfixturevalue(soln_fixture)
+    print(soln)
+    assert 0
+
+
+@pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
 def test_section_participation_rates_model(request, soln_fixture):
     rates = request.getfixturevalue(soln_fixture).section_participation_rates(range(10))
     print(rates)
