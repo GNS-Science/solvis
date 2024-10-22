@@ -25,9 +25,14 @@ from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
 from .typing import ModelLogicTreeBranch, InversionSolutionProtocol
 
-from inspect import getmembers, isfunction, ismethod
+from inspect import getmembers
 
 def inherit_docstrings(cls):
+    """ A decorator function hoisting docstrings from superclass methods
+
+    taken from: https://stackoverflow.com/a/17393254
+    see also: https://github.com/rcmdnk/inherit-docstring for a pypi package
+    """
     for name, method in getmembers(cls, lambda o: isinstance(o, property)):
         # print(f"inherit_docstrings {method} {name}")
         if method.__doc__: continue
@@ -45,7 +50,6 @@ class InversionSolution(InversionSolutionProtocol):
      from_archive: deserialise an instance from zip archive.
      filter_solution: get a new InversionSolution instance, filtered by rupture ids.
      to_archive: serialise an instance to a zip archive.
-
     """
 
     def __init__(self, solution_file: Optional[InversionSolutionFile] = None):
@@ -54,9 +58,29 @@ class InversionSolution(InversionSolutionProtocol):
         self._dataframe_operations = InversionSolutionOperations(self._solution_file)
 
     @property
-    def model(self):
+    def model(self) ->InversionSolutionOperations:
+        """provides access to the pandas dataframes API model of the solution
+
+        Returns:
+            model: an instance of InversionSolutionOperation class
+        """
         return self._dataframe_operations
 
+    @property
+    def solution_file(self) -> Optional[InversionSolutionFile]:
+        """
+        An InversionSolutionFile instance
+
+        Returns:
+            instance: the InversionSolutionFile
+        """
+        return self._solution_file
+
+    ###
+    # These attrbutes are 'hoisted' from the _solution_file isntance
+    #
+    # those that return dataframes may be migrated to the model -> InversionSolutionOperations
+    ####
     @property
     def average_slips(self):
         return self._solution_file.average_slips
@@ -78,16 +102,6 @@ class InversionSolution(InversionSolutionProtocol):
         return self._solution_file.logic_tree_branch
 
     @property
-    def solution_file(self) -> Optional[InversionSolutionFile]:
-        """
-        An InversionSolutionFile instance
-
-        Returns:
-            instance: the InversionSolutionFile
-        """
-        return self._solution_file
-
-    @property
     def indices(self):
         return self._solution_file.indices
 
@@ -103,6 +117,11 @@ class InversionSolution(InversionSolutionProtocol):
         """Write the current solution to a new zip archive.
         """
         return self._solution_file.to_archive(archive_path, base_archive_path, compat)
+
+    ###
+    # End 'hoisted' attributes
+    ###
+
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':
