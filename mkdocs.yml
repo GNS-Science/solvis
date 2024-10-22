@@ -104,6 +104,12 @@ plugins:
             annotations_path: source
             # show_source: true
 
+            extensions:
+            - pydantic: {schema: true}
+            - solvis/dochelper/extension.py:DynamicDocstrings:
+                object_paths: [solvis.inversion_solution.inversion_solution.InversionSolution]
+
+
 extra:
   social:
     - icon: fontawesome/brands/github

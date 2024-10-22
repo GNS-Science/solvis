@@ -75,9 +75,6 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         df = self._dataframe_from_csv(self._composite_rates, self.COMPOSITE_RATES_PATH, dtypes)
         return df.set_index(["solution_id", "Rupture Index"], drop=False)
 
-    @property
-    def rupture_rates(self) -> gpd.GeoDataFrame:
-        return self.aggregate_rates
 
     @property
     def aggregate_rates(self) -> gpd.GeoDataFrame:

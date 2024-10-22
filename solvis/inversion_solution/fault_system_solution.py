@@ -20,17 +20,20 @@ from .typing import BranchSolutionProtocol, ModelLogicTreeBranch
 
 log = logging.getLogger(__name__)
 
-
-class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
+class FaultSystemSolution(InversionSolutionOperations):
     """A class that aggregates InversionSolution instances sharing a common OpenSHA RuptureSet.
 
     The class is largely interchangeable with InversionSolution, as only rupture rates
     are  affected by the aggregation.
     """
 
-    _composite_rates: Optional[pd.DataFrame] = None
-    _rs_with_composite_rupture_rates: Optional[pd.DataFrame] = None
+    # _composite_rates: Optional[pd.DataFrame] = None
+    # _rs_with_composite_rupture_rates: Optional[pd.DataFrame] = None
     _fast_indices: Optional[pd.DataFrame] = None
+
+    def __init__(self, solution_file: Optional[FaultSystemSolutionFile] = None):
+        self._solution_file = solution_file or FaultSystemSolutionFile()
+        super().__init__(self._solution_file)
 
     def set_props(
         self, composite_rates, aggregate_rates, ruptures, indices, fault_sections, fault_regime, average_slips
@@ -50,8 +53,56 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         )
         self._rates = rates
 
+    @property
+    def aggregate_rates(self):
+        return self._aggregate_rates
+
+    @property
+    def composite_rates(self):
+        return self._solution_file._composite_rates
+
+    @property
+    def rupture_rates(self) -> gpd.GeoDataFrame:
+        return self._aggregate_rates
+
+    @property
+    def average_slips(self):
+        return self._solution_file.average_slips
+
+    @property
+    def section_target_slip_rates(self):
+        return self._solution_file.section_target_slip_rates
+
+    @property
+    def fault_sections(self):
+        return self._solution_file.fault_sections
+
+    @property
+    def fault_regime(self):
+        return self._solution_file.fault_regime
+
+    @property
+    def logic_tree_branch(self):
+        return self._solution_file.logic_tree_branch
+
+    @property
+    def solution_file(self):
+        return self._solution_file
+
+    @property
+    def indices(self):
+        return self._solution_file.indices
+
+    @property
+    def ruptures(self):
+        return self._solution_file.ruptures
+
+
+
+
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'FaultSystemSolution':
+        assert 0
         new_solution = FaultSystemSolution()
 
         # TODO: sort out this weirdness
@@ -111,7 +162,7 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
                         new_zip.writestr(item, zf.read(item.filename))
                 # write the modifies tables
                 ns._write_dataframes(new_zip, reindex=False)  # retain original rupture ids and structure
-            ns._archive = new_archive
+            ns.solution_file._archive = new_archive
             ns._archive.seek(0)
         return ns
 
@@ -149,12 +200,13 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         ns.set_props(
             composite_rates_df,
             aggregate_rates_df,
-            solution.ruptures.copy(),
-            solution.indices.copy(),
-            solution.fault_sections.copy(),
-            solution.fault_regime,
-            solution.average_slips.copy(),
+            solution.solution_file.ruptures.copy(),
+            solution.solution_file.indices.copy(),
+            solution.solution_file.fault_sections.copy(),
+            solution.solution_file.fault_regime,
+            solution.solution_file.average_slips.copy(),
         )
+        ns.solution_file._archive_path = solution.solution_file._archive_path
         return ns
 
     @staticmethod

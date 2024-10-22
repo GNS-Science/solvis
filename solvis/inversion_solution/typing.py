@@ -10,10 +10,24 @@ Classes:
 import zipfile
 from enum import Enum
 from pathlib import Path
-from typing import Any, Iterable, List, Mapping, Optional, Protocol, Union
+from typing import Any, Iterable, List, Mapping, Optional, Protocol, Union, TYPE_CHECKING
 
 import geopandas as gpd
 
+if TYPE_CHECKING:
+    # from numpy.typing import NDArray
+    from pandera.typing import DataFrame
+    from .dataframe_models import (
+        FaultSectionRuptureRateSchema,
+        FaultSectionSchema,
+        FaultSectionWithSolutionSlipRate,
+        ParentFaultParticipationSchema,
+        RuptureSectionSchema,
+        RuptureSectionsWithRuptureRatesSchema,
+        RupturesWithRuptureRatesSchema,
+        SectionParticipationSchema,
+        RuptureRateSchema
+    )
 
 class InversionSolutionProtocol(Protocol):
 
@@ -24,16 +38,20 @@ class InversionSolutionProtocol(Protocol):
         """solution requires a fault regime"""
 
     @property
-    def fault_sections(self) -> gpd.GeoDataFrame:
-        """solution requires fault sections"""
+    def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
+        """something pass"""
 
     @property
     def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
         """solution requires fault sections with rates"""
 
     @property
-    def rupture_rates(self) -> gpd.GeoDataFrame:
-        """the event rate for each rupture."""
+    def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
+        """A dataframe containing ruptures and their rates
+
+        Returns:
+          dataframe: a [rupture rates][solvis.inversion_solution.dataframe_models.RuptureRateSchema] dataframe
+        """
 
     @property
     def rupture_sections(self) -> gpd.GeoDataFrame:
@@ -41,7 +59,13 @@ class InversionSolutionProtocol(Protocol):
 
     @property
     def ruptures(self) -> gpd.GeoDataFrame:
-        """the properties of each rupture."""
+        """A dataframe containing ruptures
+
+        this is internal list only
+
+        Returns:
+          dataframe: a ruptures dataframe
+        """
 
     @property
     def average_slips(self) -> gpd.GeoDataFrame:
