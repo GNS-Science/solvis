@@ -38,7 +38,7 @@ def inherit_docstrings(cls):
     return cls
 
 @inherit_docstrings
-class InversionSolution(InversionSolutionProtocol, InversionSolutionOperations):
+class InversionSolution(InversionSolutionProtocol):
     """A python interface for an OpenSHA Inversion Solution archive.
 
     Methods:
@@ -51,7 +51,11 @@ class InversionSolution(InversionSolutionProtocol, InversionSolutionOperations):
     def __init__(self, solution_file: Optional[InversionSolutionFile] = None):
         """dont crash"""
         self._solution_file = solution_file or InversionSolutionFile()
-        super().__init__(self._solution_file)
+        self._dataframe_operations = InversionSolutionOperations(self._solution_file)
+
+    @property
+    def model(self):
+        return self._dataframe_operations
 
     @property
     def average_slips(self):

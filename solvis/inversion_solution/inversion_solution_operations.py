@@ -1,5 +1,5 @@
 """
-This module defines the mixin class `InversionSolutionOperations`.
+This module defines the ~mixin~ class `InversionSolutionOperations`.
 
 The `InversionSolutionOperations` class provides methods to build pandas dataframes
 from the raw dataframes available via the `InversionSolutionFile` class.
@@ -55,14 +55,6 @@ class InversionSolutionOperations():
      - get_ruptures_intersecting
      - get_solution_slip_rates_for_parent
     """
-
-    # _fault_sections: Optional[gpd.GeoDataFrame]
-    # _fs_with_rates: Optional[pd.DataFrame]  # Union[, DataFrame[FaultSectionRuptureRateSchema]]]
-    # _fs_with_soln_rates: Optional[pd.DataFrame]
-    # _rs_with_rupture_rates: Optional[pd.DataFrame]
-    # _rupture_sections: Optional[pd.DataFrame]  # Union[, DataFrame[RuptureSectionSchema]]]
-    # _ruptures_with_rupture_rates: Optional[pd.DataFrame]
-
     def __init__(self, solution_file:InversionSolutionFile) -> None:
         self._solution_file = solution_file
         self._rs_with_rupture_rates: Optional[pd.DataFrame] = None
@@ -70,9 +62,6 @@ class InversionSolutionOperations():
         self._rupture_sections: Optional[gpd.GeoDataFrame] = None
         self._fs_with_rates: Optional[pd.DataFrame] = None
         self._fs_with_soln_rates: Optional[pd.DataFrame] = None
-        # self._average_slips: Optional[pd.DataFrame] = None
-        # self._logic_tree_branch: List[Any] = []
-        # self._fault_regime: str = ''
         self._fault_sections: Optional[pd.DataFrame] = None
 
     @property

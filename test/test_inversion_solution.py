@@ -56,14 +56,14 @@ class TestInversionSolution(object):
         # polygon = circle_polygon(5e5, -38.662334, 178.017654)
         polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
 
-        ruptures = sol.get_rupture_ids_intersecting(polygon)
+        ruptures = sol.model.get_rupture_ids_intersecting(polygon)
         all_rupture_ids = list(sol.ruptures.index)
 
         assert len(sol.ruptures) > len(ruptures)
         assert set(all_rupture_ids).issuperset(set(ruptures))
 
     def test_get_rupture_ids_for_parent_fault(self, crustal_solution_fixture):
-        sol = crustal_solution_fixture
+        sol = crustal_solution_fixture.model
 
         pf1_ids = set(sol.get_rupture_ids_for_parent_fault("Alpine Kaniere to Springs Junction"))
         pf2_ids = set(sol.get_rupture_ids_for_parent_fault("Alpine Jacksons to Kaniere"))
@@ -74,7 +74,7 @@ class TestInversionSolution(object):
         assert len(pf1_ids.intersection(pf2_ids)) > 0, "Sets are expected to overlap"
 
     def test_get_rupture_ids_for_fault_names(self, crustal_solution_fixture):
-        sol = crustal_solution_fixture
+        sol = crustal_solution_fixture.model
 
         PARENT_FAULT_1 = "Alpine Jacksons to Kaniere"
         PARENT_FAULT_2 = "Alpine Kaniere to Springs Junction"
@@ -103,7 +103,7 @@ class TestInversionSolution(object):
             )
 
     def test_get_rupture_ids_for_location_radius(self, crustal_solution_fixture):
-        sol = crustal_solution_fixture
+        sol = crustal_solution_fixture.model
 
         def _rupture_ids_for_location(location_id: str, radius_km: int = 100):
             """Helper: ruptures in polygon around location."""
@@ -153,11 +153,11 @@ class TestInversionSolution(object):
         assert len(diff_rupture_ids) == len(expected_diff_ruptures)
 
     def test_slip_rate_soln(self, crustal_solution_fixture):
-        sol = crustal_solution_fixture
+        solution = crustal_solution_fixture
 
-        assert (sol.average_slips.index == sol.average_slips["Rupture Index"]).all()
-        assert len(sol.fault_sections_with_solution_slip_rates) == len(sol.fault_sections)
-        assert sol.fault_sections_with_solution_slip_rates.loc[0, "Solution Slip Rate"] == approx(
+        assert (solution.average_slips.index == solution.average_slips["Rupture Index"]).all()
+        assert len(solution.model.fault_sections_with_solution_slip_rates) == len(solution.fault_sections)
+        assert solution.model.fault_sections_with_solution_slip_rates.loc[0, "Solution Slip Rate"] == approx(
             0.02632348565225584, abs=1e-10, rel=1e-6
         )
 
