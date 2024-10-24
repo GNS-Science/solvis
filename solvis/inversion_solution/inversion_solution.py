@@ -8,11 +8,12 @@ Classes:
 Examples:
     ```py
     >>> solution = solvis.InversionSolution.from_archive(filename)
-    >>>
-    >>> rupture_ids = solvis.filter.FilterRuptureIds(solution)\\
+    >>> model = solution.model
+
+    >>> rupture_ids = solvis.filter.FilterRuptureIds(model)\\
             .for_magnitude(min_mag=5.75, max_mag=6.25)
     >>>
-    >>> rates = solution.section_participation_rates(rupture_ids)
+    >>> rates = model.section_participation_rates(rupture_ids)
     >>> rates
     ```
 """
@@ -27,29 +28,38 @@ from .typing import ModelLogicTreeBranch, InversionSolutionProtocol
 
 from inspect import getmembers
 
+
 def inherit_docstrings(cls):
-    """ A decorator function hoisting docstrings from superclass methods
+    """A decorator function hoisting docstrings from superclass methods
 
     taken from: https://stackoverflow.com/a/17393254
     see also: https://github.com/rcmdnk/inherit-docstring for a pypi package
     """
     for name, method in getmembers(cls, lambda o: isinstance(o, property)):
         # print(f"inherit_docstrings {method} {name}")
-        if method.__doc__: continue
+        if method.__doc__:
+            continue
         for parent in cls.__mro__[1:]:
             if hasattr(parent, name):
                 method.__doc__ = getattr(parent, name).__doc__
     # assert 0
     return cls
 
+
 @inherit_docstrings
 class InversionSolution(InversionSolutionProtocol):
     """A python interface for an OpenSHA Inversion Solution archive.
+
+    Attributes:
+     model: the dataframes model of the solution
+     solution_file: the archive file handler
 
     Methods:
      from_archive: deserialise an instance from zip archive.
      filter_solution: get a new InversionSolution instance, filtered by rupture ids.
      to_archive: serialise an instance to a zip archive.
+
+
     """
 
     def __init__(self, solution_file: Optional[InversionSolutionFile] = None):
@@ -58,70 +68,26 @@ class InversionSolution(InversionSolutionProtocol):
         self._dataframe_operations = InversionSolutionOperations(self._solution_file)
 
     @property
-    def model(self) ->InversionSolutionOperations:
-        """provides access to the pandas dataframes API model of the solution
-
-        Returns:
-            model: an instance of InversionSolutionOperation class
-        """
+    def model(self) -> InversionSolutionOperations:
         return self._dataframe_operations
 
     @property
     def solution_file(self) -> Optional[InversionSolutionFile]:
-        """
-        An InversionSolutionFile instance
+        # """
+        # An InversionSolutionFile instance
 
-        Returns:
-            instance: the InversionSolutionFile
-        """
+        # Returns:
+        #     instance: the InversionSolutionFile
+        # """
         return self._solution_file
-
-    ###
-    # These attrbutes are 'hoisted' from the _solution_file isntance
-    #
-    # those that return dataframes may be migrated to the model -> InversionSolutionOperations
-    ####
-    @property
-    def average_slips(self):
-        return self._solution_file.average_slips
-
-    @property
-    def section_target_slip_rates(self):
-        return self._solution_file.section_target_slip_rates
-
-    @property
-    def fault_sections(self):
-        return self._solution_file.fault_sections
 
     @property
     def fault_regime(self):
         return self._solution_file.fault_regime
 
-    @property
-    def logic_tree_branch(self):
-        return self._solution_file.logic_tree_branch
-
-    @property
-    def indices(self):
-        return self._solution_file.indices
-
-    @property
-    def ruptures(self):
-        return self._solution_file.ruptures
-
-    @property
-    def rupture_rates(self):
-        return self._solution_file.rupture_rates
-
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
-        """Write the current solution to a new zip archive.
-        """
+        """Write the current solution to a new zip archive."""
         return self._solution_file.to_archive(archive_path, base_archive_path, compat)
-
-    ###
-    # End 'hoisted' attributes
-    ###
-
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':
@@ -162,10 +128,11 @@ class InversionSolution(InversionSolutionProtocol):
         Returns:
             A new InversionSolution containing data for the rupture IDs specified.
         """
-        rr = solution.ruptures
-        ra = solution.rupture_rates
-        ri = solution.indices
-        avs = solution.average_slips
+        model = solution.model
+        rr = model.ruptures
+        ra = model.rupture_rates
+        ri = model.indices
+        avs = model.average_slips
 
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
@@ -174,11 +141,10 @@ class InversionSolution(InversionSolutionProtocol):
 
         ns = InversionSolution()
 
-        ns.solution_file.set_props(rates, ruptures, indices,
-            solution.solution_file.fault_sections.copy(),
-            solution.solution_file.average_slips)
+        ns.solution_file.set_props(
+            rates, ruptures, indices, solution.solution_file.fault_sections.copy(), solution.solution_file.average_slips
+        )
         ns.solution_file._archive_path = solution.solution_file._archive_path
-
 
         return ns
 
@@ -213,9 +179,10 @@ class BranchInversionSolution(InversionSolution):
             fault_system: a string representing the fault system (e.g `CRU`, 'HIK`).
             rupture_set_id: id for the rupture_set_id.
         """
-        ruptures = solution.ruptures.copy()
-        rates = solution.rupture_rates.copy()
-        indices = solution.indices.copy()
+        model = solution.model
+        ruptures = model.ruptures.copy()
+        rates = model.rupture_rates.copy()
+        indices = model.indices.copy()
 
         # print(solution.solution_file.fault_sections)
         # assert 0
@@ -224,9 +191,9 @@ class BranchInversionSolution(InversionSolution):
         bis.branch = branch
         bis.fault_system = fault_system
         bis.rupture_set_id = rupture_set_id
-        bis.solution_file.set_props(rates, ruptures, indices,
-            solution.solution_file.fault_sections.copy(),
-            solution.solution_file.average_slips)
+        bis.solution_file.set_props(
+            rates, ruptures, indices, solution.solution_file.fault_sections.copy(), solution.solution_file.average_slips
+        )
         bis.solution_file._archive_path = solution.solution_file._archive_path
         return bis
 

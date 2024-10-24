@@ -3,10 +3,10 @@ import random
 from solvis.filter.parent_fault_id_filter import parent_fault_name_id_mapping
 
 
-def test_parent_fault_names_all(filter_parent_fault_ids, fss):
+def test_parent_fault_names_all(filter_parent_fault_ids, fss_model):
     all_fault_ids = filter_parent_fault_ids.all()
     print(list(all_fault_ids))
-    assert len(all_fault_ids) == len(fss.fault_sections['ParentID'].unique())
+    assert len(all_fault_ids) == len(fss_model.fault_sections['ParentID'].unique())
 
 
 def test_fault_names_as_ids(filter_parent_fault_ids):
@@ -26,9 +26,9 @@ def test_parent_fault_subsection_ids(filter_parent_fault_ids, filter_subsection_
     assert filter_parent_fault_ids.for_subsection_ids(subsections) == pids
 
 
-def test_parent_fault_name_id_mapping(filter_parent_fault_ids, fss):
+def test_parent_fault_name_id_mapping(filter_parent_fault_ids, fss_model):
     parent_ids = list(filter_parent_fault_ids.for_parent_fault_names(['Vernon 4']))
-    mapping = list(parent_fault_name_id_mapping(fss, parent_ids))
+    mapping = list(parent_fault_name_id_mapping(fss_model, parent_ids))
 
     print(parent_ids)
     print(mapping)
@@ -37,22 +37,22 @@ def test_parent_fault_name_id_mapping(filter_parent_fault_ids, fss):
     assert mapping[0].parent_fault_name == 'Vernon 4'
 
 
-def test_round_trip_ids_and_names(filter_parent_fault_ids, fss):
-    pnames = random.sample(fss.parent_fault_names, 3)
+def test_round_trip_ids_and_names(filter_parent_fault_ids, fss_model):
+    pnames = random.sample(fss_model.parent_fault_names, 3)
     parent_ids = list(filter_parent_fault_ids.for_parent_fault_names(pnames))
     print(pnames)
     print(parent_ids)
 
-    mapping = list(parent_fault_name_id_mapping(fss, parent_ids))
+    mapping = list(parent_fault_name_id_mapping(fss_model, parent_ids))
     print(mapping)
 
     for parent in mapping:
         assert filter_parent_fault_ids.for_parent_fault_names([parent.parent_fault_name]) == set([parent.parent_id])
 
 
-def test_parent_faults_for_ruptures(filter_parent_fault_ids, filter_rupture_ids, fss):
-    # pnames = ['Alpine Jacksons to Kaniere'] # small fss has rupture on only one parent
-    pnames = random.sample(fss.parent_fault_names, 2)
+def test_parent_faults_for_ruptures(filter_parent_fault_ids, filter_rupture_ids, fss_model):
+    # pnames = ['Alpine Jacksons to Kaniere'] # small fss_model has rupture on only one parent
+    pnames = random.sample(fss_model.parent_fault_names, 2)
 
     pids = filter_parent_fault_ids.for_parent_fault_names(pnames)
     rupt_ids = list(filter_rupture_ids.for_parent_fault_names(pnames))

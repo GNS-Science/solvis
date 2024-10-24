@@ -27,4 +27,4 @@ def test_filter_from_complete_composite(composite_fixture):
 
     new_sol = solvis.FaultSystemSolution.filter_solution(sol, ruptures)
 
-    assert ruptures.shape[0] == new_sol.ruptures.shape[0]
+    assert ruptures.shape[0] == new_sol.model.ruptures.shape[0]

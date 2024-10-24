@@ -26,10 +26,11 @@ if TYPE_CHECKING:
         RuptureSectionsWithRuptureRatesSchema,
         RupturesWithRuptureRatesSchema,
         SectionParticipationSchema,
-        RuptureRateSchema
+        RuptureRateSchema,
     )
 
-class InversionSolutionProtocol(Protocol):
+
+class InversionSolutionFileProtocol(Protocol):
 
     FAULTS_PATH: Union[Path, str] = ''
 
@@ -37,6 +38,33 @@ class InversionSolutionProtocol(Protocol):
     def fault_regime(self) -> str:
         """solution requires a fault regime"""
 
+    @property
+    def average_slips(self) -> gpd.GeoDataFrame:
+        """the average slips for each rupture."""
+
+    @property
+    def section_target_slip_rates(self) -> gpd.GeoDataFrame:
+        """the inversion target slip rates for each rupture."""
+
+    @property
+    def indices(self) -> gpd.GeoDataFrame:
+        """the fault sections involved in each rupture."""
+
+    @staticmethod
+    def filter_solution(solution: Any, rupture_ids: Iterable) -> Any:
+        """return a new solution containing just the ruptures specified"""
+        raise NotImplementedError()
+
+    @property
+    def archive_path(self) -> Optional[Path]:
+        """the path to the archive file"""
+
+    @property
+    def archive(self) -> Optional[zipfile.ZipFile]:
+        """the archive instance"""
+
+
+class InversionSolutionModelProtocol(Protocol):
     @property
     def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
         """something pass"""
@@ -53,6 +81,9 @@ class InversionSolutionProtocol(Protocol):
           dataframe: a [rupture rates][solvis.inversion_solution.dataframe_models.RuptureRateSchema] dataframe
         """
 
+    def rate_column_name(self) -> str:
+        """the name of the rate_column returned in dataframes."""
+
     @property
     def rupture_sections(self) -> gpd.GeoDataFrame:
         """the rupture sections for each rupture."""
@@ -66,18 +97,6 @@ class InversionSolutionProtocol(Protocol):
         Returns:
           dataframe: a ruptures dataframe
         """
-
-    @property
-    def average_slips(self) -> gpd.GeoDataFrame:
-        """the average slips for each rupture."""
-
-    @property
-    def section_target_slip_rates(self) -> gpd.GeoDataFrame:
-        """the inversion target slip rates for each rupture."""
-
-    @property
-    def indices(self) -> gpd.GeoDataFrame:
-        """the fault sections involved in each rupture."""
 
     @property
     def parent_fault_names(self) -> List[str]:
@@ -99,11 +118,6 @@ class InversionSolutionProtocol(Protocol):
     ):
         pass
 
-    @staticmethod
-    def filter_solution(solution: Any, rupture_ids: Iterable) -> Any:
-        """return a new solution containing just the ruptures specified"""
-        raise NotImplementedError()
-
     @property
     def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
         """the event rate for each rupture section."""
@@ -112,13 +126,32 @@ class InversionSolutionProtocol(Protocol):
     def ruptures_with_rupture_rates(self) -> gpd.GeoDataFrame:
         """the event rate for each rupture."""
 
-    @property
-    def archive_path(self) -> Optional[Path]:
-        """the path to the archive file"""
+
+class InversionSolutionProtocol(Protocol):
 
     @property
-    def archive(self) -> Optional[zipfile.ZipFile]:
-        """the archive instance"""
+    def model(self) -> 'InversionSolutionModelProtocol':
+        """the pandas dataframes API model of the solution.
+
+        Returns:
+            model: an instance of type InversionSolutionModelProtocol
+        """
+    @property
+    def solution_file(self) -> 'InversionSolutionFileProtocol':
+        """the file protocol instance for the solution.
+
+        Returns:
+            instance: an instance of type InversionSolutionFileProtocol
+        """
+
+    @property
+    def fault_regime(self) -> str:
+        """solution requires a fault regime"""
+
+    @staticmethod
+    def filter_solution(solution: Any, rupture_ids: Iterable) -> Any:
+        """return a new solution containing just the ruptures specified"""
+        raise NotImplementedError()
 
 
 class CompositeSolutionProtocol(Protocol):

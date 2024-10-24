@@ -1,10 +1,10 @@
 import pytest
 
 
-def test_subsections_all(filter_subsection_ids, fss):
+def test_subsections_all(filter_subsection_ids, fss_model):
     all_sections = filter_subsection_ids.all()
     print(list(all_sections))
-    assert len(all_sections) == fss.fault_sections.shape[0]
+    assert len(all_sections) == fss_model.fault_sections.shape[0]
 
 
 def test_subsections_for_ruptures(filter_subsection_ids):

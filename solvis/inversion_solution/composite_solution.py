@@ -6,6 +6,8 @@ Classes:
 """
 import io
 import zipfile
+import time
+import logging
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
 
@@ -13,11 +15,12 @@ import geopandas as gpd
 import pandas as pd
 
 from .fault_system_solution import FaultSystemSolution
-from .inversion_solution_file import data_to_zip_direct
+# from .inversion_solution_file import data_to_zip_direct
 
 # from .typing import CompositeSolutionProtocol
 from .inversion_solution_operations import CompositeSolutionOperations
 
+log = logging.getLogger(__name__)
 
 class CompositeSolution(CompositeSolutionOperations):
     """A container class collecting FaultSystemSolution instances and a source_logic_tree.
@@ -76,7 +79,7 @@ class CompositeSolution(CompositeSolutionOperations):
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.rupture_rates for sol in self._solutions.values()]
+        all_rates = [sol.model.rupture_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 
@@ -97,7 +100,7 @@ class CompositeSolution(CompositeSolutionOperations):
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.composite_rates for sol in self._solutions.values()]
+        all_rates = [sol.model.composite_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 
@@ -112,13 +115,10 @@ class CompositeSolution(CompositeSolutionOperations):
                 rate_count,
                 rate_weighted_mean
         """
-        all = [
-            sol.fault_sections_with_rupture_rates
-            for sol in self._solutions.values()
-        ]
+        all = [gpd.GeoDataFrame(sol.model.fault_sections_with_rupture_rates).to_crs("EPSG:4326") for sol in self._solutions.values()]
         print(all)
         all_df = pd.concat(all, ignore_index=True)
-        return gpd.GeoDataFrame(all_df).to_crs("EPSG:4326")
+        return all_df #gpd.GeoDataFrame(all_df).to_crs("EPSG:4326")
 
     def to_archive(self, archive_path: Union[Path, str]):
         """Serialize a CompositeSolution instance to a zip archive.
@@ -129,13 +129,24 @@ class CompositeSolution(CompositeSolutionOperations):
         with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zout:
             for key, fss in self._solutions.items():
                 fss_name = f"{key}_fault_system_solution.zip"
-                if fss._archive:
+                fss_file = fss.solution_file
+                if fss_file.archive:
                     # we can serialise the 'in-memory' archive now
-                    data_to_zip_direct(zout, fss._archive.read(), fss_name)
-                elif fss.archive_path is None:
+                    # data_to_zip_direct(zout, fss_file.archive, fss_name)
+
+                    # TODO : consider how to resolve this, it's needed from creating composite archive
+                    # and it was written to store fss archive to disk
+
+                    assert 0
+                    log.debug('direct store %s' % fss_name)
+                    zinfo = zipfile.ZipInfo(fss_name, time.localtime()[:6])
+                    zinfo.compress_type = zipfile.ZIP_DEFLATED
+                    zout.write(zinfo, fss_file.archive.read(), fss_name)
+
+                elif fss_file.archive_path is None:
                     raise RuntimeError("archive_path is not defined")
                 else:
-                    zout.write(fss.archive_path, arcname=fss_name)
+                    zout.write(fss_file.archive_path, arcname=fss_name)
         self._archive_path = Path(archive_path)
 
     @staticmethod

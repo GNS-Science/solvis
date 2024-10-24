@@ -8,12 +8,13 @@ import inspect
 import griffe
 
 from typing import Union, Optional
+
 logger = griffe.get_logger(__name__)
 
 logger.setLevel('DEBUG')
 
-class DynamicDocstrings(griffe.Extension):
 
+class DynamicDocstrings(griffe.Extension):
     def __init__(self, object_paths: Optional[list[str]] = None) -> None:
         self.object_paths = object_paths
 
