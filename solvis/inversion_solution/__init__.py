@@ -27,6 +27,7 @@ Example:
 
 from .composite_solution import CompositeSolution
 from .fault_system_solution import FaultSystemSolution
+from .fault_system_solution_model import FaultSystemSolutionModel
 from .inversion_solution import InversionSolution
 
 """

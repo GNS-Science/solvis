@@ -11,20 +11,20 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope='package')
-def fss(composite_fixture):
-    yield composite_fixture._solutions['CRU']
+def fss_model(composite_fixture):
+    yield composite_fixture._solutions['CRU'].model
 
 
 @pytest.fixture(scope='package')
-def filter_rupture_ids(fss):
-    yield FilterRuptureIds(fss)
+def filter_rupture_ids(fss_model):
+    yield FilterRuptureIds(fss_model)
 
 
 @pytest.fixture(scope='package')
-def filter_parent_fault_ids(fss):
-    yield FilterParentFaultIds(fss)
+def filter_parent_fault_ids(fss_model):
+    yield FilterParentFaultIds(fss_model)
 
 
 @pytest.fixture(scope='package')
-def filter_subsection_ids(fss):
-    yield FilterSubsectionIds(fss)
+def filter_subsection_ids(fss_model):
+    yield FilterSubsectionIds(fss_model)

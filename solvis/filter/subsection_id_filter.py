@@ -19,7 +19,7 @@ Examples:
 """
 from typing import Iterable, Union
 
-from solvis.inversion_solution.typing import InversionSolutionProtocol, SetOperationEnum
+from solvis.inversion_solution.typing import InversionSolutionModelProtocol, SetOperationEnum
 
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
@@ -33,9 +33,9 @@ class FilterSubsectionIds(ChainableSetBase):
     set operands like `union`, `intersection`, `difference` etc).
     """
 
-    def __init__(self, solution: InversionSolutionProtocol):
-        self._solution = solution
-        self._filter_parent_fault_ids = FilterParentFaultIds(solution)
+    def __init__(self, model: InversionSolutionModelProtocol):
+        self._model = model
+        self._filter_parent_fault_ids = FilterParentFaultIds(model)
 
     def for_named_faults(self, named_fault_names: Iterable[str]) -> ChainableSetBase:
         raise NotImplementedError()
@@ -48,8 +48,8 @@ class FilterSubsectionIds(ChainableSetBase):
         Returns:
             A chainable set of all the subsection_ids.
         """
-        result = set(self._solution.fault_sections.index.to_list())
-        return self.new_chainable_set(result, self._solution)
+        result = set(self._model.fault_sections.index.to_list())
+        return self.new_chainable_set(result, self._model)
 
     def for_parent_fault_names(
         self, parent_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
@@ -79,10 +79,10 @@ class FilterSubsectionIds(ChainableSetBase):
         Returns:
             The fault_subsection_ids matching the filter.
         """
-        df0 = self._solution.fault_sections
+        df0 = self._model.fault_sections
         ids = df0[df0['ParentID'].isin(list(parent_fault_ids))]['FaultID'].tolist()
         result = set([int(id) for id in ids])
-        return self.new_chainable_set(result, self._solution, join_prior=join_prior)
+        return self.new_chainable_set(result, self._model, join_prior=join_prior)
 
     def for_rupture_ids(
         self, rupture_ids: Iterable[int], join_prior: Union[SetOperationEnum, str] = 'intersection'
@@ -95,10 +95,10 @@ class FilterSubsectionIds(ChainableSetBase):
         Returns:
             The fault_subsection_ids matching the filter.
         """
-        df0 = self._solution.rupture_sections
+        df0 = self._model.rupture_sections
         ids = df0[df0.rupture.isin(list(rupture_ids))].section.tolist()
         result = set([int(id) for id in ids])
-        return self.new_chainable_set(result, self._solution, join_prior=join_prior)
+        return self.new_chainable_set(result, self._model, join_prior=join_prior)
 
     def for_polygon(self, polygon, contained=True) -> ChainableSetBase:
         raise NotImplementedError()

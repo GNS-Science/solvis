@@ -82,8 +82,9 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     # print("NEW DF", new_df)
     return new_df
 
-#InversionSolutionProtocol
-class InversionSolutionFile():
+
+# InversionSolutionProtocol
+class InversionSolutionFile:
     """
     Class to handle the OpenSHA modular archive file form.
 
@@ -189,7 +190,7 @@ class InversionSolutionFile():
             self._write_dataframes(zout, reindex=True)
         else:
             self._write_dataframes(zout, reindex=False)
-        self._archive_path = archive_path
+        # self._archive_path = archive_path
         data_to_zip_direct(zout, WARNING, "WARNING.md")
 
     @property
@@ -231,7 +232,6 @@ class InversionSolutionFile():
             toc = time.perf_counter()
             log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
         return prop
-
 
     def _geodataframe_from_geojson(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
@@ -349,9 +349,10 @@ class InversionSolutionFile():
         fault_sections: pd.DataFrame,
         average_slips: pd.DataFrame,
     ):
-        # self._init_props()
         self._rates = rates
         self._ruptures = ruptures
         self._fault_sections = fault_sections
         self._indices = indices
         self._average_slips = average_slips
+        print('****')
+        print(rates)
