@@ -32,6 +32,8 @@ composite_solution = solvis.CompositeSolution.from_archive(
 
 ## Refining solution data
 
+*this section is the deprecated API, users should migrate to use the new [filter API](/solvis/api/filter)*
+
 To gather rupture IDs from a fault system solution:
 
 ```py

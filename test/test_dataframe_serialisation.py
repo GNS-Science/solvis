@@ -67,10 +67,10 @@ class TestSerialisation(object):
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
         read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
-        print(read_sol.rupture_rates)
-        print(crustal_fixture.rupture_rates)
-        assert read_sol.rupture_rates.columns.all() == crustal_fixture.rupture_rates.columns.all()
-        assert read_sol.rupture_rates.shape == crustal_fixture.rupture_rates.shape
+        print(read_sol.model.rupture_rates)
+        print(crustal_fixture.model.rupture_rates)
+        assert read_sol.model.rupture_rates.columns.all() == crustal_fixture.model.rupture_rates.columns.all()
+        assert read_sol.model.rupture_rates.shape == crustal_fixture.model.rupture_rates.shape
 
     def test_write_read_archive_compatible_composite_rates(self, crustal_fixture, archives):
 
@@ -84,11 +84,11 @@ class TestSerialisation(object):
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
         read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
-        print(read_sol.composite_rates.info())
-        print(read_sol.composite_rates.columns)
-        print(read_sol.composite_rates)
-        assert read_sol.composite_rates.columns.all() == crustal_fixture.composite_rates.columns.all()
-        assert read_sol.composite_rates.shape == crustal_fixture.composite_rates.shape
+        print(read_sol.model.composite_rates.info())
+        print(read_sol.model.composite_rates.columns)
+        print(read_sol.model.composite_rates)
+        assert read_sol.model.composite_rates.columns.all() == crustal_fixture.model.composite_rates.columns.all()
+        assert read_sol.model.composite_rates.shape == crustal_fixture.model.composite_rates.shape
 
     def test_write_read_archive_incompatible(self, crustal_fixture, archives):
 
@@ -102,9 +102,11 @@ class TestSerialisation(object):
         crustal_fixture.to_archive(str(new_path), ref_solution, compat=False)
         read_sol = solvis.FaultSystemSolution.from_archive(new_path)
 
-        print(read_sol.rupture_rates)
-        print(crustal_fixture.rupture_rates)
-        assert read_sol.rupture_rates.columns.all() == crustal_fixture.rupture_rates.columns.all()
+        print(read_sol.model.rupture_rates)
+        print(crustal_fixture.model.rupture_rates)
+        assert read_sol.model.rupture_rates.columns.all() == crustal_fixture.model.rupture_rates.columns.all()
         # NO the composite solutions have different rate structure
-        # assert read_sol.rupture_rates.shape == crustal_fixture.rupture_rates.shape
-        assert read_sol.rupture_rates['Rupture Index'].all() == crustal_fixture.rupture_rates['Rupture Index'].all()
+        # assert read_sol.model.rupture_rates.shape == crustal_fixture.model.rupture_rates.shape
+        assert read_sol.model.rupture_rates['Rupture Index'].all() == crustal_fixture.model.rupture_rates['Rupture Index'].all()
+
+        # print(crustal_fixture.solution_file._archive_path)

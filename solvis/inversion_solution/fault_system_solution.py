@@ -1,70 +1,70 @@
+"""
+This module handles the aggregation of InversionSolution instances which must share a common OpenSHA RuptureSet.
+
+Classes:
+    FaultSystemSolution: a class aggregating InversionSolution instances.
+"""
 import io
 import logging
 import zipfile
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 import geopandas as gpd
-import numpy as np
-import numpy.typing as npt
 import nzshm_model as nm
 import pandas as pd
 
 from .fault_system_solution_file import FaultSystemSolutionFile
-from .inversion_solution_operations import InversionSolutionOperations
+from .fault_system_solution_model import FaultSystemSolutionModel
+from .inversion_solution import InversionSolution
 from .typing import BranchSolutionProtocol, ModelLogicTreeBranch
 
 log = logging.getLogger(__name__)
 
 
-class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
+class FaultSystemSolution(InversionSolution):
+    """A class that aggregates InversionSolution instances sharing a common OpenSHA RuptureSet.
 
-    _composite_rates: pd.DataFrame = ...
+    The class is largely interchangeable with InversionSolution, as only rupture rates
+    are  affected by the aggregation.
+    """
 
-    def set_props(
-        self, composite_rates, aggregate_rates, ruptures, indices, fault_sections, fault_regime, average_slips
-    ):
-        # self._init_props()
-        self._composite_rates = composite_rates
-        self._aggregate_rates = aggregate_rates
-        self._ruptures = ruptures
-        self._fault_sections = fault_sections
-        self._indices = indices
-        self._fault_regime = fault_regime
-        self._average_slips = average_slips
+    def __init__(self, solution_file: Optional[FaultSystemSolutionFile] = None):
+        self._solution_file = solution_file or FaultSystemSolutionFile()
+        self._dataframe_operations = FaultSystemSolutionModel(self._solution_file)
 
-        # Now we need a rates table, structured correctly, with weights from the aggregate_rates
-        rates = self.aggregate_rates.drop(columns=['rate_max', 'rate_min', 'rate_count', 'fault_system']).rename(
-            columns={"rate_weighted_mean": "Annual Rate"}
-        )
-        self._rates = rates
+    def to_archive(self, archive_path, base_archive_path=None, compat=False):
+        """Write the current solution to a new zip archive."""
+        self.model.enable_fast_indices()
+        return self._solution_file.to_archive(archive_path, base_archive_path, compat)
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'FaultSystemSolution':
-        new_solution = FaultSystemSolution()
+        new_solution_file = FaultSystemSolutionFile()
 
         # TODO: sort out this weirdness
         if isinstance(instance_or_path, io.BytesIO):
             with zipfile.ZipFile(instance_or_path, 'r') as zf:
-                assert 'ruptures/fast_indices.csv' in zf.namelist()
                 assert 'composite_rates.csv' in zf.namelist()
                 assert 'aggregate_rates.csv' in zf.namelist()
-            new_solution._archive = instance_or_path
+                assert 'ruptures/fast_indices.csv' in zf.namelist()
+            new_solution_file._archive = instance_or_path
         else:
             assert zipfile.Path(instance_or_path, at='ruptures/fast_indices.csv').exists()
             assert zipfile.Path(instance_or_path, at='composite_rates.csv').exists()
             assert zipfile.Path(instance_or_path, at='aggregate_rates.csv').exists()
-            new_solution._archive_path = Path(instance_or_path)
+            new_solution_file._archive_path = Path(instance_or_path)
             log.debug("from_archive %s " % instance_or_path)
-        return new_solution
+        return FaultSystemSolution(new_solution_file)
 
     @staticmethod
-    def filter_solution(solution: 'FaultSystemSolution', rupture_ids: npt.ArrayLike) -> 'FaultSystemSolution':
-        rr = solution.ruptures
-        cr = solution.composite_rates
-        ar = solution.aggregate_rates
-        ri = solution.indices
-        avs = solution.average_slips
+    def filter_solution(solution: 'FaultSystemSolution', rupture_ids: Iterable) -> 'FaultSystemSolution':
+        model = solution.model
+        rr = model.ruptures
+        cr = model.composite_rates
+        ar = model.aggregate_rates
+        ri = model.indices
+        avs = model.average_slips
 
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         composite_rates = cr[cr["Rupture Index"].isin(rupture_ids)].copy()
@@ -73,42 +73,41 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         average_slips = avs[avs["Rupture Index"].isin(rupture_ids)].copy()
 
         # all other solution properties are derived from those above
-        ns = FaultSystemSolution()
-        ns.set_props(
+        new_solution_file = FaultSystemSolutionFile()
+        new_solution_file.set_props(
             composite_rates,
             aggregate_rates,
             ruptures,
             indices,
-            solution.fault_sections.copy(),
-            solution.fault_regime,
+            model.fault_sections.copy(),
+            model.fault_regime,
             average_slips,
         )
         # ns._archive_path = None
-        ns.enable_fast_indices()
+        #### new_solution_file.enable_fast_indices()
         # copy the original archive, if it exists
         # TODO: does the archive needs filtering applied?? see to_archive()
-        if solution._archive:
+        if solution.solution_file._archive:
             new_archive = io.BytesIO()
             with zipfile.ZipFile(new_archive, 'w') as new_zip:
                 # write the core files
-                with zipfile.ZipFile(solution._archive, 'r') as zf:
+                with zipfile.ZipFile(solution.solution_file._archive, 'r') as zf:
                     for item in zf.filelist:
-                        if item.filename in solution.DATAFRAMES:
+                        if item.filename in solution.solution_file.DATAFRAMES:
                             continue
-                        if item.filename in solution.OPENSHA_ONLY:  # drop bulky, opensha-only artefacts
+                        if item.filename in solution.solution_file.OPENSHA_ONLY:  # drop bulky, opensha-only artefacts
                             continue
                         new_zip.writestr(item, zf.read(item.filename))
                 # write the modifies tables
-                ns._write_dataframes(new_zip, reindex=False)  # retain original rupture ids and structure
-            ns._archive = new_archive
-            ns._archive.seek(0)
-        return ns
+                new_solution_file._write_dataframes(new_zip, reindex=False)  # retain original rupture ids and structure
+            new_solution_file._archive = new_archive
+            new_solution_file._archive.seek(0)
+        return FaultSystemSolution(new_solution_file)
+
 
     @staticmethod
     def new_solution(solution: BranchSolutionProtocol, composite_rates_df: pd.DataFrame) -> 'FaultSystemSolution':
         # build a new composite solution, taking solution template properties, and composite_rates_df
-        ns = FaultSystemSolution()
-
         composite_rates_df = composite_rates_df[composite_rates_df["Annual Rate"] > 0]
         composite_rates_df.insert(
             0,
@@ -118,31 +117,36 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
 
         aggregate_rates_df = composite_rates_df.pivot_table(
             index=['fault_system', 'Rupture Index'],
-            aggfunc={"Annual Rate": [np.min, np.max, 'count'], "weighted_rate": np.sum},
+            aggfunc={"Annual Rate": ['min', 'max', 'count'], "weighted_rate": 'sum'},
         )
 
+        # print(aggregate_rates_df.columns)
+        # assert 0
         # drop the top index level
         aggregate_rates_df.columns = aggregate_rates_df.columns.get_level_values(1)
         aggregate_rates_df = aggregate_rates_df.reset_index().rename(
             columns={
-                "amax": "rate_max",
-                "amin": "rate_min",
+                "max": "rate_max",
+                "min": "rate_min",
                 "count": "rate_count",
                 "sum": "rate_weighted_mean",
             }
         )
         composite_rates_df = composite_rates_df.drop(columns="weighted_rate")
 
-        ns.set_props(
+        fss_file = FaultSystemSolutionFile()
+
+        fss_file.set_props(
             composite_rates_df,
             aggregate_rates_df,
-            solution.ruptures.copy(),
-            solution.indices.copy(),
-            solution.fault_sections.copy(),
-            solution.fault_regime,
-            solution.average_slips.copy(),
+            solution.solution_file.ruptures.copy(),
+            solution.solution_file.indices.copy(),
+            solution.solution_file.fault_sections.copy(),
+            solution.solution_file.fault_regime,
+            solution.solution_file.average_slips.copy(),
         )
-        return ns
+        fss_file._archive_path = solution.solution_file._archive_path
+        return FaultSystemSolution(fss_file)
 
     @staticmethod
     def get_branch_inversion_solution_id(branch: ModelLogicTreeBranch) -> str:
@@ -175,40 +179,72 @@ class FaultSystemSolution(FaultSystemSolutionFile, InversionSolutionOperations):
         for branch_solution in solutions:
             inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(branch_solution.branch)
 
-            solution_df = branch_solution.rupture_rates.copy()
+            solution_df = branch_solution.model.rupture_rates.copy()
             solution_df.insert(
                 0, 'solution_id', inversion_solution_id
             )  # CategoricalDtype(categories=['PUY'], ordered=False)
-            solution_df.insert(
-                0, 'rupture_set_id', branch_solution.rupture_set_id
-            )  # , pd.Series(branch_solution.rupture_set_id, dtype='category'))
+            solution_df.insert(0, 'rupture_set_id', branch_solution.rupture_set_id)
             solution_df.insert(0, 'weight', branch_solution.branch.weight)
-            solution_df.insert(
-                0, 'fault_system', branch_solution.fault_system
-            )  # , pd.Series(branch_solution.fault_system, dtype='category'))
+            solution_df.insert(0, 'fault_system', branch_solution.fault_system)
             composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
 
             # print('dims', composite_rates_df.shape, solution_df.shape)
         return FaultSystemSolution.new_solution(solution=branch_solution, composite_rates_df=composite_rates_df)
 
-    @property
-    def rupture_sections(self) -> gpd.GeoDataFrame:
-        """FSS overrides InversionSolutionOperations so we can use fast_indices"""
 
-        if self._fast_indices is None:
-            try:
-                self._fast_indices = self.fast_indices
-                log.debug("loaded fast indices")
-            except Exception:
-                log.info("rupture_sections() building fast indices")
-                self._fast_indices = self.build_rupture_sections()
+"""
+TODO: notes for fault_system_solution participation
 
-        if self._rupture_sections is None:
-            self._rupture_sections = self._fast_indices
+>>> csol.rs_with_rupture_rates.head()
+                            key_0 fault_system  Rupture Index  rate_max      rate_min  rate_count  rate_weighted_mean  Magnitude  Average Rake (degrees)    Area (m^2)  Length (m)  section
+fault_system Rupture Index
+CRU          3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      0.0
+             3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      1.0
+             3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      2.0
+             9                  9          CRU              9  0.000110  7.749647e-07          24            0.000032   7.285888              -95.056915  1.218684e+09    60601.45      3.0
+             9                  9          CRU              9  0.000110  7.749647e-07          24            0.000032   7.285888              -95.056915  1.218684e+09    60601.45      4.0
+>>> csol.composite_rates.head()
+                                                        Rupture Index fault_system    weight    rupture_set_id                               solution_id  Annual Rate
+solution_id                              Rupture Index
+U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy 9                          9          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000020
+                                         142                      142          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000022
+                                         399                      399          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000008
+                                         607                      607          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000010
+                                         613                      613          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000020
+>>> csol.composite_rates.index
+MultiIndex([('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',      9),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    142),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    399),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    607),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    613),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    626),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    628),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    634),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    721),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    722),
+            ...
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 405506),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 407596),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 407597),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408843),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408852),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408858),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409076),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409087),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409919),
+            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409995)],
+           names=['solution_id', 'Rupture Index'], length=37389)
+>>> csol.ruptures_with_rupture_rates.shape
+(3884, 10)
+>>> csol.ruptures_with_rupture_rates.head()
+                           fault_system  Rupture Index  rate_max      rate_min  rate_count  rate_weighted_mean  Magnitude  Average Rake (degrees)    Area (m^2)  Length (m)
+fault_system Rupture Index
+CRU          3                      CRU              3  0.000047  6.097353e-06          12        1.012588e-05   7.237556              110.000000  1.090333e+09    34817.69
+             9                      CRU              9  0.000110  7.749647e-07          24        3.237533e-05   7.285888              -95.056915  1.218684e+09    60601.45
+             55                     CRU             55  0.000067  5.627826e-06          12        1.531652e-05   8.092601              169.242100  7.809173e+09   340323.75
+             140                    CRU            140  0.000001  5.418595e-07           6        1.826545e-08   8.197684             -177.146090  9.946928e+09   455076.94
+             142                    CRU            142  0.000051  2.222447e-05           6        5.750140e-06   8.225152             -172.993900  1.059636e+10   483159.47
+>>> help(csol.ruptures_with_rupture_rates)
 
-        return self._rupture_sections
-
-    def enable_fast_indices(self) -> bool:
-        """make sure that the fast_indices dataframe is available at serialisation time"""
-        rs = self.rupture_sections  # noqa
-        return self._fast_indices is not None
+>>>
+"""  # noqa

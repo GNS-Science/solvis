@@ -1,10 +1,6 @@
 ::: solvis.inversion_solution.inversion_solution_file
-    options:
+<!--     options:
         docstring_options:
             ignore_init_summary: false
-        merge_init_into_class: true
-        members:
-        - WARNING
-        - InversionSolutionFile
-        - data_to_zip_direct
-        - reindex_dataframe
+        merge_init_into_class: true -->
+

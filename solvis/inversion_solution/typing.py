@@ -1,51 +1,42 @@
-import io
+'''
+This module defines type classes for the main interfaces shared
+across the `inversion_solution` package.
+
+Classes:
+    InversionSolutionProtocol: the interface for an InversionSolution
+    CompositeSolutionProtocol: interface for CompositeSolution
+
+'''
 import zipfile
 from enum import Enum
 from pathlib import Path
-from typing import Any, List, Mapping, Optional, Protocol, Union
+from typing import Any, Iterable, List, Mapping, Optional, Protocol, Union, TYPE_CHECKING
 
 import geopandas as gpd
-import numpy.typing as npt
-import pandas as pd
+
+if TYPE_CHECKING:
+    # from numpy.typing import NDArray
+    from pandera.typing import DataFrame
+    from .dataframe_models import (
+        FaultSectionRuptureRateSchema,
+        FaultSectionSchema,
+        FaultSectionWithSolutionSlipRate,
+        ParentFaultParticipationSchema,
+        RuptureSectionSchema,
+        RuptureSectionsWithRuptureRatesSchema,
+        RupturesWithRuptureRatesSchema,
+        SectionParticipationSchema,
+        RuptureRateSchema,
+    )
 
 
-class InversionSolutionProtocol(Protocol):
-
-    _rates: pd.DataFrame = ...
-    _ruptures: pd.DataFrame = ...
-    _indices: pd.DataFrame = ...
-    _average_slips: pd.DataFrame = ...
-    _sect_slip_rates: pd.DataFrame = ...
-    _rupture_sections: pd.DataFrame = ...
-    _fs_with_rates: pd.DataFrame = ...
-    _fs_with_soln_rates: pd.DataFrame = ...
-    _rs_with_rupture_rates: pd.DataFrame = ...
-    _fault_sections: pd.DataFrame = ...
-    _ruptures_with_rupture_rates: pd.DataFrame = ...
-    _archive_path: Optional[Path]
-    _archive: Optional[io.BytesIO]
+class InversionSolutionFileProtocol(Protocol):
 
     FAULTS_PATH: Union[Path, str] = ''
 
     @property
     def fault_regime(self) -> str:
         """solution requires a fault regime"""
-
-    @property
-    def fault_sections(self) -> gpd.GeoDataFrame:
-        """solution requires fault sections"""
-
-    @property
-    def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
-        """solution requires fault sections with rates"""
-
-    @property
-    def rupture_rates(self) -> gpd.GeoDataFrame:
-        """the event rate for each rupture."""
-
-    @property
-    def ruptures(self) -> gpd.GeoDataFrame:
-        """the properties of each rupture."""
 
     @property
     def average_slips(self) -> gpd.GeoDataFrame:
@@ -59,20 +50,10 @@ class InversionSolutionProtocol(Protocol):
     def indices(self) -> gpd.GeoDataFrame:
         """the fault sections involved in each rupture."""
 
-    def fault_surfaces(self) -> gpd.GeoDataFrame:
-        """builder method returning the fault surfaces."""
-
-    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        """builder method returning the rupture surface of a given rupture id."""
-
     @staticmethod
-    def filter_solution(solution: Any, rupture_ids: npt.ArrayLike) -> Any:
+    def filter_solution(solution: Any, rupture_ids: Iterable) -> Any:
         """return a new solution containing just the ruptures specified"""
         raise NotImplementedError()
-
-    @property
-    def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
-        """the event rate for each rupture section."""
 
     @property
     def archive_path(self) -> Optional[Path]:
@@ -83,10 +64,100 @@ class InversionSolutionProtocol(Protocol):
         """the archive instance"""
 
 
+class InversionSolutionModelProtocol(Protocol):
+    @property
+    def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
+        """something pass"""
+
+    @property
+    def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        """solution requires fault sections with rates"""
+
+    @property
+    def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
+        """A dataframe containing ruptures and their rates
+
+        Returns:
+          dataframe: a [rupture rates][solvis.inversion_solution.dataframe_models.RuptureRateSchema] dataframe
+        """
+
+    def rate_column_name(self) -> str:
+        """the name of the rate_column returned in dataframes."""
+
+    @property
+    def rupture_sections(self) -> gpd.GeoDataFrame:
+        """the rupture sections for each rupture."""
+
+    @property
+    def ruptures(self) -> gpd.GeoDataFrame:
+        """A dataframe containing ruptures
+
+        this is internal list only
+
+        Returns:
+          dataframe: a ruptures dataframe
+        """
+
+    @property
+    def parent_fault_names(self) -> List[str]:
+        """The parent_fault_names."""
+
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        """builder method returning the fault surfaces."""
+
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        """builder method returning the rupture surface of a given rupture id."""
+
+    def section_participation_rates(
+        self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
+        pass
+
+    def fault_participation_rates(
+        self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
+        pass
+
+    @property
+    def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        """the event rate for each rupture section."""
+
+    @property
+    def ruptures_with_rupture_rates(self) -> gpd.GeoDataFrame:
+        """the event rate for each rupture."""
+
+
+class InversionSolutionProtocol(Protocol):
+
+    @property
+    def model(self) -> 'InversionSolutionModelProtocol':
+        """the pandas dataframes API model of the solution.
+
+        Returns:
+            model: an instance of type InversionSolutionModelProtocol
+        """
+    @property
+    def solution_file(self) -> 'InversionSolutionFileProtocol':
+        """the file protocol instance for the solution.
+
+        Returns:
+            instance: an instance of type InversionSolutionFileProtocol
+        """
+
+    @property
+    def fault_regime(self) -> str:
+        """solution requires a fault regime"""
+
+    @staticmethod
+    def filter_solution(solution: Any, rupture_ids: Iterable) -> Any:
+        """return a new solution containing just the ruptures specified"""
+        raise NotImplementedError()
+
+
 class CompositeSolutionProtocol(Protocol):
 
     _solutions: Mapping[str, InversionSolutionProtocol] = {}
-    _archive_path: Union[Path, str] = ''
+    _archive_path: Optional[Path]
 
     def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
         """builder method returning the rupture surface of a given rupture id."""
