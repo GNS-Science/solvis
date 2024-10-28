@@ -3,7 +3,6 @@
 import os
 import pathlib
 
-import numpy as np
 import pandas as pd
 from nzshm_common.location.location import location_by_id
 from pytest import approx, raises
@@ -34,7 +33,7 @@ class TestInversionSolution(object):
         assert sol.fault_regime == 'CRUSTAL'
         assert sol.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
 
-        assert sol.rupture_rates["Annual Rate"].dtype == np.float32
+        assert sol.rupture_rates["Annual Rate"].dtype == pd.Float32Dtype()
         # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
         # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
         # assert 0
@@ -118,6 +117,8 @@ class TestInversionSolution(object):
         # All WLG results should also in BHE set for this fixture
         expected_intersection_ruptures = set(ruptures_wlg).intersection(ruptures_bhe)
         expected_union_ruptures = set(ruptures_wlg).union(ruptures_bhe)
+        expected_diff_ruptures = set(ruptures_wlg).difference(ruptures_bhe)
+
         # Pre-checks on assumptions
         assert len(ruptures_wlg) == len(expected_intersection_ruptures)
         assert len(ruptures_bhe) == len(expected_union_ruptures)
@@ -143,12 +144,13 @@ class TestInversionSolution(object):
         )
         assert len(union_rupture_ids) == len(expected_union_ruptures)
 
-        with raises(ValueError):
-            sol.get_rupture_ids_for_location_radius(
-                location_ids=["WLG", "BHE"],
-                radius_km=100,
-                location_join_type=SetOperationEnum.DIFFERENCE,
-            )
+        # with raises(ValueError):
+        diff_rupture_ids = sol.get_rupture_ids_for_location_radius(
+            location_ids=["WLG", "BHE"],
+            radius_km=100,
+            location_join_type=SetOperationEnum.DIFFERENCE,
+        )
+        assert len(diff_rupture_ids) == len(expected_diff_ruptures)
 
     def test_slip_rate_soln(self, crustal_solution_fixture):
         sol = crustal_solution_fixture

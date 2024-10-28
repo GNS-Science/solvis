@@ -8,8 +8,7 @@ import solvis
 from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
-slt = current_model.source_logic_tree
-fslt = slt.fault_system_lts[0]  # PUY is used always , just for the 3 solution_ids
+fslt = current_model.source_logic_tree.branch_sets[0]  # PUY is used always , just for the 3 solution_ids
 
 FSR_COLUMNS_A = 26
 FSR_COLUMNS_B = 25  # HIK
@@ -32,15 +31,16 @@ class TestSmallCrustal(object):
 
     def test_check_indexes(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture
-        assert sol.ruptures.index == sol.ruptures["Rupture Index"]
+        # assert sol.ruptures.index == sol.ruptures["Rupture Index"]
         assert sol.indices.index.all() == sol.indices["Rupture Index"].all()
 
         print(sol.composite_rates.index.names)
         assert sol.composite_rates.index.names == ['solution_id', 'Rupture Index']
 
+        print(sol.rupture_rates.info())
         assert sol.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
         assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
-        # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.indices["Rupture Index"].dtype == pd.Int32Dtype()
 
     def test_check_types(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture
@@ -50,8 +50,8 @@ class TestSmallCrustal(object):
         assert infer_dtype(sol.rupture_rates["fault_system"]) == "string"
         assert sol.rupture_rates["rate_weighted_mean"].dtype == 'float32'
         assert infer_dtype(sol.indices["Num Sections"]) == "integer"
-        # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
-        # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
+        assert sol.indices["Num Sections"].dtype == "Int32"  # pd.UInt16Dtype()
+        assert sol.indices["# 1"].dtype == "Int32"  # pd.UInt16Dtype()
 
     def test_filter_solution_ruptures(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture

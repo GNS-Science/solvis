@@ -1,26 +1,166 @@
+"""
+This module defines the mixin class `InversionSolutionOperations`.
+
+The `InversionSolutionOperations` class provides methods to build pandas dataframes
+from the raw dataframes available via the `InversionSolutionFile` class.
+"""
 import logging
 import time
 import warnings
-from typing import Iterable, List, Set
+from typing import TYPE_CHECKING, Iterable, List, Optional, Set, cast
 
 import geopandas as gpd
 import pandas as pd
+import shapely.geometry
 from nzshm_common.location.location import location_by_id
 
+from solvis.filter import FilterSubsectionIds
+from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.geometry import circle_polygon
 
 from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
 
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+    from pandera.typing import DataFrame
+
+    from .dataframe_models import (
+        FaultSectionRuptureRateSchema,
+        FaultSectionSchema,
+        FaultSectionWithSolutionSlipRate,
+        ParentFaultParticipationSchema,
+        RuptureSectionSchema,
+        RuptureSectionsWithRuptureRatesSchema,
+        RupturesWithRuptureRatesSchema,
+        SectionParticipationSchema,
+    )
+
 log = logging.getLogger(__name__)
 
 
 class InversionSolutionOperations(InversionSolutionProtocol):
+    """
+    helper methods for analysis of InversionSolutionProtocol subtypes.
+
+    Deprecated:
+     the following methods are replaced by solvis.filter classes.
+
+     - get_rupture_ids_for_fault_names
+     - get_rupture_ids_for_location_radius
+     - get_rupture_ids_for_parent_fault
+     - get_rupture_ids_intersecting
+     - get_ruptures_for_parent_fault
+     - get_ruptures_intersecting
+     - get_solution_slip_rates_for_parent
+    """
+
+    _fault_sections: Optional[gpd.GeoDataFrame]
+    _fs_with_rates: Optional[pd.DataFrame]  # Union[, DataFrame[FaultSectionRuptureRateSchema]]]
+    _fs_with_soln_rates: Optional[pd.DataFrame]
+    _rs_with_rupture_rates: Optional[pd.DataFrame]
+    _rupture_sections: Optional[pd.DataFrame]  # Union[, DataFrame[RuptureSectionSchema]]]
+    _ruptures_with_rupture_rates: Optional[pd.DataFrame]
+
     def fault_surfaces(self) -> gpd.GeoDataFrame:
         return SolutionSurfacesBuilder(self).fault_surfaces()
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
         return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
+
+    def section_participation_rates(
+        self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ) -> 'DataFrame[SectionParticipationSchema]':
+        """Calculate the 'participation rate' for fault subsections.
+
+        Participation rate for each section is the the sum of rupture rates for the ruptures involving that section.
+
+        Args:
+            subsection_ids: the list of subsection_ids to include.
+            rupture_ids: calculate participation using only these ruptures (aka `Conditional Participation`).
+
+        Notes:
+         - Passing a non empty `subsection_ids` will not affect the rates, only the subsections for
+           which rates are returned.
+         - Passing a non empty `rupture_ids` will affect the rates, as only the specified ruptures
+           will be included in the sum.
+           This is referred to as the `conditional participation rate` which might be used when you are
+           only interested in the rates of e.g. ruptures in a particular magnitude range.
+
+        Returns:
+            pd.DataFrame: a participation rates dataframe
+        """
+        rate_column = "Annual Rate" if self.__class__.__name__ == "InversionSolution" else "rate_weighted_mean"
+
+        t0 = time.perf_counter()
+        df0 = cast(pd.DataFrame, self.rs_with_rupture_rates)
+
+        log.info(f"df0 shape: {df0.shape}")
+
+        if subsection_ids:
+            df0 = df0[df0["section"].isin(subsection_ids)]
+
+        t1 = time.perf_counter()
+        log.info(f'apply section filter took : {t1-t0} seconds')
+
+        if rupture_ids:
+            df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
+
+        t2 = time.perf_counter()
+        log.info(f'apply rupture_ids filter took : {t2-t1} seconds')
+
+        # result = df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
+        result = df0[["section", "Rupture Index", rate_column]].groupby("section").agg('sum')
+        result = result[[rate_column]]
+        t3 = time.perf_counter()
+        log.info(f'dataframe aggregation took : {t3-t2} seconds')
+        result = result.rename(columns={rate_column: 'participation_rate'})
+        return cast('DataFrame[SectionParticipationSchema]', result)
+
+    def fault_participation_rates(
+        self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ) -> 'DataFrame[ParentFaultParticipationSchema]':
+        """Calculate the 'participation rate' for parent faults.
+
+        Participation rate for each parent fault is the the sum of rupture rates for the
+        ruptures involving that parent fault.
+
+        Args:
+            parent_fault_ids: the list of parent_fault_ids to include.
+            rupture_ids: calculate participation using only these ruptures (aka Conditional Participation).
+
+        Notes:
+         - Passing `parent_fault_ids` will not affect the rate calculation, only the parent faults
+           for which rates are returned.
+         - Passing `rupture_ids` will affect the rates, as only the specified ruptures
+           will be included in the sum.
+           This is referred to as the `conditional participation rate` which might be used when you are
+           only interested in e.g. the rates of ruptures in a particular magnitude range.
+
+        Returns:
+            pd.DataFrame: a participation rates dataframe
+        """
+        subsection_ids = FilterSubsectionIds(self).for_parent_fault_ids(parent_fault_ids) if parent_fault_ids else None
+
+        rate_column = "Annual Rate" if self.__class__.__name__ == "InversionSolution" else "rate_weighted_mean"
+        df0 = cast(pd.DataFrame, self.rs_with_rupture_rates)
+        if subsection_ids:
+            df0 = df0[df0["section"].isin(subsection_ids)]
+
+        if rupture_ids:
+            df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
+
+        df1 = df0.join(self.fault_sections[['ParentID']], on='section')
+        result = (
+            df1[["ParentID", "Rupture Index", rate_column]]
+            .rename(columns={rate_column: 'participation_rate'})
+            .reset_index(drop=True)
+            .groupby(["ParentID", "Rupture Index"])
+            .agg('first')
+            .groupby("ParentID")
+            .agg('sum')
+        )
+        return cast('DataFrame[ParentFaultParticipationSchema]', result)
 
     def _geodataframe_from_geojson(self, prop, path):
         if not isinstance(prop, pd.DataFrame):
@@ -28,10 +168,13 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return prop
 
     @property
-    def fault_sections(self) -> gpd.GeoDataFrame:
+    def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
         """
         Get the fault sections and replace slip rates from rupture set with target rates from inverison.
         Cache result.
+
+        Returns:
+            pd.DataFrame: participation rates dataframe
         """
         if self._fault_sections is not None:
             return self._fault_sections
@@ -50,15 +193,20 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         return self._fault_sections
 
     @property
-    def rupture_sections(self) -> gpd.GeoDataFrame:
+    def rupture_sections(self) -> 'DataFrame[RuptureSectionSchema]':
+        """
+        Calculate and cache the permutations of rupture_id and section_id.
 
+        Returns:
+            pd.DataFrame: a pandas dataframe
+        """
         if self._rupture_sections is not None:
-            return self._rupture_sections  # pragma: no cover
+            return cast('DataFrame[RuptureSectionSchema]', self._rupture_sections)
 
         self._rupture_sections = self.build_rupture_sections()
-        return self._rupture_sections
+        return cast('DataFrame[RuptureSectionSchema]', self._rupture_sections)
 
-    def build_rupture_sections(self) -> gpd.GeoDataFrame:
+    def build_rupture_sections(self) -> 'DataFrame[RuptureSectionSchema]':
 
         tic = time.perf_counter()
 
@@ -80,10 +228,10 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         toc = time.perf_counter()
         log.debug('rupture_sections(): time to load and conform rupture_sections: %2.3f seconds' % (toc - tic))
-        return df2
+        return cast('DataFrame[RuptureSectionSchema]', df2)
 
     @property
-    def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
+    def fault_sections_with_rupture_rates(self) -> 'DataFrame[FaultSectionRuptureRateSchema]':
         """
         Calculate and cache the fault sections and their rupture rates.
 
@@ -91,7 +239,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             a gpd.GeoDataFrame
         """
         if self._fs_with_rates is not None:
-            return self._fs_with_rates
+            return cast('DataFrame[FaultSectionRuptureRateSchema]', self._fs_with_rates)
 
         tic = time.perf_counter()
         self._fs_with_rates = self.rs_with_rupture_rates.join(self.fault_sections, 'section', how='inner')
@@ -106,74 +254,87 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rupture_rates,
         #     on=self.fault_sections["Rupture Index"] )
-        return self._fs_with_rates
+        return cast('DataFrame[FaultSectionRuptureRateSchema]', self._fs_with_rates)
 
     @property
     def parent_fault_names(self) -> List[str]:
-        fault_names = list(set(list(self.fault_sections['ParentName'])))
-        fault_names.sort()
-        return fault_names
+        return sorted(self.fault_sections.ParentName.unique())
 
     @property
-    def fault_sections_with_solution_slip_rates(self) -> gpd.GeoDataFrame:
-        """
-        Calculate and cache fault sections and their solution slip rates.
-        Solution slip rate combines input (avg slips) and solution (rupture rates).
+    def fault_sections_with_solution_slip_rates(self) -> 'DataFrame[FaultSectionWithSolutionSlipRate]':
+        """Calculate and cache fault sections and their solution slip rates.
+
+        Solution slip rate combines the inversion inputs (avg slips), and the inversion solution (rupture rates).
 
         Returns:
             a gpd.GeoDataFrame
         """
         if self._fs_with_soln_rates is not None:
-            return self._fs_with_soln_rates
+            return cast('DataFrame[FaultSectionWithSolutionSlipRate]', self._fs_with_soln_rates)
 
         tic = time.perf_counter()
         self._fs_with_soln_rates = self._get_soln_rates()
         toc = time.perf_counter()
         log.debug('fault_sections_with_soilution_rates: time to calculate solution rates: %2.3f seconds' % (toc - tic))
-        return self._fs_with_soln_rates
+        return cast('DataFrame[FaultSectionWithSolutionSlipRate]', self._fs_with_soln_rates)
 
-    def _get_soln_rates(self):
+    def _get_soln_rates(self) -> 'DataFrame[FaultSectionWithSolutionSlipRate]':
+        """Get a dataframe joining ruptures and rupture_rates.
 
+        Returns:
+            a gpd.GeoDataFrame
+        """
         average_slips = self.average_slips
         # for every subsection, find the ruptures on it
         fault_sections_wr = self.fault_sections.copy()
-        for ind, fault_section in self.fault_sections.iterrows():
+        for idx, fault_section in self.fault_sections.iterrows():
             fault_id = fault_section['FaultID']
             fswr_gt0 = self.fault_sections_with_rupture_rates[
                 (self.fault_sections_with_rupture_rates['FaultID'] == fault_id)
                 & (self.fault_sections_with_rupture_rates['Annual Rate'] > 0.0)
             ]
-            fault_sections_wr.loc[ind, 'Solution Slip Rate'] = sum(
+            fault_sections_wr.loc[idx, 'Solution Slip Rate'] = sum(  # type: ignore
                 fswr_gt0['Annual Rate'] * average_slips.loc[fswr_gt0['Rupture Index']]['Average Slip (m)']
             )
 
-        return fault_sections_wr
+        return cast('DataFrame[FaultSectionWithSolutionSlipRate]', fault_sections_wr)
 
     @property
-    def rs_with_rupture_rates(self) -> gpd.GeoDataFrame:
+    def rs_with_rupture_rates(self) -> 'DataFrame[RuptureSectionsWithRuptureRatesSchema]':
+        """Get a dataframe joining rupture_sections and rupture_rates.
+
+        Returns:
+            a gpd.GeoDataFrame
+        """
         if self._rs_with_rupture_rates is not None:
-            return self._rs_with_rupture_rates  # pragma: no cover
+            return cast('DataFrame[RuptureSectionsWithRuptureRatesSchema]', self._rs_with_rupture_rates)
 
         tic = time.perf_counter()
         # df_rupt_rate = self.ruptures.join(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
         self._rs_with_rupture_rates = self.ruptures_with_rupture_rates.join(
-            self.rupture_sections.set_index("rupture"), on=self.ruptures_with_rupture_rates["Rupture Index"]
+            self.rupture_sections.set_index("rupture"),
+            on=self.ruptures_with_rupture_rates["Rupture Index"],  # type: ignore
         )
 
         toc = time.perf_counter()
-        log.debug(
+        log.info(
             (
                 'rs_with_rupture_rates: time to load ruptures_with_rupture_rates '
                 'and join with rupture_sections: %2.3f seconds'
             )
             % (toc - tic)
         )
-        return self._rs_with_rupture_rates
+        return cast('DataFrame[RuptureSectionsWithRuptureRatesSchema]', self._rs_with_rupture_rates)
 
     @property
-    def ruptures_with_rupture_rates(self) -> pd.DataFrame:
+    def ruptures_with_rupture_rates(self) -> 'DataFrame[RupturesWithRuptureRatesSchema]':
+        """Get a dataframe joining ruptures and rupture_rates.
+
+        Returns:
+            a gpd.GeoDataFrame
+        """
         if self._ruptures_with_rupture_rates is not None:
-            return self._ruptures_with_rupture_rates  # pragma: no cover
+            return cast('DataFrame[RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
 
         tic = time.perf_counter()
         # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
@@ -186,16 +347,16 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         log.debug(
             'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
         )
-        return self._ruptures_with_rupture_rates
+        return cast('DataFrame[RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
 
-    # return the rupture ids for any ruptures intersecting the polygon
-    def get_rupture_ids_intersecting(self, polygon) -> pd.Series:
-        """Return IDs for any ruptures intersecting the polygon."""
-        q0 = gpd.GeoDataFrame(self.fault_sections)
-        q1 = q0[q0['geometry'].intersects(polygon)]  # whitemans_0)]
-        sr = self.rs_with_rupture_rates
-        qdf = sr.join(q1, 'section', how='inner')
-        return qdf["Rupture Index"].unique()
+    def get_rupture_ids_intersecting(self, polygon: shapely.geometry.Polygon) -> pd.Series:
+        """Return IDs for any ruptures intersecting the polygon.
+
+        Warning:
+         Deprecated: please use solvis.filter.*.for_polygons method instead
+        """
+        warnings.warn("Please use solvis.filter.*.for_polygons method instead", DeprecationWarning)
+        return pd.Series(list(FilterRuptureIds(self).for_polygon(polygon)))
 
     def get_rupture_ids_for_location_radius(
         self,
@@ -203,8 +364,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         radius_km: float,
         location_join_type: SetOperationEnum = SetOperationEnum.UNION,
     ) -> Set[int]:
-        """
-        Return IDs for ruptures within a radius around one or more locations.
+        """Return IDs for ruptures within a radius around one or more locations.
 
         Where there are multiple locations, the rupture IDs represent a set joining
         of the specified radii.
@@ -221,23 +381,15 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             a Set of rupture IDs
 
         Examples:
-            Get all rupture IDs from the solution that are within 100km of Blenheim:
-            ```py
-                bhe_rupture_ids = sol.get_rupture_ids_for_location_radius(
-                    location_ids=["BHE"],
-                    radius_km=100,
-                )
-            ```
             Get all rupture IDs from the solution that are within 50km of Blenheim
-            or within 50km of Wellington:
+            or Wellington:
             ```py
                 intersect_rupture_ids = sol.get_rupture_ids_for_location_radius(
-                    location_ids=["BHE"],
+                    location_ids=["BHE", "WLG"],
                     radius_km=50,
                     location_joint_type=SetOperationEnum.UNION,
                 )
             ```
-
         Note:
             If you want to do this kind of joining between locations with different
             radii or points that are not defined by location IDs, consider using
@@ -245,28 +397,15 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             [get_rupture_ids_intersecting][solvis.inversion_solution.inversion_solution_operations.InversionSolutionOperations.get_rupture_ids_intersecting]
             then use set operations to join each rupture ID set.
         """
+        warnings.warn("Please use solvis.filter.classes *.for_polygons method instead.", DeprecationWarning)
         log.info('get_rupture_ids_for_location_radius: %s %s %s' % (self, radius_km, location_ids))
-        first = True
-        rupture_ids: Set[int]
+        polygons = []
         for loc_id in location_ids:
             loc = location_by_id(loc_id)
-            polygon = circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude'])
-            location_rupture_ids = set(self.get_rupture_ids_intersecting(polygon))
+            polygons.append(circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude']))
+        return set(FilterRuptureIds(self).for_polygons(polygons, location_join_type))
 
-            if first:
-                rupture_ids = location_rupture_ids
-                first = False
-            else:
-                log.debug('location_join_type %s' % location_join_type)
-                if location_join_type == SetOperationEnum.INTERSECTION:
-                    rupture_ids = rupture_ids.intersection(location_rupture_ids)
-                elif location_join_type == SetOperationEnum.UNION:
-                    rupture_ids = rupture_ids.union(location_rupture_ids)
-                else:
-                    raise ValueError("unsupported SetOperation")
-        return rupture_ids
-
-    def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+    def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> 'NDArray':
         """
         Return rupture IDs from fault sections for a given parent fault.
 
@@ -276,6 +415,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
         Returns:
             a Pandas series of rupture IDs
         """
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
         # sr = sol.rs_with_rupture_rates
         # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
         sects = self.fault_sections[self.fault_sections['ParentName'] == parent_fault_name]
@@ -316,6 +456,8 @@ class InversionSolutionOperations(InversionSolutionProtocol):
             ```
             Returns a set of 1440 rupture IDs in the intersection of the two datasets.
         """
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
+
         first = True
         rupture_ids: Set[int]
         for fault_name in corupture_fault_names:
@@ -342,14 +484,16 @@ class InversionSolutionOperations(InversionSolutionProtocol):
 
         return rupture_ids
 
-    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> pd.Series:
+    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> 'NDArray':
         """Deprecated signature for get_rupture_ids_for_parent_fault."""
-        warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
+        # warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
         return self.get_rupture_ids_for_parent_fault(parent_fault_name)
 
     def get_ruptures_intersecting(self, polygon) -> pd.Series:
         """Deprecated signature for get_rupture_ids_intersecting."""
-        warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
+        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
+        # warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
         return self.get_rupture_ids_intersecting(polygon)
 
     def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
