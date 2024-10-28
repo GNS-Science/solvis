@@ -114,7 +114,7 @@ def fault_surface_projection(
     lower_depth: float,
 ) -> Union[Polygon, LineString]:
     """
-    Calculate a projection of the fault surface onto the geodetic sphere
+    Calculate a projection of the fault surface onto the surface of a spherical Earth.
 
     Note: Any fault having a vertical dispostion (deg_deg == 90) will be rendered as a line.
 

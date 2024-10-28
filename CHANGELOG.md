@@ -13,9 +13,9 @@
  - standardise participation functions API and return columns;
 
 ## Added
- - new filter package providing classes for filtering solotions
+ - new filter package providing classes for filtering solutions
  - support for 3d geometry (thanks @voj)
- - c3ab6da simplify FSS participation using rate_weighted_mean
+ - simplify FSS participation using rate_weighted_mean
  - participation performance testing;
  - added participation methods to fault_system_solution
  - a simple rupture grouping algorithm (can this be a different type of filter??);

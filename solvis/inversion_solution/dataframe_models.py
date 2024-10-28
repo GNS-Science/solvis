@@ -58,7 +58,7 @@ class FaultSectionSchemaBase(pda.DataFrameModel):
      section_id: the section id (OpenSHA:FaultID).
      section_name: section name (OpenSHA:FaultName).
      dip_angle: dip angle in degrees (OpenSHA:DipDeg).
-     rake: fault sectoin rake in degrees (OpenSHA:Rake).
+     rake: rake angle in degrees (OpenSHA:Rake).
      lower_depth: fault lower depth in meters (OpenSHA:LowDepth).
      upper_depth: fault upper depth in metres (OpenSHA:UpDepth).
      aseismic_slip_factor: ratio of aseismic slip  (OpenSHA:AseismicSlipFactor).

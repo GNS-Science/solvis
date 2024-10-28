@@ -80,10 +80,6 @@ def test_combo_filtering_options():
 
     # this is needed so the property is cached for both timing tests
     df0 = solution.rs_with_rupture_rates.copy()  # property
-    # df0.section = df0.section.astype('int32')
-
-    # subsection_ids = [53, 54, 55, 56, 57, 58, 2219, 2218, 2220, 2102, 2103]
-    # subsection_ids = [ 132,  133,  134,  135,  136,  454,  453, 2199, 2200, 1371 ]
 
     rids = list(FilterRuptureIds(solution).for_parent_fault_names(TARGET_FAULTS))
     subsection_ids = FilterSubsectionIds(solution).for_rupture_ids(rids)

@@ -73,14 +73,22 @@ class InversionSolutionOperations(InversionSolutionProtocol):
     ) -> 'DataFrame[SectionParticipationSchema]':
         """Calculate the 'participation rate' for fault subsections.
 
-        Participation rate is the sum of rupture rate on each fault sections.
+        Participation rate for each section is the the sum of rupture rates for the ruptures involving that section.
 
         Args:
-            subsection_ids: the list of subsection_ids to return
-            rupture_ids: participation only for these ruptures (`conditional participation`).
+            subsection_ids: the list of subsection_ids to include.
+            rupture_ids: calculate participation using only these ruptures (aka `Conditional Participation`).
+
+        Notes:
+         - Passing a non empty `subsection_ids` will not affect the rates, only the subsections for
+           which rates are returned.
+         - Passing a non empty `rupture_ids` will affect the rates, as only the specified ruptures
+           will be included in the sum.
+           This is referred to as the `conditional participation rate` which might be used when you are
+           only interested in the rates of e.g. ruptures in a particular magnitude range.
 
         Returns:
-            pd.DataFrame: participation rates dataframe
+            pd.DataFrame: a participation rates dataframe
         """
         rate_column = "Annual Rate" if self.__class__.__name__ == "InversionSolution" else "rate_weighted_mean"
 
@@ -114,14 +122,23 @@ class InversionSolutionOperations(InversionSolutionProtocol):
     ) -> 'DataFrame[ParentFaultParticipationSchema]':
         """Calculate the 'participation rate' for parent faults.
 
-        Participation rate is the sum of rupture rate on each parent fault.
+        Participation rate for each parent fault is the the sum of rupture rates for the
+        ruptures involving that parent fault.
 
         Args:
-            parent_fault_ids: the list of parent_fault_ids to return
-            rupture_ids: participation only for these ruptures (`conditional participation`).
+            parent_fault_ids: the list of parent_fault_ids to include.
+            rupture_ids: calculate participation using only these ruptures (aka Conditional Participation).
+
+        Notes:
+         - Passing `parent_fault_ids` will not affect the rate calculation, only the parent faults
+           for which rates are returned.
+         - Passing `rupture_ids` will affect the rates, as only the specified ruptures
+           will be included in the sum.
+           This is referred to as the `conditional participation rate` which might be used when you are
+           only interested in e.g. the rates of ruptures in a particular magnitude range.
 
         Returns:
-            pd.DataFrame: participation rates dataframe
+            pd.DataFrame: a participation rates dataframe
         """
         subsection_ids = FilterSubsectionIds(self).for_parent_fault_ids(parent_fault_ids) if parent_fault_ids else None
 
@@ -247,7 +264,7 @@ class InversionSolutionOperations(InversionSolutionProtocol):
     def fault_sections_with_solution_slip_rates(self) -> 'DataFrame[FaultSectionWithSolutionSlipRate]':
         """Calculate and cache fault sections and their solution slip rates.
 
-        NB: Solution slip rate combines input (avg slips) and solution (rupture rates).
+        Solution slip rate combines the inversion inputs (avg slips), and the inversion solution (rupture rates).
 
         Returns:
             a gpd.GeoDataFrame

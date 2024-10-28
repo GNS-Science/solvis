@@ -26,18 +26,9 @@ def test_section_participation_rate_default_spot_check(crustal_small_fss_fixture
 
 def test_section_participation_rate_default_all_sections(crustal_small_fss_fixture):
     # get the participation rate for a single (sub)section
-    # sec_id = 5
     solution = crustal_small_fss_fixture
     rates = solution.section_participation_rates()
-
     section_rates = solution.rs_with_rupture_rates.groupby("section").agg('sum')[RATE_COLUMN]
-
-    # print(solution.rs_with_composite_rupture_rates)
-    # print()
-    # print(solution.composite_rates)
-    # print(solution.rupture_sections)
-    # print(section_rates)
-
     assert section_rates.all() == rates.participation_rate.all()
 
     # print(sum(section_rates))
@@ -107,7 +98,6 @@ def test_section_participation_rates(crustal_small_fss_fixture, fault_name, subs
     print(solution.fault_sections[["FaultName"]])
     subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name])
     # print(subsection_ids)
-    # print()
     # print(solution.composite_rates)
     # print(solution.rupture_sections)
     srdf = solution.section_participation_rates(subsection_ids)
@@ -152,13 +142,12 @@ def test_section_participation_rates_detail(crustal_small_fss_fixture, fault_nam
     df1 = df0[df0['Rupture Index'].isin(rids_subset)]
     df2 = df1[df1['section'] == subsection_id]
 
-    # use this to check what 'good' expected result looks like
-    print(df2.columns)
-    print(df2[['section', 'Rupture Index', RATE_COLUMN]])
+    # # use this to check what 'good' expected result looks like
+    # print(df2.columns)
+    # print(df2[['section', 'Rupture Index', RATE_COLUMN]])
 
     new_expected_rate = sum(df2[RATE_COLUMN])
 
     srdf = solution.section_participation_rates([subsection_id], rids_subset)
     print(srdf)
     assert pytest.approx(srdf.participation_rate.tolist()[0]) == new_expected_rate
-    # assert 0

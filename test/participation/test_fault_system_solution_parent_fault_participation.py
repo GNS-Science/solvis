@@ -4,7 +4,7 @@ from solvis.filter import FilterParentFaultIds, FilterRuptureIds, FilterSubsecti
 
 RATE_COLUMN = 'rate_weighted_mean'  # 'Annual Rate'
 
-# PROBLEM: our test fixture only has ruptures for 1 parent fault
+# TODO: PROBLEM: our test fixture only has ruptures for 1 parent fault
 parent_fault_rates = [
     # ("Vernon 4", 0.0013733797),
     ("Alpine Jacksons to Kaniere", 0.00262068771),
@@ -24,14 +24,12 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
     df1 = df0.join(solution.fault_sections[['ParentID', 'ParentName']], on='section')
 
     print(df1['ParentName'].unique())
-    # assert 0
     df1 = df1[df1['ParentName'] == fault_name]
     pfid = df1['ParentID'].unique()[0]
 
     print(f'parent_fault id: {pfid}')
 
     df2 = df1[["ParentID", "section", RATE_COLUMN]]
-    # print(df2[df2[RATE_COLUMN] > 0])
 
     parent_rate = df2.groupby(["ParentID", "Rupture Index"]).agg('first').groupby("ParentID").agg('sum')[RATE_COLUMN]
     print(parent_rate)
@@ -44,11 +42,6 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
 @pytest.mark.parametrize("fault_name, expected_rate", parent_fault_rates)
 def test_parent_fault_participation_rate_conditional(crustal_small_fss_fixture, fault_name, expected_rate):
 
-    """
-    Notes:
-     - this fixture is InversionSolution - so no weights and rate col is
-       [RATE_COLUMN]
-    """
     # get the participation rate for a (parent) fault
     solution = crustal_small_fss_fixture
 
@@ -74,20 +67,14 @@ def test_parent_fault_participation_rate_vs_section_rates(crustal_small_fss_fixt
     solution = crustal_small_fss_fixture
     fault_rates = solution.fault_participation_rates([fault_name])
     assert pytest.approx(fault_rates.participation_rate.tolist()[0]) == expected_rate
-
     print(fault_rates)
-
     rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
-    # assert len(rids) > 1
 
     subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name]).for_rupture_ids(rids)
-
     print(f'subsection_ids {list(subsection_ids)}')
 
     section_rates = solution.section_participation_rates(subsection_ids)
     print(section_rates)
-
-    # assert pytest.approx(sum(section_rates[RATE_COLUMN])) == 0.023329016054049134
 
     assert (
         sum(section_rates.participation_rate) >= expected_rate

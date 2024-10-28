@@ -31,12 +31,6 @@ def test_parent_fault_participation_rate_vs_section_rates(crustal_solution_fixtu
 
 @pytest.mark.parametrize("fault_name, expected_rate", parent_fault_rates)
 def test_parent_fault_participation_rate(crustal_solution_fixture, fault_name, expected_rate):
-
-    """
-    Notes:
-     - this fixture is InversionSolution - so no weights and rate col is
-       .participation_rate
-    """
     # get the participation rate for a (parent) fault
     solution = crustal_solution_fixture
 
@@ -63,12 +57,6 @@ def test_parent_fault_participation_rate(crustal_solution_fixture, fault_name, e
 
 @pytest.mark.parametrize("fault_name, expected_rate", parent_fault_rates)
 def test_parent_fault_participation_rate_conditional(crustal_solution_fixture, fault_name, expected_rate):
-
-    """
-    Notes:
-     - this fixture is InversionSolution - so no weights and rate col is
-       .participation_rate
-    """
     # get the participation rate for a (parent) fault
     solution = crustal_solution_fixture
 
