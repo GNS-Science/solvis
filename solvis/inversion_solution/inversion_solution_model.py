@@ -6,23 +6,17 @@ from the raw dataframes available via the `InversionSolutionFile` class.
 """
 import logging
 import time
-import warnings
-from typing import TYPE_CHECKING, Iterable, List, Optional, Set, cast
+from typing import TYPE_CHECKING, Iterable, List, Optional, cast
 
 import geopandas as gpd
 import pandas as pd
-import shapely.geometry
-from nzshm_common.location.location import location_by_id
 
 from solvis.filter import FilterSubsectionIds
-from solvis.filter.rupture_id_filter import FilterRuptureIds
-from solvis.geometry import circle_polygon
 
 from .inversion_solution_file import InversionSolutionFile
-from .typing import CompositeSolutionProtocol, InversionSolutionModelProtocol, SetOperationEnum
+from .typing import CompositeSolutionProtocol, InversionSolutionModelProtocol
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
     from pandera.typing import DataFrame
 
     from .dataframe_models import (  # FaultSectionSchema,
@@ -370,153 +364,6 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
         )
         return cast('DataFrame[RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
-
-    def get_rupture_ids_intersecting(self, polygon: shapely.geometry.Polygon) -> pd.Series:
-        """Return IDs for any ruptures intersecting the polygon.
-
-        Warning:
-         Deprecated: please use solvis.filter.*.for_polygons method instead
-        """
-        warnings.warn("Please use solvis.filter.*.for_polygons method instead", DeprecationWarning)
-        return pd.Series(list(FilterRuptureIds(self).for_polygon(polygon)))
-
-    def get_rupture_ids_for_location_radius(
-        self,
-        location_ids: Iterable[str],
-        radius_km: float,
-        location_join_type: SetOperationEnum = SetOperationEnum.UNION,
-    ) -> Set[int]:
-        """Return IDs for ruptures within a radius around one or more locations.
-
-        Where there are multiple locations, the rupture IDs represent a set joining
-        of the specified radii.
-
-        Locations are resolved using [`nzshm-common`](https://pypi.org/project/nzshm-common/)
-        location ID values.
-
-        Parameters:
-            location_ids: one or more defined location IDs
-            radius_km: radius around the point(s) in kilometres
-            location_join_type: UNION or INTERSECTION
-
-        Returns:
-            a Set of rupture IDs
-
-        Examples:
-            Get all rupture IDs from the solution that are within 50km of Blenheim
-            or Wellington:
-            ```py
-                intersect_rupture_ids = sol.get_rupture_ids_for_location_radius(
-                    location_ids=["BHE", "WLG"],
-                    radius_km=50,
-                    location_joint_type=SetOperationEnum.UNION,
-                )
-            ```
-        Note:
-            If you want to do this kind of joining between locations with different
-            radii or points that are not defined by location IDs, consider using
-            [circle_polygon][solvis.geometry.circle_polygon] and
-            [get_rupture_ids_intersecting][solvis.inversion_solution.inversion_solution_model.InversionSolutionModel.get_rupture_ids_intersecting]
-            then use set operations to join each rupture ID set.
-        """
-        warnings.warn("Please use solvis.filter.classes *.for_polygons method instead.", DeprecationWarning)
-        log.info('get_rupture_ids_for_location_radius: %s %s %s' % (self, radius_km, location_ids))
-        polygons = []
-        for loc_id in location_ids:
-            loc = location_by_id(loc_id)
-            polygons.append(circle_polygon(radius_km * 1000, lon=loc['longitude'], lat=loc['latitude']))
-        return set(FilterRuptureIds(self).for_polygons(polygons, location_join_type))
-
-    def get_rupture_ids_for_parent_fault(self, parent_fault_name: str) -> 'NDArray':
-        """
-        Return rupture IDs from fault sections for a given parent fault.
-
-        Parameters:
-            parent_fault_name: The name of the parent fault, e.g. "Alpine Jacksons to Kaniere"
-
-        Returns:
-            a Pandas series of rupture IDs
-        """
-        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
-        # sr = sol.rs_with_rupture_rates
-        # print(f"Sections with rate (sr_, where parent fault name = '{parent_fault_name}'.")
-        sects = self.solution_file.fault_sections[self.solution_file.fault_sections['ParentName'] == parent_fault_name]
-        qdf = self.rupture_sections.join(sects, 'section', how='inner')
-        return qdf.rupture.unique()
-
-    def get_rupture_ids_for_fault_names(
-        self,
-        corupture_fault_names: Iterable[str],
-        fault_join_type: SetOperationEnum = SetOperationEnum.UNION,
-    ) -> Set[int]:
-        """
-        Retrieve a set of rupture IDs for the specified corupture fault names.
-
-        Where there are multiple faults, the rupture IDs represent a set joining
-        of the specified faults.
-
-        Parameters:
-            corupture_fault_names: a collection of corupture fault names
-            fault_join_type: UNION or INTERSECTION
-
-        Raises:
-            ValueError: on an unsupported fault join type
-
-        Returns:
-            a Set of rupture IDs
-
-        Examples:
-            ```py
-            rupture_ids = solution.get_rupture_ids_for_fault_names(
-                corupture_fault_names=[
-                    "Alpine Jacksons to Kaniere",
-                    "Alpine Kaniere to Springs Junction",
-                ],
-                fault_joint_type=SetOperationEnum.INTERSECTION,
-                }
-            )
-            ```
-            Returns a set of 1440 rupture IDs in the intersection of the two datasets.
-        """
-        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
-
-        first = True
-        rupture_ids: Set[int]
-        for fault_name in corupture_fault_names:
-            if fault_name not in self.parent_fault_names:
-                raise ValueError("Invalid fault name: %s" % fault_name)
-            tic22 = time.perf_counter()
-            fault_rupture_ids = self.get_rupture_ids_for_parent_fault(fault_name)
-            tic23 = time.perf_counter()
-            log.debug('get_ruptures_for_parent_fault %s: %2.3f seconds' % (fault_name, (tic23 - tic22)))
-
-            if first:
-                rupture_ids = set(fault_rupture_ids)
-                first = False
-            else:
-                log.debug(f"fault_join_type {fault_join_type}")
-                if fault_join_type == SetOperationEnum.INTERSECTION:
-                    rupture_ids = rupture_ids.intersection(fault_rupture_ids)
-                elif fault_join_type == SetOperationEnum.UNION:
-                    rupture_ids = rupture_ids.union(fault_rupture_ids)
-                else:
-                    raise ValueError(
-                        "Only INTERSECTION and UNION operations are supported for option 'multiple_faults'"
-                    )
-
-        return rupture_ids
-
-    def get_ruptures_for_parent_fault(self, parent_fault_name: str) -> 'NDArray':
-        """Deprecated signature for get_rupture_ids_for_parent_fault."""
-        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
-        # warnings.warn("Please use updated method name: get_rupture_ids_for_parent_fault", category=DeprecationWarning)
-        return self.get_rupture_ids_for_parent_fault(parent_fault_name)
-
-    def get_ruptures_intersecting(self, polygon) -> pd.Series:
-        """Deprecated signature for get_rupture_ids_intersecting."""
-        warnings.warn("Please use solvis.filter.classes instead.", DeprecationWarning)
-        # warnings.warn("Please use updated method name: get_rupture_ids_intersecting", category=DeprecationWarning)
-        return self.get_rupture_ids_intersecting(polygon)
 
     def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
 

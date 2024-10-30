@@ -4,6 +4,7 @@ import os
 import pathlib
 
 import pandas as pd
+import pytest
 from nzshm_common.location.location import location_by_id
 from pytest import approx, raises
 
@@ -50,6 +51,7 @@ class TestInversionSolution(object):
     #     assert isinstance(sol, InversionSolution)
     #     assert sol.fault_regime == 'SUBDUCTION'
 
+    @pytest.mark.skip('Deprecated')
     def test_get_rupture_ids_intersecting_crustal(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
         model = sol.model
@@ -64,6 +66,7 @@ class TestInversionSolution(object):
         assert len(model.ruptures) > len(ruptures)
         assert set(all_rupture_ids).issuperset(set(ruptures))
 
+    @pytest.mark.skip('Deprecated')
     def test_get_rupture_ids_for_parent_fault(self, crustal_solution_fixture):
         model = crustal_solution_fixture.model
 
@@ -75,6 +78,7 @@ class TestInversionSolution(object):
         assert len(pf1_ids) is not len(pf2_ids), "Sets should have different lengths"
         assert len(pf1_ids.intersection(pf2_ids)) > 0, "Sets are expected to overlap"
 
+    @pytest.mark.skip('Deprecated')
     def test_get_rupture_ids_for_fault_names(self, crustal_solution_fixture):
         model = crustal_solution_fixture.model
 
@@ -104,6 +108,7 @@ class TestInversionSolution(object):
                 fault_join_type=SetOperationEnum.DIFFERENCE,
             )
 
+    @pytest.mark.skip('Deprecated')
     def test_get_rupture_ids_for_location_radius(self, crustal_solution_fixture):
         sol = crustal_solution_fixture.model
 

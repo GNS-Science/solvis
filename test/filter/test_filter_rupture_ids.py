@@ -52,8 +52,8 @@ def test_ruptures_for_polygon_intersecting(fss_model, filter_rupture_ids):
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
     rupture_ids = filter_rupture_ids.for_polygon(polygon)
 
-    # check vs the legacy solvis function
-    assert rupture_ids == set(fss_model.get_rupture_ids_intersecting(polygon))
+    # check vs the legacy solvis function - now Deprecated
+    # assert rupture_ids == set(fss_model.get_rupture_ids_intersecting(polygon))
 
     # check vs known fixture values
     assert set(

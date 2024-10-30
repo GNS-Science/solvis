@@ -7,6 +7,7 @@ import pytest
 import solvis
 
 # from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
+from solvis.filter.rupture_id_filter import FilterRuptureIds
 
 
 @pytest.fixture(scope='module')
@@ -17,14 +18,9 @@ def composite_fixture(request):
 
 
 def test_filter_from_complete_composite(composite_fixture):
-    """
-    reproduce KeyError: "There is no item named 'ruptures/indices.csv' in the archive"
-    """
     sol = composite_fixture.get_fault_system_solution('HIK')
-    ruptures = solvis.rupt_ids_above_rate(sol, 1e-4, rate_column="rate_weighted_mean")
-
+    ruptures = list(FilterRuptureIds(sol.model).for_rupture_rate(min_rate=1e-7))
     print(ruptures)
-
     new_sol = solvis.FaultSystemSolution.filter_solution(sol, ruptures)
-
-    assert ruptures.shape[0] == new_sol.model.ruptures.shape[0]
+    assert len(ruptures) == new_sol.model.ruptures.shape[0]
+    # assert 0
