@@ -8,12 +8,12 @@ Examples:
     ```py
     >>> ham50 = solvis.circle_polygon(50000, -37.78, 175.28)  # 50km radius around Hamilton
     <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
-    >>> solution = solvis.InversionSolution.from_archive(filename)
-    >>> rupture_ids = FilterRuptureIds(solution)\\
+    >>> model = solvis.InversionSolution.from_archive(filename).model
+    >>> rupture_ids = FilterRuptureIds(model)\\
             .for_magnitude(min_mag=5.75, max_mag=6.25)\\
             .for_polygon(ham50)
 
-    >>> subsection_ids = FilterSubsectionIds(solution)\\
+    >>> subsection_ids = FilterSubsectionIds(model)\\
     >>>     .for_rupture_ids(rupture_ids)
     ```
 """

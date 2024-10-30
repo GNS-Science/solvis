@@ -11,8 +11,8 @@ Functions:
 
 Examples:
     ```py
-    >>> solution = InversionSolution.from_archive(filename)
-    >>> parent_fault_ids = FilterParentFaultIds(solution)\\
+    >>> model = InversionSolution.from_archive(filename).model
+    >>> parent_fault_ids = FilterParentFaultIds(model)\\
             .for_parent_fault_names(['Alpine Jacksons to Kaniere', 'BooBoo'])
     ```
 
