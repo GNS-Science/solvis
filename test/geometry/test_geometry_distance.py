@@ -101,7 +101,7 @@ class TestSurfaceDistanceCalculation(object):
             TEST_FOLDER, "fixtures/AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
         )
         sol = InversionSolution().from_archive(str(filename))
-        gdf = gpd.GeoDataFrame(sol.model.fault_surfaces())
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         print(gdf)
 
@@ -122,7 +122,7 @@ class TestSurfaceDistanceCalculation(object):
 
         original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
         sol = InversionSolution().from_archive(original_archive)
-        gdf = gpd.GeoDataFrame(sol.model.fault_surfaces())
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         # # set up WLG as our datum
         WLG = location_by_id('WLG')
@@ -153,7 +153,7 @@ class TestSurfaceDistanceCalculation(object):
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
-        gdf = gpd.GeoDataFrame(sol.model.fault_surfaces())
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         polygon = geometry.circle_polygon(radius_m=dist_km * 1000, lon=WLG['longitude'], lat=WLG['latitude'])
         polygon_intersect_df = gdf[gdf['geometry'].intersects(polygon)]  # whitemans_0)]
@@ -185,7 +185,7 @@ class TestSurfaceDistanceCalculation(object):
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
-        gdf = gpd.GeoDataFrame(sol.model.fault_surfaces())
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         polygon = geometry.circle_polygon(radius_m=dist_km * 1000, lon=WLG['longitude'], lat=WLG['latitude'])
         polygon_intersect_df = gdf[gdf['geometry'].intersects(polygon)]  # whitemans_0)]

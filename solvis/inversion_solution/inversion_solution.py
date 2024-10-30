@@ -19,14 +19,16 @@ Examples:
 """
 import io
 import zipfile
+from inspect import getmembers
 from pathlib import Path
-from typing import Iterable, Union, Optional
+from typing import Iterable, Optional, Union
+
+import geopandas as gpd
 
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_operations import InversionSolutionOperations
-from .typing import ModelLogicTreeBranch, InversionSolutionProtocol
-
-from inspect import getmembers
+from .solution_surfaces_builder import SolutionSurfacesBuilder
+from .typing import ModelLogicTreeBranch
 
 
 def inherit_docstrings(cls):
@@ -47,7 +49,7 @@ def inherit_docstrings(cls):
 
 
 @inherit_docstrings
-class InversionSolution(InversionSolutionProtocol):
+class InversionSolution:
     """A python interface for an OpenSHA Inversion Solution archive.
 
     Attributes:
@@ -72,7 +74,7 @@ class InversionSolution(InversionSolutionProtocol):
         return self._dataframe_operations
 
     @property
-    def solution_file(self) -> Optional[InversionSolutionFile]:
+    def solution_file(self) -> InversionSolutionFile:
         # """
         # An InversionSolutionFile instance
 
@@ -88,6 +90,12 @@ class InversionSolution(InversionSolutionProtocol):
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
         """Write the current solution to a new zip archive."""
         return self._solution_file.to_archive(archive_path, base_archive_path, compat)
+
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).fault_surfaces()
+
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':
@@ -142,7 +150,7 @@ class InversionSolution(InversionSolutionProtocol):
         ns = InversionSolution()
 
         ns.solution_file.set_props(
-            rates, ruptures, indices, solution.solution_file.fault_sections.copy(), solution.solution_file.average_slips
+            rates, ruptures, indices, solution.solution_file.fault_sections.copy(), average_slips
         )
         ns.solution_file._archive_path = solution.solution_file._archive_path
 

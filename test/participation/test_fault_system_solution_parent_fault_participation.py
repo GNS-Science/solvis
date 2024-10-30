@@ -48,9 +48,7 @@ def test_parent_fault_participation_rate_conditional(crustal_small_fss_fixture, 
     model = solution.model
 
     rids = list(
-        FilterRuptureIds(model).for_parent_fault_ids(
-            FilterParentFaultIds(model).for_parent_fault_names([fault_name])
-        )
+        FilterRuptureIds(model).for_parent_fault_ids(FilterParentFaultIds(model).for_parent_fault_names([fault_name]))
     )
     assert len(rids) > 1
 

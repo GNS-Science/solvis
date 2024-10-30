@@ -29,7 +29,7 @@ def parent_fault_names(
 def section_participation(sol: InversionSolutionProtocol, df_ruptures: Optional[pd.DataFrame] = None):
     warnings.warn("Please use InversionSolutionProtocol participation methods instead.", DeprecationWarning)
     rupture_ids = df_ruptures['Rupture Index'].tolist() if df_ruptures else None
-    return sol.section_participation_rates(rupture_ids=rupture_ids)
+    return sol.model.section_participation_rates(rupture_ids=rupture_ids)
 
 
 def mfd_hist(ruptures_df: pd.DataFrame, rate_column: str = "Annual Rate"):

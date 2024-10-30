@@ -5,21 +5,21 @@ FaultSystemSolutionModelprovides methods to build pandas dataframes
 from the raw dataframes available via the `InversionSolutionFile` class.
 """
 import logging
-from typing import TYPE_CHECKING
-from .inversion_solution_operations import InversionSolutionOperations as InversionSolutionModel
+from typing import TYPE_CHECKING, Optional, cast
+
+from pandera.typing import DataFrame
+
+from .dataframe_models import RuptureSectionSchema
 from .fault_system_solution_file import FaultSystemSolutionFile
+from .inversion_solution_operations import InversionSolutionOperations as InversionSolutionModel
+
+# from .typing import AggregateSolutionProtocol
 
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # from numpy.typing import NDArray
-    # import pandas as pd
-
-    from pandera.typing import DataFrame
-
-    from .dataframe_models import (
-        RuptureSectionSchema,
-    )
+    import pandas as pd
 
 
 class FaultSystemSolutionModel(InversionSolutionModel):
@@ -29,7 +29,7 @@ class FaultSystemSolutionModel(InversionSolutionModel):
 
     def __init__(self, solution_file: FaultSystemSolutionFile) -> None:
         self._fast_indices: Optional[pd.DataFrame] = None
-        self._solution_file = solution_file
+        self._solution_file: FaultSystemSolutionFile = solution_file
         super().__init__(solution_file)
 
     @property
@@ -59,7 +59,7 @@ class FaultSystemSolutionModel(InversionSolutionModel):
         if self._rupture_sections is None:
             self._rupture_sections = self._fast_indices
 
-        return self._rupture_sections
+        return cast(DataFrame[RuptureSectionSchema], self._rupture_sections)
 
     def enable_fast_indices(self) -> bool:
         """make sure that the fast_indices dataframe is available at serialisation time"""

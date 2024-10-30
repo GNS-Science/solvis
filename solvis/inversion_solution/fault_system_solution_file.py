@@ -1,6 +1,6 @@
 import logging
 import zipfile
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import geopandas as gpd
 import pandas as pd
@@ -9,6 +9,7 @@ from .inversion_solution_file import InversionSolutionFile, data_to_zip_direct
 
 if TYPE_CHECKING:
     from pandera.typing import DataFrame
+
     from .dataframe_models import RuptureRateSchema
 
 log = logging.getLogger(__name__)

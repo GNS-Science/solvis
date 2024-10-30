@@ -68,7 +68,7 @@ class TestSubductionSurface(unittest.TestCase):
     def test_subduction_rupture_surface(self):
         filename = pathlib.PurePath(TEST_FOLDER, PUY_ARCHIVE)
         solution = solvis.InversionSolution().from_archive(str(filename))
-        surface = solution.model.rupture_surface(4)
+        surface = solution.rupture_surface(4)
         assert surface.shape == (8, 22)
 
     @pytest.mark.slow
@@ -77,7 +77,7 @@ class TestSubductionSurface(unittest.TestCase):
         solution = solvis.InversionSolution().from_archive(str(filename))
 
         rupture_id = 101
-        surface = solution.model.rupture_surface(rupture_id)
+        surface = solution.rupture_surface(rupture_id)
 
         print(surface)
         assert surface.shape == (25, 22)
@@ -90,11 +90,11 @@ class TestSubductionSurface(unittest.TestCase):
 
         rupture_id = 101
         t0 = dt.utcnow()
-        solution.model.rupture_surface(rupture_id)
+        solution.rupture_surface(rupture_id)
         uncached_time = dt.utcnow() - t0
 
         t1 = dt.utcnow()
-        solution.model.rupture_surface(rupture_id)
+        solution.rupture_surface(rupture_id)
         cached_time = dt.utcnow() - t1
 
         print(cached_time, uncached_time)

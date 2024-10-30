@@ -10,10 +10,10 @@ from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
 fslt = current_model.source_logic_tree.branch_sets[0]  # PUY is used always , just for the 3 solution_ids
 
-FSR_COLUMNS_A = 26 # see how this flies: 26
-FSR_COLUMNS_B = 25 # HIK
+FSR_COLUMNS_A = 26  # see how this flies: 26
+FSR_COLUMNS_B = 25  # HIK
 
-RATE_COLUMNS_A = 6 # see how this flies:6
+RATE_COLUMNS_A = 6  # see how this flies:6
 COMPOSITE_RATE_COLUMNS = 6
 
 
@@ -100,7 +100,6 @@ class TestSmallCrustal(object):
 
 
 class TestSmallDataFrames(object):
-
     def test_rates_shape(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
         assert sol.model.rupture_rates.shape == (7, RATE_COLUMNS_A)  # no 0 rates
@@ -137,7 +136,7 @@ class TestSmallDataFrames(object):
 
 class TestPuysegurSmallSurfaces(object):
     def test_rupture_surface(self, puysegur_small_fss_fixture):
-        surface = puysegur_small_fss_fixture.model.rupture_surface(3)
+        surface = puysegur_small_fss_fixture.rupture_surface(3)
         print(surface.info())
         print()
         print(surface)
@@ -145,7 +144,7 @@ class TestPuysegurSmallSurfaces(object):
         # assert 0
 
     def test_fault_surfaces(self, puysegur_small_fss_fixture):
-        surfaces = puysegur_small_fss_fixture.model.fault_surfaces()
+        surfaces = puysegur_small_fss_fixture.fault_surfaces()
         print(surfaces.info())
         print()
         print(surfaces.tail())
@@ -159,7 +158,7 @@ class TestHikurangi(object):
         assert hikurangi_fixture.model.fault_sections_with_rupture_rates.shape == (42403, FSR_COLUMNS_B)
 
     def test_fault_surfaces(self, hikurangi_fixture):
-        surfaces = hikurangi_fixture.model.fault_surfaces()
+        surfaces = hikurangi_fixture.fault_surfaces()
         print(surfaces.info())
         print()
         print(surfaces.tail())
@@ -168,7 +167,7 @@ class TestHikurangi(object):
         assert surfaces.shape == (452, 13)
 
     def test_rupture_surface(self, hikurangi_fixture):
-        surface = hikurangi_fixture.model.rupture_surface(23660)
+        surface = hikurangi_fixture.rupture_surface(23660)
         assert surface.shape == (6, FSR_COLUMNS_B)
 
     def test_rates_shape(self, hikurangi_fixture):
@@ -185,7 +184,7 @@ class TestSmallHikurangi(object):
 
     @pytest.mark.TODO_check_values
     def test_fault_surfaces(self, hikurangi_small_fss_fixture):
-        surfaces = hikurangi_small_fss_fixture.model.fault_surfaces()
+        surfaces = hikurangi_small_fss_fixture.fault_surfaces()
         print(surfaces.info())
         print()
         print(surfaces.tail())
@@ -195,7 +194,7 @@ class TestSmallHikurangi(object):
 
     @pytest.mark.TODO_check_values
     def test_rupture_surface(self, hikurangi_small_fss_fixture):
-        surface = hikurangi_small_fss_fixture.model.rupture_surface(5)
+        surface = hikurangi_small_fss_fixture.rupture_surface(5)
         assert surface.shape == (9, FSR_COLUMNS_B)
 
     def test_rates_shape(self, hikurangi_small_fss_fixture):

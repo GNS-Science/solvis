@@ -5,9 +5,9 @@ A griffe extension lifted from https://mkdocstrings.github.io/griffe/guide/users
 """
 import ast
 import inspect
-import griffe
+from typing import Optional, Union
 
-from typing import Union, Optional
+import griffe
 
 logger = griffe.get_logger(__name__)
 

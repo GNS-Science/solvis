@@ -8,7 +8,7 @@ import io
 import logging
 import zipfile
 from pathlib import Path
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional, Union, cast
 
 import geopandas as gpd
 import nzshm_model as nm
@@ -16,13 +16,13 @@ import pandas as pd
 
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .fault_system_solution_model import FaultSystemSolutionModel
-from .inversion_solution import InversionSolution
+from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import BranchSolutionProtocol, ModelLogicTreeBranch
 
 log = logging.getLogger(__name__)
 
 
-class FaultSystemSolution(InversionSolution):
+class FaultSystemSolution:
     """A class that aggregates InversionSolution instances sharing a common OpenSHA RuptureSet.
 
     The class is largely interchangeable with InversionSolution, as only rupture rates
@@ -30,13 +30,37 @@ class FaultSystemSolution(InversionSolution):
     """
 
     def __init__(self, solution_file: Optional[FaultSystemSolutionFile] = None):
-        self._solution_file = solution_file or FaultSystemSolutionFile()
-        self._dataframe_operations = FaultSystemSolutionModel(self._solution_file)
+        self._solution_file: FaultSystemSolutionFile = solution_file or FaultSystemSolutionFile()
+        self._dataframe_operations: FaultSystemSolutionModel = FaultSystemSolutionModel(self._solution_file)
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
         """Write the current solution to a new zip archive."""
         self.model.enable_fast_indices()
         return self._solution_file.to_archive(archive_path, base_archive_path, compat)
+
+    @property
+    def solution_file(self) -> FaultSystemSolutionFile:
+        # """
+        # An FaultSystemSolutionFile instance
+
+        # Returns:
+        #     instance: the FaultSystemSolutionFile
+        # """
+        return self._solution_file
+
+    @property
+    def model(self) -> FaultSystemSolutionModel:
+        return self._dataframe_operations
+
+    @property
+    def fault_regime(self):
+        return self._solution_file.fault_regime
+
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).fault_surfaces()
+
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'FaultSystemSolution':
@@ -59,12 +83,13 @@ class FaultSystemSolution(InversionSolution):
 
     @staticmethod
     def filter_solution(solution: 'FaultSystemSolution', rupture_ids: Iterable) -> 'FaultSystemSolution':
+        solution = cast(FaultSystemSolution, solution)
         model = solution.model
         rr = model.ruptures
         cr = model.composite_rates
         ar = model.aggregate_rates
-        ri = model.indices
-        avs = model.average_slips
+        ri = solution.solution_file.indices.copy()
+        avs = solution.solution_file.average_slips.copy()
 
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         composite_rates = cr[cr["Rupture Index"].isin(rupture_ids)].copy()
@@ -80,7 +105,7 @@ class FaultSystemSolution(InversionSolution):
             ruptures,
             indices,
             model.fault_sections.copy(),
-            model.fault_regime,
+            solution.solution_file.fault_regime,
             average_slips,
         )
         # ns._archive_path = None
@@ -103,7 +128,6 @@ class FaultSystemSolution(InversionSolution):
             new_solution_file._archive = new_archive
             new_solution_file._archive.seek(0)
         return FaultSystemSolution(new_solution_file)
-
 
     @staticmethod
     def new_solution(solution: BranchSolutionProtocol, composite_rates_df: pd.DataFrame) -> 'FaultSystemSolution':
@@ -139,13 +163,13 @@ class FaultSystemSolution(InversionSolution):
         fss_file.set_props(
             composite_rates_df,
             aggregate_rates_df,
-            solution.solution_file.ruptures.copy(),
+            solution.model.ruptures.copy(),
             solution.solution_file.indices.copy(),
-            solution.solution_file.fault_sections.copy(),
+            solution.model.fault_sections.copy(),
             solution.solution_file.fault_regime,
             solution.solution_file.average_slips.copy(),
         )
-        fss_file._archive_path = solution.solution_file._archive_path
+        fss_file._archive_path = solution.solution_file.archive_path
         return FaultSystemSolution(fss_file)
 
     @staticmethod

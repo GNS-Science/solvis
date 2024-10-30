@@ -5,9 +5,9 @@ Classes:
     CompositeSolution: a container class collecting FaultSystemSolution instances.
 """
 import io
-import zipfile
-import time
 import logging
+import time
+import zipfile
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
 
@@ -15,12 +15,15 @@ import geopandas as gpd
 import pandas as pd
 
 from .fault_system_solution import FaultSystemSolution
-# from .inversion_solution_file import data_to_zip_direct
 
 # from .typing import CompositeSolutionProtocol
 from .inversion_solution_operations import CompositeSolutionOperations
 
+# from .inversion_solution_file import data_to_zip_direct
+
+
 log = logging.getLogger(__name__)
+
 
 class CompositeSolution(CompositeSolutionOperations):
     """A container class collecting FaultSystemSolution instances and a source_logic_tree.
@@ -51,6 +54,18 @@ class CompositeSolution(CompositeSolutionOperations):
             raise ValueError(f"fault system with key: {fault_system} exists already. {self._solutions.keys()}")
         self._solutions[fault_system] = fault_system_solution
         return self
+
+    def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
+        return self._solutions[fault_system].rupture_surface(rupture_id)
+
+    def fault_surfaces(self):
+        surfaces = []
+        for fault_system, sol in self._solutions.items():
+            solution_df = sol.fault_surfaces().to_crs("EPSG:4326")
+            solution_df.insert(0, 'fault_system', fault_system)
+            surfaces.append(solution_df)
+        all_surfaces_df = pd.concat(surfaces, ignore_index=True)
+        return gpd.GeoDataFrame(all_surfaces_df)
 
     @property
     def archive_path(self) -> Union[Path, None]:
@@ -115,10 +130,13 @@ class CompositeSolution(CompositeSolutionOperations):
                 rate_count,
                 rate_weighted_mean
         """
-        all = [gpd.GeoDataFrame(sol.model.fault_sections_with_rupture_rates).to_crs("EPSG:4326") for sol in self._solutions.values()]
+        all = [
+            gpd.GeoDataFrame(sol.model.fault_sections_with_rupture_rates).to_crs("EPSG:4326")
+            for sol in self._solutions.values()
+        ]
         print(all)
         all_df = pd.concat(all, ignore_index=True)
-        return all_df #gpd.GeoDataFrame(all_df).to_crs("EPSG:4326")
+        return all_df
 
     def to_archive(self, archive_path: Union[Path, str]):
         """Serialize a CompositeSolution instance to a zip archive.

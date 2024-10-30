@@ -18,17 +18,15 @@ from solvis.filter import FilterSubsectionIds
 from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.geometry import circle_polygon
 
-from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import CompositeSolutionProtocol, InversionSolutionProtocol, SetOperationEnum
 from .inversion_solution_file import InversionSolutionFile
+from .typing import CompositeSolutionProtocol, InversionSolutionModelProtocol, SetOperationEnum
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
     from pandera.typing import DataFrame
 
-    from .dataframe_models import (
+    from .dataframe_models import (  # FaultSectionSchema,
         FaultSectionRuptureRateSchema,
-        FaultSectionSchema,
         FaultSectionWithSolutionSlipRate,
         ParentFaultParticipationSchema,
         RuptureSectionSchema,
@@ -40,7 +38,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class InversionSolutionOperations:
+class InversionSolutionOperations(InversionSolutionModelProtocol):
     """
     helper methods for analysis of InversionSolutionProtocol subtypes.
 
@@ -69,14 +67,8 @@ class InversionSolutionOperations:
     def solution_file(self) -> InversionSolutionFile:
         return self._solution_file
 
-    def fault_surfaces(self) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).fault_surfaces()
-
-    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
-
     ###
-    # These attrbutes are 'hoisted' from the _solution_file isntance
+    # These attributes are 'hoisted' from the _solution_file instance
     #
     # those that return dataframes may be migrated to the model -> InversionSolutionOperations
     ####
@@ -369,7 +361,7 @@ class InversionSolutionOperations:
         # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
         self._ruptures_with_rupture_rates = self.solution_file.rupture_rates.join(
             self.solution_file.ruptures.drop(columns="Rupture Index"),
-            on=self.solution_file.rupture_rates["Rupture Index"],
+            on=self.solution_file.rupture_rates["Rupture Index"],  # type: ignore
         )
         if 'key_0' in self._ruptures_with_rupture_rates.columns:
             self._ruptures_with_rupture_rates.drop(columns=['key_0'], inplace=True)
@@ -534,14 +526,4 @@ class InversionSolutionOperations:
 
 
 class CompositeSolutionOperations(CompositeSolutionProtocol):
-    def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
-        return self._solutions[fault_system].model.rupture_surface(rupture_id)
-
-    def fault_surfaces(self):
-        surfaces = []
-        for fault_system, sol in self._solutions.items():
-            solution_df = sol.model.fault_surfaces().to_crs("EPSG:4326")
-            solution_df.insert(0, 'fault_system', fault_system)
-            surfaces.append(solution_df)
-        all_surfaces_df = pd.concat(surfaces, ignore_index=True)
-        return gpd.GeoDataFrame(all_surfaces_df)
+    pass

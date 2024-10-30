@@ -18,12 +18,12 @@ from typing import TYPE_CHECKING, Any, List, Optional, cast
 import geopandas as gpd
 import pandas as pd
 
-from .typing import InversionSolutionProtocol
+from .typing import InversionSolutionFileProtocol
 
 if TYPE_CHECKING:
     from pandera.typing import DataFrame
 
-    from .dataframe_models import RuptureRateSchema, RuptureSchema
+    from .dataframe_models import FaultSectionSchema, RuptureRateSchema, RuptureSchema
 
 log = logging.getLogger(__name__)
 
@@ -83,8 +83,7 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     return new_df
 
 
-# InversionSolutionProtocol
-class InversionSolutionFile:
+class InversionSolutionFile(InversionSolutionFileProtocol):
     """
     Class to handle the OpenSHA modular archive file form.
 
@@ -248,7 +247,7 @@ class InversionSolutionFile:
             pd.DataFrame: participation rates dataframe
         """
         if self._fault_sections is not None:
-            return self._fault_sections
+            return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
 
         tic = time.perf_counter()
         self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
@@ -261,7 +260,7 @@ class InversionSolutionFile:
         self._fault_sections.rename(columns=mapper, inplace=True)
         toc = time.perf_counter()
         log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
-        return self._fault_sections
+        return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
 
     @property
     def logic_tree_branch(self) -> list:

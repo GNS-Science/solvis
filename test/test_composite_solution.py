@@ -83,6 +83,7 @@ class TestThreeSmallFaultSystems(object):
         assert isinstance(surfaces, gpd.GeoDataFrame)
         assert surfaces.shape == (809, 15)
 
+
 @pytest.mark.skip('consider how this works again')
 def test_composite_serialisation(small_archives):
     folder = tempfile.TemporaryDirectory()

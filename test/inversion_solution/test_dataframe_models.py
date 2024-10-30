@@ -15,14 +15,18 @@ from solvis.inversion_solution.dataframe_models import (
     RupturesWithRuptureRatesSchema,
     SectionParticipationSchema,
 )
-from solvis.inversion_solution.typing import InversionSolutionProtocol
+
+# from solvis.inversion_solution.typing import InversionSolutionProtocol
 
 
-@pytest.mark.skip("this test is not that useful ... see https://mypy.readthedocs.io/en/latest/protocols.html#using-isinstance-with-protocols")
-@pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
-def test_model(request, soln_fixture):
-    soln = request.getfixturevalue(soln_fixture)
-    assert isinstance(soln, InversionSolutionProtocol)
+# @pytest.mark.skip(
+#     "this test is not that useful, "
+#     "... see https://mypy.readthedocs.io/en/latest/protocols.html#using-isinstance-with-protocols"
+# )
+# @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
+# def test_model(request, soln_fixture):
+#     soln = request.getfixturevalue(soln_fixture)
+#     assert isinstance(soln, InversionSolutionProtocol)
 
 
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])

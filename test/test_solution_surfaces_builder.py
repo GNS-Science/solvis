@@ -26,8 +26,8 @@ class TestSolutionSurfacesBuilder(unittest.TestCase):
         # assert isinstance(likeness, InversionSolution)
         assert likeness.fault_regime == 'CRUSTAL'
 
-        fs_gdf = sol.model.fault_surfaces()
-        fsr_gdf = sol.model.rupture_surface(0)
+        fs_gdf = sol.fault_surfaces()
+        fsr_gdf = sol.rupture_surface(0)
         assert fs_gdf.shape == (86, 14)
         assert fsr_gdf.shape == (2, 22)
         # print(fsr_gdf.columns)
@@ -42,8 +42,8 @@ class TestSolutionSurfacesBuilder(unittest.TestCase):
         assert isinstance(sol, InversionSolution)
         assert sol.fault_regime == 'SUBDUCTION'
 
-        fs_gdf = sol.model.fault_surfaces()
-        fsr_gdf = sol.model.rupture_surface(0)
+        fs_gdf = sol.fault_surfaces()
+        fsr_gdf = sol.rupture_surface(0)
 
         # No DipDir column in subduction solutions
         assert fs_gdf.shape == (452, 13)

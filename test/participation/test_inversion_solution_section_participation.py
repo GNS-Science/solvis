@@ -66,7 +66,6 @@ def test_section_participation_rates(crustal_solution_fixture, fault_name, subse
 
 @pytest.mark.parametrize("fault_name, subsection_id, expected_rate", section_fault_rates)
 def test_section_participation_rates_conditional(crustal_solution_fixture, fault_name, subsection_id, expected_rate):
-    solution = crustal_solution_fixture
     model = crustal_solution_fixture.model
 
     rids = list(FilterRuptureIds(model).for_parent_fault_names([fault_name]))

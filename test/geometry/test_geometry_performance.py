@@ -21,7 +21,7 @@ class TestDipDirectionCrustal(unittest.TestCase):
         sol = InversionSolution().from_archive(original_archive)
 
         # pick a rupture section
-        gdf = gpd.GeoDataFrame(sol.model.fault_surfaces())
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         # # set up WLG as our datum
         WLG = location_by_id('WLG')
@@ -54,7 +54,7 @@ class TestDipDirectionCrustal(unittest.TestCase):
             TEST_FOLDER, "fixtures/AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
         )
         sol = InversionSolution().from_archive(str(filename))
-        gdf = gpd.GeoDataFrame(sol.model.fault_surfaces())
+        gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
         # # set up WLG as our datum
         WLG = location_by_id('WLG')
