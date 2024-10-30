@@ -26,7 +26,7 @@ from typing import Iterable, Optional, Union
 import geopandas as gpd
 
 from .inversion_solution_file import InversionSolutionFile
-from .inversion_solution_operations import InversionSolutionOperations
+from .inversion_solution_model import InversionSolutionModel
 from .solution_surfaces_builder import SolutionSurfacesBuilder
 from .typing import ModelLogicTreeBranch
 
@@ -67,10 +67,10 @@ class InversionSolution:
     def __init__(self, solution_file: Optional[InversionSolutionFile] = None):
         """dont crash"""
         self._solution_file = solution_file or InversionSolutionFile()
-        self._dataframe_operations = InversionSolutionOperations(self._solution_file)
+        self._dataframe_operations = InversionSolutionModel(self._solution_file)
 
     @property
-    def model(self) -> InversionSolutionOperations:
+    def model(self) -> InversionSolutionModel:
         return self._dataframe_operations
 
     @property

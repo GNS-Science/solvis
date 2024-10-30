@@ -1,7 +1,7 @@
 """
-This module defines the ~mixin~ class `InversionSolutionOperations`.
+This module defines the class `InversionSolutionModel`.
 
-The `InversionSolutionOperations` class provides methods to build pandas dataframes
+The `InversionSolutionModel` class provides methods to build pandas dataframes
 from the raw dataframes available via the `InversionSolutionFile` class.
 """
 import logging
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class InversionSolutionOperations(InversionSolutionModelProtocol):
+class InversionSolutionModel(InversionSolutionModelProtocol):
     """
     helper methods for analysis of InversionSolutionProtocol subtypes.
 
@@ -70,7 +70,7 @@ class InversionSolutionOperations(InversionSolutionModelProtocol):
     ###
     # These attributes are 'hoisted' from the _solution_file instance
     #
-    # those that return dataframes may be migrated to the model -> InversionSolutionOperations
+    # those that return dataframes may be migrated to the model -> InversionSolutionModel
     ####
     @property
     def average_slips(self):
@@ -416,7 +416,7 @@ class InversionSolutionOperations(InversionSolutionModelProtocol):
             If you want to do this kind of joining between locations with different
             radii or points that are not defined by location IDs, consider using
             [circle_polygon][solvis.geometry.circle_polygon] and
-            [get_rupture_ids_intersecting][solvis.inversion_solution.inversion_solution_operations.InversionSolutionOperations.get_rupture_ids_intersecting]
+            [get_rupture_ids_intersecting][solvis.inversion_solution.inversion_solution_model.InversionSolutionModel.get_rupture_ids_intersecting]
             then use set operations to join each rupture ID set.
         """
         warnings.warn("Please use solvis.filter.classes *.for_polygons method instead.", DeprecationWarning)
@@ -525,5 +525,5 @@ class InversionSolutionOperations(InversionSolutionModelProtocol):
         ]
 
 
-class CompositeSolutionOperations(CompositeSolutionProtocol):
+class CompositeSolutionModel(CompositeSolutionProtocol):
     pass

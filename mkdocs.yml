@@ -28,7 +28,7 @@ nav:
         - Supporting modules:
           - api/inversion_solution/fault_system_solution_file.md
           - api/inversion_solution/inversion_solution_file.md
-          - api/inversion_solution/inversion_solution_operations.md
+          - api/inversion_solution/inversion_solution_model.md
           - api/inversion_solution/solution_surfaces_builder.md
           - api/inversion_solution/typing.md
       - config [module]: api/solvis/config.md

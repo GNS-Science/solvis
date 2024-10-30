@@ -11,7 +11,7 @@ from pandera.typing import DataFrame
 
 from .dataframe_models import RuptureSectionSchema
 from .fault_system_solution_file import FaultSystemSolutionFile
-from .inversion_solution_operations import InversionSolutionOperations as InversionSolutionModel
+from .inversion_solution_model import InversionSolutionModel
 
 # from .typing import AggregateSolutionProtocol
 

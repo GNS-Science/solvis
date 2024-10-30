@@ -11,7 +11,7 @@ Modules:
  typing: defines class interfaces using `typing.Protocol`
  inversion_solution: defines the InversionSolution and BranchInversionSolution classes.
  inversion_solution_file: defines a mixin class that manages all IO for an InversionSolution archive.
- inversion_solution_operations: defines a mixin class providing anaysis of InversionSolutions.
+ inversion_solution_model: defines a mixin class providing anaysis of InversionSolutions.
  fault_system_solution: defines the aggregation class FaultSystemSolution.
  fault_system_solution_file: defines a mixin class that manages all IO for a FaultSystemSolution archive.
  composite_solution: defines the CompositeSolution class.
