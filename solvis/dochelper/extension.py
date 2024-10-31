@@ -1,7 +1,6 @@
 """
 A griffe extension lifted from https://mkdocstrings.github.io/griffe/guide/users/extending/#full-example
 
-
 """
 import ast
 import inspect

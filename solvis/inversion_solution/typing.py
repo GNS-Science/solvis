@@ -135,15 +135,20 @@ class InversionSolutionProtocol(Protocol):
         """solution requires a fault regime"""
 
     @staticmethod
-    def filter_solution(solution: Any, rupture_ids: Iterable) -> Any:
+    def filter_solution(solution: Any, rupture_ids: Iterable[int]) -> Any:
         """return a new solution containing just the ruptures specified"""
         raise NotImplementedError()
 
-    # def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
-    #     """builder method returning the rupture surface of a given rupture id."""
+    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
+        """get the rupture surface geometry for a given rupture id.
 
-    # def fault_surfaces(self) -> gpd.GeoDataFrame:
-    #     pass
+        Returns:
+            dataframe: a geopandas dataframe with a geometry column
+        """
+        raise NotImplementedError()
+
+    def fault_surfaces(self) -> gpd.GeoDataFrame:
+        pass
 
 
 '''

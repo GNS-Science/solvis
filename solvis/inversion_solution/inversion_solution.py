@@ -19,7 +19,7 @@ Examples:
 """
 import io
 import zipfile
-from inspect import getmembers
+from inspect import getmembers, isfunction
 from pathlib import Path
 from typing import Iterable, Optional, Union
 
@@ -28,7 +28,7 @@ import geopandas as gpd
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_model import InversionSolutionModel
 from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import ModelLogicTreeBranch
+from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
 
 
 def inherit_docstrings(cls):
@@ -37,7 +37,16 @@ def inherit_docstrings(cls):
     taken from: https://stackoverflow.com/a/17393254
     see also: https://github.com/rcmdnk/inherit-docstring for a pypi package
     """
-    for name, method in getmembers(cls, lambda o: isinstance(o, property)):
+
+    def docstrings_for(o: object):
+        if isinstance(o, property):
+            return True
+        elif isfunction(o):
+            return True
+        else:
+            return False
+
+    for name, method in getmembers(cls, docstrings_for):
         # print(f"inherit_docstrings {method} {name}")
         if method.__doc__:
             continue
@@ -49,7 +58,7 @@ def inherit_docstrings(cls):
 
 
 @inherit_docstrings
-class InversionSolution:
+class InversionSolution(InversionSolutionProtocol):
     """A python interface for an OpenSHA Inversion Solution archive.
 
     Attributes:
@@ -60,7 +69,7 @@ class InversionSolution:
      from_archive: deserialise an instance from zip archive.
      filter_solution: get a new InversionSolution instance, filtered by rupture ids.
      to_archive: serialise an instance to a zip archive.
-
+     rupture_surface: get a geopandas dataframe representing a rutpure surface
 
     """
 
@@ -75,12 +84,6 @@ class InversionSolution:
 
     @property
     def solution_file(self) -> InversionSolutionFile:
-        # """
-        # An InversionSolutionFile instance
-
-        # Returns:
-        #     instance: the InversionSolutionFile
-        # """
         return self._solution_file
 
     @property
@@ -88,7 +91,6 @@ class InversionSolution:
         return self._solution_file.fault_regime
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
-        """Write the current solution to a new zip archive."""
         return self._solution_file.to_archive(archive_path, base_archive_path, compat)
 
     def fault_surfaces(self) -> gpd.GeoDataFrame:
@@ -123,7 +125,7 @@ class InversionSolution:
         return InversionSolution(new_solution_file)
 
     @staticmethod
-    def filter_solution(solution: 'InversionSolution', rupture_ids: Iterable) -> 'InversionSolution':
+    def filter_solution(solution: 'InversionSolution', rupture_ids: Iterable[int]) -> 'InversionSolution':
         """
         Filter an InversionSolution by a subset of its rupture IDs, returing a new smaller InversionSolution.
 
