@@ -124,7 +124,7 @@ class FilterRuptureIds(ChainableSetBase):
         # TODO: this is needed because the rupture rate concept differs between IS and FSS classes
         rate_column = (
             "rate_weighted_mean"
-            if isinstance(self._model, solvis.fault_system_solution.FaultSystemSolutionModel)
+            if isinstance(self._model, solvis.inversion_solution.fault_system_solution.FaultSystemSolutionModel)
             else "Annual Rate"
         )
         if self._drop_zero_rates:

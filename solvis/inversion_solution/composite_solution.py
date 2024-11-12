@@ -14,7 +14,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 import geopandas as gpd
 import pandas as pd
 
-from solvis.fault_system_solution.fault_system_solution import FaultSystemSolution
+from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 
 # from .typing import CompositeSolutionProtocol
 from .inversion_solution_model import CompositeSolutionModel

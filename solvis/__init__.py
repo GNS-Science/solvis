@@ -21,7 +21,7 @@ Example:
     <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
     ```
 """
-from .fault_system_solution import FaultSystemSolution
+from .inversion_solution.fault_system_solution import FaultSystemSolution
 from .geometry import circle_polygon
 from .inversion_solution import CompositeSolution, InversionSolution
 from .solvis import export_geojson, mfd_hist
