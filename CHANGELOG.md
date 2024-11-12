@@ -6,11 +6,14 @@
  - drop_zero_rate differentiates between FSS and IS;
  - faster testing (~3 times faster)
  - documentation improvements
- - abc427e fixing many deprecation warnings; updated geopandas, pandas, numpy, pyvista libs;
- - read_csv dtype configuration improvements;
+ - fix many deprecation warnings
+ - updated dependencies: geopandas, pandas, numpy, pyvista libs
+ - read_csv dtype configuration improvements
  - many old functions are deprecated/migrated to new filter package
  - refactor dataframe dtypes
- - standardise participation functions API and return columns;
+ - standardise participation functions API and return columns
+ - refactor `solvis.inversion_solution` package to `solvis.solution` and collect modules into packages
+ - new packages `solvis.solution.inversion_solution` and  `solvis.solution.fault_system_solution`
 
 ## Added
  - new filter package providing classes for filtering solutions

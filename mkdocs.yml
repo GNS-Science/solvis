@@ -19,18 +19,22 @@ nav:
         - rupture_id_filter: api/filter/rupture_id_filter.md
         - subsection_id_filter: api/filter/subsection_id_filter.md
         - chainable_set_base: api/filter/chainable_set_base.md
-      - inversion_solution:
-        - api/inversion_solution/index.md
-        - Dataframe Models: api/inversion_solution/dataframe_models.md
-        - Inversion Solution: api/inversion_solution/inversion_solution.md
-        - Fault System Solution: api/inversion_solution/fault_system_solution.md
-        - Composite Solution: api/inversion_solution/composite_solution.md
-        - Supporting modules:
-          - api/inversion_solution/fault_system_solution_file.md
-          - api/inversion_solution/inversion_solution_file.md
-          - api/inversion_solution/inversion_solution_model.md
-          - api/inversion_solution/solution_surfaces_builder.md
-          - api/inversion_solution/typing.md
+      - solution:
+        - api/solution/index.md
+        - composite_solution: api/solution/composite_solution.md
+        - fault_system_solution:
+          - api/solution/fault_system_solution/index.md
+          - api/solution/fault_system_solution/fault_system_solution.md
+          - api/solution/fault_system_solution/fault_system_solution_file.md
+          - api/solution/fault_system_solution/fault_system_solution_model.md
+        - inversion_solution:
+          - api/solution/inversion_solution/index.md
+          - api/solution/inversion_solution/inversion_solution.md
+          - api/solution/inversion_solution/inversion_solution_file.md
+          - api/solution/inversion_solution/inversion_solution_model.md
+        - dataframe_models: api/solution/dataframe_models.md
+        - solution_surfaces_builder: api/solution/solution_surfaces_builder.md
+        - typing: api/solution/typing.md
       - config [module]: api/solvis/config.md
       - geometry [module]: api/solvis/geometry.md
       - solvis [module]: api/solvis/solvis.md
@@ -107,7 +111,7 @@ plugins:
             extensions:
             - pydantic: {schema: true}
             - solvis/dochelper/extension.py:DynamicDocstrings:
-                object_paths: [solvis.inversion_solution.inversion_solution.InversionSolution]
+                object_paths: [solvis.solution.inversion_solution.InversionSolution]
 
 
 extra:
