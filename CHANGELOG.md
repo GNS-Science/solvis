@@ -21,6 +21,10 @@
  - a simple rupture grouping algorithm (can this be a different type of filter??);
  - `pandera` library for dataframe model validations and better docs
 
+## Removed
+ - deprecated `solvis.solvis` functions removed.
+ - deprecated `solvis.inversion_solution.*` functions/methods removed.
+
 ## [0.12.3] 2024-07-04
 bump version to verify new pypi workflow
 

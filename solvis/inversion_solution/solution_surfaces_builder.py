@@ -11,7 +11,8 @@ from solvis.geometry import create_surface, dip_direction, fault_surface_3d
 # from .typing import InversionSolutionProtocol
 
 if TYPE_CHECKING:
-    from solvis.inversion_solution import FaultSystemSolution, InversionSolution
+    from solvis.inversion_solution import InversionSolution
+    from solvis.fault_system_solution import FaultSystemSolution
 
 log = logging.getLogger(__name__)
 

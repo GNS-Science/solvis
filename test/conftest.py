@@ -9,8 +9,8 @@ from itertools import chain
 import nzshm_model as nm
 import pytest
 
+from solvis import FaultSystemSolution
 from solvis.inversion_solution import CompositeSolution
-from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
 from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
 
 current_model = nm.get_model_version("NSHM_v1.0.0")
