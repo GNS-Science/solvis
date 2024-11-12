@@ -34,10 +34,13 @@ import shapely.geometry
 
 import solvis.solution
 
-from ..solution.typing import InversionSolutionModelProtocol, SetOperationEnum
+from ..solution.typing import InversionSolutionModelProtocol, InversionSolutionProtocol, SetOperationEnum
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 from .subsection_id_filter import FilterSubsectionIds
+
+# from ..solution.inversion_solution import InversionSolution, InversionSolutionModel
+# from ..solution.fault_system_solution import FaultSystemSolution, FaultSystemSolutionModel
 
 
 class FilterRuptureIds(ChainableSetBase):
@@ -45,16 +48,25 @@ class FilterRuptureIds(ChainableSetBase):
     A helper class to filter solution ruptures, returning the qualifying rupture_ids.
     """
 
-    def __init__(self, model: InversionSolutionModelProtocol, drop_zero_rates: bool = True):
+    def __init__(
+        self,
+        solution_model: Union[InversionSolutionModelProtocol, InversionSolutionProtocol],
+        drop_zero_rates: bool = True,
+    ):
         """
         Args:
-            solution: The solution instance to act on.
+            solution_model: The solution or solution.model instance to filter on.
             drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
         """
-        self._model = model
+        if isinstance(solution_model, InversionSolutionModelProtocol):
+            self._model = solution_model
+        elif isinstance(solution_model, InversionSolutionProtocol):
+            self._model = solution_model.model
+        else:
+            raise ValueError(f"unhandled type: {type(solution_model)}")
         self._drop_zero_rates = drop_zero_rates
-        self._filter_subsection_ids = FilterSubsectionIds(model)
-        self._filter_parent_fault_ids = FilterParentFaultIds(model)
+        self._filter_subsection_ids = FilterSubsectionIds(self._model)
+        self._filter_parent_fault_ids = FilterParentFaultIds(self._model)
 
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution ruptures.

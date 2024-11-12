@@ -16,6 +16,18 @@ def test_top_level_import(fss_model):
     assert {0, 1, 2}.issubset(flt.FilterRuptureIds(fss_model).for_subsection_ids([1]))
 
 
+def test_filter_inversion_solution_or_model(crustal_solution_fixture):
+    rupts_a = FilterRuptureIds(crustal_solution_fixture).all()
+    rupts_b = FilterRuptureIds(crustal_solution_fixture.model).all()
+    assert rupts_a == rupts_b
+
+
+def test_filter_fault_system_solution_or_model(crustal_small_fss_fixture):
+    rupts_a = FilterRuptureIds(crustal_small_fss_fixture).all()
+    rupts_b = FilterRuptureIds(crustal_small_fss_fixture.model).all()
+    assert rupts_a == rupts_b
+
+
 def test_ruptures_all(filter_rupture_ids, fss_model):
     all_ruptures = filter_rupture_ids.all()
     print(list(all_ruptures))

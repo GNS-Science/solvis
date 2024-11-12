@@ -19,11 +19,11 @@ Examples:
 TODO:
   - make FilterParentFaultIds chainable
 """
-from typing import Iterable, Iterator, NamedTuple, Set
+from typing import Iterable, Iterator, NamedTuple, Set, Union
 
 import shapely.geometry
 
-from ..solution.typing import InversionSolutionModelProtocol
+from ..solution.typing import InversionSolutionModelProtocol, InversionSolutionProtocol
 
 
 class ParentFaultMapping(NamedTuple):
@@ -85,9 +85,17 @@ class FilterParentFaultIds:
         ```
     """
 
-    def __init__(self, model: InversionSolutionModelProtocol):
-        # self._solution = solution
-        self._model = model
+    def __init__(self, solution_model: Union[InversionSolutionModelProtocol, InversionSolutionProtocol]):
+        """
+        Args:
+            solution_model: The solution or solution.model instance to filter on.
+        """
+        if isinstance(solution_model, InversionSolutionModelProtocol):
+            self._model = solution_model
+        elif isinstance(solution_model, InversionSolutionProtocol):
+            self._model = solution_model.model
+        else:
+            raise ValueError(f"unhandled type: {type(solution_model)}")
 
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()

@@ -19,7 +19,7 @@ Examples:
 """
 from typing import Iterable, Union
 
-from solvis.solution.typing import InversionSolutionModelProtocol, SetOperationEnum
+from solvis.solution.typing import InversionSolutionModelProtocol, InversionSolutionProtocol, SetOperationEnum
 
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
@@ -28,14 +28,20 @@ from .parent_fault_id_filter import FilterParentFaultIds
 class FilterSubsectionIds(ChainableSetBase):
     """
     A helper class to filter subsections, returning qualifying section_ids.
-
-    Class methods all return sets to make it easy to combine filters with
-    set operands like `union`, `intersection`, `difference` etc).
     """
 
-    def __init__(self, model: InversionSolutionModelProtocol):
-        self._model = model
-        self._filter_parent_fault_ids = FilterParentFaultIds(model)
+    def __init__(self, solution_model: Union[InversionSolutionModelProtocol, InversionSolutionProtocol]):
+        """
+        Args:
+            solution_model: The solution or solution.model instance to filter on.
+        """
+        if isinstance(solution_model, InversionSolutionModelProtocol):
+            self._model = solution_model
+        elif isinstance(solution_model, InversionSolutionProtocol):
+            self._model = solution_model.model
+        else:
+            raise ValueError(f"unhandled type: {type(solution_model)}")
+        self._filter_parent_fault_ids = FilterParentFaultIds(self._model)
 
     def for_named_faults(self, named_fault_names: Iterable[str]) -> ChainableSetBase:
         raise NotImplementedError()

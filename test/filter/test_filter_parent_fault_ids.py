@@ -1,12 +1,24 @@
 import random
 
-from solvis.filter.parent_fault_id_filter import parent_fault_name_id_mapping
+from solvis.filter.parent_fault_id_filter import FilterParentFaultIds, parent_fault_name_id_mapping
 
 
 def test_parent_fault_names_all(filter_parent_fault_ids, fss_model):
     all_fault_ids = filter_parent_fault_ids.all()
     print(list(all_fault_ids))
     assert len(all_fault_ids) == len(fss_model.fault_sections['ParentID'].unique())
+
+
+def test_filter_inversion_solution_or_model(crustal_solution_fixture):
+    rupts_a = FilterParentFaultIds(crustal_solution_fixture).all()
+    rupts_b = FilterParentFaultIds(crustal_solution_fixture.model).all()
+    assert rupts_a == rupts_b
+
+
+def test_filter_fault_system_solution_or_model(crustal_small_fss_fixture):
+    rupts_a = FilterParentFaultIds(crustal_small_fss_fixture).all()
+    rupts_b = FilterParentFaultIds(crustal_small_fss_fixture.model).all()
+    assert rupts_a == rupts_b
 
 
 def test_fault_names_as_ids(filter_parent_fault_ids):
