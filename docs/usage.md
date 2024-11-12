@@ -10,9 +10,9 @@ A typical Solvis investigation starts with reading an archive into a solution ob
 
 Depending on the data type, you will need to use one of:
 
-- [`FaultSystemSolution.from_archive(instance_or_path)`][solvis.inversion_solution.fault_system_solution.FaultSystemSolution.from_archive]
-- [`InversionSolution.from_archive(instance_or_path)`][solvis.inversion_solution.inversion_solution.InversionSolution.from_archive]
-- [`CompositeSolution.from_archive(instance_or_path, slt)`][solvis.inversion_solution.composite_solution.CompositeSolution.from_archive]
+- [`FaultSystemSolution.from_archive(instance_or_path)`][solvis.solution.fault_system_solution.FaultSystemSolution.from_archive]
+- [`InversionSolution.from_archive(instance_or_path)`][solvis.solution.inversion_solution.InversionSolution.from_archive]
+- [`CompositeSolution.from_archive(instance_or_path, slt)`][solvis.solution.composite_solution.CompositeSolution.from_archive]
 
 Composite solutions require selecting an NSHM model version (usually 1.0.4), and constructing a
 solution from its source logic tree.

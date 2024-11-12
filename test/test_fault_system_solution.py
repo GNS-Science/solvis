@@ -5,7 +5,7 @@ import pytest
 from pandas.api.types import infer_dtype
 
 import solvis
-from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
+from solvis.solution.fault_system_solution import FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
 fslt = current_model.source_logic_tree.branch_sets[0]  # PUY is used always , just for the 3 solution_ids

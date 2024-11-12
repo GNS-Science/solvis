@@ -1,6 +1,6 @@
 from typing import Dict, Iterator, List, Optional
 
-from solvis.inversion_solution.typing import InversionSolutionProtocol
+from solvis.solution.typing import InversionSolutionProtocol
 
 """
 NAMES

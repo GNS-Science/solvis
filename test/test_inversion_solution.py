@@ -9,7 +9,7 @@ from nzshm_common.location.location import location_by_id
 from pytest import approx, raises
 
 from solvis import InversionSolution, circle_polygon
-from solvis.inversion_solution.typing import SetOperationEnum
+from solvis.solution.typing import SetOperationEnum
 
 folder = pathlib.PurePath(os.path.realpath(__file__)).parent
 

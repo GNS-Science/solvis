@@ -14,9 +14,8 @@ import geopandas as gpd
 import nzshm_model as nm
 import pandas as pd
 
-from solvis.inversion_solution.solution_surfaces_builder import SolutionSurfacesBuilder
-from solvis.inversion_solution.typing import BranchSolutionProtocol, ModelLogicTreeBranch
-
+from ..solution_surfaces_builder import SolutionSurfacesBuilder
+from ..typing import BranchSolutionProtocol, ModelLogicTreeBranch
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .fault_system_solution_model import FaultSystemSolutionModel
 

@@ -9,9 +9,8 @@ from typing import TYPE_CHECKING, Optional, cast
 
 from pandera.typing import DataFrame
 
-from solvis.inversion_solution.dataframe_models import RuptureSectionSchema
-from solvis.inversion_solution.inversion_solution_model import InversionSolutionModel
-
+from ..dataframe_models import RuptureSectionSchema
+from ..inversion_solution import InversionSolutionModel
 from .fault_system_solution_file import FaultSystemSolutionFile
 
 # from .typing import AggregateSolutionProtocol

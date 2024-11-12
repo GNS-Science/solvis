@@ -14,10 +14,10 @@ from typing import Any, Dict, Iterable, Optional, Union
 import geopandas as gpd
 import pandas as pd
 
-from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
+from .fault_system_solution import FaultSystemSolution
 
 # from .typing import CompositeSolutionProtocol
-from .inversion_solution_model import CompositeSolutionModel
+from .inversion_solution.inversion_solution_model import CompositeSolutionModel
 
 # from .inversion_solution_file import data_to_zip_direct
 
@@ -209,7 +209,7 @@ class CompositeSolution(CompositeSolutionModel):
         Retrieve a `FaultSystemSolution` from within the composite solution.
 
         Codes can be retrieved with
-        [`get_fault_system_codes`][solvis.inversion_solution.composite_solution.CompositeSolution.get_fault_system_codes]
+        [`get_fault_system_codes`][solvis.solution.composite_solution.CompositeSolution.get_fault_system_codes]
 
 
         Parameters:

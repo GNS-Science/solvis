@@ -1,8 +1,8 @@
 """
 This package provides classes to support filtering by key attributes of the solution classes:
 
- - [FaultSystemSolution][solvis.inversion_solution.fault_system_solution.FaultSystemSolution] aggregated solutions
- - [InversionSolution][solvis.inversion_solution.inversion_solution.InversionSolution] individual solutions
+ - [FaultSystemSolution][solvis.solution.fault_system_solution.FaultSystemSolution] aggregated solutions
+ - [InversionSolution][solvis.solution.inversion_solution.InversionSolution] individual solutions
 
 Classes:
   FilterParentFaultIds: for filtering solution parent faults.

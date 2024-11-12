@@ -1,7 +1,7 @@
 #! test_dataframe_models.py
 import pytest
 
-from solvis.inversion_solution.dataframe_models import (
+from solvis.solution.dataframe_models import (
     FaultSectionRuptureRateSchema,
     FaultSectionSchema,
     FaultSectionWithSolutionSlipRate,
@@ -16,7 +16,7 @@ from solvis.inversion_solution.dataframe_models import (
     SectionParticipationSchema,
 )
 
-# from solvis.inversion_solution.typing import InversionSolutionProtocol
+# from solvis.solution.typing import InversionSolutionProtocol
 
 
 # @pytest.mark.skip(

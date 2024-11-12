@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 import geopandas as gpd
 import pandas as pd
 
-from solvis.inversion_solution.inversion_solution_file import InversionSolutionFile, data_to_zip_direct
+from ..inversion_solution import InversionSolutionFile, data_to_zip_direct
 
 if TYPE_CHECKING:
     from pandera.typing import DataFrame

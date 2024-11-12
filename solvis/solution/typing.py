@@ -2,6 +2,10 @@
 This module defines type classes for the main interfaces shared
 across the `inversion_solution` package.
 
+Todo:
+    With the refactoring done on various classes/modules, most of these protocol classes can be
+    dropped and function docstrings migrated to the functional code.
+
 Classes:
     InversionSolutionProtocol: the interface for an InversionSolution
     CompositeSolutionProtocol: interface for CompositeSolution
@@ -70,7 +74,7 @@ class InversionSolutionModelProtocol(Protocol):
         """A dataframe containing ruptures and their rates
 
         Returns:
-          dataframe: a [rupture rates][solvis.inversion_solution.dataframe_models.RuptureRateSchema] dataframe
+          dataframe: a [rupture rates][solvis.solution.dataframe_models.RuptureRateSchema] dataframe
         """
 
     def rate_column_name(self) -> str:

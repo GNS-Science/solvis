@@ -6,7 +6,7 @@ from nzshm_common.location.location import location_by_id
 
 from solvis import circle_polygon
 from solvis.filter.rupture_id_filter import FilterRuptureIds
-from solvis.inversion_solution.typing import SetOperationEnum
+from solvis.solution.typing import SetOperationEnum
 
 # TODO: these tests should also cover InversionSolution, not just FSS_model
 

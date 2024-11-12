@@ -23,7 +23,7 @@ from typing import Iterable, Iterator, NamedTuple, Set
 
 import shapely.geometry
 
-from solvis.inversion_solution.typing import InversionSolutionModelProtocol
+from ..solution.typing import InversionSolutionModelProtocol
 
 
 class ParentFaultMapping(NamedTuple):

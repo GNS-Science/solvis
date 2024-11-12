@@ -1,1 +1,0 @@
-::: solvis.inversion_solution

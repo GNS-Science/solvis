@@ -6,7 +6,7 @@ import pytest
 
 import solvis
 
-# from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
+# from solvis.solution.fault_system_solution import FaultSystemSolution
 from solvis.filter.rupture_id_filter import FilterRuptureIds
 
 

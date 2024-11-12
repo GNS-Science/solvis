@@ -6,7 +6,7 @@ import unittest
 
 from solvis import InversionSolution
 
-# from solvis.inversion_solution.solution_surfaces_builder import SolutionSurfacesBuilder
+# from solvis.solution.solution_surfaces_builder import SolutionSurfacesBuilder
 
 
 class SolutionLike:

@@ -32,9 +32,9 @@ from typing import Iterable, List, Optional, Set, Union
 import geopandas as gpd
 import shapely.geometry
 
-import solvis.inversion_solution
-from solvis.inversion_solution.typing import InversionSolutionModelProtocol, SetOperationEnum
+import solvis.solution
 
+from ..solution.typing import InversionSolutionModelProtocol, SetOperationEnum
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 from .subsection_id_filter import FilterSubsectionIds
@@ -124,7 +124,7 @@ class FilterRuptureIds(ChainableSetBase):
         # TODO: this is needed because the rupture rate concept differs between IS and FSS classes
         rate_column = (
             "rate_weighted_mean"
-            if isinstance(self._model, solvis.inversion_solution.fault_system_solution.FaultSystemSolutionModel)
+            if isinstance(self._model, solvis.solution.fault_system_solution.FaultSystemSolutionModel)
             else "Annual Rate"
         )
         if self._drop_zero_rates:
@@ -189,7 +189,7 @@ class FilterRuptureIds(ChainableSetBase):
 
         # rate_column = (
         #     "rate_weighted_mean"
-        #     if isinstance(self._model, solvis.inversion_solution.FaultSystemSolution)
+        #     if isinstance(self._model, solvis.solution.FaultSystemSolution)
         #     else "Annual Rate"
         # )
         rate_column = self._model.rate_column_name()

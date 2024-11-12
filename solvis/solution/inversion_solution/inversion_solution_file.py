@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, cast
 import geopandas as gpd
 import pandas as pd
 
-from .typing import InversionSolutionFileProtocol
+from ..typing import InversionSolutionFileProtocol
 
 if TYPE_CHECKING:
     from pandera.typing import DataFrame

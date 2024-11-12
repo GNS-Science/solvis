@@ -25,10 +25,10 @@ from typing import Iterable, Optional, Union
 
 import geopandas as gpd
 
+from ..solution_surfaces_builder import SolutionSurfacesBuilder
+from ..typing import InversionSolutionProtocol, ModelLogicTreeBranch
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_model import InversionSolutionModel
-from .solution_surfaces_builder import SolutionSurfacesBuilder
-from .typing import InversionSolutionProtocol, ModelLogicTreeBranch
 
 
 def inherit_docstrings(cls):

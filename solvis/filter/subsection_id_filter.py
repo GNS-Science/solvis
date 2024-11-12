@@ -19,7 +19,7 @@ Examples:
 """
 from typing import Iterable, Union
 
-from solvis.inversion_solution.typing import InversionSolutionModelProtocol, SetOperationEnum
+from solvis.solution.typing import InversionSolutionModelProtocol, SetOperationEnum
 
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds

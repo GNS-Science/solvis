@@ -12,9 +12,9 @@ import geopandas as gpd
 import pandas as pd
 
 from solvis.filter import FilterSubsectionIds
+from solvis.solution.typing import CompositeSolutionProtocol, InversionSolutionModelProtocol
 
 from .inversion_solution_file import InversionSolutionFile
-from .typing import CompositeSolutionProtocol, InversionSolutionModelProtocol
 
 if TYPE_CHECKING:
     from pandera.typing import DataFrame

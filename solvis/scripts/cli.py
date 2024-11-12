@@ -13,7 +13,7 @@ from nzshm_common.location.location import location_by_id
 
 from solvis import CompositeSolution, FaultSystemSolution, circle_polygon, export_geojson
 from solvis.get_secret import get_secret
-from solvis.inversion_solution.inversion_solution import BranchInversionSolution, InversionSolution
+from solvis.solution.inversion_solution import BranchInversionSolution, InversionSolution
 
 # Get API key from AWS secrets manager
 API_URL = os.getenv('NZSHM22_TOSHI_API_URL', "http://127.0.0.1:5000/graphql")
