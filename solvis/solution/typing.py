@@ -14,7 +14,7 @@ Classes:
 import zipfile
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Optional, Protocol, Union, runtime_checkable
+from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Optional, Protocol, Union
 
 import geopandas as gpd
 
@@ -60,7 +60,6 @@ class AggregateSolutionFileProtocol(Protocol):
         pass
 
 
-@runtime_checkable
 class InversionSolutionModelProtocol(Protocol):
     @property
     def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
@@ -118,7 +117,6 @@ class InversionSolutionModelProtocol(Protocol):
         """
 
 
-@runtime_checkable
 class InversionSolutionProtocol(Protocol):
     @property
     def model(self) -> 'InversionSolutionModelProtocol':

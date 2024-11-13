@@ -90,12 +90,16 @@ class FilterParentFaultIds:
         Args:
             solution_model: The solution or solution.model instance to filter on.
         """
-        if isinstance(solution_model, InversionSolutionModelProtocol):
-            self._model = solution_model
-        elif isinstance(solution_model, InversionSolutionProtocol):
-            self._model = solution_model.model
-        else:
-            raise ValueError(f"unhandled type: {type(solution_model)}")
+        self.__model = solution_model
+
+    @property
+    def _model(self):
+        try:
+            getattr(self.__model, 'model')
+            return self.__model.model
+        except (AttributeError):
+            return self.__model
+        raise ValueError(f"unhandled type: {type(self.__model)}")
 
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()

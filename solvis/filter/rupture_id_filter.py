@@ -58,15 +58,23 @@ class FilterRuptureIds(ChainableSetBase):
             solution_model: The solution or solution.model instance to filter on.
             drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
         """
-        if isinstance(solution_model, InversionSolutionModelProtocol):
-            self._model = solution_model
-        elif isinstance(solution_model, InversionSolutionProtocol):
-            self._model = solution_model.model
-        else:
-            raise ValueError(f"unhandled type: {type(solution_model)}")
+        self.__model = solution_model
         self._drop_zero_rates = drop_zero_rates
-        self._filter_subsection_ids = FilterSubsectionIds(self._model)
-        self._filter_parent_fault_ids = FilterParentFaultIds(self._model)
+        self._filter_subsection_ids = FilterSubsectionIds(self.__model)
+        self._filter_parent_fault_ids = FilterParentFaultIds(self.__model)
+
+    @property
+    def _model(self):
+        # if isinstance(self.__model, InversionSolutionModelProtocol):
+        #     return self.__model
+        # else:
+        #     return self.__model.model
+        try:
+            getattr(self.__model, 'model')
+            return self.__model.model
+        except (AttributeError):
+            return self.__model
+        raise ValueError(f"unhandled type: {type(self.__model)}")
 
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution ruptures.

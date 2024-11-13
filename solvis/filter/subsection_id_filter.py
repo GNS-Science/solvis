@@ -24,7 +24,6 @@ from solvis.solution.typing import InversionSolutionModelProtocol, InversionSolu
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 
-
 class FilterSubsectionIds(ChainableSetBase):
     """
     A helper class to filter subsections, returning qualifying section_ids.
@@ -35,13 +34,17 @@ class FilterSubsectionIds(ChainableSetBase):
         Args:
             solution_model: The solution or solution.model instance to filter on.
         """
-        if isinstance(solution_model, InversionSolutionModelProtocol):
-            self._model = solution_model
-        elif isinstance(solution_model, InversionSolutionProtocol):
-            self._model = solution_model.model
-        else:
-            raise ValueError(f"unhandled type: {type(solution_model)}")
-        self._filter_parent_fault_ids = FilterParentFaultIds(self._model)
+        self.__model = solution_model
+        self._filter_parent_fault_ids = FilterParentFaultIds(self.__model)
+
+    @property
+    def _model(self):
+        try:
+            getattr(self.__model, 'model')
+            return self.__model.model
+        except (AttributeError):
+            return self.__model
+        raise ValueError(f"unhandled type: {type(self.__model)}")
 
     def for_named_faults(self, named_fault_names: Iterable[str]) -> ChainableSetBase:
         raise NotImplementedError()
