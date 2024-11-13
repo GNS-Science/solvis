@@ -24,6 +24,7 @@ from solvis.solution.typing import InversionSolutionModelProtocol, InversionSolu
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 
+
 class FilterSubsectionIds(ChainableSetBase):
     """
     A helper class to filter subsections, returning qualifying section_ids.
