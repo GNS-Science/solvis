@@ -72,8 +72,7 @@ Inversion Solution archive file:
  - 'ruptures/indices.csv'
  - 'ruptures/average_slips.csv'
 
-"""
-"A warning added to archives that have been modified by Solvis."
+"""  # warning added to archives that have been modified by Solvis.
 
 
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -207,8 +206,8 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
         archive = None
         if self._archive is None:
-            if self._archive_path is None:
-                raise RuntimeError("archive_path ARGG")
+            if self._archive_path is None:  # pragma: no cover  (this should never happen)
+                raise RuntimeError("archive_path cannot be None, unless we have an in-memory archive")
             else:
                 tic = time.perf_counter()
                 data = io.BytesIO(open(self._archive_path, 'rb').read())
@@ -232,11 +231,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
             log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
         return prop
 
-    def _geodataframe_from_geojson(self, prop, path):
-        if not isinstance(prop, pd.DataFrame):
-            prop = gpd.read_file(self.archive.open(path))
-        return prop
-
     @property
     def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
         """
@@ -250,7 +244,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
             return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
 
         tic = time.perf_counter()
-        self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections = gpd.read_file(self.archive.open(self.FAULTS_PATH))
         self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
         self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
         mapper = {

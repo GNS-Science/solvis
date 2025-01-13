@@ -170,8 +170,8 @@ class TestInversionSolution(object):
 
     def test_target_slip_rates(self, crustal_solution_fixture):
         model = crustal_solution_fixture.model
-        model.section_target_slip_rates
         model.fault_sections
+        model.section_target_slip_rates
         assert "Target Slip Rate" in model.fault_sections.columns
         assert "Target Slip Rate StdDev" in model.fault_sections.columns
         assert "SlipRate" not in model.fault_sections.columns
