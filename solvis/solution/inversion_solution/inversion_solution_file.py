@@ -211,12 +211,10 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
             else:
                 tic = time.perf_counter()
                 data = io.BytesIO(open(self._archive_path, 'rb').read())
-                archive = zipfile.ZipFile(data)
+                self._archive = zipfile.ZipFile(data)
                 toc = time.perf_counter()
                 log.debug('archive time to open zipfile %s %2.3f seconds' % (self._archive_path, toc - tic))
-        else:
-            archive = zipfile.ZipFile(self._archive)
-        return archive
+        return self._archive
 
     def _dataframe_from_csv(self, prop, path, dtype=None):
         log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))
