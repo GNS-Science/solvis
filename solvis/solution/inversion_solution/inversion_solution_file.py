@@ -164,7 +164,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         """
         if base_archive_path is None:
             # try to use this archive, rather than a base archive
-            zin = self._archive
+            zin = self.archive
         else:
             zin = zipfile.ZipFile(base_archive_path, 'r')
 
@@ -204,19 +204,16 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
     def archive(self) -> zipfile.ZipFile:
         """An in-memory archive instance."""
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
-        archive = None
         if self._archive is None:
             if self._archive_path is None:  # pragma: no cover  (this should never happen)
                 raise RuntimeError("archive_path cannot be None, unless we have an in-memory archive")
             else:
                 tic = time.perf_counter()
-                data = io.BytesIO(open(self._archive_path, 'rb').read())
-                archive = zipfile.ZipFile(data)
+                self._archive = io.BytesIO(open(self._archive_path, 'rb').read())
                 toc = time.perf_counter()
                 log.debug('archive time to open zipfile %s %2.3f seconds' % (self._archive_path, toc - tic))
-        else:
-            archive = zipfile.ZipFile(self._archive)
-        return archive
+
+        return zipfile.ZipFile(self._archive)
 
     def _dataframe_from_csv(self, prop, path, dtype=None):
         log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))

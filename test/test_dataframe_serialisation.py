@@ -7,6 +7,7 @@ import unittest
 import zipfile
 
 import pandas as pd
+import pytest
 
 import solvis
 
@@ -39,20 +40,22 @@ class TestRates(unittest.TestCase):
 
 
 class TestSerialisation(object):
-    def test_write_to_archive_compatible(self, crustal_fixture, archives):
+    @pytest.mark.parametrize("compatible", [True, False])
+    @pytest.mark.parametrize("base_archive_path", [True, False])
+    def test_write_to_archive(self, crustal_fixture, archives, compatible, base_archive_path):
 
         folder = tempfile.TemporaryDirectory()
         # folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         new_path = pathlib.Path(folder.name, 'test_compatible_archive.zip')
 
-        # ref_solution = next(branch_solutions(fslt, archive=archives['CRU']))
+        if base_archive_path:
+            fixture_folder = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures"
+            ref_solution = pathlib.PurePath(fixture_folder, archives['CRU'])
+        else:
+            ref_solution = None
 
-        fixture_folder = pathlib.PurePath(os.path.realpath(__file__)).parent / "fixtures"
-        ref_solution = pathlib.PurePath(fixture_folder, archives['CRU'])
-
-        # assert not new_path.exists()
         # write the file
-        crustal_fixture.to_archive(str(new_path), ref_solution, compat=True)
+        crustal_fixture.to_archive(str(new_path), ref_solution, compat=compatible)
         assert new_path.exists()
 
     def test_write_read_archive_compatible(self, crustal_fixture, archives):
