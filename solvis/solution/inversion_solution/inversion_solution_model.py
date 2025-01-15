@@ -356,10 +356,3 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
         )
         return cast('DataFrame[RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
-
-    def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
-
-        return self.fault_sections_with_solution_slip_rates[
-            self.fault_sections_with_solution_slip_rates['ParentName'] == parent_fault_name
-        ]
-
