@@ -83,6 +83,21 @@ class FaultSystemSolution:
 
     @staticmethod
     def filter_solution(solution: 'FaultSystemSolution', rupture_ids: Iterable) -> 'FaultSystemSolution':
+        """
+        Filter a FaultSystemSolution by a subset of its rupture IDs, returing a new FaultSystemSolution.
+
+        Note:
+         - this is an utility method primarily for producing test fixtures.
+         - this is not actually used, and maybe deprecated in a future release
+
+        Parameters:
+            solution: an fault system solution instance.
+            rupture_ids: a sequence of rupture ids.
+
+        Returns:
+            A new FaultSystemSolution containing data for the rupture IDs specified.
+        """
+
         solution = cast(FaultSystemSolution, solution)
         model = solution.model
         rr = model.ruptures
@@ -108,25 +123,28 @@ class FaultSystemSolution:
             solution.solution_file.fault_regime,
             average_slips,
         )
-        # ns._archive_path = None
-        #### new_solution_file.enable_fast_indices()
-        # copy the original archive, if it exists
-        # TODO: does the archive needs filtering applied?? see to_archive()
-        if solution.solution_file._archive:
-            new_archive = io.BytesIO()
-            with zipfile.ZipFile(new_archive, 'w') as new_zip:
-                # write the core files
-                with zipfile.ZipFile(solution.solution_file._archive, 'r') as zf:
-                    for item in zf.filelist:
-                        if item.filename in solution.solution_file.DATAFRAMES:
-                            continue
-                        if item.filename in solution.solution_file.OPENSHA_ONLY:  # drop bulky, opensha-only artefacts
-                            continue
-                        new_zip.writestr(item, zf.read(item.filename))
-                # write the modifies tables
-                new_solution_file._write_dataframes(new_zip, reindex=False)  # retain original rupture ids and structure
-            new_solution_file._archive = new_archive
-            new_solution_file._archive.seek(0)
+
+        # now copy data from the original archive
+        assert solution.solution_file._archive, "Assumed _archive is not available"
+
+        new_archive = io.BytesIO()
+        with zipfile.ZipFile(new_archive, 'w') as new_zip:
+            # write the core files
+            with zipfile.ZipFile(solution.solution_file._archive, 'r') as zf:
+                for item in zf.filelist:
+                    if item.filename in solution.solution_file.DATAFRAMES:
+                        log.debug(f'filter_solution() skipping copy of dataframe file: {item.filename}')
+                        continue
+                    if item.filename in solution.solution_file.OPENSHA_ONLY:  # drop bulky, opensha-only artefacts
+                        log.debug(f'filter_solution() skipping copy of opensha only file: {item.filename}')
+                        continue
+                    log.debug(f'filter_solution() copying {item.filename}')
+                    new_zip.writestr(item, zf.read(item.filename))
+
+            # write the modifies tables
+            new_solution_file._write_dataframes(new_zip, reindex=False)  # retain original rupture ids and structure
+        new_solution_file._archive = new_archive
+        new_solution_file._archive.seek(0)
         return FaultSystemSolution(new_solution_file)
 
     @staticmethod
@@ -187,9 +205,11 @@ class FaultSystemSolution:
                 if source.type == "inversion":
                     inversion_solution_id = source.inversion_id
                     break
+                else:  # pragma: no cover
+                    continue
             else:
-                raise Exception("Could not find inversion solution ID for branch solution")
-        else:
+                raise Exception("Could not find inversion solution ID for branch solution")  # pragma: no cover
+        else:  # pragma: no cover
             # Fall back to v1 behaviour
             inversion_solution_id = branch.inversion_solution_id
 
