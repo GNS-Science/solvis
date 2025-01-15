@@ -79,14 +79,6 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
         return self._solution_file.fault_sections
 
     @property
-    def fault_regime(self):
-        return self._solution_file.fault_regime
-
-    @property
-    def logic_tree_branch(self):
-        return self._solution_file.logic_tree_branch
-
-    @property
     def indices(self):
         return self._solution_file.indices
 
@@ -371,6 +363,3 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             self.fault_sections_with_solution_slip_rates['ParentName'] == parent_fault_name
         ]
 
-
-class CompositeSolutionModel(CompositeSolutionProtocol):
-    pass

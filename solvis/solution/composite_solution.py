@@ -16,16 +16,11 @@ import pandas as pd
 
 from .fault_system_solution import FaultSystemSolution
 
-# from .typing import CompositeSolutionProtocol
-from .inversion_solution.inversion_solution_model import CompositeSolutionModel
-
-# from .inversion_solution_file import data_to_zip_direct
-
 
 log = logging.getLogger(__name__)
 
 
-class CompositeSolution(CompositeSolutionModel):
+class CompositeSolution:
     """A container class collecting FaultSystemSolution instances and a source_logic_tree.
 
     Methods:
