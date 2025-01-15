@@ -49,7 +49,7 @@ class FaultSystemSolutionModel(InversionSolutionModel):
         if self._fast_indices is None:
             try:
                 self._fast_indices = self._solution_file.fast_indices
-                log.debug("loaded fast indices")
+                log.debug("loaded fast indices")  # pragma: no cover
             except Exception:
                 log.info("rupture_sections() building fast indices")
                 self._fast_indices = super().build_rupture_sections()

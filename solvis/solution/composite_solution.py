@@ -16,7 +16,6 @@ import pandas as pd
 
 from .fault_system_solution import FaultSystemSolution
 
-
 log = logging.getLogger(__name__)
 
 

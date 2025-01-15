@@ -12,7 +12,7 @@ import geopandas as gpd
 import pandas as pd
 
 from solvis.filter import FilterSubsectionIds
-from solvis.solution.typing import CompositeSolutionProtocol, InversionSolutionModelProtocol
+from solvis.solution.typing import InversionSolutionModelProtocol
 
 from .inversion_solution_file import InversionSolutionFile
 
@@ -349,7 +349,7 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             self.solution_file.ruptures.drop(columns="Rupture Index"),
             on=self.solution_file.rupture_rates["Rupture Index"],  # type: ignore
         )
-        if 'key_0' in self._ruptures_with_rupture_rates.columns:
+        if 'key_0' in self._ruptures_with_rupture_rates.columns:  # pragma: no cover (can this be dropped?)
             self._ruptures_with_rupture_rates.drop(columns=['key_0'], inplace=True)
         toc = time.perf_counter()
         log.debug(
