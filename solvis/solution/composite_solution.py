@@ -149,10 +149,8 @@ class CompositeSolution:
                     # serialise the 'in-memory' archive
                     fss_file._archive.seek(0)
                     data_to_zip_direct(zout, fss_file._archive.read(), fss_name)
-                elif fss_file.archive_path is None:
-                    raise RuntimeError("archive_path is not defined")
-                else:
-                    zout.write(fss_file.archive_path, arcname=fss_name)
+                else:  # pragma: no cover
+                    raise RuntimeError("_archive is not defined")
         self._archive_path = Path(archive_path)
 
     @staticmethod

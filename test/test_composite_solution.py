@@ -125,6 +125,9 @@ def test_composite_serialisation(small_archives):
     assert new_composite.rupture_rates['Rupture Index'].all() == composite.rupture_rates['Rupture Index'].all()
 
     assert new_composite.archive_path == new_path
+    assert new_composite.source_logic_tree == slt
+    assert sorted(new_composite.get_fault_system_codes()) == ['CRU', 'HIK', 'PUY']
+
 
 
 # class TestThreeFaultSystems(object):
