@@ -56,19 +56,20 @@ class SolutionSurfacesBuilder:
         new_geometry_df = self._solution.model.fault_sections.copy()
         toc = time.perf_counter()
         log.debug('time to load fault_sections: %2.3f seconds' % (toc - tic))
-
         if self._solution.fault_regime == 'SUBDUCTION':
             return new_geometry_df.set_geometry(
                 [create_subduction_section_surface(section) for i, section in new_geometry_df.iterrows()]
             )
-        if self._solution.fault_regime == 'CRUSTAL':
+        elif self._solution.fault_regime == 'CRUSTAL':
             return new_geometry_df.set_geometry(
                 [create_crustal_section_surface(section) for i, section in new_geometry_df.iterrows()]
             )
+        else:  # pragma: no cover
+            raise RuntimeError(f'Unable to render fault_surfaces for fault regime {self._solution.fault_regime}')
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
         """
-        Calculate the geometry of the rupture fault surfaces projected onto the earth surface.
+        Calculate the geometry of the rupture surfaces projected onto the earth surface.
 
         Parameters:
             rupture_id: ID of the rupture
@@ -83,5 +84,7 @@ class SolutionSurfacesBuilder:
         rupt: gpd.DataFrame = df0[df0["Rupture Index"] == rupture_id]
         if self._solution.fault_regime == 'SUBDUCTION':
             return rupt.set_geometry([create_subduction_section_surface(section) for i, section in rupt.iterrows()])
-        if self._solution.fault_regime == 'CRUSTAL':
+        elif self._solution.fault_regime == 'CRUSTAL':
             return rupt.set_geometry([create_crustal_section_surface(section) for i, section in rupt.iterrows()])
+        else:  # pragma: no cover
+            raise RuntimeError(f'Unable to render rupture_surface for fault regime {self._solution.fault_regime}')

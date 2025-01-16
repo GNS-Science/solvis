@@ -7,6 +7,7 @@ A module to produce a named_fault for use with filtering crustal ruptures.
 for NSHM_V.1 the Crustal Rupture Sets all use the same Fault Model (form the NZ CFM) 
 
 """
+
 import csv
 from typing import Protocol, Set
 

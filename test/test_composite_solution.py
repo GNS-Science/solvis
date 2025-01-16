@@ -129,7 +129,6 @@ def test_composite_serialisation(small_archives):
     assert sorted(new_composite.get_fault_system_codes()) == ['CRU', 'HIK', 'PUY']
 
 
-
 # class TestThreeFaultSystems(object):
 
 #     @pytest.mark.skip('REVIEW')

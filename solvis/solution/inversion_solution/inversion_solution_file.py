@@ -345,5 +345,3 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         self._fault_sections = fault_sections
         self._indices = indices
         self._average_slips = average_slips
-        print('****')
-        print(rates)
