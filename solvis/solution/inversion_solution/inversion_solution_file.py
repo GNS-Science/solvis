@@ -13,7 +13,7 @@ import time
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, cast
+from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 
 import geopandas as gpd
 import pandas as pd
@@ -148,7 +148,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         data_to_zip_direct(zip_archive, indices.to_csv(index=reindex), self.INDICES_PATH)
         data_to_zip_direct(zip_archive, slips.to_csv(index=reindex), self.AVG_SLIPS_PATH)
 
-    def to_archive(self, archive_path, base_archive_path=None, compat=False):
+    def to_archive(self, archive_path_or_buffer: Union[Path, str, io.BytesIO], base_archive_path=None, compat=False):
         """Write the current solution to a new zip archive.
 
         Optionally cloning data from a base archive.
@@ -158,7 +158,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         so that the original rutpure ids are lost.
 
         Args:
-            archive_path: path to write to.
+            archive_path: path or buffrer to write.
             base_archive_path: path to an InversionSolution archive to clone data from.
             compat: if True reindex the dataframes so that the archive remains compatible with opensha.
         """
@@ -168,12 +168,11 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         else:
             zin = zipfile.ZipFile(base_archive_path, 'r')
 
-        log.debug('create zipfile %s with method %s' % (archive_path, ZIP_METHOD))
-        zout = zipfile.ZipFile(archive_path, 'w', ZIP_METHOD)
+        log.debug('create zipfile %s with method %s' % (archive_path_or_buffer, ZIP_METHOD))
+        zout = zipfile.ZipFile(archive_path_or_buffer, 'w', ZIP_METHOD)
 
         log.debug('to_archive: skipping files: %s' % self.DATAFRAMES)
         # this copies in memory, skipping the dataframe files we'll want to overwrite
-
         for item in zin.infolist():
             if item.filename in self.DATAFRAMES:
                 continue
@@ -181,15 +180,17 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
             buffer = zin.read(item.filename)
             zout.writestr(item, buffer)
 
-        """
-
-        """
         if compat:
             self._write_dataframes(zout, reindex=True)
         else:
             self._write_dataframes(zout, reindex=False)
-        # self._archive_path = archive_path
+
         data_to_zip_direct(zout, WARNING, "WARNING.md")
+
+        if isinstance(archive_path_or_buffer, io.BytesIO):
+            self._archive = archive_path_or_buffer
+        else:
+            self._archive_path = cast(Path, archive_path_or_buffer)
 
     @property
     def archive_path(self) -> Optional[Path]:

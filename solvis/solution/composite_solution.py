@@ -6,13 +6,14 @@ Classes:
 """
 import io
 import logging
-import time
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
+
+from solvis.solution.inversion_solution.inversion_solution_file import data_to_zip_direct
 
 from .fault_system_solution import FaultSystemSolution
 
@@ -45,7 +46,9 @@ class CompositeSolution:
         """Add a new FaultSystemSolution instance."""
         # print(">>> add_fault_system_solution", self, fault_system)
         if fault_system in self._solutions.keys():
-            raise ValueError(f"fault system with key: {fault_system} exists already. {self._solutions.keys()}")
+            raise ValueError(
+                f"fault system with key: {fault_system} exists already. {self._solutions.keys()}"
+            )  # pragma: no cover
         self._solutions[fault_system] = fault_system_solution
         return self
 
@@ -142,19 +145,10 @@ class CompositeSolution:
             for key, fss in self._solutions.items():
                 fss_name = f"{key}_fault_system_solution.zip"
                 fss_file = fss.solution_file
-                if fss_file.archive:
-                    # we can serialise the 'in-memory' archive now
-                    # data_to_zip_direct(zout, fss_file.archive, fss_name)
-
-                    # TODO : consider how to resolve this, it's needed from creating composite archive
-                    # and it was written to store fss archive to disk
-
-                    assert 0
-                    log.debug('direct store %s' % fss_name)
-                    zinfo = zipfile.ZipInfo(fss_name, time.localtime()[:6])
-                    zinfo.compress_type = zipfile.ZIP_DEFLATED
-                    zout.write(zinfo, fss_file.archive.read(), fss_name)
-
+                if fss_file._archive:
+                    # serialise the 'in-memory' archive
+                    fss_file._archive.seek(0)
+                    data_to_zip_direct(zout, fss_file._archive.read(), fss_name)
                 elif fss_file.archive_path is None:
                     raise RuntimeError("archive_path is not defined")
                 else:

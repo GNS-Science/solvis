@@ -69,6 +69,9 @@ class FaultSystemSolution:
         # TODO: sort out this weirdness
         if isinstance(instance_or_path, io.BytesIO):
             with zipfile.ZipFile(instance_or_path, 'r') as zf:
+
+                print("namelist: ", zf.namelist())
+
                 assert 'composite_rates.csv' in zf.namelist()
                 assert 'aggregate_rates.csv' in zf.namelist()
                 assert 'ruptures/fast_indices.csv' in zf.namelist()
@@ -149,7 +152,7 @@ class FaultSystemSolution:
 
     @staticmethod
     def new_solution(solution: BranchSolutionProtocol, composite_rates_df: pd.DataFrame) -> 'FaultSystemSolution':
-        # build a new composite solution, taking solution template properties, and composite_rates_df
+        # build a new fault system solution, taking solution template properties, and composite_rates_df
         composite_rates_df = composite_rates_df[composite_rates_df["Annual Rate"] > 0]
         composite_rates_df.insert(
             0,
@@ -188,7 +191,10 @@ class FaultSystemSolution:
             solution.solution_file.average_slips.copy(),
         )
         fss_file._archive_path = solution.solution_file.archive_path
-        return FaultSystemSolution(fss_file)
+
+        new_fss = FaultSystemSolution(fss_file)
+        new_fss.to_archive(io.BytesIO(), solution.solution_file.archive_path)  # initialise the _archive
+        return new_fss
 
     @staticmethod
     def get_branch_inversion_solution_id(branch: ModelLogicTreeBranch) -> str:
@@ -232,7 +238,6 @@ class FaultSystemSolution:
             solution_df.insert(0, 'fault_system', branch_solution.fault_system)
             composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
 
-            # print('dims', composite_rates_df.shape, solution_df.shape)
         return FaultSystemSolution.new_solution(solution=branch_solution, composite_rates_df=composite_rates_df)
 
 
