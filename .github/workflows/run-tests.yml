@@ -49,11 +49,12 @@ jobs:
       #----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: |
+        run:
           poetry install --no-interaction --no-root --with dev --all-extras
 
       - name: Install tox-gh-actions
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run:
           poetry add tox-gh-actions
 
       - name: test with tox (uses tox-gh-actions to select correct environment)
