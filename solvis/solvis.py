@@ -2,7 +2,7 @@
 """
 Some original solvis API helper functions are defined in this module.
 
-But most are now  deprecated and replaced bu equivalent filter and model methods.
+But most are now deprecated and replaced by equivalent filter and model methods.
 """
 from pathlib import Path
 from typing import Union

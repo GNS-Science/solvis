@@ -26,4 +26,4 @@ from .geometry import circle_polygon
 from .solution import CompositeSolution, FaultSystemSolution, InversionSolution
 from .solvis import export_geojson, mfd_hist
 
-__version__ = '0.12.3'
+__version__ = '0.13.0'
