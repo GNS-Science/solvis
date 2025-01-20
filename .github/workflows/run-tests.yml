@@ -31,6 +31,7 @@ jobs:
         uses: GNS-Science/install-poetry@main
         # uses: snok/install-poetry@v1
         with:
+          version: 1.8.4
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
