@@ -18,10 +18,11 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
 
     # get the participation rate for a (parent) fault
     solution = crustal_small_fss_fixture
+    model = solution.model
 
     # # calc rate by hand ...
-    df0 = solution.rs_with_rupture_rates
-    df1 = df0.join(solution.fault_sections[['ParentID', 'ParentName']], on='section')
+    df0 = model.rs_with_rupture_rates
+    df1 = df0.join(model.fault_sections[['ParentID', 'ParentName']], on='section')
 
     print(df1['ParentName'].unique())
     df1 = df1[df1['ParentName'] == fault_name]
@@ -35,7 +36,7 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
     print(parent_rate)
     assert pytest.approx(parent_rate) == expected_rate  # the original test value
 
-    rates = solution.fault_participation_rates([fault_name])
+    rates = model.fault_participation_rates([fault_name])
     assert pytest.approx(rates.participation_rate.tolist()[0]) == expected_rate
 
 
@@ -44,36 +45,36 @@ def test_parent_fault_participation_rate_conditional(crustal_small_fss_fixture, 
 
     # get the participation rate for a (parent) fault
     solution = crustal_small_fss_fixture
+    model = solution.model
 
     rids = list(
-        FilterRuptureIds(solution).for_parent_fault_ids(
-            FilterParentFaultIds(solution).for_parent_fault_names([fault_name])
-        )
+        FilterRuptureIds(model).for_parent_fault_ids(FilterParentFaultIds(model).for_parent_fault_names([fault_name]))
     )
     assert len(rids) > 1
 
     print(rids)
-    rates = solution.fault_participation_rates([fault_name], rupture_ids=rids)
+    rates = model.fault_participation_rates([fault_name], rupture_ids=rids)
     assert pytest.approx(rates.participation_rate.tolist()[0]) == expected_rate
 
     rids_subset = rids[: int(len(rids) / 2)]
     print(rids_subset)
-    rates = solution.fault_participation_rates([fault_name], rupture_ids=rids_subset)
+    rates = model.fault_participation_rates([fault_name], rupture_ids=rids_subset)
     assert rates.participation_rate.tolist()[0] < expected_rate
 
 
 @pytest.mark.parametrize("fault_name, expected_rate", parent_fault_rates)
 def test_parent_fault_participation_rate_vs_section_rates(crustal_small_fss_fixture, fault_name, expected_rate):
     solution = crustal_small_fss_fixture
-    fault_rates = solution.fault_participation_rates([fault_name])
+    model = solution.model
+    fault_rates = model.fault_participation_rates([fault_name])
     assert pytest.approx(fault_rates.participation_rate.tolist()[0]) == expected_rate
     print(fault_rates)
-    rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
+    rids = list(FilterRuptureIds(model).for_parent_fault_names([fault_name]))
 
-    subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name]).for_rupture_ids(rids)
+    subsection_ids = FilterSubsectionIds(model).for_parent_fault_names([fault_name]).for_rupture_ids(rids)
     print(f'subsection_ids {list(subsection_ids)}')
 
-    section_rates = solution.section_participation_rates(subsection_ids)
+    section_rates = model.section_participation_rates(subsection_ids)
     print(section_rates)
 
     assert (

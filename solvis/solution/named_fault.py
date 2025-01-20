@@ -13,7 +13,7 @@ from typing import Protocol, Set
 import pandas as pd
 
 # from solvis.inversion_solution import FaultSystemSolution, InversionSolution
-from solvis.inversion_solution.typing import InversionSolutionProtocol
+from solvis.solution.typing import InversionSolutionProtocol
 
 CFM_1_0A_DOM_SANSTVZ_MAP = 'resources/named_faults/cfm_1_0A_no_tvz.xml.FaultsByNameAlt.txt'
 

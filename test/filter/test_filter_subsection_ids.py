@@ -1,10 +1,24 @@
 import pytest
 
+from solvis.filter.subsection_id_filter import FilterSubsectionIds
 
-def test_subsections_all(filter_subsection_ids, fss):
+
+def test_subsections_all(filter_subsection_ids, fss_model):
     all_sections = filter_subsection_ids.all()
     print(list(all_sections))
-    assert len(all_sections) == fss.fault_sections.shape[0]
+    assert len(all_sections) == fss_model.fault_sections.shape[0]
+
+
+def test_filter_inversion_solution_or_model(crustal_solution_fixture):
+    rupts_a = FilterSubsectionIds(crustal_solution_fixture).all()
+    rupts_b = FilterSubsectionIds(crustal_solution_fixture.model).all()
+    assert rupts_a == rupts_b
+
+
+def test_filter_fault_system_solution_or_model(crustal_small_fss_fixture):
+    rupts_a = FilterSubsectionIds(crustal_small_fss_fixture).all()
+    rupts_b = FilterSubsectionIds(crustal_small_fss_fixture.model).all()
+    assert rupts_a == rupts_b
 
 
 def test_subsections_for_ruptures(filter_subsection_ids):

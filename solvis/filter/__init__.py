@@ -1,8 +1,8 @@
 """
 This package provides classes to support filtering by key attributes of the solution classes:
 
- - [FaultSystemSolution][solvis.inversion_solution.fault_system_solution.FaultSystemSolution] aggregated solutions
- - [InversionSolution][solvis.inversion_solution.inversion_solution.InversionSolution] individual solutions
+ - [FaultSystemSolution][solvis.solution.fault_system_solution.FaultSystemSolution] aggregated solutions
+ - [InversionSolution][solvis.solution.inversion_solution.InversionSolution] individual solutions
 
 Classes:
   FilterParentFaultIds: for filtering solution parent faults.
@@ -12,15 +12,16 @@ Classes:
 Examples:
     ```py
     >>> solution = InversionSolution.from_archive(filename)
-    >>> parent_fault_ids = FilterParentFaultIds(solution)\\
+    >>> model = solution.model
+    >>> parent_fault_ids = FilterParentFaultIds(model)\\
             .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\\
             .for_rupture_ids([1,2,3])
 
-    >>> rupture_ids = FilterRuptureIds(solution)\\
+    >>> rupture_ids = FilterRuptureIds(model)\\
             .for_parent_fault_ids(parent_fault_ids)\\
             .for_magnitude(7.95, 8.15)
 
-    >>> assert FilterRuptureIds(solution)\\
+    >>> assert FilterRuptureIds(model)\\
             .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\\
             .issuperset(rupture_ids), "using set operands on two `filter.for` results"
     ```

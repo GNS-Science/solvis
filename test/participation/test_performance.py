@@ -19,7 +19,7 @@ TARGET_FAULTS = ['Masterton', 'Ohariu']
 
 def faster_subsection_filter(solution, subsection_ids):
     # https://stackoverflow.com/questions/67456315/a-faster-way-than-the-isin-function-of-pandas-to-extract-conditional-rows
-    df0 = solution.rs_with_rupture_rates.copy()
+    df0 = solution.model.rs_with_rupture_rates.copy()
     df0.section = df0.section.astype('int32')
     # print(f'df0 copy/dtype took : {t1-t0} seconds')
 
@@ -38,13 +38,13 @@ def original_subsection_filter(solution, subsection_ids):
 
 
 def original_rupture_filter(solution, rids):
-    df0 = solution.rs_with_rupture_rates.copy()
+    df0 = solution.model.rs_with_rupture_rates.copy()
     df0 = df0[df0["Rupture Index"].isin(rids)]
     return df0
 
 
 def faster_rupture_filter(solution, rids):
-    df0 = solution.rs_with_rupture_rates.copy()
+    df0 = solution.model.rs_with_rupture_rates.copy()
     # df0.section = df0.section.astype('int32')
     # print(f'df0 copy/dtype took : {t1-t0} seconds')
     df0 = df0.set_index('Rupture Index')
@@ -79,10 +79,9 @@ def test_combo_filtering_options():
     solution = solvis.InversionSolution.from_archive(single_sol)
 
     # this is needed so the property is cached for both timing tests
-    df0 = solution.rs_with_rupture_rates.copy()  # property
-
-    rids = list(FilterRuptureIds(solution).for_parent_fault_names(TARGET_FAULTS))
-    subsection_ids = FilterSubsectionIds(solution).for_rupture_ids(rids)
+    df0 = solution.model.rs_with_rupture_rates.copy()  # property
+    rids = list(FilterRuptureIds(solution.model).for_parent_fault_names(TARGET_FAULTS))
+    subsection_ids = FilterSubsectionIds(solution.model).for_rupture_ids(rids)
 
     t0 = time.perf_counter()
     fs0 = faster_combo_filter(df0, subsection_ids, rids)
@@ -166,9 +165,9 @@ def test_rupture_filtering_options():
     solution = solvis.InversionSolution.from_archive(single_sol)
 
     # this is needed so the property is cached for both timing tests
-    df0 = solution.rs_with_rupture_rates  # noqa
+    df0 = solution.model.rs_with_rupture_rates  # noqa
 
-    rids = list(FilterRuptureIds(solution).for_parent_fault_names(TARGET_FAULTS))
+    rids = list(FilterRuptureIds(solution.model).for_parent_fault_names(TARGET_FAULTS))
 
     t0 = time.perf_counter()
     fs0 = faster_rupture_filter(solution, rids)
@@ -202,7 +201,7 @@ def test_subsection_filtering_options():
     solution = solvis.InversionSolution.from_archive(single_sol)
 
     # this is needed so the property is cached for both timing tests
-    df0 = solution.rs_with_rupture_rates  # noqa
+    df0 = solution.model.rs_with_rupture_rates  # noqa
 
     subsection_ids = [53, 54, 55, 56, 57, 58, 2219, 2218, 2220, 2102, 2103]
 
@@ -239,20 +238,20 @@ def test_section_performance():
 
     # RATE_COLUMN = "Annual Rate"
     # this is needed so the property is cached for both timing tests
-    df0 = solution.rs_with_rupture_rates.copy()  # noqa
+    df0 = solution.model.rs_with_rupture_rates.copy()  # noqa
 
     def process_1(solution):
 
         t0 = time.perf_counter()
 
-        ruptures = FilterRuptureIds(solution).for_parent_fault_names(TARGET_FAULTS)
+        ruptures = FilterRuptureIds(solution.model).for_parent_fault_names(TARGET_FAULTS)
         # .for_magnitude(5, 8.2)
 
         t01 = time.perf_counter()
         print(f'filter ruptures took {t01-t0} seconds')
 
         # # get rupture fault sections (rs) with rates for those ruptures
-        # df0 = solution.rs_with_rupture_rates
+        # df0 = solution.model.rs_with_rupture_rates
 
         # rupture_sections_df = df0[df0["Rupture Index"].isin(ruptures)]
         # rupture_ids = list(rupture_sections_df["Rupture Index"].unique())
@@ -268,7 +267,7 @@ def test_section_performance():
     def process_2(solution, rupture_ids):
         t1 = time.perf_counter()
 
-        subsection_ids = FilterSubsectionIds(solution).for_rupture_ids(rupture_ids)
+        subsection_ids = FilterSubsectionIds(solution.model).for_rupture_ids(rupture_ids)
         print(f' {len(subsection_ids)} rupture subsections...')
 
         print(f'rupture subsections: {len(subsection_ids)}')
@@ -276,7 +275,7 @@ def test_section_performance():
         t2 = time.perf_counter()
         print(f'filter rupture subsections took : {t2-t1} seconds')
 
-        section_rates = solution.section_participation_rates(list(subsection_ids))  # , list(rupture_ids))
+        section_rates = solution.model.section_participation_rates(list(subsection_ids))  # , list(rupture_ids))
 
         t3 = time.perf_counter()
         print(f'section rates took {t3-t2} seconds')

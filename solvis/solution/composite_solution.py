@@ -5,6 +5,8 @@ Classes:
     CompositeSolution: a container class collecting FaultSystemSolution instances.
 """
 import io
+import logging
+import time
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
@@ -13,13 +15,17 @@ import geopandas as gpd
 import pandas as pd
 
 from .fault_system_solution import FaultSystemSolution
-from .inversion_solution_file import data_to_zip_direct
 
 # from .typing import CompositeSolutionProtocol
-from .inversion_solution_operations import CompositeSolutionOperations
+from .inversion_solution.inversion_solution_model import CompositeSolutionModel
+
+# from .inversion_solution_file import data_to_zip_direct
 
 
-class CompositeSolution(CompositeSolutionOperations):
+log = logging.getLogger(__name__)
+
+
+class CompositeSolution(CompositeSolutionModel):
     """A container class collecting FaultSystemSolution instances and a source_logic_tree.
 
     Methods:
@@ -49,6 +55,18 @@ class CompositeSolution(CompositeSolutionOperations):
         self._solutions[fault_system] = fault_system_solution
         return self
 
+    def rupture_surface(self, fault_system: str, rupture_id: int) -> gpd.GeoDataFrame:
+        return self._solutions[fault_system].rupture_surface(rupture_id)
+
+    def fault_surfaces(self):
+        surfaces = []
+        for fault_system, sol in self._solutions.items():
+            solution_df = sol.fault_surfaces().to_crs("EPSG:4326")
+            solution_df.insert(0, 'fault_system', fault_system)
+            surfaces.append(solution_df)
+        all_surfaces_df = pd.concat(surfaces, ignore_index=True)
+        return gpd.GeoDataFrame(all_surfaces_df)
+
     @property
     def archive_path(self) -> Union[Path, None]:
         """Get the path of the instance."""
@@ -76,7 +94,7 @@ class CompositeSolution(CompositeSolutionOperations):
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.rupture_rates for sol in self._solutions.values()]
+        all_rates = [sol.model.rupture_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 
@@ -97,7 +115,7 @@ class CompositeSolution(CompositeSolutionOperations):
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.composite_rates for sol in self._solutions.values()]
+        all_rates = [sol.model.composite_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 
@@ -113,9 +131,10 @@ class CompositeSolution(CompositeSolutionOperations):
                 rate_weighted_mean
         """
         all = [
-            gpd.GeoDataFrame(sol.fault_sections_with_rupture_rates).to_crs("EPSG:4326")
+            gpd.GeoDataFrame(sol.model.fault_sections_with_rupture_rates).to_crs("EPSG:4326")
             for sol in self._solutions.values()
         ]
+        print(all)
         all_df = pd.concat(all, ignore_index=True)
         return all_df
 
@@ -128,13 +147,24 @@ class CompositeSolution(CompositeSolutionOperations):
         with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zout:
             for key, fss in self._solutions.items():
                 fss_name = f"{key}_fault_system_solution.zip"
-                if fss._archive:
+                fss_file = fss.solution_file
+                if fss_file.archive:
                     # we can serialise the 'in-memory' archive now
-                    data_to_zip_direct(zout, fss._archive.read(), fss_name)
-                elif fss.archive_path is None:
+                    # data_to_zip_direct(zout, fss_file.archive, fss_name)
+
+                    # TODO : consider how to resolve this, it's needed from creating composite archive
+                    # and it was written to store fss archive to disk
+
+                    assert 0
+                    log.debug('direct store %s' % fss_name)
+                    zinfo = zipfile.ZipInfo(fss_name, time.localtime()[:6])
+                    zinfo.compress_type = zipfile.ZIP_DEFLATED
+                    zout.write(zinfo, fss_file.archive.read(), fss_name)
+
+                elif fss_file.archive_path is None:
                     raise RuntimeError("archive_path is not defined")
                 else:
-                    zout.write(fss.archive_path, arcname=fss_name)
+                    zout.write(fss_file.archive_path, arcname=fss_name)
         self._archive_path = Path(archive_path)
 
     @staticmethod
@@ -179,7 +209,7 @@ class CompositeSolution(CompositeSolutionOperations):
         Retrieve a `FaultSystemSolution` from within the composite solution.
 
         Codes can be retrieved with
-        [`get_fault_system_codes`][solvis.inversion_solution.composite_solution.CompositeSolution.get_fault_system_codes]
+        [`get_fault_system_codes`][solvis.solution.composite_solution.CompositeSolution.get_fault_system_codes]
 
 
         Parameters:

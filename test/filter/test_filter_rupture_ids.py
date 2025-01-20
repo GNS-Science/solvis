@@ -6,20 +6,32 @@ from nzshm_common.location.location import location_by_id
 
 from solvis import circle_polygon
 from solvis.filter.rupture_id_filter import FilterRuptureIds
-from solvis.inversion_solution.typing import SetOperationEnum
+from solvis.solution.typing import SetOperationEnum
 
-# TODO: these tests should also cover InversionSolution, not just FSS
+# TODO: these tests should also cover InversionSolution, not just FSS_model
 
 
-def test_top_level_import(fss):
+def test_top_level_import(fss_model):
     flt = importlib.import_module('solvis.filter')
-    assert {0, 1, 2}.issubset(flt.FilterRuptureIds(fss).for_subsection_ids([1]))
+    assert {0, 1, 2}.issubset(flt.FilterRuptureIds(fss_model).for_subsection_ids([1]))
 
 
-def test_ruptures_all(filter_rupture_ids, fss):
+def test_filter_inversion_solution_or_model(crustal_solution_fixture):
+    rupts_a = FilterRuptureIds(crustal_solution_fixture).all()
+    rupts_b = FilterRuptureIds(crustal_solution_fixture.model).all()
+    assert rupts_a == rupts_b
+
+
+def test_filter_fault_system_solution_or_model(crustal_small_fss_fixture):
+    rupts_a = FilterRuptureIds(crustal_small_fss_fixture).all()
+    rupts_b = FilterRuptureIds(crustal_small_fss_fixture.model).all()
+    assert rupts_a == rupts_b
+
+
+def test_ruptures_all(filter_rupture_ids, fss_model):
     all_ruptures = filter_rupture_ids.all()
     print(list(all_ruptures))
-    assert len(all_ruptures) == fss.ruptures.shape[0]
+    assert len(all_ruptures) == fss_model.ruptures.shape[0]
 
 
 def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
@@ -30,10 +42,10 @@ def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
     assert all_rupts.issuperset(ruptures)
 
 
-def test_ruptures_for_parent_fault_ids(filter_rupture_ids, filter_parent_fault_ids, fss):
+def test_ruptures_for_parent_fault_ids(filter_rupture_ids, filter_parent_fault_ids, fss_model):
     fault_ids = filter_parent_fault_ids.for_parent_fault_names(['Vernon 4'])
     rupt_ids_with_rate = filter_rupture_ids.for_parent_fault_ids(fault_ids)
-    rupt_ids_all = FilterRuptureIds(fss, drop_zero_rates=False).for_parent_fault_ids(fault_ids)
+    rupt_ids_all = FilterRuptureIds(fss_model, drop_zero_rates=False).for_parent_fault_ids(fault_ids)
 
     assert rupt_ids_with_rate.issuperset(
         set([2090, 2618, 1595, 76, 77, 594, 595, 2134, 1126, 1127, 1648, 1649, 2177, 664, 665, 154, 2723])
@@ -47,13 +59,13 @@ def test_ruptures_for_parent_fault_names(filter_rupture_ids):
     )
 
 
-def test_ruptures_for_polygon_intersecting(fss, filter_rupture_ids):
+def test_ruptures_for_polygon_intersecting(fss_model, filter_rupture_ids):
     WLG = location_by_id('WLG')
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
     rupture_ids = filter_rupture_ids.for_polygon(polygon)
 
-    # check vs the legacy solvis function
-    assert rupture_ids == set(fss.get_rupture_ids_intersecting(polygon))
+    # check vs the legacy solvis function - now Deprecated
+    # assert rupture_ids == set(fss_model.get_rupture_ids_intersecting(polygon))
 
     # check vs known fixture values
     assert set(
@@ -61,7 +73,7 @@ def test_ruptures_for_polygon_intersecting(fss, filter_rupture_ids):
     ).issubset(rupture_ids)
 
 
-def test_ruptures_for_polygons_join_iterable(fss, filter_rupture_ids):
+def test_ruptures_for_polygons_join_iterable(fss_model, filter_rupture_ids):
     WLG = location_by_id('WLG')
     MRO = location_by_id('MRO')
     polyA = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
@@ -90,19 +102,19 @@ def test_ruptures_for_polygons_join_iterable(fss, filter_rupture_ids):
     ) == ridsA.difference(ridsB)
 
 
-def test_ruptures_for_polygon_intersecting_with_drop_zero(fss, filter_rupture_ids):
+def test_ruptures_for_polygon_intersecting_with_drop_zero(fss_model, filter_rupture_ids):
     WLG = location_by_id('WLG')
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
     rupture_ids = filter_rupture_ids.for_polygon(polygon)
 
-    all_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=False).for_polygon(polygon)
+    all_rupture_ids = FilterRuptureIds(fss_model, drop_zero_rates=False).for_polygon(polygon)
     assert all_rupture_ids.issuperset(rupture_ids)
     assert len(all_rupture_ids) > len(rupture_ids)
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_min_mag(fss, drop_zero_rates):
-    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+def test_ruptures_for_min_mag(fss_model, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss_model, drop_zero_rates=drop_zero_rates)
 
     m6plus = filter_rupture_ids.for_magnitude(min_mag=6.0)
     m7plus = filter_rupture_ids.for_magnitude(min_mag=7.0)
@@ -114,8 +126,8 @@ def test_ruptures_for_min_mag(fss, drop_zero_rates):
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_max_mag(fss, drop_zero_rates):
-    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+def test_ruptures_for_max_mag(fss_model, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss_model, drop_zero_rates=drop_zero_rates)
 
     m8less = filter_rupture_ids.for_magnitude(max_mag=8.0)
     m7less = filter_rupture_ids.for_magnitude(max_mag=7.5)
@@ -127,8 +139,8 @@ def test_ruptures_for_max_mag(fss, drop_zero_rates):
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_min_rate(fss, drop_zero_rates):
-    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+def test_ruptures_for_min_rate(fss_model, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss_model, drop_zero_rates=drop_zero_rates)
 
     r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6)
     r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7)
@@ -140,8 +152,8 @@ def test_ruptures_for_min_rate(fss, drop_zero_rates):
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_filter_chaining_rates(fss, drop_zero_rates):
-    filter_rupture_ids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+def test_filter_chaining_rates(fss_model, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss_model, drop_zero_rates=drop_zero_rates)
 
     r6less = filter_rupture_ids.for_rupture_rate(min_rate=1e-6)
     r7less = filter_rupture_ids.for_rupture_rate(min_rate=1e-7)
@@ -152,8 +164,8 @@ def test_filter_chaining_rates(fss, drop_zero_rates):
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_filter_chaining_join_chain(fss, drop_zero_rates):
-    frids = FilterRuptureIds(fss, drop_zero_rates=drop_zero_rates)
+def test_filter_chaining_join_chain(fss_model, drop_zero_rates):
+    frids = FilterRuptureIds(fss_model, drop_zero_rates=drop_zero_rates)
 
     n0 = frids.for_parent_fault_names(['Vernon 4'])
     n1 = frids.for_parent_fault_names(['Alpine Jacksons to Kaniere'])

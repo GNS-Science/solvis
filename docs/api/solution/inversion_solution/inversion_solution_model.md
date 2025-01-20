@@ -1,8 +1,8 @@
-::: solvis.inversion_solution.inversion_solution_operations
+::: solvis.solution.inversion_solution.inversion_solution_model
     options:
         members: false
 
-::: solvis.inversion_solution.inversion_solution_operations.InversionSolutionOperations
+::: solvis.solution.inversion_solution.inversion_solution_model.InversionSolutionModel
     options:
         inherited_members: false
         filters:
@@ -11,7 +11,7 @@
         members_order: alphabetical
         group_by_category: false
 
-::: solvis.inversion_solution.inversion_solution_operations.CompositeSolutionOperations
+::: solvis.solution.inversion_solution.inversion_solution_model.CompositeSolutionModel
     options:
         inherited_members: false
         members_order: alphabetical

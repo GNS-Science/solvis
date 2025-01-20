@@ -1,7 +1,7 @@
 import pytest
 
 from solvis.filter.chainable_set_base import ChainableSetBase
-from solvis.inversion_solution.typing import SetOperationEnum
+from solvis.solution.typing import SetOperationEnum
 
 
 class FilterExampleClass(ChainableSetBase):
@@ -20,8 +20,8 @@ class FilterExampleClass(ChainableSetBase):
 
 
 @pytest.fixture(scope='module')
-def filter_example(fss):
-    yield FilterExampleClass(fss)
+def filter_example(fss_model):
+    yield FilterExampleClass(fss_model)
 
 
 def test_chaining_a_b(filter_example):

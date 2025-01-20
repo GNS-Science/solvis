@@ -6,11 +6,14 @@
  - drop_zero_rate differentiates between FSS and IS;
  - faster testing (~3 times faster)
  - documentation improvements
- - abc427e fixing many deprecation warnings; updated geopandas, pandas, numpy, pyvista libs;
- - read_csv dtype configuration improvements;
+ - fix many deprecation warnings
+ - updated dependencies: geopandas, pandas, numpy, pyvista libs
+ - read_csv dtype configuration improvements
  - many old functions are deprecated/migrated to new filter package
  - refactor dataframe dtypes
- - standardise participation functions API and return columns;
+ - standardise participation functions API and return columns
+ - refactor `solvis.inversion_solution` package to `solvis.solution` and collect modules into packages
+ - new packages `solvis.solution.inversion_solution` and  `solvis.solution.fault_system_solution`
 
 ## Added
  - new filter package providing classes for filtering solutions
@@ -20,6 +23,10 @@
  - added participation methods to fault_system_solution
  - a simple rupture grouping algorithm (can this be a different type of filter??);
  - `pandera` library for dataframe model validations and better docs
+
+## Removed
+ - deprecated `solvis.solvis` functions removed.
+ - deprecated `solvis.inversion_solution.*` functions/methods removed.
 
 ## [0.12.3] 2024-07-04
 bump version to verify new pypi workflow

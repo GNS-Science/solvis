@@ -9,7 +9,7 @@ Classes:
 import copy
 from typing import Any, Set, Union
 
-from solvis.inversion_solution.typing import SetOperationEnum
+from solvis.solution.typing import SetOperationEnum
 
 
 class ChainableSetBase:

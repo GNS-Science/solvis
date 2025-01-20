@@ -6,7 +6,7 @@ import unittest
 
 from solvis import InversionSolution
 
-# from solvis.inversion_solution.solution_surfaces_builder import SolutionSurfacesBuilder
+# from solvis.solution.solution_surfaces_builder import SolutionSurfacesBuilder
 
 
 class SolutionLike:
@@ -21,7 +21,7 @@ class TestSolutionSurfacesBuilder(unittest.TestCase):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
         sol = InversionSolution.from_archive(str(filename))
-        likeness = SolutionLike(sol.fault_regime, sol.fault_sections, sol.fault_sections_with_rupture_rates)
+        likeness = SolutionLike(sol.fault_regime, sol.model.fault_sections, sol.model.fault_sections_with_rupture_rates)
 
         # assert isinstance(likeness, InversionSolution)
         assert likeness.fault_regime == 'CRUSTAL'

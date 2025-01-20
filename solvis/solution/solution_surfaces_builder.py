@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import TYPE_CHECKING, Union
 
 import geopandas as gpd
 from shapely import get_coordinates
@@ -7,7 +8,11 @@ from shapely.geometry import LineString, Point
 
 from solvis.geometry import create_surface, dip_direction, fault_surface_3d
 
-from .typing import InversionSolutionProtocol
+# from .typing import InversionSolutionProtocol
+
+if TYPE_CHECKING:
+    from solvis.solution.fault_system_solution import FaultSystemSolution
+    from solvis.solution.inversion_solution import InversionSolution
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +42,7 @@ def create_crustal_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 class SolutionSurfacesBuilder:
-    def __init__(self, solution: InversionSolutionProtocol) -> None:
+    def __init__(self, solution: Union['InversionSolution', 'FaultSystemSolution']) -> None:
         self._solution = solution
 
     def fault_surfaces(self) -> gpd.GeoDataFrame:
@@ -48,7 +53,7 @@ class SolutionSurfacesBuilder:
             a gpd.GeoDataFrame
         """
         tic = time.perf_counter()
-        new_geometry_df = self._solution.fault_sections.copy()
+        new_geometry_df = self._solution.model.fault_sections.copy()
         toc = time.perf_counter()
         log.debug('time to load fault_sections: %2.3f seconds' % (toc - tic))
 
@@ -72,10 +77,10 @@ class SolutionSurfacesBuilder:
             a gpd.GeoDataFrame
         """
         tic = time.perf_counter()
-        df0 = self._solution.fault_sections_with_rupture_rates.copy()
+        df0 = self._solution.model.fault_sections_with_rupture_rates.copy()
         toc = time.perf_counter()
         log.debug('time to load fault_sections_with_rupture_rates: %2.3f seconds' % (toc - tic))
-        rupt = df0[df0["Rupture Index"] == rupture_id]
+        rupt: gpd.DataFrame = df0[df0["Rupture Index"] == rupture_id]
         if self._solution.fault_regime == 'SUBDUCTION':
             return rupt.set_geometry([create_subduction_section_surface(section) for i, section in rupt.iterrows()])
         if self._solution.fault_regime == 'CRUSTAL':
