@@ -99,7 +99,7 @@ class FilterParentFaultIds:
             return self.__model.model
         except (AttributeError):
             return self.__model
-        raise ValueError(f"unhandled type: {type(self.__model)}")
+        raise ValueError(f"unhandled type: {type(self.__model)}")  # pragma: no cover
 
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()

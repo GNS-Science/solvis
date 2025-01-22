@@ -37,7 +37,7 @@ class ChainableSetBase:
         elif join_prior == SetOperationEnum.DIFFERENCE:
             instance._chained_set = set.difference(result, self.chained_set) if self.chained_set else result
         else:
-            raise ValueError(f"Unsupported join type {join_prior}")
+            raise ValueError(f"Unsupported join type {join_prior}")  # pragma: no cover
         return instance
 
     def __eq__(self, other) -> bool:

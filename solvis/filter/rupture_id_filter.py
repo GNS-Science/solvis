@@ -74,7 +74,7 @@ class FilterRuptureIds(ChainableSetBase):
             return self.__model.model
         except (AttributeError):
             return self.__model
-        raise ValueError(f"unhandled type: {type(self.__model)}")
+        raise ValueError(f"unhandled type: {type(self.__model)}")  # pragma: no cover
 
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution ruptures.
@@ -285,7 +285,9 @@ class FilterRuptureIds(ChainableSetBase):
         elif join_polygons == SetOperationEnum.DIFFERENCE:
             rupture_ids = set.difference(*rupture_id_sets)
         else:
-            raise ValueError("Only INTERSECTION, UNION & DIFFERENCE operations are supported for `join_type`")
+            raise ValueError(
+                "Only INTERSECTION, UNION & DIFFERENCE operations are supported for `join_type`"
+            )  # pragma: no cover
         return self.new_chainable_set(rupture_ids, self._model, self._drop_zero_rates, join_prior=join_prior)
 
     def for_polygon(
