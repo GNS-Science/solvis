@@ -27,37 +27,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-# from functools import cached_property
-
-"""
-zipfile.ZIP_STORED
-
-    The numeric constant for an uncompressed archive member.
-
-zipfile.ZIP_DEFLATED
-
-    The numeric constant for the usual ZIP compression method. This requires the zlib module.
-
-zipfile.ZIP_BZIP2
-
-    The numeric constant for the BZIP2 compression method. This requires the bz2 module.
-
-    New in version 3.3.
-
-zipfile.ZIP_LZMA
-
-    The numeric constant for the LZMA compression method. This requires the lzma module.
-"""
-
 ZIP_METHOD = zipfile.ZIP_STORED
-
-
-def data_to_zip_direct(z, data, name):
-    log.debug('data_to_zip_direct %s' % name)
-    zinfo = zipfile.ZipInfo(name, time.localtime()[:6])
-    zinfo.compress_type = zipfile.ZIP_DEFLATED
-    z.writestr(zinfo, data)
-
 
 WARNING = """
 # Attention
@@ -75,6 +45,13 @@ Inversion Solution archive file:
 """  # warning added to archives that have been modified by Solvis.
 
 
+def data_to_zip_direct(z, data, name):
+    log.debug('data_to_zip_direct %s' % name)
+    zinfo = zipfile.ZipInfo(name, time.localtime()[:6])
+    zinfo.compress_type = zipfile.ZIP_DEFLATED
+    z.writestr(zinfo, data)
+
+
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
     new_df.index = new_df.index.rename('Rupture Index')
@@ -88,7 +65,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     Methods:
         to_archive: serialise an instance to a zip archive.
-        filter_solution: get a new InversionSolution instance, filtered by rupture ids.
         set_props:
 
     Attributes:
@@ -149,7 +125,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         data_to_zip_direct(zip_archive, slips.to_csv(index=reindex), self.AVG_SLIPS_PATH)
 
     def to_archive(self, archive_path_or_buffer: Union[Path, str, io.BytesIO], base_archive_path=None, compat=False):
-        """Write the current solution to a new zip archive.
+        """Write the current solution file to a new zip archive.
 
         Optionally cloning data from a base archive.
 
@@ -231,13 +207,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
-        """
-        Get the fault sections and replace slip rates from rupture set with target rates from inverison.
-        Cache result.
-
-        Returns:
-            pd.DataFrame: participation rates dataframe
-        """
         if self._fault_sections is not None:
             return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
 

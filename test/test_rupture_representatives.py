@@ -70,7 +70,7 @@ def test_build_rupture_groups_fast(small_composite_fixture, min_overlap, expecte
 def test_build_rupture_groups_filtered(small_composite_fixture, min_overlap, expected_len, sample_zero):
     fss = small_composite_fixture._solutions['CRU']
 
-    m7less = list(FilterRuptureIds(fss.model).for_magnitude(max_mag=7.5))
+    m7less = list(FilterRuptureIds(fss).for_magnitude(max_mag=7.5))
     reps = list(build_rupture_groups(fss, rupture_ids=m7less, min_overlap=min_overlap))
 
     print(reps)

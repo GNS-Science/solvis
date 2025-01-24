@@ -77,7 +77,7 @@ def test_sum_vs_weighted_mean_conditional(crustal_small_fss_fixture, fault_name,
     solution = crustal_small_fss_fixture
     model = solution.model
 
-    rids = list(FilterRuptureIds(model).for_parent_fault_names([fault_name]))
+    rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
     print(rids)
 
     rids_subset = rids[2:]
@@ -103,11 +103,7 @@ def test_section_participation_rates(crustal_small_fss_fixture, fault_name, subs
     solution = crustal_small_fss_fixture
     model = solution.model
 
-    print(model.fault_sections[["FaultName"]])
-    subsection_ids = FilterSubsectionIds(model).for_parent_fault_names([fault_name])
-    # print(subsection_ids)
-    # print(solution.composite_rates)
-    # print(solution.rupture_sections)
+    subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name])
     srdf = model.section_participation_rates(subsection_ids)
     print(srdf)
 
@@ -127,7 +123,7 @@ def test_section_participation_rates_conditional(crustal_small_fss_fixture, faul
     solution = crustal_small_fss_fixture
     model = solution.model
 
-    rids = list(FilterRuptureIds(model).for_parent_fault_names([fault_name]))
+    rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
     print(rids)
 
     rids_subset = rids[2:]
@@ -143,7 +139,7 @@ def test_section_participation_rates_detail(crustal_small_fss_fixture, fault_nam
     solution = crustal_small_fss_fixture
     model = solution.model
 
-    rids = list(FilterRuptureIds(model).for_parent_fault_names([fault_name]))
+    rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
     rids_subset = rids[2:]
 
     print(rids_subset)

@@ -16,6 +16,8 @@ logger.setLevel('DEBUG')
 class DynamicDocstrings(griffe.Extension):
     def __init__(self, object_paths: Optional[list[str]] = None) -> None:
         self.object_paths = object_paths
+        logger.debug(object_paths)
+        # assert 0
 
     def on_instance(
         self,
@@ -24,14 +26,20 @@ class DynamicDocstrings(griffe.Extension):
         agent: Union[griffe.Visitor, griffe.Inspector],
         **kwargs,
     ) -> None:
-        logger.debug(f'obj {obj} {obj.path}')
+        logger.info(f'obj {obj} {obj.path}')
         if isinstance(node, griffe.ObjectNode):
             return  # Skip runtime objects, their docstrings are already right.
 
-        if self.object_paths and obj.path not in self.object_paths:
-            for path in self.object_paths:
-                if path not in obj.path:
-                    return  # Skip objects that were not selected.
+        def match_path(obj):
+            if self.object_paths and obj.path not in self.object_paths:
+                for path in self.object_paths:
+                    if path in obj.path:
+                        return True
+                return False
+            return True
+
+        if not match_path(obj):
+            return
 
         # Import object to get its evaluated docstring.
         try:
@@ -47,10 +55,12 @@ class DynamicDocstrings(griffe.Extension):
         # Update the object instance with the evaluated docstring.
         try:
             docstring = inspect.cleandoc(docstring)
+            logger.warning(docstring)
         except AttributeError:
             return
 
         if obj.docstring:
+            logger.info(f'obj.docstring {obj.docstring}')
             obj.docstring.value = docstring
         else:
             obj.docstring = griffe.Docstring(
@@ -59,4 +69,4 @@ class DynamicDocstrings(griffe.Extension):
                 parser=agent.docstring_parser,
                 parser_options=agent.docstring_options,
             )
-        logger.warning(f'updated docstring for {obj.path}: {docstring}')
+        logger.info(f'updated docstring for {obj.path}: {docstring}')

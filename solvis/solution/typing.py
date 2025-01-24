@@ -11,6 +11,7 @@ Classes:
     CompositeSolutionProtocol: interface for CompositeSolution
 
 '''
+import io
 import zipfile
 from enum import Enum
 from pathlib import Path
@@ -59,6 +60,27 @@ class InversionSolutionFileProtocol(Protocol):
         """the archive instance"""
         raise NotImplementedError()
 
+    @property
+    def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
+        """
+        Get the fault sections and replace slip rates from rupture set with target rates from inversion.
+
+        Returns:
+            pd.DataFrame: participation rates dataframe
+        """
+        raise NotImplementedError()
+
+    @property
+    def ruptures(self) -> gpd.GeoDataFrame:
+        """A dataframe containing ruptures
+
+        this is internal list only
+
+        Returns:
+          dataframe: a ruptures dataframe
+        """
+        raise NotImplementedError()
+
 
 class AggregateSolutionFileProtocol(Protocol):
     @property
@@ -67,10 +89,20 @@ class AggregateSolutionFileProtocol(Protocol):
 
 
 class InversionSolutionModelProtocol(Protocol):
-    @property
-    def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
-        """Get the fault sections."""
-        raise NotImplementedError()
+
+    # @property
+    # def indices(self) -> 'DataFrame':
+    #     """A dataframe containing rupture ids ids
+
+    #     Returns:
+    #       dataframe: indices
+    #     """
+    #     raise NotImplementedError()
+
+    # @property
+    # def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
+    #     """Get the fault sections."""
+    #     raise NotImplementedError()
 
     @property
     def fault_sections_with_rupture_rates(self) -> gpd.GeoDataFrame:
@@ -86,6 +118,11 @@ class InversionSolutionModelProtocol(Protocol):
         Returns:
           dataframe: a [rupture rates][solvis.solution.dataframe_models.RuptureRateSchema] dataframe
         """
+        raise NotImplementedError()
+
+    @property
+    def rupture_sections(self) -> gpd.GeoDataFrame:
+        """the rupture sections for each rupture."""
         raise NotImplementedError()
 
     def rate_column_name(self) -> str:
@@ -119,24 +156,57 @@ class InversionSolutionModelProtocol(Protocol):
         """the event rate for each rupture."""
         raise NotImplementedError()
 
-    @property
-    def rupture_sections(self) -> gpd.GeoDataFrame:
-        """the rupture sections for each rupture."""
-        raise NotImplementedError()
 
-    @property
-    def ruptures(self) -> gpd.GeoDataFrame:
-        """A dataframe containing ruptures
+class InversionSolutionProtocol(Protocol):
+    @staticmethod
+    def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolutionProtocol':
+        """
+        Read and return a solution from an archive file or byte-stream.
 
-        this is internal list only
+        Archive validity is checked with the presence of a `ruptures/indices.csv` file.
+
+        Parameters:
+            instance_or_path: a Path object, filename or in-memory binary IO stream
 
         Returns:
-          dataframe: a ruptures dataframe
+            A solution instance.
         """
         raise NotImplementedError()
 
+    @staticmethod
+    def filter_solution(
+        solution: 'InversionSolutionProtocol', rupture_ids: Iterable[int]
+    ) -> 'InversionSolutionProtocol':
+        """
+        Filter solution by a subset of its rupture IDs.
 
-class InversionSolutionProtocol(Protocol):
+        This is a utility method primarily for producing test fixtures.
+
+        Parameters:
+            solution: a solution instance.
+            rupture_ids: a sequence of rupture ids.
+
+        Returns:
+            A new solution instance.
+        """
+        raise NotImplementedError()
+
+    def to_archive(self, archive_path, base_archive_path=None, compat=False):
+        """Write the current solution to a new zip archive.
+
+        Optionally cloning data from a base archive.
+
+        In non-compatible mode (the default) rupture ids may not be a contiguous, 0-based sequence,
+        so the archive will not be suitable for use with opensha. Compatible mode will reindex rupture tables,
+        so that the original rutpure ids are lost.
+
+        Args:
+            archive_path: path or buffrer to write.
+            base_archive_path: path to an InversionSolution archive to clone data from.
+            compat: if True reindex the dataframes so that the archive remains compatible with opensha.
+        """
+        raise NotImplementedError()
+
     @property
     def model(self) -> 'InversionSolutionModelProtocol':
         """the pandas dataframes API model of the solution.
@@ -158,11 +228,6 @@ class InversionSolutionProtocol(Protocol):
     @property
     def fault_regime(self) -> str:
         """solution requires a fault regime"""
-
-    @staticmethod
-    def filter_solution(solution: Any, rupture_ids: Iterable[int]) -> Any:
-        """return a new solution containing just the ruptures specified"""
-        raise NotImplementedError()
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
         """

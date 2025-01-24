@@ -68,7 +68,7 @@ def test_section_participation_rates(crustal_solution_fixture, fault_name, subse
 def test_section_participation_rates_conditional(crustal_solution_fixture, fault_name, subsection_id, expected_rate):
     model = crustal_solution_fixture.model
 
-    rids = list(FilterRuptureIds(model).for_parent_fault_names([fault_name]))
+    rids = list(FilterRuptureIds(crustal_solution_fixture).for_parent_fault_names([fault_name]))
     print(rids)
 
     rids_subset = rids[: int(len(rids) / 2)]

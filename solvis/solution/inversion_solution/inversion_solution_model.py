@@ -61,34 +61,34 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
     def solution_file(self) -> InversionSolutionFile:
         return self._solution_file
 
-    ###
-    # These attributes are 'hoisted' from the _solution_file instance
-    #
-    # those that return dataframes may be migrated to the model -> InversionSolutionModel
-    ####
-    @property
-    def average_slips(self):
-        return self._solution_file.average_slips
+    # ###
+    # # These attributes are 'hoisted' from the _solution_file instance
+    # #
+    # # those that return dataframes may be migrated to the model -> InversionSolutionModel
+    # ####
+    # @property
+    # def average_slips(self):
+    #     return self._solution_file.average_slips
 
-    @property
-    def section_target_slip_rates(self):
-        return self._solution_file.section_target_slip_rates
+    # @property
+    # def section_target_slip_rates(self):
+    #     return self._solution_file.section_target_slip_rates
 
-    @property
-    def fault_sections(self):
-        return self._solution_file.fault_sections
+    # @property
+    # def fault_sections(self):
+    #     return self._solution_file.fault_sections
 
-    @property
-    def indices(self):
-        return self._solution_file.indices
+    # # @property
+    # # def indices(self):
+    # #     return self._solution_file.indices
 
-    @property
-    def ruptures(self):
-        return self._solution_file.ruptures
+    # @property
+    # def ruptures(self):
+    #     return self._solution_file.ruptures
 
-    @property
-    def rupture_rates(self):
-        return self._solution_file.rupture_rates
+    # @property
+    # def rupture_rates(self):
+    #     return self._solution_file.rupture_rates
 
     def rate_column_name(self) -> str:
         """Get the appropriate rate_column name

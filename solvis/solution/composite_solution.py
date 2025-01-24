@@ -91,7 +91,7 @@ class CompositeSolution:
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.model.rupture_rates for sol in self._solutions.values()]
+        all_rates = [sol.solution_file.rupture_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 

@@ -47,7 +47,7 @@ def test_parent_fault_participation_rates_model(request, soln_fixture):
 
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
 def test_fault_section_model(request, soln_fixture):
-    df = request.getfixturevalue(soln_fixture).model.fault_sections
+    df = request.getfixturevalue(soln_fixture).solution_file.fault_sections
     print(df)
     FaultSectionSchema.validate(df)
 
@@ -107,14 +107,14 @@ def test_FSS_ONLY_rs_with_rupture_rates(crustal_fixture):
 
 ### Below are from InversionSolutionFile
 def test_IS_ONLY_rupture_rates(crustal_solution_fixture):
-    df = crustal_solution_fixture.model.rupture_rates
+    df = crustal_solution_fixture.solution_file.rupture_rates
     print(df)
     RuptureRateSchema.validate(df)
 
 
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
 def test_ruptures_model(request, soln_fixture):
-    df = request.getfixturevalue(soln_fixture).model.ruptures
+    df = request.getfixturevalue(soln_fixture).solution_file.ruptures
     print(df)
     RuptureSchema.validate(df)
 

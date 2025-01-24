@@ -14,15 +14,18 @@ import geopandas as gpd
 import nzshm_model as nm
 import pandas as pd
 
+from solvis.dochelper import inherit_docstrings
+
 from ..solution_surfaces_builder import SolutionSurfacesBuilder
-from ..typing import BranchSolutionProtocol, ModelLogicTreeBranch
+from ..typing import BranchSolutionProtocol, InversionSolutionProtocol, ModelLogicTreeBranch
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .fault_system_solution_model import FaultSystemSolutionModel
 
 log = logging.getLogger(__name__)
 
 
-class FaultSystemSolution:
+@inherit_docstrings
+class FaultSystemSolution(InversionSolutionProtocol):
     """A class that aggregates InversionSolution instances sharing a common OpenSHA RuptureSet.
 
     The class is largely interchangeable with InversionSolution, as only rupture rates
@@ -31,26 +34,19 @@ class FaultSystemSolution:
 
     def __init__(self, solution_file: Optional[FaultSystemSolutionFile] = None):
         self._solution_file: FaultSystemSolutionFile = solution_file or FaultSystemSolutionFile()
-        self._dataframe_operations: FaultSystemSolutionModel = FaultSystemSolutionModel(self._solution_file)
+        self._model: FaultSystemSolutionModel = FaultSystemSolutionModel(self._solution_file)
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
-        """Write the current solution to a new zip archive."""
         self.model.enable_fast_indices()
         return self._solution_file.to_archive(archive_path, base_archive_path, compat)
 
     @property
     def solution_file(self) -> FaultSystemSolutionFile:
-        # """
-        # An FaultSystemSolutionFile instance
-
-        # Returns:
-        #     instance: the FaultSystemSolutionFile
-        # """
         return self._solution_file
 
     @property
     def model(self) -> FaultSystemSolutionModel:
-        return self._dataframe_operations
+        return self._model
 
     @property
     def fault_regime(self):
@@ -69,9 +65,6 @@ class FaultSystemSolution:
         # TODO: sort out this weirdness
         if isinstance(instance_or_path, io.BytesIO):
             with zipfile.ZipFile(instance_or_path, 'r') as zf:
-
-                print("namelist: ", zf.namelist())
-
                 assert 'composite_rates.csv' in zf.namelist()
                 assert 'aggregate_rates.csv' in zf.namelist()
                 assert 'ruptures/fast_indices.csv' in zf.namelist()
@@ -85,27 +78,14 @@ class FaultSystemSolution:
         return FaultSystemSolution(new_solution_file)
 
     @staticmethod
-    def filter_solution(solution: 'FaultSystemSolution', rupture_ids: Iterable) -> 'FaultSystemSolution':
-        """
-        Filter a FaultSystemSolution by a subset of its rupture IDs, returing a new FaultSystemSolution.
-
-        Note:
-         - this is an utility method primarily for producing test fixtures.
-         - this is not actually used, and maybe deprecated in a future release
-
-        Parameters:
-            solution: an fault system solution instance.
-            rupture_ids: a sequence of rupture ids.
-
-        Returns:
-            A new FaultSystemSolution containing data for the rupture IDs specified.
-        """
+    def filter_solution(solution: 'InversionSolutionProtocol', rupture_ids: Iterable) -> 'FaultSystemSolution':
+        # this method  is not actually used, and maybe deprecated in a future release
 
         solution = cast(FaultSystemSolution, solution)
-        model = solution.model
-        rr = model.ruptures
-        cr = model.composite_rates
-        ar = model.aggregate_rates
+        # model = solution.model
+        rr = solution.solution_file.ruptures
+        cr = solution.model.composite_rates
+        ar = solution.model.aggregate_rates
         ri = solution.solution_file.indices.copy()
         avs = solution.solution_file.average_slips.copy()
 
@@ -122,7 +102,7 @@ class FaultSystemSolution:
             aggregate_rates,
             ruptures,
             indices,
-            model.fault_sections.copy(),
+            solution.solution_file.fault_sections.copy(),
             solution.solution_file.fault_regime,
             average_slips,
         )
@@ -184,9 +164,9 @@ class FaultSystemSolution:
         fss_file.set_props(
             composite_rates_df,
             aggregate_rates_df,
-            solution.model.ruptures.copy(),
+            solution.solution_file.ruptures.copy(),
             solution.solution_file.indices.copy(),
-            solution.model.fault_sections.copy(),
+            solution.solution_file.fault_sections.copy(),
             solution.solution_file.fault_regime,
             solution.solution_file.average_slips.copy(),
         )
@@ -229,7 +209,7 @@ class FaultSystemSolution:
         for branch_solution in solutions:
             inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(branch_solution.branch)
 
-            solution_df = branch_solution.model.rupture_rates.copy()
+            solution_df = branch_solution.solution_file.rupture_rates.copy()
             solution_df.insert(
                 0, 'solution_id', inversion_solution_id
             )  # CategoricalDtype(categories=['PUY'], ordered=False)

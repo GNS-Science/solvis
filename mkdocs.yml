@@ -111,9 +111,9 @@ plugins:
             extensions:
             - pydantic: {schema: true}
             - solvis/dochelper/extension.py:DynamicDocstrings:
-                object_paths: [solvis.solution.inversion_solution.InversionSolution]
-
-
+                object_paths:
+                  - solvis.solution.fault_system_solution.fault_system_solution.FaultSystemSolution
+                  - solvis.solution.inversion_solution.inversion_solution.InversionSolution
 extra:
   social:
     - icon: fontawesome/brands/github

@@ -19,8 +19,8 @@ def composite_fixture(request):
 
 def test_filter_from_complete_composite(composite_fixture):
     sol = composite_fixture.get_fault_system_solution('HIK')
-    ruptures = list(FilterRuptureIds(sol.model).for_rupture_rate(min_rate=1e-7))
+    ruptures = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-7))
     print(ruptures)
     new_sol = solvis.FaultSystemSolution.filter_solution(sol, ruptures)
-    assert len(ruptures) == new_sol.model.ruptures.shape[0]
+    assert len(ruptures) == new_sol.solution_file.ruptures.shape[0]
     # assert 0

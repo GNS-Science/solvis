@@ -19,42 +19,17 @@ Examples:
 """
 import io
 import zipfile
-from inspect import getmembers, isfunction
 from pathlib import Path
 from typing import Iterable, Optional, Union
 
 import geopandas as gpd
 
+from solvis.dochelper import inherit_docstrings
+
 from ..solution_surfaces_builder import SolutionSurfacesBuilder
 from ..typing import InversionSolutionProtocol, ModelLogicTreeBranch
 from .inversion_solution_file import InversionSolutionFile
 from .inversion_solution_model import InversionSolutionModel
-
-
-def inherit_docstrings(cls):
-    """A decorator function hoisting docstrings from superclass methods
-
-    taken from: https://stackoverflow.com/a/17393254
-    see also: https://github.com/rcmdnk/inherit-docstring for a pypi package
-    """
-
-    def docstrings_for(o: object):
-        if isinstance(o, property):
-            return True
-        elif isfunction(o):
-            return True
-        else:
-            return False
-
-    for name, method in getmembers(cls, docstrings_for):
-        # print(f"inherit_docstrings {method} {name}")
-        if method.__doc__:
-            continue
-        for parent in cls.__mro__[1:]:
-            if hasattr(parent, name):
-                method.__doc__ = getattr(parent, name).__doc__
-    # assert 0
-    return cls
 
 
 @inherit_docstrings
@@ -74,7 +49,6 @@ class InversionSolution(InversionSolutionProtocol):
     """
 
     def __init__(self, solution_file: Optional[InversionSolutionFile] = None):
-        """dont crash"""
         self._solution_file = solution_file or InversionSolutionFile()
         self._dataframe_operations = InversionSolutionModel(self._solution_file)
 
@@ -101,17 +75,6 @@ class InversionSolution(InversionSolutionProtocol):
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'InversionSolution':
-        """
-        Read and return an inversion solution from an OpenSHA archive file or byte-stream.
-
-        Archive validity is checked with the presence of a `ruptures/indices.csv` file.
-
-        Parameters:
-            instance_or_path: a Path object, filename or in-memory binary IO stream
-
-        Returns:
-            An InversionSolution instance.
-        """
         new_solution_file = InversionSolutionFile()
 
         if isinstance(instance_or_path, io.BytesIO):
@@ -125,24 +88,12 @@ class InversionSolution(InversionSolutionProtocol):
         return InversionSolution(new_solution_file)
 
     @staticmethod
-    def filter_solution(solution: 'InversionSolution', rupture_ids: Iterable[int]) -> 'InversionSolution':
-        """
-        Filter an InversionSolution by a subset of its rupture IDs, returing a new smaller InversionSolution.
-
-        NB. this is an utility method primarily for produicing test fixtures.
-
-        Parameters:
-            solution: an inversion solution instance.
-            rupture_ids: a sequence of rupture ids.
-
-        Returns:
-            A new InversionSolution containing data for the rupture IDs specified.
-        """
-        model = solution.model
-        rr = model.ruptures
-        ra = model.rupture_rates
-        ri = model.indices
-        avs = model.average_slips
+    def filter_solution(solution: 'InversionSolutionProtocol', rupture_ids: Iterable[int]) -> 'InversionSolution':
+        # model = solution.model
+        rr = solution.solution_file.ruptures
+        ra = solution.solution_file.rupture_rates
+        ri = solution.solution_file.indices
+        avs = solution.solution_file.average_slips
 
         ruptures = rr[rr["Rupture Index"].isin(rupture_ids)].copy()
         rates = ra[ra["Rupture Index"].isin(rupture_ids)].copy()
@@ -154,6 +105,8 @@ class InversionSolution(InversionSolutionProtocol):
         ns.solution_file.set_props(
             rates, ruptures, indices, solution.solution_file.fault_sections.copy(), average_slips
         )
+
+        ## TODO:  there should be a new in-memory archive ??
         ns.solution_file._archive_path = solution.solution_file._archive_path
 
         return ns
@@ -189,10 +142,9 @@ class BranchInversionSolution(InversionSolution):
             fault_system: a string representing the fault system (e.g `CRU`, 'HIK`).
             rupture_set_id: id for the rupture_set_id.
         """
-        model = solution.model
-        ruptures = model.ruptures.copy()
-        rates = model.rupture_rates.copy()
-        indices = model.indices.copy()
+        ruptures = solution.solution_file.ruptures.copy()
+        rates = solution.solution_file.rupture_rates.copy()
+        indices = solution.solution_file.indices.copy()
 
         # print(solution.solution_file.fault_sections)
         # assert 0

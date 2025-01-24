@@ -32,9 +32,9 @@ class FaultSystemSolutionModel(InversionSolutionModel):
         self._solution_file: FaultSystemSolutionFile = solution_file
         super().__init__(solution_file)
 
-    @property
-    def indices(self):
-        return self._solution_file.indices
+    # @property
+    # def indices(self):
+    #     return self._solution_file.indices
 
     @property
     def composite_rates(self):

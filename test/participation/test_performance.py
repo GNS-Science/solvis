@@ -80,8 +80,8 @@ def test_combo_filtering_options():
 
     # this is needed so the property is cached for both timing tests
     df0 = solution.model.rs_with_rupture_rates.copy()  # property
-    rids = list(FilterRuptureIds(solution.model).for_parent_fault_names(TARGET_FAULTS))
-    subsection_ids = FilterSubsectionIds(solution.model).for_rupture_ids(rids)
+    rids = list(FilterRuptureIds(solution).for_parent_fault_names(TARGET_FAULTS))
+    subsection_ids = FilterSubsectionIds(solution).for_rupture_ids(rids)
 
     t0 = time.perf_counter()
     fs0 = faster_combo_filter(df0, subsection_ids, rids)
@@ -167,7 +167,7 @@ def test_rupture_filtering_options():
     # this is needed so the property is cached for both timing tests
     df0 = solution.model.rs_with_rupture_rates  # noqa
 
-    rids = list(FilterRuptureIds(solution.model).for_parent_fault_names(TARGET_FAULTS))
+    rids = list(FilterRuptureIds(solution).for_parent_fault_names(TARGET_FAULTS))
 
     t0 = time.perf_counter()
     fs0 = faster_rupture_filter(solution, rids)
@@ -244,7 +244,7 @@ def test_section_performance():
 
         t0 = time.perf_counter()
 
-        ruptures = FilterRuptureIds(solution.model).for_parent_fault_names(TARGET_FAULTS)
+        ruptures = FilterRuptureIds(solution).for_parent_fault_names(TARGET_FAULTS)
         # .for_magnitude(5, 8.2)
 
         t01 = time.perf_counter()
@@ -267,7 +267,7 @@ def test_section_performance():
     def process_2(solution, rupture_ids):
         t1 = time.perf_counter()
 
-        subsection_ids = FilterSubsectionIds(solution.model).for_rupture_ids(rupture_ids)
+        subsection_ids = FilterSubsectionIds(solution).for_rupture_ids(rupture_ids)
         print(f' {len(subsection_ids)} rupture subsections...')
 
         print(f'rupture subsections: {len(subsection_ids)}')
