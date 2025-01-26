@@ -81,6 +81,15 @@ class InversionSolutionFileProtocol(Protocol):
         """
         raise NotImplementedError()
 
+    @property
+    def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
+        """A dataframe containing ruptures and their rates
+
+        Returns:
+          dataframe: a [rupture rates][solvis.solution.dataframe_models.RuptureRateSchema] dataframe
+        """
+        raise NotImplementedError()
+
 
 class AggregateSolutionFileProtocol(Protocol):
     @property
@@ -112,15 +121,6 @@ class InversionSolutionModelProtocol(Protocol):
         raise NotImplementedError()
 
     @property
-    def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
-        """A dataframe containing ruptures and their rates
-
-        Returns:
-          dataframe: a [rupture rates][solvis.solution.dataframe_models.RuptureRateSchema] dataframe
-        """
-        raise NotImplementedError()
-
-    @property
     def rupture_sections(self) -> gpd.GeoDataFrame:
         """the rupture sections for each rupture."""
         raise NotImplementedError()
@@ -132,18 +132,6 @@ class InversionSolutionModelProtocol(Protocol):
     @property
     def parent_fault_names(self) -> List[str]:
         """The parent_fault_names."""
-        raise NotImplementedError()
-
-    def section_participation_rates(
-        self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
-    ):
-        """get section participation"""
-        raise NotImplementedError()
-
-    def fault_participation_rates(
-        self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
-    ):
-        """get fault_partipation"""
         raise NotImplementedError()
 
     @property
@@ -248,6 +236,16 @@ class InversionSolutionProtocol(Protocol):
         Returns:
             a gpd.GeoDataFrame
         """
+        raise NotImplementedError()
+
+    def section_participation_rates(
+        self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
+        raise NotImplementedError()
+
+    def fault_participation_rates(
+        self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
+    ):
         raise NotImplementedError()
 
 
