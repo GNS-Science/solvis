@@ -1,5 +1,5 @@
-"""
-This package provides classes to support filtering by key attributes of the solution classes:
+r"""
+This package provides classes to support filtering by key attributes of the solution classes.
 
  - [FaultSystemSolution][solvis.solution.fault_system_solution.FaultSystemSolution] aggregated solutions
  - [InversionSolution][solvis.solution.inversion_solution.InversionSolution] individual solutions
@@ -13,16 +13,16 @@ Examples:
     ```py
     >>> solution = InversionSolution.from_archive(filename)
     >>> model = solution.model
-    >>> parent_fault_ids = FilterParentFaultIds(model)\\
-            .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\\
+    >>> parent_fault_ids = FilterParentFaultIds(model)\
+            .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\
             .for_rupture_ids([1,2,3])
 
-    >>> rupture_ids = FilterRuptureIds(model)\\
-            .for_parent_fault_ids(parent_fault_ids)\\
+    >>> rupture_ids = FilterRuptureIds(model)\
+            .for_parent_fault_ids(parent_fault_ids)\
             .for_magnitude(7.95, 8.15)
 
-    >>> assert FilterRuptureIds(model)\\
-            .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\\
+    >>> assert FilterRuptureIds(model)\
+            .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\
             .issuperset(rupture_ids), "using set operands on two `filter.for` results"
     ```
 
@@ -41,6 +41,7 @@ versatile:
 -
 
 """
+
 from .parent_fault_id_filter import FilterParentFaultIds
 from .rupture_id_filter import FilterRuptureIds
 from .subsection_id_filter import FilterSubsectionIds

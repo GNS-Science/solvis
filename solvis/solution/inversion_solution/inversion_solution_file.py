@@ -1,11 +1,12 @@
 """
-An InversionSolution Archive file helper.
+An InversionSolution archive file helper.
 
-This module handles files having the OpenSHA InversionSolution archive format.
+Supports files in OpenSHA InversionSolution archive format.
 
 It provides conversions from the original file formats to pandas dataframe instances
 with caching and some error handling.
 """
+
 import io
 import json
 import logging
@@ -17,6 +18,8 @@ from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 
 import geopandas as gpd
 import pandas as pd
+
+from solvis.dochelper import inherit_docstrings
 
 from ..typing import InversionSolutionFileProtocol
 
@@ -59,27 +62,18 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     return new_df
 
 
+@inherit_docstrings
 class InversionSolutionFile(InversionSolutionFileProtocol):
     """
     Class to handle the OpenSHA modular archive file form.
 
     Methods:
         to_archive: serialise an instance to a zip archive.
-        set_props:
-
-    Attributes:
-        archive: the archive instance.
-        archive_path: the archive path name.
-        ruptures: get the solution ruptures dataframe.
-        fault_regime:
-        indices:
-        logic_tree_branch:
-        rupture_rates:
-        ruptures:
-        section_target_slip_rates:
     """
 
     RATES_PATH = 'solution/rates.csv'
+    """description of RATES_PATH
+    """
     RUPTS_PATH = 'ruptures/properties.csv'
     INDICES_PATH = 'ruptures/indices.csv'
     AVG_SLIPS_PATH = 'ruptures/average_slips.csv'
@@ -134,7 +128,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         so that the original rutpure ids are lost.
 
         Args:
-            archive_path: path or buffrer to write.
+            archive_path_or_buffer: path or buffrer to write.
             base_archive_path: path to an InversionSolution archive to clone data from.
             compat: if True reindex the dataframes so that the archive remains compatible with opensha.
         """
@@ -221,9 +215,9 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
     def logic_tree_branch(self) -> list:
         if not self._logic_tree_branch:
             ltb = json.load(self.archive.open(self.LOGIC_TREE_PATH))
-            if type(ltb) == list:
+            if isinstance(ltb, list):
                 self._logic_tree_branch = ltb
-            elif type(ltb.get('values')) == list:
+            elif isinstance(ltb.get('values'), list):
                 self._logic_tree_branch = ltb.get('values')
             else:  # pragma: no cover
                 raise ValueError(f"unhandled logic_tree_branch: {ltb}")

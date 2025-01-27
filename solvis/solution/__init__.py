@@ -1,6 +1,4 @@
-"""
-A package for analysis of Opensha Inversion Solutions.
-
+"""A package for analysis of Opensha Inversion Solutions.
 
 It provides python developers with easy access to the solution data in pandas dataframes.
 

@@ -1,5 +1,4 @@
-"""
-The base Solvis analysis package.
+"""The base Solvis analysis package.
 
 Classes:
  InversionSolution: handles the standard output of an opensha grand inversion.
@@ -21,6 +20,7 @@ Example:
     <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
     ```
 """
+
 # from .solution.fault_system_solution import
 from .geometry import circle_polygon
 from .solution import CompositeSolution, FaultSystemSolution, InversionSolution

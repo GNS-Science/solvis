@@ -1,3 +1,9 @@
+"""
+An FaultSystemSolution archive file helper.
+
+See notes about FaultSystemSolution and OpenSHA InversionSolution archive formats.
+"""
+
 import logging
 import zipfile
 from typing import TYPE_CHECKING, Optional
@@ -33,9 +39,7 @@ Inversion Solution archive file:
 
 @inherit_docstrings
 class FaultSystemSolutionFile(InversionSolutionFile):
-    """
-    Class to handle the solution modular archive file form
-    """
+    """Class to handle the solution modular archive file form."""
 
     _composite_rates: Optional[pd.DataFrame] = None
     _aggregate_rates: Optional[pd.DataFrame] = None
@@ -85,9 +89,7 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         super()._write_dataframes(zip_archive, reindex)
 
     def to_archive(self, archive_path, base_archive_path, compat=False):
-        """
-        Writes the current solution to a new zip archive, cloning data from a base archive
-        """
+        """Writes the current solution to a new zip archive, cloning data from a base archive."""
         log.debug("%s to_archive %s" % (type(self), archive_path))
         super().to_archive(archive_path, base_archive_path, compat=False)
 

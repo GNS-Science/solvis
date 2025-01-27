@@ -1,3 +1,5 @@
+"""Package supporting dynamic dosstrings."""
+
 from .extension import DynamicDocstrings
 from .inherit_docstrings import inherit_docstrings
 

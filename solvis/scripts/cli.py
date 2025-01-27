@@ -1,4 +1,5 @@
 """Console script for solvis."""
+
 # noqa
 import logging
 import os
@@ -55,6 +56,8 @@ MODEL_ID_HELP = "An nzshm_model ID (default: NSHM_v1.0.4)"
 
 
 class SourceSolution(ToshiFile):
+    """Helper class."""
+
     def get_source(self, fid):
 
         qry = '''
@@ -138,7 +141,7 @@ def build_fault_system_solution(work_folder, fault_system, model_version=nzshm_m
     tic = time.perf_counter()
     fault_system_solution = FaultSystemSolution.from_branch_solutions(solutions)
     toc = time.perf_counter()
-    click.echo(f"time to build fault_system_solution: {toc-tic} seconds")
+    click.echo(f"time to build fault_system_solution: {toc - tic} seconds")
 
     # ensure fast indices
     fault_system_solution.enable_fast_indices()
@@ -188,7 +191,7 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
     new_path = pathlib.Path(work_folder, archive_name)
     composite.to_archive(new_path)
     toc = time.perf_counter()
-    click.echo(f'created composite solution file {new_path.name} in {toc-tic} seconds')
+    click.echo(f'created composite solution file {new_path.name} in {toc - tic} seconds')
     # print( composite.rupture_rates )
     # print()
     # print(composite.rupture_surface("HIK", 1))
@@ -205,8 +208,7 @@ def build_composite_all(work_folder, archive_name, model_version=nzshm_model.CUR
 @click.option('--work_folder', '-w', default=lambda: os.getcwd())
 @click.pass_context
 def cli(ctx, work_folder, fault_system):
-    """
-    FaultSystemSolution tasks - build, analyse.
+    """Handle FaultSystemSolution tasks - build, analyse.
 
     Note:
     This script relies on access to the NSHM Toshi GraphQL API (nshm-toshi-api)
@@ -258,19 +260,19 @@ def perf(ctx, archive_name, model_id):
 
     comp = CompositeSolution.from_archive(pathlib.Path(work_folder, archive_name), slt)
     toc = time.perf_counter()
-    click.echo(f'time to load archive: {toc-tic:2.3f} seconds')
+    click.echo(f'time to load archive: {toc - tic:2.3f} seconds')
     print(comp)
 
     tic = toc
     # LOC = location_by_id('WLG')
     rupture_surface_gdf = comp._solutions[ctx.obj['fault_system']].rupture_surface(2)
     toc = time.perf_counter()
-    click.echo(f'time to load 1st rupture_surface_gdf: {toc-tic:2.3f} seconds')
+    click.echo(f'time to load 1st rupture_surface_gdf: {toc - tic:2.3f} seconds')
     tic = toc
 
     rupture_surface_gdf = comp._solutions[ctx.obj['fault_system']].rupture_surface(4)  # noqa: F841
     toc = time.perf_counter()
-    click.echo(f'time to load 2nd rupture_surface_gdf: {toc-tic:2.3f} seconds')
+    click.echo(f'time to load 2nd rupture_surface_gdf: {toc - tic:2.3f} seconds')
     tic = toc
 
 
@@ -304,7 +306,7 @@ def query(ctx):
         export_geojson(sol.rupture_surface(rupt), f"{work_folder}/CRU_rupture_{rupt}.geojson", indent=2)
 
     toc = time.perf_counter()
-    click.echo(f'time to get ruptures: {toc-tic} seconds')
+    click.echo(f'time to get ruptures: {toc - tic} seconds')
 
 
 if __name__ == "__main__":

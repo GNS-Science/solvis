@@ -4,6 +4,7 @@ This module defines the dataframe models class `FaultSystemSolutionModel`.
 FaultSystemSolutionModelprovides methods to build pandas dataframes
 from the raw dataframes available via the `InversionSolutionFile` class.
 """
+
 import logging
 from typing import TYPE_CHECKING, Optional, cast
 
@@ -26,9 +27,7 @@ if TYPE_CHECKING:
 
 @inherit_docstrings
 class FaultSystemSolutionModel(InversionSolutionModel):
-    """
-    For analysis of FaultSystemSolutions
-    """
+    """For analysis of FaultSystemSolutions."""
 
     def __init__(self, solution_file: FaultSystemSolutionFile) -> None:
         self._fast_indices: Optional[pd.DataFrame] = None
@@ -65,6 +64,6 @@ class FaultSystemSolutionModel(InversionSolutionModel):
         return cast(DataFrame[RuptureSectionSchema], self._rupture_sections)
 
     def enable_fast_indices(self) -> bool:
-        """make sure that the fast_indices dataframe is available at serialisation time"""
+        """Ensure that the fast_indices dataframe is available."""
         rs = self.rupture_sections  # noqa
         return self._fast_indices is not None

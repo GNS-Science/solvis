@@ -17,6 +17,9 @@
  - improved test coverage
  - refactored to/from archive code to reginstate some skipped tests
  - doc/typing improvements
+ - fixes to the dynamic docstrings helper class & setup
+ - API simplifications
+ - updated flake8 and applied many docstring fixes.
 
 ## Added
  - new filter package providing classes for filtering solutions

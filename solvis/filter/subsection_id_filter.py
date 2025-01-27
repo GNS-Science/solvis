@@ -1,4 +1,4 @@
-"""
+r"""
 This module provides a class for filtering solution fault sections (subsections).
 
 Classes:
@@ -9,14 +9,15 @@ Examples:
     >>> ham50 = solvis.circle_polygon(50000, -37.78, 175.28)  # 50km radius around Hamilton
     <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
     >>> sol = solvis.InversionSolution.from_archive(filename)
-    >>> rupture_ids = FilterRuptureIds(sol)\\
-            .for_magnitude(min_mag=5.75, max_mag=6.25)\\
+    >>> rupture_ids = FilterRuptureIds(sol)\
+            .for_magnitude(min_mag=5.75, max_mag=6.25)\
             .for_polygon(ham50)
 
-    >>> subsection_ids = FilterSubsectionIds(sol)\\
+    >>> subsection_ids = FilterSubsectionIds(sol)\
     >>>     .for_rupture_ids(rupture_ids)
     ```
 """
+
 from typing import Iterable, Union
 
 from solvis.solution.typing import InversionSolutionProtocol, SetOperationEnum
@@ -26,12 +27,11 @@ from .parent_fault_id_filter import FilterParentFaultIds
 
 
 class FilterSubsectionIds(ChainableSetBase):
-    """
-    A helper class to filter subsections, returning qualifying section_ids.
-    """
+    """A helper class to filter subsections, returning qualifying section_ids."""
 
     def __init__(self, solution: InversionSolutionProtocol):
-        """
+        """Instantiate a new filter.
+
         Args:
             solution: The solution instance to filter on.
         """

@@ -1,16 +1,13 @@
-# import copy
+"""helper for inherited docstrings."""
+
 from inspect import getmembers, isfunction
 
 
 def inherit_docstrings(cls):
-    """A decorator function hoisting docstrings from superclass methods
-
-    taken from: https://stackoverflow.com/a/17393254
-    see also: https://github.com/rcmdnk/inherit-docstring for a pypi package
-    """
+    """A decorator function hoisting docstrings from superclass methods."""
 
     def docstrings_for(o: object):
-        # print(o)
+        # print('docstrings_for(o) o: ', o)
         if isinstance(o, property):
             return True
         elif isfunction(o):
@@ -25,4 +22,5 @@ def inherit_docstrings(cls):
             if hasattr(parent, name):
                 method.__doc__ = getattr(parent, name).__doc__
                 continue
+    # assert 0
     return cls

@@ -1,4 +1,4 @@
-"""
+r"""
 This module aggregates InversionSolution instances, which must share a common OpenSHA RuptureSet.
 
 Classes:
@@ -7,12 +7,14 @@ Classes:
 Examples:
     ```py
     >>> solution = solvis.FaultSystemSolution.from_archive(filename)
-    >>> rupture_ids = solvis.filter.FilterRuptureIds(solution)\\
+    >>> rupture_ids = solvis.filter\
+            .FilterRuptureIds(solution)\
             .for_magnitude(min_mag=5.75, max_mag=6.25)
     >>>
     >>> rates = solution.section_participation_rates(rupture_ids)
     ```
 """
+
 import io
 import logging
 import zipfile

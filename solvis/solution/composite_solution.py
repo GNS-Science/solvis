@@ -1,9 +1,9 @@
-"""
-This module provides the CompositeSolution class
+"""This module provides the CompositeSolution class.
 
 Classes:
     CompositeSolution: a container class collecting FaultSystemSolution instances.
 """
+
 import io
 import logging
 import zipfile
@@ -191,14 +191,12 @@ class CompositeSolution:
         return list(self._solutions.keys())
 
     def get_fault_system_solution(self, fault_system_code: str) -> FaultSystemSolution:
-        """
-        Retrieve a `FaultSystemSolution` from within the composite solution.
+        """Retrieve a `FaultSystemSolution` from within the composite solution.
 
         Codes can be retrieved with
         [`get_fault_system_codes`][solvis.solution.composite_solution.CompositeSolution.get_fault_system_codes]
 
-
-        Parameters:
+        Args:
             fault_system_code: a named fault system code
 
         Returns:

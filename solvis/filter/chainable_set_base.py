@@ -6,6 +6,7 @@ NB: This is used internally, and is not intended for use by solvis API users.
 Classes:
  ChainableSetBase: a base class to help making subclass methods chainable & set-like
 """
+
 import copy
 from typing import Any, Set, Union
 
@@ -64,26 +65,24 @@ class ChainableSetBase:
         return self.symmetric_difference(*other)
 
     def __le__(self, *other) -> bool:
-        """set <= other
-        Test whether every element in the set is in other.
-        """
+        """Test whether every element in the set is in other."""
         return self.issubset(*other)
 
     def __lt__(self, *other) -> bool:
-        """set < other
-        Test whether the set is a proper subset of other, that is, set <= other and set != other.
+        """Test whether the set is a proper subset of other.
+
+        That is, set <= other and set != other.
         """
         return self.issubset(*other) and not self.__eq__(*other)
 
     def __ge__(self, *other) -> bool:
-        """set >= other
-        Test whether every element in other is in the set.
-        """
+        """Test whether every element in other is in the set."""
         return self.issuperset(*other)
 
     def __gt__(self, *other) -> bool:
-        """set > other
-        Test whether the set is a proper superset of other, that is, set >= other and set != other.
+        """Test whether the set is a proper superset of other.
+
+        That is, set >= other and set != other.
         """
         return self.issuperset(*other) and not self.__eq__(*other)
 

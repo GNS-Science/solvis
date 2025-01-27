@@ -28,10 +28,9 @@ log = logging.getLogger(__name__)
 
 
 def reverse_geom(geom: BaseGeometry) -> BaseGeometry:
-    """
-    Reverse the order of the points of a geometry object.
+    """Reverse the order of the points of a geometry object.
 
-    Parameters:
+    Args:
         geom: A geometry object
 
     Returns:
@@ -45,16 +44,19 @@ def reverse_geom(geom: BaseGeometry) -> BaseGeometry:
 
 
 def translate_horizontally(azimuth: float, distance: float, lon: float, lat: float) -> Tuple[float, float]:
-    """
-    Taking a `lat, lon` location as the origin, create a new location at the specified distance and azimuth on a sphere.
+    """Translate a location on the earths surface.
+
+    Taking a `lat, lon` location as the origin, create a new location at the specified distance and
+    azimuth on a sphere.
 
     Written so that it can be curried and used with
     [`shapely.ops.transform`](https://shapely.readthedocs.io/en/stable/manual.html#shapely.ops.transform).
 
     From Java:
-    [`org.opensha.commons.geo.LocationUtils.location()`](https://github.com/opensha/opensha/blob/master/src/main/java/org/opensha/commons/geo/LocationUtils.java)
+    [`org.opensha.commons.geo.LocationUtils.location()`]
+    (https://github.com/opensha/opensha/blob/master/src/main/java/org/opensha/commons/geo/LocationUtils.java)
 
-    Parameters:
+    Args:
         azimuth: a horizontal angle in degrees
         distance: distance in km
         lon: longitude in degrees. Note that longitude comes before latitude
@@ -79,10 +81,9 @@ def translate_horizontally(azimuth: float, distance: float, lon: float, lat: flo
 def create_surface(
     trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float
 ) -> Union[Polygon, LineString]:
-    """
-    legacy alias for fault_surface_projection()
+    """Legacy alias for fault_surface_projection().
 
-    Parameters:
+    Args:
         trace: the fault trace
         dip_dir: the azimuth of the dip in degrees
         dip_deg: the dip (inclination) in degrees
@@ -113,8 +114,7 @@ def fault_surface_projection(
     upper_depth: float,
     lower_depth: float,
 ) -> Union[Polygon, LineString]:
-    """
-    Calculate a projection of the fault surface onto the surface of a spherical Earth.
+    """Calculate a projection of the fault surface onto the surface of a spherical Earth.
 
     Note: Any fault having a vertical dispostion (deg_deg == 90) will be rendered as a line.
 
@@ -128,8 +128,7 @@ def fault_surface_projection(
 def fault_surface_3d(
     trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float
 ) -> Polygon:
-    """
-    Calculate the fault suface in 3 dimensions, suitable for rendering in either 2d or 3d render tools.
+    """Calculate the fault suface in 3 dimensions, suitable for rendering in either 2d or 3d render tools.
 
     Arguments:
         trace: the fault trace
@@ -147,7 +146,19 @@ def fault_surface_3d(
 def build_surface(
     trace: LineString, dip_dir: float, dip_deg: float, upper_depth: float, lower_depth: float, with_z_dimension=False
 ) -> Polygon:
+    """Build a surface from fault trace coordinates.
 
+    Args:
+        trace: corodinates for the surface trace.
+        dip_dir: dip direction in degrees.
+        dip_deg: dip in degrees.
+        upper_depth: depth of the upper edge (trace) in meters.
+        lower_depth: depth of the lower edge in meters.
+        with_z_dimension: whether to add Z cordinate to the returned object.
+
+    Returns:
+        surface: a Polygon object in 2D or 3D.
+    """
     trace = LineString(get_coordinates(trace))
     depth = lower_depth - upper_depth
     width = depth / math.tan(math.radians(dip_deg))
@@ -167,12 +178,11 @@ def build_surface(
 
 
 def bearing(point_a: Point, point_b: Point) -> float:
-    """
-    Computes the bearing in degrees from one Point to another Point.
+    """Computes the bearing in degrees from one Point to another Point.
 
     Points are treated as `(lat, lon)` pairs of decimal degrees.
 
-    Parameters:
+    Args:
         point_a: the first point
         point_b: the second point
 
@@ -193,28 +203,26 @@ def bearing(point_a: Point, point_b: Point) -> float:
         >>> bearing(loc_akl, loc_chc)
         214.72263050205407
         ```
+    Notes:
+
+        ref:  https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+
+        Formula to find Bearing, when two different points latitude, longitude is given:
+
+        Bearing from point A to B, can be calculated as,
+
+        β = atan2(X,Y),
+
+        where, X and Y are two quantities and can be calculated as:
+
+        X = cos θb * sin ∆L
+
+        Y = cos θa * sin θb – sin θa * cos θb * cos ∆L
+
+        ∆L is ( Longitude B – Longitude A)
+
+        ## sanity check here: https://www.igismap.com/map-tool/bearing-angle
     """
-
-    """
-    ref:  https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
-
-    Formula to find Bearing, when two different points latitude, longitude is given:
-
-    Bearing from point A to B, can be calculated as,
-
-    β = atan2(X,Y),
-
-    where, X and Y are two quantities and can be calculated as:
-
-    X = cos θb * sin ∆L
-
-    Y = cos θa * sin θb – sin θa * cos θb * cos ∆L
-
-    ∆L is ( Longitude B – Longitude A)
-
-    ## sanity check here: https://www.igismap.com/map-tool/bearing-angle
-    """
-
     if point_a == point_b:
         raise ValueError("cannot compute bearing, points A & B are identical")
 
@@ -249,7 +257,7 @@ def refine_dip_direction(point_a: Point, point_b: Point, original_dip_direction:
     fault surface trace, but keeping the orientation (i.e. resolving the 180 degree ambiguity
     when not obeying the right-hand rule).
 
-    Parameters:
+    Args:
         point_a: the first point
         point_b: the second point
         original_dip_direction: the original dip direction in decimal degrees
@@ -273,7 +281,7 @@ def resolve_azimuth(az: float) -> float:
     """
     Resolve an azimuth angle to be between -360° and 360°.
 
-    Parameters:
+    Args:
         az: the azimuth angle in decimal degrees
 
     Returns:
@@ -286,7 +294,7 @@ def dip_direction(point_a: Point, point_b: Point) -> float:
     """
     Computes the dip direction for a strike from Point A to Point B.
 
-    Parameters:
+    Args:
         point_a: the first point
         point_b: the second point
 
@@ -298,8 +306,7 @@ def dip_direction(point_a: Point, point_b: Point) -> float:
 
 
 def circle_polygon(radius_m: float, lat: float, lon: float) -> Polygon:
-    """
-    Creates a circular `Polygon` at a given radius in metres around the `lat, lon` coordinate.
+    """Creates a circular `Polygon` at a given radius in metres around the `lat, lon` coordinate.
 
     Calculation based on:
     [https://gis.stackexchange.com/a/359748](https://gis.stackexchange.com/a/359748),<br/>
@@ -312,7 +319,7 @@ def circle_polygon(radius_m: float, lat: float, lon: float) -> Polygon:
     The number of points in the polygon is determined by
     [shapely.buffer](https://shapely.readthedocs.io/en/stable/reference/shapely.buffer.html) defaults.
 
-    Parameters:
+    Args:
         radius_m: the radius in metres
         lat: the latitude in degrees azimuth of the dip
         lon: the longitude in degrees azimuth of the dip
@@ -333,7 +340,6 @@ def circle_polygon(radius_m: float, lat: float, lon: float) -> Polygon:
         65
         ```
     """
-
     local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
     wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
 
@@ -363,10 +369,11 @@ def section_distance(
     upper_depth: float,
     lower_depth: float,
 ) -> float:
-    """
-    Calculate minimum distance from the transformer datum to a surface built from the surface projection of the fault.
+    """Calculate minimum distance from the transformer datum to a surface.
 
-    Parameters:
+    Where that surface is the surface projection of the fault.
+
+    Args:
         transformer: typically from WGS84 to azimuthal
         surface_geometry: the surface projection of the fault plane (`Polygon` or `LineString`)
         upper_depth: the upper depth in km

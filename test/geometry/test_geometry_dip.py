@@ -83,7 +83,7 @@ class TestDipDirection(unittest.TestCase):
                 return refine_dip_direction(
                     Point(points[1][0], points[0][0]), Point(points[1][-1], points[0][-1]), section["DipDir"]
                 )
-            except (ValueError) as err:
+            except ValueError as err:
                 print(err)
                 # raise
 

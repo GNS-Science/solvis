@@ -4,6 +4,7 @@ This module defines the class `InversionSolutionModel`.
 The `InversionSolutionModel` class provides methods to build pandas dataframes
 from the raw dataframes available via the `InversionSolutionFile` class.
 """
+
 import logging
 import time
 from typing import TYPE_CHECKING, List, Optional, cast
@@ -88,7 +89,7 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
     #     return self._solution_file.rupture_rates
 
     def rate_column_name(self) -> str:
-        """Get the appropriate rate_column name
+        """Get the appropriate rate_column name.
 
         Returns:
             rate_column: "Annual Rate" or rate_weighted_mean"

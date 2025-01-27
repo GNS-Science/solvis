@@ -1,4 +1,4 @@
-"""
+r"""
 This module provides a class for filtering solution parent faults.
 
 Classes:
@@ -12,13 +12,14 @@ Functions:
 Examples:
     ```py
     >>> model = InversionSolution.from_archive(filename).model
-    >>> parent_fault_ids = FilterParentFaultIds(model)\\
+    >>> parent_fault_ids = FilterParentFaultIds(model)\
             .for_parent_fault_names(['Alpine Jacksons to Kaniere', 'BooBoo'])
     ```
 
 TODO:
   - make FilterParentFaultIds chainable
 """
+
 from typing import Iterable, Iterator, NamedTuple, Set
 
 import shapely.geometry
@@ -71,8 +72,7 @@ def valid_parent_fault_names(solution, validate_names: Iterable[str]) -> Set[str
 
 
 class FilterParentFaultIds:
-    """
-    A helper class to filter parent faults, returning qualifying fault_ids.
+    """A helper class to filter parent faults, returning qualifying fault_ids.
 
     Class methods all return sets to make it easy to combine filters with
     set operands like `union`, `intersection`, `difference` etc).
@@ -80,15 +80,16 @@ class FilterParentFaultIds:
     Examples:
         ```py
         >>> solution = InversionSolution.from_archive(filename)
-        >>> parent_fault_ids = FilterParentFaultIds(solution)\\
+        >>> parent_fault_ids = FilterParentFaultIds(solution)\
                 .for_parent_fault_names(['Alpine Jacksons to Kaniere'])
         ```
     """
 
     def __init__(self, solution: InversionSolutionProtocol):
-        """
+        """Instantiate a new filter.
+
         Args:
-            solution_model: The solution or solution.model instance to filter on.
+            solution: The solution instance to filter on.
         """
         self._solution = solution
 

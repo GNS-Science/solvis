@@ -1,4 +1,4 @@
-"""
+r"""
 This module provides a class for filtering solution ruptures.
 
 Classes:
@@ -11,22 +11,23 @@ Examples:
     <POLYGON ((175.849 -37.779, 175.847 -37.823, 175.839 -37.866, 175.825 -37.90...>
     >>> solution = solvis.InversionSolution.from_archive(filename)
     >>> model = solution.model
-    >>> rupture_ids = FilterRuptureIds(model)\\
-            .for_magnitude(min_mag=5.75, max_mag=6.25)\\
+    >>> rupture_ids = FilterRuptureIds(model)\
+            .for_magnitude(min_mag=5.75, max_mag=6.25)\
             .for_polygon(ham50)
 
     >>> # ruptures on any of faults A, B, with magnitude and rupture rate limits
-    >>> rupture_ids = FilterRuptureIds(model)\\
-    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere", "Vernon"])\\
-    >>>    .for_magnitude(7.0, 8.0)\\
+    >>> rupture_ids = FilterRuptureIds(model)\
+    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere", "Vernon"])\
+    >>>    .for_magnitude(7.0, 8.0)\
     >>>    .for_rupture_rate(1e-6, 1e-2)
 
     >>> # ruptures on fault A that do not involve fault B:
-    >>> rupture_ids = FilterRuptureIds(model)\\
-    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere"])\\
+    >>> rupture_ids = FilterRuptureIds(model)\
+    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere"])\
     >>>    .for_parent_fault_names(["Vernon], join_prior='difference')
     ```
 """
+
 from typing import Iterable, List, Optional, Set, Union
 
 import geopandas as gpd
@@ -39,42 +40,25 @@ from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 from .subsection_id_filter import FilterSubsectionIds
 
-# from ..solution.inversion_solution import InversionSolution, InversionSolutionModel
-# from ..solution.fault_system_solution import FaultSystemSolution, FaultSystemSolutionModel
-
 
 class FilterRuptureIds(ChainableSetBase):
-    """
-    A helper class to filter solution ruptures, returning the qualifying rupture_ids.
-    """
+    """A helper class to filter solution ruptures, returning the qualifying rupture_ids."""
 
     def __init__(
         self,
         solution: InversionSolutionProtocol,
         drop_zero_rates: bool = True,
     ):
-        """
+        """Instantiate a new filter.
+
         Args:
-            solution_model: The solution or solution.model instance to filter on.
-            drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
+            solution: The solution instance to filter on.
+            drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True).
         """
         self._solution = solution
         self._drop_zero_rates = drop_zero_rates
         self._filter_subsection_ids = FilterSubsectionIds(solution)
         self._filter_parent_fault_ids = FilterParentFaultIds(solution)
-
-    # @property
-    # def _model(self):
-    #     # if isinstance(self.__model, InversionSolutionModelProtocol):
-    #     #     return self.__model
-    #     # else:
-    #     #     return self.__model.model
-    #     try:
-    #         getattr(self.__model, 'model')
-    #         return self.__model.model
-    #     except (AttributeError):
-    #         return self.__model
-    #     raise ValueError(f"unhandled type: {type(self.__model)}")  # pragma: no cover
 
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution ruptures.
@@ -177,8 +161,9 @@ class FilterRuptureIds(ChainableSetBase):
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
     def _ruptures_with_and_without_rupture_rates(self):
-        """Helper method
-        # TODO this dataframe could be cached?? And used by above??
+        """Helper method.
+
+        TODO: this dataframe could be cached?? And used by above??
         """
         print(self._solution.solution_file.rupture_rates.info())
         if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):

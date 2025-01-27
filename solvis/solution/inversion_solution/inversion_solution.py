@@ -1,4 +1,4 @@
-"""
+r"""
 This module handles the standard output of an OpenSHA grand inversion.
 
 Classes:
@@ -8,12 +8,14 @@ Classes:
 Examples:
     ```py
     >>> solution = solvis.InversionSolution.from_archive(filename)
-    >>> rupture_ids = solvis.filter.FilterRuptureIds(solution)\\
+    >>> rupture_ids = solvis.filter\
+            .FilterRuptureIds(solution)\
             .for_magnitude(min_mag=5.75, max_mag=6.25)
     >>>
     >>> rates = solution.section_participation_rates(rupture_ids)
     ```
 """
+
 import io
 import logging
 import time
@@ -156,19 +158,19 @@ class InversionSolution(InversionSolutionProtocol):
             df0 = df0[df0["section"].isin(subsection_ids)]
 
         t1 = time.perf_counter()
-        log.info(f'apply section filter took : {t1-t0} seconds')
+        log.info(f'apply section filter took : {t1 - t0} seconds')
 
         if rupture_ids:
             df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
 
         t2 = time.perf_counter()
-        log.info(f'apply rupture_ids filter took : {t2-t1} seconds')
+        log.info(f'apply rupture_ids filter took : {t2 - t1} seconds')
 
         # result = df0.pivot_table(values=rate_column, index=['section'], aggfunc='sum')
         result = df0[["section", "Rupture Index", rate_column]].groupby("section").agg('sum')
         result = result[[rate_column]]
         t3 = time.perf_counter()
-        log.info(f'dataframe aggregation took : {t3-t2} seconds')
+        log.info(f'dataframe aggregation took : {t3 - t2} seconds')
         result = result.rename(columns={rate_column: 'participation_rate'})
         return cast('DataFrame[SectionParticipationSchema]', result)
 
@@ -220,7 +222,7 @@ class InversionSolution(InversionSolutionProtocol):
 
 
 class BranchInversionSolution(InversionSolution):
-    """Extend InversionSolution with the branch attributes:
+    """Extend InversionSolution with the branch attributes.
 
     Attributes:
         branch: a logic tree branch instance.
