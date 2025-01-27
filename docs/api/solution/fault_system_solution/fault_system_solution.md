@@ -1,13 +1,10 @@
 ::: solvis.solution.fault_system_solution.fault_system_solution
-<!-- 	options:
-		members: false
-
-::: solvis.solution.fault_system_solution.FaultSystemSolution
     options:
-       inherited_members: false
-       members_order: alphabetical
-       filters:
-       	- "![A-Z]+"
-       	- "!set_props"
-       	- "!^_"
-       group_by_category: false -->
+      merge_init_into_class: true
+      group_by_category: true
+      show_category_heading: true
+      members_order: source
+      inherited_members: false
+      filters:
+        - "!^_[^_]"
+        - "!^log"

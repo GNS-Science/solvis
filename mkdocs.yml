@@ -21,17 +21,17 @@ nav:
         - chainable_set_base: api/filter/chainable_set_base.md
       - solution:
         - api/solution/index.md
-        - composite_solution: api/solution/composite_solution.md
-        - fault_system_solution:
-          - api/solution/fault_system_solution/index.md
-          - api/solution/fault_system_solution/fault_system_solution.md
-          - api/solution/fault_system_solution/fault_system_solution_file.md
-          - api/solution/fault_system_solution/fault_system_solution_model.md
         - inversion_solution:
           - api/solution/inversion_solution/index.md
           - api/solution/inversion_solution/inversion_solution.md
           - api/solution/inversion_solution/inversion_solution_file.md
           - api/solution/inversion_solution/inversion_solution_model.md
+        - fault_system_solution:
+          - api/solution/fault_system_solution/index.md
+          - api/solution/fault_system_solution/fault_system_solution.md
+          - api/solution/fault_system_solution/fault_system_solution_file.md
+          - api/solution/fault_system_solution/fault_system_solution_model.md
+        - composite_solution: api/solution/composite_solution.md
         - dataframe_models: api/solution/dataframe_models.md
         - solution_surfaces_builder: api/solution/solution_surfaces_builder.md
         - typing: api/solution/typing.md
@@ -112,8 +112,13 @@ plugins:
             - pydantic: {schema: true}
             - solvis/dochelper/extension.py:DynamicDocstrings:
                 object_paths:
-                  - solvis.solution.fault_system_solution.fault_system_solution.FaultSystemSolution
                   - solvis.solution.inversion_solution.inversion_solution.InversionSolution
+                  - solvis.solution.inversion_solution.inversion_solution_file.InversionSolutionFile
+                  - solvis.solution.inversion_solution.inversion_solution_model.InversionSolutionModel
+                  - solvis.solution.fault_system_solution.fault_system_solution.FaultSystemSolution
+                  - solvis.solution.fault_system_solution.fault_system_solution_file.FaultSystemSolutionFile
+                  - solvis.solution.fault_system_solution.fault_system_solution_model.FaultSystemSolutionModel
+
 extra:
   social:
     - icon: fontawesome/brands/github

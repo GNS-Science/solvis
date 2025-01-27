@@ -1,5 +1,9 @@
 ::: solvis.solution.inversion_solution.inversion_solution
     options:
-        filters:
+      merge_init_into_class: true
+      group_by_category: true
+      show_category_heading: true
+      members_order: source
+      filters:
         - "!^_[^_]"
         - "!^log"
