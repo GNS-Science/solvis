@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Optional, cast
 
 from pandera.typing import DataFrame
 
+from solvis.dochelper import inherit_docstrings
+
 from ..dataframe_models import RuptureSectionSchema
 from ..inversion_solution import InversionSolutionModel
 from .fault_system_solution_file import FaultSystemSolutionFile
@@ -22,6 +24,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
+@inherit_docstrings
 class FaultSystemSolutionModel(InversionSolutionModel):
     """
     For analysis of FaultSystemSolutions

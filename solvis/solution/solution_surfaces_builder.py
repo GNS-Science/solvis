@@ -53,7 +53,7 @@ class SolutionSurfacesBuilder:
             a gpd.GeoDataFrame
         """
         tic = time.perf_counter()
-        new_geometry_df = self._solution.solution_file.fault_sections.copy()
+        new_geometry_df: gpd.GeoDataFrame = self._solution.solution_file.fault_sections.copy()
         toc = time.perf_counter()
         log.debug('time to load fault_sections: %2.3f seconds' % (toc - tic))
         if self._solution.fault_regime == 'SUBDUCTION':

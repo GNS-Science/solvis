@@ -32,7 +32,7 @@ from solvis.solution.dataframe_models import (
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
 def test_section_participation_rates_model(request, soln_fixture):
     solution = request.getfixturevalue(soln_fixture)
-    rates = solution.model.section_participation_rates(range(10))
+    rates = solution.section_participation_rates(range(10))
     print(rates)
     SectionParticipationSchema.validate(rates)
 
@@ -40,7 +40,7 @@ def test_section_participation_rates_model(request, soln_fixture):
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
 def test_parent_fault_participation_rates_model(request, soln_fixture):
     solution = request.getfixturevalue(soln_fixture)
-    rates = solution.model.fault_participation_rates()
+    rates = solution.fault_participation_rates()
     print(rates)
     ParentFaultParticipationSchema.validate(rates)
 

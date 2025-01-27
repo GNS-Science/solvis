@@ -181,8 +181,11 @@ class FilterRuptureIds(ChainableSetBase):
         # TODO this dataframe could be cached?? And used by above??
         """
         print(self._solution.solution_file.rupture_rates.info())
-        df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index", "fault_system"])
-        df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without "fault_system"
+        if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
+            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index", "fault_system"])
+            df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
+        else:
+            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
         return self._solution.solution_file.ruptures.join(
             df_rr, on=self._solution.solution_file.ruptures["Rupture Index"], rsuffix='_r'
         )

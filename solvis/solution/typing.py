@@ -31,9 +31,30 @@ class InversionSolutionFileProtocol(Protocol):
     FAULTS_PATH: Union[Path, str] = ''
 
     @property
-    def fault_regime(self) -> str:
-        """solution requires a fault regime"""
+    def archive_path(self) -> Optional[Path]:
+        """The path of the archive (if any).
+
+        Returns:
+            filepath: the file system path.
+        """
         raise NotImplementedError()
+
+    @property
+    def fault_regime(self) -> str:
+        """The fault regime as defined in the opensha logic_tree_branch data file.
+
+        Returns:
+            regime: `CRUSTAL` or `SUBDUCTION` respectively.
+        """
+        raise NotImplementedError()
+
+    @property
+    def logic_tree_branch(self) -> list:
+        """Values from the opensha `logic_tree_branch` data file.
+
+        Returns:
+            list of value objects
+        """
 
     @property
     def average_slips(self) -> gpd.GeoDataFrame:
@@ -48,11 +69,6 @@ class InversionSolutionFileProtocol(Protocol):
     @property
     def indices(self) -> gpd.GeoDataFrame:
         """the fault sections involved in each rupture."""
-        raise NotImplementedError()
-
-    @property
-    def archive_path(self) -> Optional[Path]:
-        """the path to the archive file"""
         raise NotImplementedError()
 
     @property
@@ -215,7 +231,7 @@ class InversionSolutionProtocol(Protocol):
 
     @property
     def fault_regime(self) -> str:
-        """solution requires a fault regime"""
+        """Get the fault regime label."""
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
         """

@@ -8,13 +8,10 @@ Classes:
 Examples:
     ```py
     >>> solution = solvis.InversionSolution.from_archive(filename)
-    >>> model = solution.model
-
-    >>> rupture_ids = solvis.filter.FilterRuptureIds(model)\\
+    >>> rupture_ids = solvis.filter.FilterRuptureIds(solution)\\
             .for_magnitude(min_mag=5.75, max_mag=6.25)
     >>>
-    >>> rates = model.section_participation_rates(rupture_ids)
-    >>> rates
+    >>> rates = solution.section_participation_rates(rupture_ids)
     ```
 """
 import io
@@ -48,31 +45,36 @@ class InversionSolution(InversionSolutionProtocol):
     """A python interface for an OpenSHA Inversion Solution archive.
 
     Attributes:
-     model: the dataframes model of the solution
-     solution_file: the archive file handler
+     model: the dataframes model of the solution.
+     solution_file: the archive file instance.
+     fault_regime: the type of fault system.
 
     Methods:
      from_archive: deserialise an instance from zip archive.
-     filter_solution: get a new InversionSolution instance, filtered by rupture ids.
      to_archive: serialise an instance to a zip archive.
-     rupture_surface: get a geopandas dataframe representing a rutpure surface
-
+     filter_solution: get a new InversionSolution instance, filtered by rupture ids.
+     rupture_surface: get a geopandas dataframe representing a rutpure surface.
+     fault_surfaces: get a geopandas dataframe representing teh fault surfaces.
+     section_participation_rates: calculate the 'participation rate' for fault subsections.
+     fault_participation_rates: calculate the 'participation rate' for parent faults.
     """
+
+    # Docstrings for most methods are found in the `InversionSolutionProtocol` class.
 
     def __init__(self, solution_file: Optional[InversionSolutionFile] = None):
         self._solution_file = solution_file or InversionSolutionFile()
-        self._dataframe_operations = InversionSolutionModel(self._solution_file)
+        self._model = InversionSolutionModel(self._solution_file)
 
     @property
     def model(self) -> InversionSolutionModel:
-        return self._dataframe_operations
+        return self._model
 
     @property
     def solution_file(self) -> InversionSolutionFile:
         return self._solution_file
 
     @property
-    def fault_regime(self):
+    def fault_regime(self) -> str:
         return self._solution_file.fault_regime
 
     def to_archive(self, archive_path, base_archive_path=None, compat=False):
@@ -224,6 +226,9 @@ class BranchInversionSolution(InversionSolution):
         branch: a logic tree branch instance.
         fault_system: A string representing the fault System (e.g `CRU`, 'HIK`).
         rupture_set_id: a string ID for the rupture_set_id.
+
+    Methods:
+        new_branch_solution: produce a new `BranchInversionSolution` instance.
 
     Todo:
         - can this functionality be done more simply and/or

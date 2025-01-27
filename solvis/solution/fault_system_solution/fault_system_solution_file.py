@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Optional
 import geopandas as gpd
 import pandas as pd
 
+from solvis.dochelper import inherit_docstrings
+
 from ..inversion_solution import InversionSolutionFile, data_to_zip_direct
 
 if TYPE_CHECKING:
@@ -29,6 +31,7 @@ Inversion Solution archive file:
 """
 
 
+@inherit_docstrings
 class FaultSystemSolutionFile(InversionSolutionFile):
     """
     Class to handle the solution modular archive file form

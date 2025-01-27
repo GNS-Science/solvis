@@ -275,7 +275,7 @@ def test_section_performance():
         t2 = time.perf_counter()
         print(f'filter rupture subsections took : {t2-t1} seconds')
 
-        section_rates = solution.model.section_participation_rates(list(subsection_ids))  # , list(rupture_ids))
+        section_rates = solution.section_participation_rates(list(subsection_ids))  # , list(rupture_ids))
 
         t3 = time.perf_counter()
         print(f'section rates took {t3-t2} seconds')

@@ -36,7 +36,7 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
     print(parent_rate)
     assert pytest.approx(parent_rate) == expected_rate  # the original test value
 
-    rates = solution.model.fault_participation_rates([fault_name])
+    rates = solution.fault_participation_rates([fault_name])
     assert pytest.approx(rates.participation_rate.tolist()[0]) == expected_rate
 
 
@@ -54,12 +54,12 @@ def test_parent_fault_participation_rate_conditional(crustal_small_fss_fixture, 
     assert len(rids) > 1
 
     print(rids)
-    rates = solution.model.fault_participation_rates([fault_name], rupture_ids=rids)
+    rates = solution.fault_participation_rates([fault_name], rupture_ids=rids)
     assert pytest.approx(rates.participation_rate.tolist()[0]) == expected_rate
 
     rids_subset = rids[: int(len(rids) / 2)]
     print(rids_subset)
-    rates = solution.model.fault_participation_rates([fault_name], rupture_ids=rids_subset)
+    rates = solution.fault_participation_rates([fault_name], rupture_ids=rids_subset)
     assert rates.participation_rate.tolist()[0] < expected_rate
 
 
@@ -67,7 +67,7 @@ def test_parent_fault_participation_rate_conditional(crustal_small_fss_fixture, 
 def test_parent_fault_participation_rate_vs_section_rates(crustal_small_fss_fixture, fault_name, expected_rate):
     solution = crustal_small_fss_fixture
 
-    fault_rates = solution.model.fault_participation_rates([fault_name])
+    fault_rates = solution.fault_participation_rates([fault_name])
     assert pytest.approx(fault_rates.participation_rate.tolist()[0]) == expected_rate
     print(fault_rates)
     rids = list(FilterRuptureIds(solution).for_parent_fault_names([fault_name]))
@@ -75,7 +75,7 @@ def test_parent_fault_participation_rate_vs_section_rates(crustal_small_fss_fixt
     subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name]).for_rupture_ids(rids)
     print(f'subsection_ids {list(subsection_ids)}')
 
-    section_rates = solution.model.section_participation_rates(subsection_ids)
+    section_rates = solution.section_participation_rates(subsection_ids)
     print(section_rates)
 
     assert (

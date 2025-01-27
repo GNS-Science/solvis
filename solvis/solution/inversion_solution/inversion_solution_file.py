@@ -170,16 +170,10 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def archive_path(self) -> Optional[Path]:
-        """The path of the archive (if any).
-
-        Returns:
-            filepath: the file system path.
-        """
         return self._archive_path
 
     @property
     def archive(self) -> zipfile.ZipFile:
-        """An in-memory archive instance."""
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
         if self._archive is None:
             if self._archive_path is None:  # pragma: no cover  (this should never happen)
@@ -225,11 +219,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def logic_tree_branch(self) -> list:
-        """Values from the opensha `logic_tree_branch` data file.
-
-        Returns:
-            list of value objects
-        """
         if not self._logic_tree_branch:
             ltb = json.load(self.archive.open(self.LOGIC_TREE_PATH))
             if type(ltb) == list:
@@ -242,12 +231,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def fault_regime(self) -> str:
-        """The fault regime as defined in the opensha logic_tree_branch data file.
-
-        Returns:
-            `CRUSTAL` or `SUBDUCTION` respectively.
-        """
-
         def get_regime() -> str:
             for obj in self.logic_tree_branch:  # .get('values'):
                 val = obj.get('value')

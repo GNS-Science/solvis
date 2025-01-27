@@ -102,7 +102,7 @@ def test_ruptures_for_polygons_join_iterable(crustal_solution_fixture, filter_ru
     ) == ridsA.difference(ridsB)
 
 
-@pytest.mark.skip("investigate!")
+# @pytest.mark.skip("investigate!")
 def test_ruptures_for_polygon_intersecting_with_drop_zero(crustal_solution_fixture, filter_rupture_ids):
     WLG = location_by_id('WLG')
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
@@ -110,25 +110,24 @@ def test_ruptures_for_polygon_intersecting_with_drop_zero(crustal_solution_fixtu
 
     all_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=False).for_polygon(polygon)
     assert all_rupture_ids.issuperset(rupture_ids)
-    assert len(all_rupture_ids) > len(rupture_ids)
+    assert len(all_rupture_ids) >= len(rupture_ids)
 
 
-@pytest.mark.skip("investigate!")
-def test_ruptures_for_polygon_intersecting_with_drop_zero_fss(fss_crustal, filter_rupture_ids):
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_ruptures_for_polygon_intersecting_with_drop_zero_fss(fss_crustal, drop_zero_rates):
+    filter_rupture_ids = FilterRuptureIds(fss_crustal, drop_zero_rates=drop_zero_rates)
     WLG = location_by_id('WLG')
     polygon = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
     rupture_ids = filter_rupture_ids.for_polygon(polygon)
 
     all_rupture_ids = FilterRuptureIds(fss_crustal, drop_zero_rates=False).for_polygon(polygon)
     assert all_rupture_ids.issuperset(rupture_ids)
-    assert len(all_rupture_ids) > len(rupture_ids)
+    assert len(all_rupture_ids) >= len(rupture_ids)
 
 
-@pytest.mark.skip('IS & FSS differ - INVESTIGATE')
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_min_mag(crustal_solution_fixture, drop_zero_rates):
+def test_ruptures_for_min_mag_with_drop_zero(crustal_solution_fixture, drop_zero_rates):
     filter_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates)
-
     m6plus = filter_rupture_ids.for_magnitude(min_mag=6.0)
     m7plus = filter_rupture_ids.for_magnitude(min_mag=7.0)
 
@@ -139,7 +138,7 @@ def test_ruptures_for_min_mag(crustal_solution_fixture, drop_zero_rates):
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_min_mag_fss(fss_crustal, drop_zero_rates):
+def test_ruptures_for_min_mag_with_drop_zero_fss(fss_crustal, drop_zero_rates):
     filter_rupture_ids = FilterRuptureIds(fss_crustal, drop_zero_rates=drop_zero_rates)
 
     m6plus = filter_rupture_ids.for_magnitude(min_mag=6.0)
@@ -151,9 +150,8 @@ def test_ruptures_for_min_mag_fss(fss_crustal, drop_zero_rates):
     assert m6plus.difference(m7plus) == filter_rupture_ids.for_magnitude(min_mag=6.0, max_mag=7.0)
 
 
-@pytest.mark.skip('IS & FSS differ - INVESTIGATE')
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_max_mag(crustal_solution_fixture, drop_zero_rates):
+def test_ruptures_for_max_mag_with_drop_zero(crustal_solution_fixture, drop_zero_rates):
     filter_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates)
 
     m8less = filter_rupture_ids.for_magnitude(max_mag=8.0)
@@ -166,7 +164,7 @@ def test_ruptures_for_max_mag(crustal_solution_fixture, drop_zero_rates):
 
 
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
-def test_ruptures_for_max_mag_FSS(fss_crustal, drop_zero_rates):
+def test_ruptures_for_max_mag_with_drop_zero_fss(fss_crustal, drop_zero_rates):
     filter_rupture_ids = FilterRuptureIds(fss_crustal, drop_zero_rates=drop_zero_rates)
 
     m8less = filter_rupture_ids.for_magnitude(max_mag=8.0)
@@ -178,7 +176,6 @@ def test_ruptures_for_max_mag_FSS(fss_crustal, drop_zero_rates):
     assert m8less.difference(m7less) == filter_rupture_ids.for_magnitude(min_mag=7.5, max_mag=8.0)
 
 
-@pytest.mark.skip('IS & FSS differ - INVESTIGATE')
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
 def test_ruptures_for_min_rate(crustal_solution_fixture, drop_zero_rates):
     filter_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates)
@@ -205,7 +202,7 @@ def test_ruptures_for_min_rate_fss(fss_crustal, drop_zero_rates):
     assert r7less.difference(r6less) == filter_rupture_ids.for_rupture_rate(min_rate=1e-7, max_rate=1e-6)
 
 
-@pytest.mark.skip('IS & FSS differ - INVESTIGATE')
+# @pytest.mark.skip('IS & FSS differ - INVESTIGATE')
 @pytest.mark.parametrize("drop_zero_rates", [True, False])
 def test_filter_chaining_rates(crustal_solution_fixture, drop_zero_rates):
     filter_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates)

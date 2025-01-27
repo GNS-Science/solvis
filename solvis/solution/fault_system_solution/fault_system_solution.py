@@ -1,8 +1,17 @@
 """
-This module handles the aggregation of InversionSolution instances which must share a common OpenSHA RuptureSet.
+This module aggregates InversionSolution instances, which must share a common OpenSHA RuptureSet.
 
 Classes:
     FaultSystemSolution: a class aggregating InversionSolution instances.
+
+Examples:
+    ```py
+    >>> solution = solvis.FaultSystemSolution.from_archive(filename)
+    >>> rupture_ids = solvis.filter.FilterRuptureIds(solution)\\
+            .for_magnitude(min_mag=5.75, max_mag=6.25)
+    >>>
+    >>> rates = solution.section_participation_rates(rupture_ids)
+    ```
 """
 import io
 import logging
@@ -10,13 +19,15 @@ import zipfile
 from pathlib import Path
 from typing import Iterable, Optional, Union, cast
 
-import geopandas as gpd
+# import geopandas as gpd
 import nzshm_model as nm
 import pandas as pd
 
 from solvis.dochelper import inherit_docstrings
 
-from ..solution_surfaces_builder import SolutionSurfacesBuilder
+from ..inversion_solution import InversionSolution
+
+# from ..solution_surfaces_builder import SolutionSurfacesBuilder
 from ..typing import BranchSolutionProtocol, InversionSolutionProtocol, ModelLogicTreeBranch
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .fault_system_solution_model import FaultSystemSolutionModel
@@ -25,12 +36,14 @@ log = logging.getLogger(__name__)
 
 
 @inherit_docstrings
-class FaultSystemSolution(InversionSolutionProtocol):
+class FaultSystemSolution(InversionSolution):
     """A class that aggregates InversionSolution instances sharing a common OpenSHA RuptureSet.
 
     The class is largely interchangeable with InversionSolution, as only rupture rates
     are  affected by the aggregation.
     """
+
+    # Docstrings for most methods are found in the `InversionSolutionProtocol` class.
 
     def __init__(self, solution_file: Optional[FaultSystemSolutionFile] = None):
         self._solution_file: FaultSystemSolutionFile = solution_file or FaultSystemSolutionFile()
@@ -47,16 +60,6 @@ class FaultSystemSolution(InversionSolutionProtocol):
     @property
     def model(self) -> FaultSystemSolutionModel:
         return self._model
-
-    @property
-    def fault_regime(self):
-        return self._solution_file.fault_regime
-
-    def fault_surfaces(self) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).fault_surfaces()
-
-    def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        return SolutionSurfacesBuilder(self).rupture_surface(rupture_id)
 
     @staticmethod
     def from_archive(instance_or_path: Union[Path, str, io.BytesIO]) -> 'FaultSystemSolution':
@@ -219,61 +222,3 @@ class FaultSystemSolution(InversionSolutionProtocol):
             composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
 
         return FaultSystemSolution.new_solution(solution=branch_solution, composite_rates_df=composite_rates_df)
-
-
-"""
-TODO: notes for fault_system_solution participation
-
->>> csol.rs_with_rupture_rates.head()
-                            key_0 fault_system  Rupture Index  rate_max      rate_min  rate_count  rate_weighted_mean  Magnitude  Average Rake (degrees)    Area (m^2)  Length (m)  section
-fault_system Rupture Index
-CRU          3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      0.0
-             3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      1.0
-             3                  3          CRU              3  0.000047  6.097353e-06          12            0.000010   7.237556              110.000000  1.090333e+09    34817.69      2.0
-             9                  9          CRU              9  0.000110  7.749647e-07          24            0.000032   7.285888              -95.056915  1.218684e+09    60601.45      3.0
-             9                  9          CRU              9  0.000110  7.749647e-07          24            0.000032   7.285888              -95.056915  1.218684e+09    60601.45      4.0
->>> csol.composite_rates.head()
-                                                        Rupture Index fault_system    weight    rupture_set_id                               solution_id  Annual Rate
-solution_id                              Rupture Index
-U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy 9                          9          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000020
-                                         142                      142          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000022
-                                         399                      399          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000008
-                                         607                      607          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000010
-                                         613                      613          CRU  0.016834  RmlsZToxMDAwODc=  U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy     0.000020
->>> csol.composite_rates.index
-MultiIndex([('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',      9),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    142),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    399),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    607),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    613),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    626),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    628),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    634),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    721),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzIy',    722),
-            ...
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 405506),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 407596),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 407597),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408843),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408852),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 408858),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409076),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409087),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409919),
-            ('U2NhbGVkSW52ZXJzaW9uU29sdXRpb246MTIwNzc4', 409995)],
-           names=['solution_id', 'Rupture Index'], length=37389)
->>> csol.ruptures_with_rupture_rates.shape
-(3884, 10)
->>> csol.ruptures_with_rupture_rates.head()
-                           fault_system  Rupture Index  rate_max      rate_min  rate_count  rate_weighted_mean  Magnitude  Average Rake (degrees)    Area (m^2)  Length (m)
-fault_system Rupture Index
-CRU          3                      CRU              3  0.000047  6.097353e-06          12        1.012588e-05   7.237556              110.000000  1.090333e+09    34817.69
-             9                      CRU              9  0.000110  7.749647e-07          24        3.237533e-05   7.285888              -95.056915  1.218684e+09    60601.45
-             55                     CRU             55  0.000067  5.627826e-06          12        1.531652e-05   8.092601              169.242100  7.809173e+09   340323.75
-             140                    CRU            140  0.000001  5.418595e-07           6        1.826545e-08   8.197684             -177.146090  9.946928e+09   455076.94
-             142                    CRU            142  0.000051  2.222447e-05           6        5.750140e-06   8.225152             -172.993900  1.059636e+10   483159.47
->>> help(csol.ruptures_with_rupture_rates)
-
->>>
-"""  # noqa
