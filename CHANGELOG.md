@@ -15,7 +15,7 @@
  - refactor `solvis.inversion_solution` package to `solvis.solution` and collect modules into packages
  - new packages `solvis.solution.inversion_solution` and  `solvis.solution.fault_system_solution`
  - improved test coverage
- - refactored to/from archive code to reginstate some skipped tests
+ - refactored to/from archive code to reinstate some skipped tests
  - doc/typing improvements
  - fixes to the dynamic docstrings helper class & setup
  - API simplifications
