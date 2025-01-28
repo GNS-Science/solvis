@@ -3,11 +3,11 @@ import pytest
 
 from solvis.solution import SolutionParticipation
 from solvis.solution.dataframe_models import (
+    AggregateRuptureSectionsWithRuptureRatesSchema,
+    AggregateRupturesWithRuptureRatesSchema,
     FaultSectionRuptureRateSchema,
     FaultSectionSchema,
     FaultSectionWithSolutionSlipRate,
-    AggregateRuptureSectionsWithRuptureRatesSchema,
-    AggregateRupturesWithRuptureRatesSchema,
     ParentFaultParticipationSchema,
     RuptureRateSchema,
     RuptureSchema,
