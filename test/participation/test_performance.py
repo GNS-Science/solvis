@@ -6,6 +6,7 @@ import pytest
 
 import solvis
 from solvis.filter import FilterRuptureIds, FilterSubsectionIds
+from solvis.solution import SolutionParticipation
 
 folder = pathlib.Path(os.path.realpath(__file__)).parent
 
@@ -275,7 +276,9 @@ def test_section_performance():
         t2 = time.perf_counter()
         print(f'filter rupture subsections took : {t2-t1} seconds')
 
-        section_rates = solution.section_participation_rates(list(subsection_ids))  # , list(rupture_ids))
+        section_rates = SolutionParticipation(solution).section_participation_rates(
+            list(subsection_ids)
+        )  # , list(rupture_ids))
 
         t3 = time.perf_counter()
         print(f'section rates took {t3-t2} seconds')

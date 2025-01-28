@@ -9,10 +9,10 @@ Classes:
  InversionSolution: handles the standard output of an OpenSHA grand inversion.
  FaultSystemSolution: a aggregation of multiple InversionSolutions sharing the same rupture set.
  CompositeSolution: the container class for complete model and logic tree.
+ SolutionParticipation: a helper class to calculate rupture participation for parts of the fault system.
 
 Modules:
  typing: defines class interfaces using `typing.Protocol`
- composite_solution: defines the CompositeSolution class.
  named_fault: helper module for named_faults (used with filtering crustal ruptures).
  solution_surfaces_builder: defines the SolutionSurfacesBuilder class.
 
@@ -26,6 +26,7 @@ Example:
 from .composite_solution import CompositeSolution
 from .fault_system_solution import FaultSystemSolution
 from .inversion_solution import InversionSolution, InversionSolutionFile, data_to_zip_direct
+from .solution_participation import SolutionParticipation
 
 """
 Notes:

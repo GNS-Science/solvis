@@ -1,13 +1,14 @@
 import pytest
 
 from solvis.filter import FilterRuptureIds
+from solvis.solution import SolutionParticipation
 
 
 def test_section_participation_rate(crustal_solution_fixture):
     # get the participation rate for a single (sub)section
     sec_id = 5
     solution = crustal_solution_fixture
-    rates = solution.section_participation_rates([sec_id])
+    rates = SolutionParticipation(solution).section_participation_rates([sec_id])
     print(f"participation rate for section {sec_id}: {rates.participation_rate.tolist()[0]} /yr")
     assert pytest.approx(rates.participation_rate.tolist()[0]) == 0.0099396
 
@@ -16,7 +17,7 @@ def test_section_participation_rate_default_spot_check(crustal_solution_fixture)
     # get the participation rate for a single (sub)section
     sec_id = 5
     solution = crustal_solution_fixture
-    rates = solution.section_participation_rates()
+    rates = SolutionParticipation(solution).section_participation_rates()
     # print(f"participation rate for section {sec_id}: {rates.participation_rate.tolist()[0]} /yr")
     # rates=r
     assert pytest.approx(rates[rates.index == sec_id].participation_rate.tolist()[0]) == 0.0099396
@@ -26,7 +27,7 @@ def test_section_participation_rate_default_all_sections(crustal_solution_fixtur
     # get the participation rate for a single (sub)section
     # sec_id = 5
     solution = crustal_solution_fixture
-    rates = solution.section_participation_rates()
+    rates = SolutionParticipation(solution).section_participation_rates()
     section_rates = solution.model.rs_with_rupture_rates.groupby("section").agg('sum')["Annual Rate"]
     assert section_rates.all() == rates.participation_rate.all()
 
@@ -53,13 +54,13 @@ def test_section_participation_rates(crustal_solution_fixture, fault_name, subse
     solution = crustal_solution_fixture
 
     # subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name])
-    # srdf = solution.section_participation_rates(subsection_ids)
+    # srdf = SolutionParticipation(solution).section_participation_rates(subsection_ids)
     # print(srdf)
 
     # section_rate = srdf[srdf.index == subsection_id].agg('sum').participation_rate
     # print(section_rate)
     # assert pytest.approx(section_rate) == expected_rate
-    srdf = solution.section_participation_rates([subsection_id])
+    srdf = SolutionParticipation(solution).section_participation_rates([subsection_id])
     # print(srdf)
     assert pytest.approx(srdf.participation_rate.tolist()[0]) == expected_rate
 
@@ -74,6 +75,6 @@ def test_section_participation_rates_conditional(crustal_solution_fixture, fault
     rids_subset = rids[: int(len(rids) / 2)]
     print(rids_subset)
 
-    srdf = solution.section_participation_rates([subsection_id], rids_subset)
+    srdf = SolutionParticipation(solution).section_participation_rates([subsection_id], rids_subset)
     print(srdf)
     assert srdf.participation_rate.tolist()[0] - 1e-10 < expected_rate

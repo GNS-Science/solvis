@@ -1,6 +1,7 @@
 import pytest
 
 from solvis.filter import FilterParentFaultIds, FilterRuptureIds, FilterSubsectionIds
+from solvis.solution import SolutionParticipation
 
 parent_fault_rates = [
     ("Alpine Jacksons to Kaniere", 0.0158445),
@@ -15,11 +16,11 @@ def test_parent_fault_participation_rate_vs_section_rates(crustal_solution_fixtu
     solution = crustal_solution_fixture
     # model = solution.model
     fault_ids = FilterParentFaultIds(solution).for_parent_fault_names([fault_name])
-    fault_rates = solution.fault_participation_rates(fault_ids)
+    fault_rates = SolutionParticipation(solution).fault_participation_rates(fault_ids)
     assert pytest.approx(fault_rates.participation_rate.tolist()[0]) == expected_rate
 
     subsection_ids = FilterSubsectionIds(solution).for_parent_fault_names([fault_name])
-    section_rates = solution.section_participation_rates(subsection_ids)
+    section_rates = SolutionParticipation(solution).section_participation_rates(subsection_ids)
     print(section_rates)
     assert (
         sum(section_rates.participation_rate) >= expected_rate
@@ -53,7 +54,7 @@ def test_parent_fault_participation_rate(crustal_solution_fixture, fault_name, e
     # assert pytest.approx(parent_rate) == expected_rate  # the original test value
 
     fault_ids = FilterParentFaultIds(solution).for_parent_fault_names([fault_name])
-    fault_rates = solution.fault_participation_rates(fault_ids)
+    fault_rates = SolutionParticipation(solution).fault_participation_rates(fault_ids)
     assert pytest.approx(fault_rates.participation_rate.tolist()[0]) == expected_rate
 
 
@@ -68,12 +69,12 @@ def test_parent_fault_participation_rate_conditional(crustal_solution_fixture, f
 
     print(rids)
     fault_ids = FilterParentFaultIds(solution).for_parent_fault_names([fault_name])
-    fault_rates = solution.fault_participation_rates(fault_ids)
+    fault_rates = SolutionParticipation(solution).fault_participation_rates(fault_ids)
     # rates = fault_participation_rates([fault_name], rupture_ids=rids)
     assert pytest.approx(fault_rates.participation_rate.tolist()[0]) == expected_rate
 
     rids_subset = rids[: int(len(rids) / 2)]
     print(rids_subset)
-    rates = solution.fault_participation_rates(fault_ids, rupture_ids=rids_subset)
+    rates = SolutionParticipation(solution).fault_participation_rates(fault_ids, rupture_ids=rids_subset)
     print(rates)
     assert rates.participation_rate.tolist()[0] < expected_rate
