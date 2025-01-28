@@ -5,6 +5,7 @@ import pytest
 from pandas.api.types import infer_dtype
 
 import solvis
+from solvis.filter.rupture_id_filter import FilterRuptureIds
 from solvis.solution.fault_system_solution import FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
@@ -54,12 +55,20 @@ class TestSmallCrustal(object):
         assert model.indices["Num Sections"].dtype == "Int32"  # pd.UInt16Dtype()
         assert model.indices["# 1"].dtype == "Int32"  # pd.UInt16Dtype()
 
-    @pytest.mark.skip('remove deprecated')
+    # @pytest.mark.skip('remove deprecated')
     def test_filter_solution_ruptures(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture
-        ruptures = solvis.rupt_ids_above_rate(sol, 1e-7, rate_column="rate_weighted_mean")
-        new_sol = solvis.FaultSystemSolution.filter_solution(sol, ruptures)
-        assert ruptures.shape[0] == new_sol.ruptures.shape[0]
+        rupture_ids = list(FilterRuptureIds(sol.model, drop_zero_rates=True).for_rupture_rate(min_rate=1e-7))
+
+        new_sol = solvis.FaultSystemSolution.filter_solution(sol, rupture_ids)
+        assert len(rupture_ids) == new_sol.model.ruptures.shape[0]
+
+        model = new_sol.model
+        assert infer_dtype(model.rupture_rates["fault_system"]) == "string"
+        assert model.rupture_rates["rate_weighted_mean"].dtype == 'float32'
+        assert infer_dtype(model.indices["Num Sections"]) == "integer"
+        assert model.indices["Num Sections"].dtype == "Int32"  # pd.UInt16Dtype()
+        assert model.indices["# 1"].dtype == "Int32"  # pd.UInt16Dtype()
 
 
 # @pytest.mark.slow

@@ -84,7 +84,7 @@ class TestThreeSmallFaultSystems(object):
         assert surfaces.shape == (809, 15)
 
 
-@pytest.mark.skip('consider how this works again')
+# @pytest.mark.skip('consider how this works again')
 def test_composite_serialisation(small_archives):
     folder = tempfile.TemporaryDirectory()
     # folder = pathlib.Path(pathlib.PurePath(os.path.realpath(__file__)).parent.parent, "SCRATCH")
@@ -110,35 +110,23 @@ def test_composite_serialisation(small_archives):
 
             print(solutions)
             fss = FaultSystemSolution.from_branch_solutions(solutions)
-
             composite.add_fault_system_solution(fault_system_lt.short_name, fss)
-
-            # # # write the fss-archive file
-            ref_solution = solutions[0].solution_file.archive_path  # the file path to the reference solution
-            new_path = pathlib.Path(folder.name, f'test_fault_system_{fault_system_lt.short_name}_archive.zip')
-
-            fss.to_archive(str(new_path), ref_solution, compat=False)
-            assert new_path.exists()
-            # assert str(fss.solution_file.archive_path) == str(new_path)
 
     new_path = pathlib.Path(folder.name, 'test_composite_archive.zip')
     composite.to_archive(new_path)
     assert new_path.exists()
     assert str(composite.archive_path) == str(new_path)
 
-    # remove the composite inputs ...
-    """
-    for key, sol in composite._solutions.items():
-        arc = pathlib.Path(sol.solution_file.archive_path)
-        assert arc.exists()
-        # arc.unlink()
-    """
-
     # rehydrate the composite
     new_composite = CompositeSolution.from_archive(new_path, slt)
+
     assert new_composite.rupture_rates.columns.all() == composite.rupture_rates.columns.all()
     assert new_composite.rupture_rates.shape == composite.rupture_rates.shape
     assert new_composite.rupture_rates['Rupture Index'].all() == composite.rupture_rates['Rupture Index'].all()
+
+    assert new_composite.archive_path == new_path
+    assert new_composite.source_logic_tree == slt
+    assert sorted(new_composite.get_fault_system_codes()) == ['CRU', 'HIK', 'PUY']
 
 
 # class TestThreeFaultSystems(object):

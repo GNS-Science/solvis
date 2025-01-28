@@ -12,7 +12,7 @@ import geopandas as gpd
 import pandas as pd
 
 from solvis.filter import FilterSubsectionIds
-from solvis.solution.typing import CompositeSolutionProtocol, InversionSolutionModelProtocol
+from solvis.solution.typing import InversionSolutionModelProtocol
 
 from .inversion_solution_file import InversionSolutionFile
 
@@ -77,14 +77,6 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
     @property
     def fault_sections(self):
         return self._solution_file.fault_sections
-
-    @property
-    def fault_regime(self):
-        return self._solution_file.fault_regime
-
-    @property
-    def logic_tree_branch(self):
-        return self._solution_file.logic_tree_branch
 
     @property
     def indices(self):
@@ -357,20 +349,10 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             self.solution_file.ruptures.drop(columns="Rupture Index"),
             on=self.solution_file.rupture_rates["Rupture Index"],  # type: ignore
         )
-        if 'key_0' in self._ruptures_with_rupture_rates.columns:
+        if 'key_0' in self._ruptures_with_rupture_rates.columns:  # pragma: no cover (can this be dropped?)
             self._ruptures_with_rupture_rates.drop(columns=['key_0'], inplace=True)
         toc = time.perf_counter()
         log.debug(
             'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
         )
         return cast('DataFrame[RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
-
-    def get_solution_slip_rates_for_parent_fault(self, parent_fault_name: str) -> pd.DataFrame:
-
-        return self.fault_sections_with_solution_slip_rates[
-            self.fault_sections_with_solution_slip_rates['ParentName'] == parent_fault_name
-        ]
-
-
-class CompositeSolutionModel(CompositeSolutionProtocol):
-    pass

@@ -13,7 +13,7 @@ import time
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, cast
+from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 
 import geopandas as gpd
 import pandas as pd
@@ -72,8 +72,7 @@ Inversion Solution archive file:
  - 'ruptures/indices.csv'
  - 'ruptures/average_slips.csv'
 
-"""
-"A warning added to archives that have been modified by Solvis."
+"""  # warning added to archives that have been modified by Solvis.
 
 
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -149,7 +148,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         data_to_zip_direct(zip_archive, indices.to_csv(index=reindex), self.INDICES_PATH)
         data_to_zip_direct(zip_archive, slips.to_csv(index=reindex), self.AVG_SLIPS_PATH)
 
-    def to_archive(self, archive_path, base_archive_path=None, compat=False):
+    def to_archive(self, archive_path_or_buffer: Union[Path, str, io.BytesIO], base_archive_path=None, compat=False):
         """Write the current solution to a new zip archive.
 
         Optionally cloning data from a base archive.
@@ -159,22 +158,21 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         so that the original rutpure ids are lost.
 
         Args:
-            archive_path: path to write to.
+            archive_path: path or buffrer to write.
             base_archive_path: path to an InversionSolution archive to clone data from.
             compat: if True reindex the dataframes so that the archive remains compatible with opensha.
         """
         if base_archive_path is None:
             # try to use this archive, rather than a base archive
-            zin = self._archive
+            zin = self.archive
         else:
             zin = zipfile.ZipFile(base_archive_path, 'r')
 
-        log.debug('create zipfile %s with method %s' % (archive_path, ZIP_METHOD))
-        zout = zipfile.ZipFile(archive_path, 'w', ZIP_METHOD)
+        log.debug('create zipfile %s with method %s' % (archive_path_or_buffer, ZIP_METHOD))
+        zout = zipfile.ZipFile(archive_path_or_buffer, 'w', ZIP_METHOD)
 
         log.debug('to_archive: skipping files: %s' % self.DATAFRAMES)
         # this copies in memory, skipping the dataframe files we'll want to overwrite
-
         for item in zin.infolist():
             if item.filename in self.DATAFRAMES:
                 continue
@@ -182,15 +180,17 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
             buffer = zin.read(item.filename)
             zout.writestr(item, buffer)
 
-        """
-
-        """
         if compat:
             self._write_dataframes(zout, reindex=True)
         else:
             self._write_dataframes(zout, reindex=False)
-        # self._archive_path = archive_path
+
         data_to_zip_direct(zout, WARNING, "WARNING.md")
+
+        if isinstance(archive_path_or_buffer, io.BytesIO):
+            self._archive = archive_path_or_buffer
+        else:
+            self._archive_path = cast(Path, archive_path_or_buffer)
 
     @property
     def archive_path(self) -> Optional[Path]:
@@ -205,19 +205,16 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
     def archive(self) -> zipfile.ZipFile:
         """An in-memory archive instance."""
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
-        archive = None
         if self._archive is None:
-            if self._archive_path is None:
-                raise RuntimeError("archive_path ARGG")
+            if self._archive_path is None:  # pragma: no cover  (this should never happen)
+                raise RuntimeError("archive_path cannot be None, unless we have an in-memory archive")
             else:
                 tic = time.perf_counter()
-                data = io.BytesIO(open(self._archive_path, 'rb').read())
-                archive = zipfile.ZipFile(data)
+                self._archive = io.BytesIO(open(self._archive_path, 'rb').read())
                 toc = time.perf_counter()
                 log.debug('archive time to open zipfile %s %2.3f seconds' % (self._archive_path, toc - tic))
-        else:
-            archive = zipfile.ZipFile(self._archive)
-        return archive
+
+        return zipfile.ZipFile(self._archive)
 
     def _dataframe_from_csv(self, prop, path, dtype=None):
         log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))
@@ -230,11 +227,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
             prop = pd.read_csv(data, dtype=dtype)
             toc = time.perf_counter()
             log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
-        return prop
-
-    def _geodataframe_from_geojson(self, prop, path):
-        if not isinstance(prop, pd.DataFrame):
-            prop = gpd.read_file(self.archive.open(path))
         return prop
 
     @property
@@ -250,7 +242,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
             return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
 
         tic = time.perf_counter()
-        self._fault_sections = self._geodataframe_from_geojson(self._fault_sections, self.FAULTS_PATH)
+        self._fault_sections = gpd.read_file(self.archive.open(self.FAULTS_PATH))
         self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
         self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
         mapper = {
@@ -353,5 +345,3 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         self._fault_sections = fault_sections
         self._indices = indices
         self._average_slips = average_slips
-        print('****')
-        print(rates)

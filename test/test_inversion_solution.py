@@ -1,5 +1,6 @@
 #!python3 test_inversion_solution.py
 
+import io
 import os
 import pathlib
 
@@ -39,6 +40,14 @@ class TestInversionSolution(object):
         # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
         # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
         # assert 0
+
+    def test_from_archive_instance(self):
+        filename = folder / "fixtures" / 'CrustalSmallSolution_compat.zip'
+        instance = io.BytesIO(open(filename, 'rb').read())
+        sol = InversionSolution.from_archive(instance)
+        assert isinstance(sol, InversionSolution)
+        assert sol.fault_regime == 'CRUSTAL'
+        assert sol.solution_file.logic_tree_branch[0]['value']['enumName'] == "CRUSTAL"
 
     def test_load_crustal_from_archive(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
@@ -170,8 +179,8 @@ class TestInversionSolution(object):
 
     def test_target_slip_rates(self, crustal_solution_fixture):
         model = crustal_solution_fixture.model
-        model.section_target_slip_rates
         model.fault_sections
+        model.section_target_slip_rates
         assert "Target Slip Rate" in model.fault_sections.columns
         assert "Target Slip Rate StdDev" in model.fault_sections.columns
         assert "SlipRate" not in model.fault_sections.columns

@@ -34,8 +34,7 @@ def build_rupture_groups(
             sample_len = len(sections)
             continue
 
-        if rupt_id is not sample_rupt:
-            sample_ruptures.append(rupt_id)
+        sample_ruptures.append(rupt_id)
 
         # compare section overlap
         section_overlap = len(set(sections).intersection(sample_sections))

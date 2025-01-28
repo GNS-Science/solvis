@@ -45,10 +45,10 @@ class FilterSubsectionIds(ChainableSetBase):
             return self.__model.model
         except (AttributeError):
             return self.__model
-        raise ValueError(f"unhandled type: {type(self.__model)}")
+        raise ValueError(f"unhandled type: {type(self.__model)}")  # pragma: no cover
 
     def for_named_faults(self, named_fault_names: Iterable[str]) -> ChainableSetBase:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover until named fault feature is implemented
 
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution fault subsections.

@@ -5,16 +5,42 @@ from solvis.filter.rupture_id_filter import FilterRuptureIds
 
 
 @pytest.mark.slow
-def test_build_rupture_groups(composite_fixture):
+@pytest.mark.parametrize(
+    "min_overlap, expected_len, sample_zero, sample_last",
+    [
+        (
+            0.5,
+            406,
+            {'rupture': 0, 'ruptures': [1, 2], 'sample_sections': 2},
+            {'rupture': 3093, 'ruptures': [3094, 3095], 'sample_sections': 4},
+        ),
+        (
+            0.6,
+            459,
+            {'rupture': 0, 'ruptures': [1], 'sample_sections': 2},
+            {'rupture': 3093, 'ruptures': [3094, 3095], 'sample_sections': 4},
+        ),
+        (
+            0.8,
+            658,
+            {'rupture': 0, 'ruptures': [1], 'sample_sections': 2},
+            {'rupture': 3098, 'ruptures': [3099], 'sample_sections': 2},
+        ),
+        (
+            0.99,
+            1548,
+            {'rupture': 0, 'ruptures': [1], 'sample_sections': 2},
+            {'rupture': 3098, 'ruptures': [3099], 'sample_sections': 2},
+        ),
+    ],
+)
+def test_build_rupture_groups(composite_fixture, min_overlap, expected_len, sample_zero, sample_last):
     fss = composite_fixture._solutions['CRU']
 
-    reps = list(build_rupture_groups(fss, min_overlap=0.5))
-    assert len(reps) == 406
-    assert reps[0] == {'rupture': 0, 'ruptures': [1, 2], 'sample_sections': 2}
-
-    reps = list(build_rupture_groups(fss, min_overlap=0.8))
-    assert len(reps) == 658
-    assert reps[0] == {'rupture': 0, 'ruptures': [1], 'sample_sections': 2}
+    reps = list(build_rupture_groups(fss, min_overlap=min_overlap))
+    assert len(reps) == expected_len
+    assert reps[0] == sample_zero
+    assert reps[-1] == sample_last
 
 
 @pytest.mark.parametrize(
@@ -45,10 +71,8 @@ def test_build_rupture_groups_filtered(small_composite_fixture, min_overlap, exp
     fss = small_composite_fixture._solutions['CRU']
 
     m7less = list(FilterRuptureIds(fss.model).for_magnitude(max_mag=7.5))
-
     reps = list(build_rupture_groups(fss, rupture_ids=m7less, min_overlap=min_overlap))
 
     print(reps)
-
     assert len(reps) == expected_len
     assert reps[0] == sample_zero
