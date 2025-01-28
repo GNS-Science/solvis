@@ -19,32 +19,13 @@ from .inversion_solution_file import InversionSolutionFile
 if TYPE_CHECKING:
     from pandera.typing import DataFrame
 
-    from .dataframe_models import (  # FaultSectionSchema,
-        FaultSectionRuptureRateSchema,
-        FaultSectionWithSolutionSlipRate,
-        RuptureSectionSchema,
-        RuptureSectionsWithRuptureRatesSchema,
-        RupturesWithRuptureRatesSchema,
-    )
+    from solvis.solution import dataframe_models
 
 log = logging.getLogger(__name__)
 
 
 class InversionSolutionModel(InversionSolutionModelProtocol):
-    """
-    helper methods for analysis of InversionSolutionProtocol subtypes.
-
-    Deprecated:
-     the following methods are replaced by solvis.filter classes.
-
-     - get_rupture_ids_for_fault_names
-     - get_rupture_ids_for_location_radius
-     - get_rupture_ids_for_parent_fault
-     - get_rupture_ids_intersecting
-     - get_ruptures_for_parent_fault
-     - get_ruptures_intersecting
-     - get_solution_slip_rates_for_parent
-    """
+    """helper methods for analysis of InversionSolutionProtocol subtypes."""
 
     def __init__(self, solution_file: InversionSolutionFile) -> None:
         self._solution_file = solution_file
@@ -59,35 +40,6 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
     def solution_file(self) -> InversionSolutionFile:
         return self._solution_file
 
-    # ###
-    # # These attributes are 'hoisted' from the _solution_file instance
-    # #
-    # # those that return dataframes may be migrated to the model -> InversionSolutionModel
-    # ####
-    # @property
-    # def average_slips(self):
-    #     return self._solution_file.average_slips
-
-    # @property
-    # def section_target_slip_rates(self):
-    #     return self._solution_file.section_target_slip_rates
-
-    # @property
-    # def fault_sections(self):
-    #     return self._solution_file.fault_sections
-
-    # # @property
-    # # def indices(self):
-    # #     return self._solution_file.indices
-
-    # @property
-    # def ruptures(self):
-    #     return self._solution_file.ruptures
-
-    # @property
-    # def rupture_rates(self):
-    #     return self._solution_file.rupture_rates
-
     def rate_column_name(self) -> str:
         """Get the appropriate rate_column name.
 
@@ -99,7 +51,7 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
         )
 
     @property
-    def rupture_sections(self) -> 'DataFrame[RuptureSectionSchema]':
+    def rupture_sections(self) -> 'DataFrame[dataframe_models.RuptureSectionSchema]':
         """
         Calculate and cache the permutations of rupture_id and section_id.
 
@@ -107,12 +59,12 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             pd.DataFrame: a pandas dataframe
         """
         if self._rupture_sections is not None:
-            return cast('DataFrame[RuptureSectionSchema]', self._rupture_sections)
+            return cast('DataFrame[dataframe_models.RuptureSectionSchema]', self._rupture_sections)
 
         self._rupture_sections = self.build_rupture_sections()
-        return cast('DataFrame[RuptureSectionSchema]', self._rupture_sections)
+        return cast('DataFrame[dataframe_models.RuptureSectionSchema]', self._rupture_sections)
 
-    def build_rupture_sections(self) -> 'DataFrame[RuptureSectionSchema]':
+    def build_rupture_sections(self) -> 'DataFrame[dataframe_models.RuptureSectionSchema]':
 
         tic = time.perf_counter()
 
@@ -134,10 +86,10 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
 
         toc = time.perf_counter()
         log.debug('rupture_sections(): time to load and conform rupture_sections: %2.3f seconds' % (toc - tic))
-        return cast('DataFrame[RuptureSectionSchema]', df2)
+        return cast('DataFrame[dataframe_models.RuptureSectionSchema]', df2)
 
     @property
-    def fault_sections_with_rupture_rates(self) -> 'DataFrame[FaultSectionRuptureRateSchema]':
+    def fault_sections_with_rupture_rates(self) -> 'DataFrame[dataframe_models.FaultSectionRuptureRateSchema]':
         """
         Calculate and cache the fault sections and their rupture rates.
 
@@ -148,7 +100,7 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
         if self._fs_with_rates is not None:
             print(self._fs_with_rates.columns)
             # assert 0
-            return cast('DataFrame[FaultSectionRuptureRateSchema]', self._fs_with_rates)
+            return cast('DataFrame[dataframe_models.FaultSectionRuptureRateSchema]', self._fs_with_rates)
 
         tic = time.perf_counter()
         print(self.rs_with_rupture_rates)
@@ -165,14 +117,14 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
 
         # self._fs_with_rates = self.fault_sections.join(self.ruptures_with_rupture_rates,
         #     on=self.fault_sections["Rupture Index"] )
-        return cast('DataFrame[FaultSectionRuptureRateSchema]', self._fs_with_rates)
+        return cast('DataFrame[dataframe_models.FaultSectionRuptureRateSchema]', self._fs_with_rates)
 
     @property
     def parent_fault_names(self) -> List[str]:
         return sorted(self.solution_file.fault_sections.ParentName.unique())
 
     @property
-    def fault_sections_with_solution_slip_rates(self) -> 'DataFrame[FaultSectionWithSolutionSlipRate]':
+    def fault_sections_with_solution_slip_rates(self) -> 'DataFrame[dataframe_models.FaultSectionWithSolutionSlipRate]':
         """Calculate and cache fault sections and their solution slip rates.
 
         Solution slip rate combines the inversion inputs (avg slips), and the inversion solution (rupture rates).
@@ -181,15 +133,15 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             a gpd.GeoDataFrame
         """
         if self._fs_with_soln_rates is not None:
-            return cast('DataFrame[FaultSectionWithSolutionSlipRate]', self._fs_with_soln_rates)
+            return cast('DataFrame[dataframe_models.FaultSectionWithSolutionSlipRate]', self._fs_with_soln_rates)
 
         tic = time.perf_counter()
         self._fs_with_soln_rates = self._get_soln_rates()
         toc = time.perf_counter()
         log.debug('fault_sections_with_soilution_rates: time to calculate solution rates: %2.3f seconds' % (toc - tic))
-        return cast('DataFrame[FaultSectionWithSolutionSlipRate]', self._fs_with_soln_rates)
+        return cast('DataFrame[dataframe_models.FaultSectionWithSolutionSlipRate]', self._fs_with_soln_rates)
 
-    def _get_soln_rates(self) -> 'DataFrame[FaultSectionWithSolutionSlipRate]':
+    def _get_soln_rates(self) -> 'DataFrame[dataframe_models.FaultSectionWithSolutionSlipRate]':
         """Get a dataframe joining ruptures and rupture_rates.
 
         Returns:
@@ -208,17 +160,19 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
                 fswr_gt0['Annual Rate'] * average_slips.loc[fswr_gt0['Rupture Index']]['Average Slip (m)']
             )
 
-        return cast('DataFrame[FaultSectionWithSolutionSlipRate]', fault_sections_wr)
+        return cast('DataFrame[dataframe_models.FaultSectionWithSolutionSlipRate]', fault_sections_wr)
 
     @property
-    def rs_with_rupture_rates(self) -> 'DataFrame[RuptureSectionsWithRuptureRatesSchema]':
+    def rs_with_rupture_rates(self) -> 'DataFrame[dataframe_models.RuptureSectionsWithRuptureRatesSchema]':
         """Get a dataframe joining rupture_sections and rupture_rates.
 
         Returns:
             a gpd.GeoDataFrame
         """
         if self._rs_with_rupture_rates is not None:
-            return cast('DataFrame[RuptureSectionsWithRuptureRatesSchema]', self._rs_with_rupture_rates)
+            return cast(
+                'DataFrame[dataframe_models.RuptureSectionsWithRuptureRatesSchema]', self._rs_with_rupture_rates
+            )
 
         tic = time.perf_counter()
         # df_rupt_rate = self.ruptures.join(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
@@ -235,17 +189,17 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
             )
             % (toc - tic)
         )
-        return cast('DataFrame[RuptureSectionsWithRuptureRatesSchema]', self._rs_with_rupture_rates)
+        return cast('DataFrame[dataframe_models.RuptureSectionsWithRuptureRatesSchema]', self._rs_with_rupture_rates)
 
     @property
-    def ruptures_with_rupture_rates(self) -> 'DataFrame[RupturesWithRuptureRatesSchema]':
+    def ruptures_with_rupture_rates(self) -> 'DataFrame[dataframe_models.RupturesWithRuptureRatesSchema]':
         """Get a dataframe joining ruptures and rupture_rates.
 
         Returns:
             a gpd.GeoDataFrame
         """
         if self._ruptures_with_rupture_rates is not None:
-            return cast('DataFrame[RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
+            return cast('DataFrame[dataframe_models.RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
 
         tic = time.perf_counter()
         # print(self.rupture_rates.drop(self.rupture_rates.iloc[:, :1], axis=1))
@@ -259,4 +213,4 @@ class InversionSolutionModel(InversionSolutionModelProtocol):
         log.debug(
             'ruptures_with_rupture_rates(): time to load rates and join with ruptures: %2.3f seconds' % (toc - tic)
         )
-        return cast('DataFrame[RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)
+        return cast('DataFrame[dataframe_models.RupturesWithRuptureRatesSchema]', self._ruptures_with_rupture_rates)

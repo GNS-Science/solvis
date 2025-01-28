@@ -242,16 +242,6 @@ class InversionSolutionProtocol(Protocol):
         """
         raise NotImplementedError()
 
-    def section_participation_rates(
-        self, subsection_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
-    ):
-        raise NotImplementedError()
-
-    def fault_participation_rates(
-        self, parent_fault_ids: Optional[Iterable[int]] = None, rupture_ids: Optional[Iterable[int]] = None
-    ):
-        raise NotImplementedError()
-
 
 class CompositeSolutionProtocol(Protocol):
     """Type for CompositeSolution."""

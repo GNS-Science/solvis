@@ -31,7 +31,9 @@ nav:
           - api/solution/fault_system_solution/fault_system_solution.md
           - api/solution/fault_system_solution/fault_system_solution_file.md
           - api/solution/fault_system_solution/fault_system_solution_model.md
+
         - composite_solution: api/solution/composite_solution.md
+        - solution participation: api/solution/solution_participation.md
         - dataframe_models: api/solution/dataframe_models.md
         - solution_surfaces_builder: api/solution/solution_surfaces_builder.md
         - typing: api/solution/typing.md
@@ -46,6 +48,13 @@ nav:
       - scripts.md
       - CLI script: scripts/cli.md
     - Changelog: changelog.md
+
+options:
+  merge_init_into_class: true
+  group_by_category: true
+  show_category_heading: true
+  members_order: source
+  inherited_members: false
 
 theme:
   name: material

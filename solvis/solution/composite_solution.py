@@ -8,10 +8,11 @@ import io
 import logging
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Dict, Iterable, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
+from nzshm_model import logic_tree
 
 from solvis.solution.inversion_solution.inversion_solution_file import data_to_zip_direct
 
@@ -34,10 +35,15 @@ class CompositeSolution:
     """
 
     _solutions: Dict[str, FaultSystemSolution]
-    _source_logic_tree: Any
+    _source_logic_tree: 'logic_tree.SourceLogicTree'
     _archive_path: Optional[Path] = None
 
-    def __init__(self, source_logic_tree):
+    def __init__(self, source_logic_tree: 'logic_tree.SourceLogicTree'):
+        """Instantiate a new instance.
+
+        Args:
+            source_logic_tree: the logic tree instance.
+        """
         self._source_logic_tree = source_logic_tree
         self._solutions = {}
         # print('__init__', self._solutions)
@@ -154,7 +160,7 @@ class CompositeSolution:
         self._archive_path = Path(archive_path)
 
     @staticmethod
-    def from_archive(archive_path: Path, source_logic_tree: Any) -> 'CompositeSolution':
+    def from_archive(archive_path: Path, source_logic_tree: 'logic_tree.SourceLogicTree') -> 'CompositeSolution':
         """Deserialize a CompositeSolution instance from an archive path.
 
         Args:

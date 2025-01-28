@@ -1,12 +1,13 @@
 #! test_dataframe_models.py
 import pytest
 
+from solvis.solution import SolutionParticipation
 from solvis.solution.dataframe_models import (
     FaultSectionRuptureRateSchema,
     FaultSectionSchema,
     FaultSectionWithSolutionSlipRate,
-    FSS_RuptureSectionsWithRuptureRatesSchema,
-    FSS_RupturesWithRuptureRatesSchema,
+    AggregateRuptureSectionsWithRuptureRatesSchema,
+    AggregateRupturesWithRuptureRatesSchema,
     ParentFaultParticipationSchema,
     RuptureRateSchema,
     RuptureSchema,
@@ -32,7 +33,7 @@ from solvis.solution.dataframe_models import (
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
 def test_section_participation_rates_model(request, soln_fixture):
     solution = request.getfixturevalue(soln_fixture)
-    rates = solution.section_participation_rates(range(10))
+    rates = SolutionParticipation(solution).section_participation_rates(range(10))
     print(rates)
     SectionParticipationSchema.validate(rates)
 
@@ -40,7 +41,7 @@ def test_section_participation_rates_model(request, soln_fixture):
 @pytest.mark.parametrize(("soln_fixture",), [("crustal_fixture",), ("crustal_solution_fixture",)])
 def test_parent_fault_participation_rates_model(request, soln_fixture):
     solution = request.getfixturevalue(soln_fixture)
-    rates = solution.fault_participation_rates()
+    rates = SolutionParticipation(solution).fault_participation_rates()
     print(rates)
     ParentFaultParticipationSchema.validate(rates)
 
@@ -86,7 +87,7 @@ def test_IS_ONLY_ruptures_with_rupture_rates(crustal_solution_fixture):
 def test_FSS_ONLY_ruptures_with_rupture_rates(crustal_fixture):
     df = crustal_fixture.model.ruptures_with_rupture_rates
     print(df)
-    FSS_RupturesWithRuptureRatesSchema.validate(df)
+    AggregateRupturesWithRuptureRatesSchema.validate(df)
 
 
 def test_IS_ONLY_rs_with_rupture_rates(crustal_solution_fixture):
@@ -101,8 +102,8 @@ def test_FSS_ONLY_rs_with_rupture_rates(crustal_fixture):
     print()
     print(df.info())
     print()
-    print(FSS_RuptureSectionsWithRuptureRatesSchema.to_schema())
-    FSS_RuptureSectionsWithRuptureRatesSchema.validate(df)
+    print(AggregateRuptureSectionsWithRuptureRatesSchema.to_schema())
+    AggregateRuptureSectionsWithRuptureRatesSchema.validate(df)
 
 
 ### Below are from InversionSolutionFile
