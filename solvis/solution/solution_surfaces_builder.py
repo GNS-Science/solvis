@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     def calc_dip_dir(section: gpd.GeoDataFrame) -> float:
-        assert isinstance(section.geometry, LineString), "Got and unhandled geometry type."
+        assert isinstance(section.geometry, LineString), "Got an unhandled geometry type."
         flat_geom = LineString(get_coordinates(section.geometry))
 
         point_a = Point(reversed(flat_geom.coords[0]))
