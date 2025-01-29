@@ -1,11 +1,12 @@
 """
-An InversionSolution Archive file helper.
+An InversionSolution archive file helper.
 
-This module handles files having the OpenSHA InversionSolution archive format.
+Supports files in OpenSHA InversionSolution archive format.
 
 It provides conversions from the original file formats to pandas dataframe instances
 with caching and some error handling.
 """
+
 import io
 import json
 import logging
@@ -18,6 +19,8 @@ from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 import geopandas as gpd
 import pandas as pd
 
+from solvis.dochelper import inherit_docstrings
+
 from ..typing import InversionSolutionFileProtocol
 
 if TYPE_CHECKING:
@@ -27,37 +30,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-# from functools import cached_property
-
-"""
-zipfile.ZIP_STORED
-
-    The numeric constant for an uncompressed archive member.
-
-zipfile.ZIP_DEFLATED
-
-    The numeric constant for the usual ZIP compression method. This requires the zlib module.
-
-zipfile.ZIP_BZIP2
-
-    The numeric constant for the BZIP2 compression method. This requires the bz2 module.
-
-    New in version 3.3.
-
-zipfile.ZIP_LZMA
-
-    The numeric constant for the LZMA compression method. This requires the lzma module.
-"""
-
 ZIP_METHOD = zipfile.ZIP_STORED
-
-
-def data_to_zip_direct(z, data, name):
-    log.debug('data_to_zip_direct %s' % name)
-    zinfo = zipfile.ZipInfo(name, time.localtime()[:6])
-    zinfo.compress_type = zipfile.ZIP_DEFLATED
-    z.writestr(zinfo, data)
-
 
 WARNING = """
 # Attention
@@ -75,6 +48,13 @@ Inversion Solution archive file:
 """  # warning added to archives that have been modified by Solvis.
 
 
+def data_to_zip_direct(z, data, name):
+    log.debug('data_to_zip_direct %s' % name)
+    zinfo = zipfile.ZipInfo(name, time.localtime()[:6])
+    zinfo.compress_type = zipfile.ZIP_DEFLATED
+    z.writestr(zinfo, data)
+
+
 def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     new_df = dataframe.copy().reset_index(drop=True).drop(columns=['Rupture Index'])  # , errors='ignore')
     new_df.index = new_df.index.rename('Rupture Index')
@@ -82,28 +62,18 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     return new_df
 
 
+@inherit_docstrings
 class InversionSolutionFile(InversionSolutionFileProtocol):
     """
     Class to handle the OpenSHA modular archive file form.
 
     Methods:
         to_archive: serialise an instance to a zip archive.
-        filter_solution: get a new InversionSolution instance, filtered by rupture ids.
-        set_props:
-
-    Attributes:
-        archive: the archive instance.
-        archive_path: the archive path name.
-        ruptures: get the solution ruptures dataframe.
-        fault_regime:
-        indices:
-        logic_tree_branch:
-        rupture_rates:
-        ruptures:
-        section_target_slip_rates:
     """
 
     RATES_PATH = 'solution/rates.csv'
+    """description of RATES_PATH
+    """
     RUPTS_PATH = 'ruptures/properties.csv'
     INDICES_PATH = 'ruptures/indices.csv'
     AVG_SLIPS_PATH = 'ruptures/average_slips.csv'
@@ -149,7 +119,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         data_to_zip_direct(zip_archive, slips.to_csv(index=reindex), self.AVG_SLIPS_PATH)
 
     def to_archive(self, archive_path_or_buffer: Union[Path, str, io.BytesIO], base_archive_path=None, compat=False):
-        """Write the current solution to a new zip archive.
+        """Write the current solution file to a new zip archive.
 
         Optionally cloning data from a base archive.
 
@@ -158,7 +128,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         so that the original rutpure ids are lost.
 
         Args:
-            archive_path: path or buffrer to write.
+            archive_path_or_buffer: path or buffrer to write.
             base_archive_path: path to an InversionSolution archive to clone data from.
             compat: if True reindex the dataframes so that the archive remains compatible with opensha.
         """
@@ -194,16 +164,10 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def archive_path(self) -> Optional[Path]:
-        """The path of the archive (if any).
-
-        Returns:
-            filepath: the file system path.
-        """
         return self._archive_path
 
     @property
     def archive(self) -> zipfile.ZipFile:
-        """An in-memory archive instance."""
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
         if self._archive is None:
             if self._archive_path is None:  # pragma: no cover  (this should never happen)
@@ -231,13 +195,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
-        """
-        Get the fault sections and replace slip rates from rupture set with target rates from inverison.
-        Cache result.
-
-        Returns:
-            pd.DataFrame: participation rates dataframe
-        """
         if self._fault_sections is not None:
             return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
 
@@ -256,16 +213,11 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def logic_tree_branch(self) -> list:
-        """Values from the opensha `logic_tree_branch` data file.
-
-        Returns:
-            list of value objects
-        """
         if not self._logic_tree_branch:
             ltb = json.load(self.archive.open(self.LOGIC_TREE_PATH))
-            if type(ltb) == list:
+            if isinstance(ltb, list):
                 self._logic_tree_branch = ltb
-            elif type(ltb.get('values')) == list:
+            elif isinstance(ltb.get('values'), list):
                 self._logic_tree_branch = ltb.get('values')
             else:  # pragma: no cover
                 raise ValueError(f"unhandled logic_tree_branch: {ltb}")
@@ -273,12 +225,6 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def fault_regime(self) -> str:
-        """The fault regime as defined in the opensha logic_tree_branch data file.
-
-        Returns:
-            `CRUSTAL` or `SUBDUCTION` respectively.
-        """
-
         def get_regime() -> str:
             for obj in self.logic_tree_branch:  # .get('values'):
                 val = obj.get('value')

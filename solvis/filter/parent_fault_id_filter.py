@@ -1,4 +1,4 @@
-"""
+r"""
 This module provides a class for filtering solution parent faults.
 
 Classes:
@@ -12,18 +12,19 @@ Functions:
 Examples:
     ```py
     >>> model = InversionSolution.from_archive(filename).model
-    >>> parent_fault_ids = FilterParentFaultIds(model)\\
+    >>> parent_fault_ids = FilterParentFaultIds(model)\
             .for_parent_fault_names(['Alpine Jacksons to Kaniere', 'BooBoo'])
     ```
 
 TODO:
   - make FilterParentFaultIds chainable
 """
-from typing import Iterable, Iterator, NamedTuple, Set, Union
+
+from typing import Iterable, Iterator, NamedTuple, Set
 
 import shapely.geometry
 
-from ..solution.typing import InversionSolutionModelProtocol, InversionSolutionProtocol
+from ..solution.typing import InversionSolutionProtocol
 
 
 class ParentFaultMapping(NamedTuple):
@@ -34,7 +35,7 @@ class ParentFaultMapping(NamedTuple):
 
 
 def parent_fault_name_id_mapping(
-    model: InversionSolutionModelProtocol, parent_fault_ids: Iterable[int]
+    solution: InversionSolutionProtocol, parent_fault_ids: Iterable[int]
 ) -> Iterator[ParentFaultMapping]:
     """For each unique parent_fault_id yield a ParentFaultMapping object.
 
@@ -44,7 +45,7 @@ def parent_fault_name_id_mapping(
     Yields:
         A mapping object.
     """
-    df0 = model.fault_sections
+    df0 = solution.solution_file.fault_sections
     df1 = df0[df0['ParentID'].isin(list(parent_fault_ids))][['ParentID', 'ParentName']]
     unique_ids = list(df1.ParentID.unique())
     unique_names = list(df1.ParentName.unique())
@@ -52,7 +53,7 @@ def parent_fault_name_id_mapping(
         yield ParentFaultMapping(parent_id, unique_names[idx])
 
 
-def valid_parent_fault_names(model, validate_names: Iterable[str]) -> Set[str]:
+def valid_parent_fault_names(solution, validate_names: Iterable[str]) -> Set[str]:
     """Check that parent_fault_names are valid for the given solution.
 
     Args:
@@ -64,15 +65,14 @@ def valid_parent_fault_names(model, validate_names: Iterable[str]) -> Set[str]:
     Raises:
         ValueError: If any member of `validate_names` argument is not valid.
     """
-    unknown = set(validate_names).difference(set(model.parent_fault_names))
+    unknown = set(validate_names).difference(set(solution.model.parent_fault_names))
     if unknown:
-        raise ValueError(f"The solution model {model} does not contain the parent_fault_names: {unknown}.")
+        raise ValueError(f"The solution model {solution.model} does not contain the parent_fault_names: {unknown}.")
     return set(validate_names)
 
 
 class FilterParentFaultIds:
-    """
-    A helper class to filter parent faults, returning qualifying fault_ids.
+    """A helper class to filter parent faults, returning qualifying fault_ids.
 
     Class methods all return sets to make it easy to combine filters with
     set operands like `union`, `intersection`, `difference` etc).
@@ -80,26 +80,18 @@ class FilterParentFaultIds:
     Examples:
         ```py
         >>> solution = InversionSolution.from_archive(filename)
-        >>> parent_fault_ids = FilterParentFaultIds(solution)\\
+        >>> parent_fault_ids = FilterParentFaultIds(solution)\
                 .for_parent_fault_names(['Alpine Jacksons to Kaniere'])
         ```
     """
 
-    def __init__(self, solution_model: Union[InversionSolutionModelProtocol, InversionSolutionProtocol]):
-        """
-        Args:
-            solution_model: The solution or solution.model instance to filter on.
-        """
-        self.__model = solution_model
+    def __init__(self, solution: InversionSolutionProtocol):
+        """Instantiate a new filter.
 
-    @property
-    def _model(self):
-        try:
-            getattr(self.__model, 'model')
-            return self.__model.model
-        except (AttributeError):
-            return self.__model
-        raise ValueError(f"unhandled type: {type(self.__model)}")  # pragma: no cover
+        Args:
+            solution: The solution instance to filter on.
+        """
+        self._solution = solution
 
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
@@ -112,7 +104,7 @@ class FilterParentFaultIds:
         Returns:
             the parent_fault_ids.
         """
-        result = set(self._model.fault_sections['ParentID'].tolist())
+        result = set(self._solution.solution_file.fault_sections['ParentID'].tolist())
         return result
 
     def for_parent_fault_names(self, parent_fault_names: Iterable[str]) -> Set[int]:
@@ -127,8 +119,8 @@ class FilterParentFaultIds:
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
         """
-        df0 = self._model.fault_sections
-        ids = df0[df0['ParentName'].isin(list(valid_parent_fault_names(self._model, parent_fault_names)))][
+        df0 = self._solution.solution_file.fault_sections
+        ids = df0[df0['ParentName'].isin(list(valid_parent_fault_names(self._solution, parent_fault_names)))][
             'ParentID'
         ].tolist()
         return set([int(id) for id in ids])
@@ -142,7 +134,7 @@ class FilterParentFaultIds:
         Returns:
             The fault_ids matching the filter.
         """
-        df0 = self._model.fault_sections
+        df0 = self._solution.solution_file.fault_sections
         ids = df0[df0['FaultID'].isin(list(fault_section_ids))]['ParentID'].unique().tolist()
         return set([int(id) for id in ids])
 
@@ -158,7 +150,7 @@ class FilterParentFaultIds:
         Returns:
             The parent_fault_ids matching the filter.
         """
-        # df0 = self._model.rupture_sections
-        df0 = self._model.fault_sections_with_rupture_rates
+        # df0 = self._solution.solution_file.rupture_sections
+        df0 = self._solution.model.fault_sections_with_rupture_rates
         ids = df0[df0['Rupture Index'].isin(list(rupture_ids))].ParentID.unique().tolist()
         return set([int(id) for id in ids])

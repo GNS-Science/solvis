@@ -21,7 +21,9 @@ class TestSolutionSurfacesBuilder(unittest.TestCase):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         filename = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
         sol = InversionSolution.from_archive(str(filename))
-        likeness = SolutionLike(sol.fault_regime, sol.model.fault_sections, sol.model.fault_sections_with_rupture_rates)
+        likeness = SolutionLike(
+            sol.fault_regime, sol.solution_file.fault_sections, sol.model.fault_sections_with_rupture_rates
+        )
 
         # assert isinstance(likeness, InversionSolution)
         assert likeness.fault_regime == 'CRUSTAL'

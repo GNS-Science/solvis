@@ -1,6 +1,5 @@
 #! python3
-"""
-Configuration module for the solvis library.
+"""Configuration module for the solvis library.
 
 These values may be used in Solvis code itself, or in associated scripts.
 
@@ -20,17 +19,16 @@ class EnvMode(enum.IntEnum):
     AWS = 2
 
 
-def boolean_env(environ_name: str) -> bool:
-    """
-    Check whether the code is running in a specific EnvMode.
+def boolean_env(flag: str) -> bool:
+    """Check whether the code is running in a specific EnvMode.
 
-    Parameters:
-        environ_name: an EnvMode member name (e.g. CLUSTER)
+    Arguments:
+        flag: an EnvMode member name (e.g. CLUSTER)
 
     Returns:
-        Whether the mode is set via environment variable.
+        true if flag evaluates true.
     """
-    return bool(os.getenv(environ_name, '').upper() in ["1", "Y", "YES", "TRUE"])
+    return bool(os.getenv(flag, '').upper() in ["1", "Y", "YES", "TRUE"])
 
 
 WORK_PATH = os.getenv('NZSHM22_SCRIPT_WORK_PATH', PurePath(os.getcwd(), "tmp"))

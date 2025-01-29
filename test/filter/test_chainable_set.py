@@ -20,8 +20,8 @@ class FilterExampleClass(ChainableSetBase):
 
 
 @pytest.fixture(scope='module')
-def filter_example(fss_model):
-    yield FilterExampleClass(fss_model)
+def filter_example(crustal_solution_fixture):
+    yield FilterExampleClass(crustal_solution_fixture)
 
 
 def test_chaining_a_b(filter_example):

@@ -1,4 +1,4 @@
-::: solvis.solution.fault_system_solution.fault_system_solution_model
+::: solvis.solution.solution_participation
     options:
       merge_init_into_class: true
       group_by_category: true
@@ -8,4 +8,3 @@
       filters:
         - "!^_[^_]"
         - "!^log"
-        - "!^get_"  # Deprecated function signatures

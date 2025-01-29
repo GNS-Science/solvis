@@ -1,3 +1,5 @@
+"""Provide functions & classes supporting surfaces in inversion solutions geometries."""
+
 import logging
 import time
 from typing import TYPE_CHECKING, Union
@@ -19,7 +21,7 @@ log = logging.getLogger(__name__)
 
 def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     def calc_dip_dir(section: gpd.GeoDataFrame) -> float:
-        assert type(section.geometry) == LineString
+        assert isinstance(section.geometry, LineString), "Got an unhandled geometry type."
         flat_geom = LineString(get_coordinates(section.geometry))
 
         point_a = Point(reversed(flat_geom.coords[0]))
@@ -33,27 +35,25 @@ def create_subduction_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataF
 
 
 def create_crustal_section_surface(section: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    # return create_surface(
-    #     section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
-    # )
     return fault_surface_3d(
         section["geometry"], section["DipDir"], section["DipDeg"], section["UpDepth"], section["LowDepth"]
     )
 
 
 class SolutionSurfacesBuilder:
+    """A class to build solution surfaces."""
+
     def __init__(self, solution: Union['InversionSolution', 'FaultSystemSolution']) -> None:
         self._solution = solution
 
     def fault_surfaces(self) -> gpd.GeoDataFrame:
-        """
-        Calculate the geometry of the solution fault surfaces projected onto the earth surface.
+        """Calculate the geometry of the solution fault surfaces projected onto the earth surface.
 
         Returns:
             a gpd.GeoDataFrame
         """
         tic = time.perf_counter()
-        new_geometry_df = self._solution.model.fault_sections.copy()
+        new_geometry_df: gpd.GeoDataFrame = self._solution.solution_file.fault_sections.copy()
         toc = time.perf_counter()
         log.debug('time to load fault_sections: %2.3f seconds' % (toc - tic))
         if self._solution.fault_regime == 'SUBDUCTION':
@@ -68,10 +68,9 @@ class SolutionSurfacesBuilder:
             raise RuntimeError(f'Unable to render fault_surfaces for fault regime {self._solution.fault_regime}')
 
     def rupture_surface(self, rupture_id: int) -> gpd.GeoDataFrame:
-        """
-        Calculate the geometry of the rupture surfaces projected onto the earth surface.
+        """Calculate the geometry of the rupture surfaces projected onto the earth surface.
 
-        Parameters:
+        Args:
             rupture_id: ID of the rupture
 
         Returns:

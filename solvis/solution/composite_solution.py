@@ -1,17 +1,18 @@
-"""
-This module provides the CompositeSolution class
+"""This module provides the CompositeSolution class.
 
 Classes:
     CompositeSolution: a container class collecting FaultSystemSolution instances.
 """
+
 import io
 import logging
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Dict, Iterable, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
+from nzshm_model import logic_tree
 
 from solvis.solution.inversion_solution.inversion_solution_file import data_to_zip_direct
 
@@ -34,10 +35,15 @@ class CompositeSolution:
     """
 
     _solutions: Dict[str, FaultSystemSolution]
-    _source_logic_tree: Any
+    _source_logic_tree: 'logic_tree.SourceLogicTree'
     _archive_path: Optional[Path] = None
 
-    def __init__(self, source_logic_tree):
+    def __init__(self, source_logic_tree: 'logic_tree.SourceLogicTree'):
+        """Instantiate a new instance.
+
+        Args:
+            source_logic_tree: the logic tree instance.
+        """
         self._source_logic_tree = source_logic_tree
         self._solutions = {}
         # print('__init__', self._solutions)
@@ -91,7 +97,7 @@ class CompositeSolution:
         # if self._fs_with_rates is not None:
         #     return self._fs_with_rates
 
-        all_rates = [sol.model.rupture_rates for sol in self._solutions.values()]
+        all_rates = [sol.solution_file.rupture_rates for sol in self._solutions.values()]
         all_rates_df = pd.concat(all_rates, ignore_index=True)
         return all_rates_df
 
@@ -154,7 +160,7 @@ class CompositeSolution:
         self._archive_path = Path(archive_path)
 
     @staticmethod
-    def from_archive(archive_path: Path, source_logic_tree: Any) -> 'CompositeSolution':
+    def from_archive(archive_path: Path, source_logic_tree: 'logic_tree.SourceLogicTree') -> 'CompositeSolution':
         """Deserialize a CompositeSolution instance from an archive path.
 
         Args:
@@ -191,14 +197,12 @@ class CompositeSolution:
         return list(self._solutions.keys())
 
     def get_fault_system_solution(self, fault_system_code: str) -> FaultSystemSolution:
-        """
-        Retrieve a `FaultSystemSolution` from within the composite solution.
+        """Retrieve a `FaultSystemSolution` from within the composite solution.
 
         Codes can be retrieved with
         [`get_fault_system_codes`][solvis.solution.composite_solution.CompositeSolution.get_fault_system_codes]
 
-
-        Parameters:
+        Args:
             fault_system_code: a named fault system code
 
         Returns:

@@ -1,3 +1,5 @@
+"""Provides a simple rupture grouping feature."""
+
 from typing import Dict, Iterator, List, Optional
 
 from solvis.solution.typing import InversionSolutionProtocol
@@ -15,6 +17,16 @@ NAMES
 def build_rupture_groups(
     solution: InversionSolutionProtocol, rupture_ids: Optional[List[int]] = None, min_overlap: float = 0.8
 ) -> Iterator[Dict]:
+    """Group ruptures that are similar.
+
+    Arguments:
+        solution: the solution instance.
+        rupture_ids: list of ruptures to consider, default to all.
+        min_overlap: proportion of coincident fault sections to use for each rutpure group.
+
+    Returns:
+        groups: a list of rupture id groups
+    """
     dfrs = solution.model.rupture_sections
     rupture_ids = rupture_ids or dfrs['rupture'].unique().tolist()
     print(f"there are {len(rupture_ids)} unique ruptures")

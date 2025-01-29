@@ -3,10 +3,10 @@ import pytest
 from solvis.filter.subsection_id_filter import FilterSubsectionIds
 
 
-def test_subsections_all(filter_subsection_ids, fss_model):
+def test_subsections_all(filter_subsection_ids, fss_crustal):
     all_sections = filter_subsection_ids.all()
     print(list(all_sections))
-    assert len(all_sections) == fss_model.fault_sections.shape[0]
+    assert len(all_sections) == fss_crustal.solution_file.fault_sections.shape[0]
 
 
 def test_filter_inversion_solution_or_model(crustal_solution_fixture):
