@@ -1,17 +1,14 @@
-# flake8: noqa  this is WIP
-# type: ignore
-# named_fault.py
-"""
-A module to produce a named_fault for use with filtering crustal ruptures.
+"""A module to produce a named_fault for use with filtering crustal ruptures.
 
 for NSHM_V1.* the Crustal Rupture Sets all use the same Fault Model (form the NZ CFM)
-
 """
-from functools import lru_cache
 import csv
+from functools import lru_cache
+
 import pandas as pd
 
 CFM_1_0A_DOM_SANSTVZ_MAP = 'resources/named_faults/cfm_1_0A_no_tvz.xml.FaultsByNameAlt.txt'
+
 
 @lru_cache
 def named_fault_table() -> pd.DataFrame:
@@ -22,5 +19,4 @@ def named_fault_table() -> pd.DataFrame:
         return (row[0], [int(x) for x in row[1:]])
 
     reformed = [reform(row) for row in csv_rows]
-    return pd.DataFrame(reformed, columns = ['named_fault_name', 'parent_fault_ids']).set_index('named_fault_name')
-
+    return pd.DataFrame(reformed, columns=['named_fault_name', 'parent_fault_ids']).set_index('named_fault_name')

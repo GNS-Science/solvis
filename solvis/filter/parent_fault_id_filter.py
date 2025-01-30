@@ -33,6 +33,7 @@ from ..solution import named_fault
 from ..solution.typing import InversionSolutionProtocol, SetOperationEnum
 from .chainable_set_base import ChainableSetBase
 
+
 class ParentFaultMapping(NamedTuple):
     """A mapping class for ParentFault id -> name."""
 
@@ -136,7 +137,6 @@ class FilterParentFaultIds(ChainableSetBase):
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, join_prior=join_prior)
 
-
     def for_named_fault_names(
         self, named_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
     ) -> ChainableSetBase:
@@ -152,11 +152,10 @@ class FilterParentFaultIds(ChainableSetBase):
         Raises:
             ValueError: If any `named_fault_names` value is not valid.
         """
-        pids = []
+        pids: Iterable[int] = []
         for nf_name in named_fault_names:
             pids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
         return self.new_chainable_set(set(pids), self._solution, join_prior=join_prior)
-
 
     def for_subsection_ids(
         self, fault_section_ids: Iterable[int], join_prior: Union[SetOperationEnum, str] = 'intersection'
