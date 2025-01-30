@@ -2,7 +2,7 @@ r"""
 This module provides a class for filtering solution parent faults.
 
 Classes:
- FilterParentFaultIds: a filter for parent faults, returning qualifying fault_ids.
+ FilterParentFaultIds: a chainable filter for parent faults, returning qualifying fault ids.
  ParentFaultMapping: a namedtuple representing id and name of a parent fault.
 
 Functions:
@@ -11,20 +11,29 @@ Functions:
 
 Examples:
     ```py
-    >>> model = InversionSolution.from_archive(filename).model
-    >>> parent_fault_ids = FilterParentFaultIds(model)\
+    >>> solution = InversionSolution.from_archive(filename)
+    >>> parent_fault_ids = FilterParentFaultIds(solution)\
             .for_parent_fault_names(['Alpine: Jacksons to Kaniere', 'BooBoo'])
+
+    >>> # chained with rutpure id filter
+    >>> rupture_ids = FilterRuptureIds(solution)\
+            .for_magnitude(min_mag=5.75, max_mag=6.25)\
+
+    >>> parent_fault_ids = FilterParentFaultIds(solution)\
+            .for_parent_fault_names(['Alpine: Jacksons to Kaniere'])\
+            .for_rupture_ids(rupture_ids)
     ```
 
 TODO:
   - make FilterParentFaultIds chainable
 """
 
-from typing import Iterable, Iterator, NamedTuple, Set
+from typing import Iterable, Iterator, NamedTuple, Set, Union
 
 import shapely.geometry
 
-from ..solution.typing import InversionSolutionProtocol
+from ..solution.typing import InversionSolutionProtocol, SetOperationEnum
+from .chainable_set_base import ChainableSetBase
 
 
 class ParentFaultMapping(NamedTuple):
@@ -71,7 +80,7 @@ def valid_parent_fault_names(solution, validate_names: Iterable[str]) -> Set[str
     return set(validate_names)
 
 
-class FilterParentFaultIds:
+class FilterParentFaultIds(ChainableSetBase):
     """A helper class to filter parent faults, returning qualifying fault_ids.
 
     Class methods all return sets to make it easy to combine filters with
@@ -82,6 +91,7 @@ class FilterParentFaultIds:
         >>> solution = InversionSolution.from_archive(filename)
         >>> parent_fault_ids = FilterParentFaultIds(solution)\
                 .for_parent_fault_names(['Alpine: Jacksons to Kaniere'])
+                .
         ```
     """
 
@@ -96,7 +106,7 @@ class FilterParentFaultIds:
     def for_named_faults(self, named_fault_names: Iterable[str]):
         raise NotImplementedError()
 
-    def all(self) -> Set[int]:
+    def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution parent faults.
 
         NB the usual `join_prior` argument is not implemented as it doesn't seem useful here.
@@ -105,16 +115,19 @@ class FilterParentFaultIds:
             the parent_fault_ids.
         """
         result = set(self._solution.solution_file.fault_sections['ParentID'].tolist())
-        return result
+        return self.new_chainable_set(result, self._solution)
 
-    def for_parent_fault_names(self, parent_fault_names: Iterable[str]) -> Set[int]:
+    def for_parent_fault_names(
+        self, parent_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
+    ) -> ChainableSetBase:
         """Find parent fault ids for the given parent_fault names.
 
         Args:
             parent_fault_names: A list of one or more `parent_fault` names.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The fault_ids matching the filter.
+            A chainable set of fault_ids matching the filter.
 
         Raises:
             ValueError: If any `parent_fault_names` argument is not valid.
@@ -123,34 +136,43 @@ class FilterParentFaultIds:
         ids = df0[df0['ParentName'].isin(list(valid_parent_fault_names(self._solution, parent_fault_names)))][
             'ParentID'
         ].tolist()
-        return set([int(id) for id in ids])
+        result = set([int(id) for id in ids])
+        return self.new_chainable_set(result, self._solution, join_prior=join_prior)
 
-    def for_subsection_ids(self, fault_section_ids: Iterable[int]) -> Set[int]:
+    def for_subsection_ids(
+        self, fault_section_ids: Iterable[int], join_prior: Union[SetOperationEnum, str] = 'intersection'
+    ) -> ChainableSetBase:
         """Find parent fault ids that contain any of the given fault_section_ids.
 
         Args:
             fault_section_ids: A list of one or more fault_section ids.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The fault_ids matching the filter.
+            A chainable set of fault_ids matching the filter.
         """
         df0 = self._solution.solution_file.fault_sections
         ids = df0[df0['FaultID'].isin(list(fault_section_ids))]['ParentID'].unique().tolist()
-        return set([int(id) for id in ids])
+        result = set([int(id) for id in ids])
+        return self.new_chainable_set(result, self._solution, join_prior=join_prior)
 
     def for_polygon(self, polygon: shapely.geometry.Polygon, contained: bool = True):
         raise NotImplementedError()
 
-    def for_rupture_ids(self, rupture_ids: Iterable[int]) -> Set[int]:
+    def for_rupture_ids(
+        self, rupture_ids: Iterable[int], join_prior: Union[SetOperationEnum, str] = 'intersection'
+    ) -> ChainableSetBase:
         """Find parent_fault_ids for the given rupture_ids.
 
         Args:
             rupture_ids: A list of one or more rupture ids.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
 
         Returns:
-            The parent_fault_ids matching the filter.
+            A chainable set of parent fault_ids matching the filter.
         """
         # df0 = self._solution.solution_file.rupture_sections
         df0 = self._solution.model.fault_sections_with_rupture_rates
         ids = df0[df0['Rupture Index'].isin(list(rupture_ids))].ParentID.unique().tolist()
-        return set([int(id) for id in ids])
+        result = set([int(id) for id in ids])
+        return self.new_chainable_set(result, self._solution, join_prior=join_prior)

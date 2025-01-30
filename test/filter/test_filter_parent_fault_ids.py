@@ -75,3 +75,39 @@ def test_parent_faults_for_ruptures(filter_parent_fault_ids, filter_rupture_ids,
 
     # there will be more parent faults, given all those ruptures on the original parents
     assert filter_parent_fault_ids.for_rupture_ids(rupt_ids).issuperset(pids)
+
+
+def test_parent_faults_filter_chaining(filter_parent_fault_ids, crustal_solution_fixture):
+    # filter_rupture_ids = FilterParentFaultIds(crustal_solution_fixture)
+    pnames = random.sample(crustal_solution_fixture.model.parent_fault_names, 2)
+
+    together = filter_parent_fault_ids.for_parent_fault_names(pnames)
+    first = filter_parent_fault_ids.for_parent_fault_names(pnames[:1])
+    second = filter_parent_fault_ids.for_parent_fault_names(pnames[1:])
+
+    assert together.difference(second) == first
+    assert together.difference(first) == second
+
+    ## union
+    chained = filter_parent_fault_ids.for_parent_fault_names(pnames[:1]).for_parent_fault_names(
+        pnames[1:], join_prior='union'
+    )
+    assert together == chained
+
+    ## difference
+    diff = filter_parent_fault_ids.for_parent_fault_names(pnames).for_parent_fault_names(
+        pnames[1:], join_prior='difference'
+    )
+    assert diff == second.difference(together)
+
+    ## symmetric_differnce
+    diff = filter_parent_fault_ids.for_parent_fault_names(pnames).for_parent_fault_names(
+        pnames[1:], join_prior='symmetric_difference'
+    )
+    assert diff == second.symmetric_difference(together)
+
+    ## intersection
+    intersect = filter_parent_fault_ids.for_parent_fault_names(pnames).for_parent_fault_names(
+        pnames[1:]
+    )  # default join_prior is `intersection`
+    assert intersect == second
