@@ -29,9 +29,9 @@ from typing import Iterable, Iterator, NamedTuple, Set, Union
 
 import shapely.geometry
 
+from ..solution import named_fault
 from ..solution.typing import InversionSolutionProtocol, SetOperationEnum
 from .chainable_set_base import ChainableSetBase
-
 
 class ParentFaultMapping(NamedTuple):
     """A mapping class for ParentFault id -> name."""
@@ -135,6 +135,28 @@ class FilterParentFaultIds(ChainableSetBase):
         ].tolist()
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, join_prior=join_prior)
+
+
+    def for_named_fault_names(
+        self, named_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
+    ) -> ChainableSetBase:
+        """Find parent fault ids for the given parent fault names.
+
+        Args:
+            named_fault_name: one or more valid named fault names.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+
+        Returns:
+            A chainable set of fault_ids matching the filter.
+
+        Raises:
+            ValueError: If any `named_fault_names` value is not valid.
+        """
+        pids = []
+        for nf_name in named_fault_names:
+            pids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
+        return self.new_chainable_set(set(pids), self._solution, join_prior=join_prior)
+
 
     def for_subsection_ids(
         self, fault_section_ids: Iterable[int], join_prior: Union[SetOperationEnum, str] = 'intersection'

@@ -111,3 +111,9 @@ def test_parent_faults_filter_chaining(filter_parent_fault_ids, crustal_solution
         pnames[1:]
     )  # default join_prior is `intersection`
     assert intersect == second
+
+
+def test_parent_faults_for_named_faults(filter_parent_fault_ids, crustal_solution_fixture):
+    named_fault = 'Ostler'
+    pids = filter_parent_fault_ids.for_named_fault_names([named_fault])
+    assert list(pids) == [334, 335]
