@@ -14,7 +14,7 @@ Examples:
     >>> solution = InversionSolution.from_archive(filename)
     >>> model = solution.model
     >>> parent_fault_ids = FilterParentFaultIds(model)\
-            .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\
+            .for_parent_fault_names(['Alpine: Jacksons to Kaniere'])\
             .for_rupture_ids([1,2,3])
 
     >>> rupture_ids = FilterRuptureIds(model)\
@@ -22,7 +22,7 @@ Examples:
             .for_magnitude(7.95, 8.15)
 
     >>> assert FilterRuptureIds(model)\
-            .for_parent_fault_names(['Alpine Jacksons to Kaniere'])\
+            .for_parent_fault_names(['Alpine: Jacksons to Kaniere'])\
             .issuperset(rupture_ids), "using set operands on two `filter.for` results"
     ```
 

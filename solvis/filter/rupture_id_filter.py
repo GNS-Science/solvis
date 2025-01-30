@@ -17,14 +17,14 @@ Examples:
 
     >>> # ruptures on any of faults A, B, with magnitude and rupture rate limits
     >>> rupture_ids = FilterRuptureIds(model)\
-    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere", "Vernon"])\
+    >>>    .for_parent_fault_names(['Alpine: Jacksons to Kaniere', 'Vernon 1' ])\
     >>>    .for_magnitude(7.0, 8.0)\
     >>>    .for_rupture_rate(1e-6, 1e-2)
 
     >>> # ruptures on fault A that do not involve fault B:
     >>> rupture_ids = FilterRuptureIds(model)\
-    >>>    .for_parent_fault_names(["Alpine Jacksons to Kaniere"])\
-    >>>    .for_parent_fault_names(["Vernon], join_prior='difference')
+    >>>    .for_parent_fault_names(['Alpine: Jacksons to Kaniere'])\
+    >>>    .for_parent_fault_names(['Vernon 1'], join_prior='difference')
     ```
 """
 

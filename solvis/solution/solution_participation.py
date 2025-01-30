@@ -29,7 +29,7 @@ class SolutionParticipation:
         >>> sol = solvis.InversionSolution.from_archive(filename)
         >>>
         >>> rate = SolutionParticipation(sol)\
-            .fault_participation_rates(['Vernon 4", "Alpine Jacksons to Kaniere"])
+            .fault_participation_rates(['Vernon 4', 'Alpine: Jacksons to Kaniere'])
         >>>
         ```
 

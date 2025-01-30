@@ -21,6 +21,7 @@
  - API simplifications
  - updated flake8 and applied many docstring fixes.
  - refactored participation methods into module/class.
+ - use valid NSHM fault names in docstring examples.
 
 ## Added
  - new filter package providing classes for filtering solutions
