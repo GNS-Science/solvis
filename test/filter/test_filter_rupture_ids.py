@@ -73,6 +73,13 @@ def test_ruptures_for_polygon_intersecting(crustal_solution_fixture, filter_rupt
     ).issubset(rupture_ids)
 
 
+def test_ruptures_for_polygon_type(crustal_solution_fixture, filter_rupture_ids):
+    MRO = location_by_id('MRO')
+    poly = circle_polygon(1.5e5, MRO['latitude'], MRO['longitude'])  # 150km circle around MRO
+    rids = filter_rupture_ids.for_polygon(poly)
+    assert isinstance(list(rids)[0], int)
+
+
 def test_ruptures_for_polygons_join_iterable(crustal_solution_fixture, filter_rupture_ids):
     WLG = location_by_id('WLG')
     MRO = location_by_id('MRO')

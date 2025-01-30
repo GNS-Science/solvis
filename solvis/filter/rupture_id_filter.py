@@ -305,5 +305,5 @@ class FilterRuptureIds(ChainableSetBase):
             df1 = self._solution.model.rupture_sections
 
         df2 = df1.join(df0, 'section', how='inner')
-        result = set(df2[index].unique())
+        result = set(df2[index].tolist())
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
