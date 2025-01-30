@@ -23,9 +23,6 @@ Examples:
             .for_parent_fault_names(['Alpine: Jacksons to Kaniere'])\
             .for_rupture_ids(rupture_ids)
     ```
-
-TODO:
-  - make FilterParentFaultIds chainable
 """
 
 from typing import Iterable, Iterator, NamedTuple, Set, Union
