@@ -37,6 +37,8 @@ class ChainableSetBase:
             instance._chained_set = set.union(result, self.chained_set) if self.chained_set else result
         elif join_prior == SetOperationEnum.DIFFERENCE:
             instance._chained_set = set.difference(result, self.chained_set) if self.chained_set else result
+        elif join_prior == SetOperationEnum.SYMMETRIC_DIFFERENCE:
+            instance._chained_set = set.symmetric_difference(result, self.chained_set) if self.chained_set else result
         else:
             raise ValueError(f"Unsupported join type {join_prior}")  # pragma: no cover
         return instance

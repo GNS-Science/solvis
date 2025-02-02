@@ -284,3 +284,4 @@ class SetOperationEnum(Enum):
     UNION = 1
     INTERSECTION = 2
     DIFFERENCE = 3
+    SYMMETRIC_DIFFERENCE = 4

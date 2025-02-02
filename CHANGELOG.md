@@ -22,6 +22,7 @@
  - updated flake8 and applied many docstring fixes.
  - refactored participation methods into module/class.
  - use valid NSHM fault names in docstring examples.
+ - `FilterParentFaultIds` class is now chainable, like the other filters.
 
 ## Added
  - new filter package providing classes for filtering solutions
@@ -31,6 +32,7 @@
  - added participation methods to fault_system_solution
  - a simple rupture grouping algorithm (can this be a different type of filter??);
  - `pandera` library for dataframe model validations and better docs
+ - ChainableSet now supports set.symmetric_difference
 
 ## Removed
  - deprecated `solvis.solvis` functions removed.
