@@ -13,6 +13,7 @@ import logging
 import time
 import zipfile
 from collections import defaultdict
+from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 
@@ -260,6 +261,7 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         return cast('DataFrame[RuptureSchema]', df)
 
     @property
+    @lru_cache
     def indices(self) -> gpd.GeoDataFrame:
         dtypes: defaultdict = defaultdict(lambda: 'Int32')
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH, dtypes)

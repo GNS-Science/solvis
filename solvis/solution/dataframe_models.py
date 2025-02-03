@@ -47,6 +47,21 @@ class ParentFaultParticipationSchema(pda.DataFrameModel):
     participation_rate: Series[pd.Float32Dtype]
 
 
+class NamedFaultParticipationSchema(pda.DataFrameModel):
+    """A Dataframe schema for `named_fault_participation_rate`.
+
+    Attributes:
+        named_fault_name: unique index on named fault name.
+        participation_rate: sum of the ruptures involving each named fault.
+    """
+
+    class Config:
+        strict = True
+
+    named_fault_name: Index[str]
+    participation_rate: Series[pd.Float32Dtype]
+
+
 class FaultSectionSchemaBase(pda.DataFrameModel):
     """A base schema for common dataframe columns.
 

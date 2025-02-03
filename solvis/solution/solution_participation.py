@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING, Iterable, Optional, cast
 
 import pandas as pd
 
-from solvis.filter import FilterSubsectionIds, FilterParentFaultIds
+from solvis.filter import FilterParentFaultIds, FilterSubsectionIds
+from solvis.solution import named_fault
 
 from .typing import InversionSolutionProtocol
 
@@ -122,8 +123,6 @@ class SolutionParticipation:
             FilterSubsectionIds(self._solution).for_parent_fault_ids(parent_fault_ids) if parent_fault_ids else None
         )
 
-        rate_column = self._solution.model.rate_column_name()
-
         df0 = cast(pd.DataFrame, self._solution.model.rs_with_rupture_rates)
         if subsection_ids:
             df0 = df0[df0["section"].isin(subsection_ids)]
@@ -132,6 +131,7 @@ class SolutionParticipation:
             df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
 
         df1 = df0.join(self._solution.solution_file.fault_sections[['ParentID']], on='section')
+        rate_column = self._solution.model.rate_column_name()
         result = (
             df1[["ParentID", "Rupture Index", rate_column]]
             .rename(columns={rate_column: 'participation_rate'})
@@ -143,10 +143,9 @@ class SolutionParticipation:
         )
         return cast('DataFrame[dataframe_models.ParentFaultParticipationSchema]', result)
 
-
     def named_fault_participation_rates(
         self, named_fault_names: Optional[Iterable[str]] = None, rupture_ids: Optional[Iterable[int]] = None
-    ) -> 'DataFrame[dataframe_models.ParentFaultParticipationSchema]':
+    ) -> 'DataFrame[dataframe_models.NamedFaultParticipationSchema]':
         """Calculate the 'participation rate' for parent faults.
 
         Participation rate for each named fault is the the sum of rupture rates for the
@@ -167,9 +166,34 @@ class SolutionParticipation:
         Returns:
             pd.DataFrame: a participation rates dataframe
         """
-        parent_fault_ids = FilterParentFaultIds(self._solution).for_named_fault_names(named_fault_names)
+        parent_fault_ids = (
+            FilterParentFaultIds(self._solution).for_named_fault_names(named_fault_names) if named_fault_names else None
+        )
 
         subsection_ids = (
             FilterSubsectionIds(self._solution).for_parent_fault_ids(parent_fault_ids) if parent_fault_ids else None
         )
-        raise NotImplementedError()
+
+        df0 = cast(pd.DataFrame, self._solution.model.rs_with_rupture_rates)
+        if subsection_ids:
+            df0 = df0[df0["section"].isin(subsection_ids)]
+
+        if rupture_ids:
+            df0 = df0[df0["Rupture Index"].isin(rupture_ids)]
+
+        df1 = df0.join(self._solution.solution_file.fault_sections[['ParentID']], on='section')
+        df2 = df1.join(named_fault.named_fault_for_parent_ids_table(), 'ParentID', how='outer')
+        df2 = df2.drop(columns=['ParentID'])
+
+        rate_column = self._solution.model.rate_column_name()
+
+        result = (
+            df2[["named_fault_name", "Rupture Index", rate_column]]
+            .rename(columns={rate_column: 'participation_rate'})
+            .reset_index(drop=True)
+            .groupby(["named_fault_name", "Rupture Index"])
+            .agg('first')
+            .groupby("named_fault_name")
+            .agg('sum')
+        )
+        return cast('DataFrame[dataframe_models.NamedFaultParticipationSchema]', result)
