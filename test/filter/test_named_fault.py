@@ -5,6 +5,7 @@ def test_named_fault_table():
     df0 = named_fault.named_fault_table()
     assert df0.loc["Ostler"].parent_fault_ids == [334, 335]
     assert df0.loc["Wairarapa"].parent_fault_ids == [506, 507, 508]
+    assert df0.loc["Alpine: Jacksons to Kaniere"].parent_fault_ids == [13]
 
 
 def test_get_named_fault_for_parent():
