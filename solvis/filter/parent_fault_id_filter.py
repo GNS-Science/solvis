@@ -101,9 +101,6 @@ class FilterParentFaultIds(ChainableSetBase):
         """
         self._solution = solution
 
-    def for_named_faults(self, named_fault_names: Iterable[str]):
-        raise NotImplementedError()
-
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution parent faults.
 
@@ -114,6 +111,26 @@ class FilterParentFaultIds(ChainableSetBase):
         """
         result = set(self._solution.solution_file.fault_sections['ParentID'].tolist())
         return self.new_chainable_set(result, self._solution)
+
+    def for_named_fault_names(
+        self, named_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
+    ) -> ChainableSetBase:
+        """Find parent fault ids for the given parent fault names.
+
+        Args:
+            named_fault_name: one or more valid named fault names.
+            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+
+        Returns:
+            A chainable set of fault_ids matching the filter.
+
+        Raises:
+            ValueError: If any `named_fault_names` value is not valid.
+        """
+        pids: Iterable[int] = []
+        for nf_name in named_fault_names:
+            pids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
+        return self.new_chainable_set(set(pids), self._solution, join_prior=join_prior)
 
     def for_parent_fault_names(
         self, parent_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
@@ -136,26 +153,6 @@ class FilterParentFaultIds(ChainableSetBase):
         ].tolist()
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, join_prior=join_prior)
-
-    def for_named_fault_names(
-        self, named_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
-    ) -> ChainableSetBase:
-        """Find parent fault ids for the given parent fault names.
-
-        Args:
-            named_fault_name: one or more valid named fault names.
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
-
-        Returns:
-            A chainable set of fault_ids matching the filter.
-
-        Raises:
-            ValueError: If any `named_fault_names` value is not valid.
-        """
-        pids: Iterable[int] = []
-        for nf_name in named_fault_names:
-            pids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
-        return self.new_chainable_set(set(pids), self._solution, join_prior=join_prior)
 
     def for_subsection_ids(
         self, fault_section_ids: Iterable[int], join_prior: Union[SetOperationEnum, str] = 'intersection'

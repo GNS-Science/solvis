@@ -22,6 +22,7 @@ from typing import Iterable, Union
 
 from solvis.solution.typing import InversionSolutionProtocol, SetOperationEnum
 
+from ..solution import named_fault
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 
@@ -38,9 +39,6 @@ class FilterSubsectionIds(ChainableSetBase):
         self._solution = solution
         self._filter_parent_fault_ids = FilterParentFaultIds(solution)
 
-    def for_named_faults(self, named_fault_names: Iterable[str]) -> ChainableSetBase:
-        raise NotImplementedError()  # pragma: no cover until named fault feature is implemented
-
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution fault subsections.
 
@@ -51,6 +49,27 @@ class FilterSubsectionIds(ChainableSetBase):
         """
         result = set(self._solution.solution_file.fault_sections.index.to_list())
         return self.new_chainable_set(result, self._solution)
+
+    def for_named_fault_names(
+        self,
+        named_fault_names: Iterable[str],
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> ChainableSetBase:
+        """Find subsection ids that occur on any of the given named_fault names.
+
+        Args:
+            named_fault_names: A list of one or more `named_fault` names.
+
+        Returns:
+            The subsection_ids matching the filter.
+
+        Raises:
+            ValueError: If any `named_fault_names` argument is not valid.
+        """
+        parent_fault_ids: Iterable[int] = []
+        for nf_name in named_fault_names:
+            parent_fault_ids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
+        return self.for_parent_fault_ids(parent_fault_ids, join_prior=join_prior)
 
     def for_parent_fault_names(
         self, parent_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
@@ -82,6 +101,7 @@ class FilterSubsectionIds(ChainableSetBase):
         """
         df0 = self._solution.solution_file.fault_sections
         ids = df0[df0['ParentID'].isin(list(parent_fault_ids))]['FaultID'].tolist()
+
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, join_prior=join_prior)
 
