@@ -190,7 +190,7 @@ class FaultSystemSolution(InversionSolution):
             This distinction may go away in future versions, simplifying this issue:
             https://github.com/GNS-Science/nzshm-model/issues/81
         """
-        if isinstance(branch, nm.logic_tree.source_logic_tree.version2.logic_tree.SourceBranch):
+        if isinstance(branch, nm.logic_tree.SourceBranch):
             # NZSHM Model 0.6: v2 branches take inversion ID from first InversionSource
             for source in branch.sources:
                 if source.type == "inversion":
