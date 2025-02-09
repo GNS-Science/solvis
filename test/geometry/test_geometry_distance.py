@@ -5,12 +5,13 @@ import unittest
 import geopandas as gpd
 import numpy as np
 import pytest
-import pyvista as pv
 from nzshm_common.location.location import location_by_id
 from pyproj import Transformer
 from pytest import approx
 
 from solvis import InversionSolution, geometry
+
+pyvista = pytest.importorskip("pyvista")
 
 TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
 
@@ -18,14 +19,14 @@ TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
 class TestPyvistaDistances(unittest.TestCase):
     def test_basic_0_rake_90(self):
 
-        mesh0 = pv.PolyData([[0, 0, 0]], force_float=False)
+        mesh0 = pyvista.PolyData([[0, 0, 0]], force_float=False)
 
         p0 = [0, 1, 0]  # 1st top-trace point
         p1 = [0, 2, 0]  # 2nd top-trace point
         p2 = [1, 1, 10]  # 1st botton trace point
         p3 = [1, 2, 10]  # 2nd bottom trace point
 
-        mesh1 = pv.PolyData([p0, p1, p2, p3], force_float=False)
+        mesh1 = pyvista.PolyData([p0, p1, p2, p3], force_float=False)
         closest_cells, closest_points = mesh1.find_closest_cell(mesh0.points, return_closest_point=True)
         d_exact = np.linalg.norm(mesh0.points - closest_points, axis=1)
 
@@ -36,14 +37,14 @@ class TestPyvistaDistances(unittest.TestCase):
         assert d_exact[0] == 1
 
     def test_basic_1_further_at_depth(self):
-        mesh0 = pv.PolyData([0, 0, 0], force_float=False)
+        mesh0 = pyvista.PolyData([0, 0, 0], force_float=False)
 
         p0 = [0, 2, 0]  # 1st top-trace point
         p1 = [0, 3, 0]  # 2nd top-trace point
         p2 = [2, 2, 10]  # 1st botton trace point
         p3 = [2, 3, 10]  # 2nd bottom trace point
 
-        mesh1 = pv.PolyData([p0, p1, p2, p3], force_float=False)
+        mesh1 = pyvista.PolyData([p0, p1, p2, p3], force_float=False)
 
         closest_cells, closest_points = mesh1.find_closest_cell(mesh0.points, return_closest_point=True)
         d_exact = np.linalg.norm(mesh0.points - closest_points, axis=1)
@@ -55,14 +56,14 @@ class TestPyvistaDistances(unittest.TestCase):
         assert d_exact[0] == 2.0
 
     def test_basic_2_closer_at_depth(self):
-        mesh0 = pv.PolyData([0, 0, 0], force_float=False)
+        mesh0 = pyvista.PolyData([0, 0, 0], force_float=False)
 
         p0 = [10, 2, 0]  # 1st top-trace point
         p1 = [10, 3, 0]  # 2nd top-trace point
         p2 = [0, 2, 5]  # 1st botton trace point
         p3 = [0, 3, 5]  # 2nd bottom trace point
 
-        mesh1 = pv.PolyData([p0, p1, p2, p3], force_float=False)
+        mesh1 = pyvista.PolyData([p0, p1, p2, p3], force_float=False)
         closest_cells, closest_points = mesh1.find_closest_cell(mesh0.points, return_closest_point=True)
         d_exact = np.linalg.norm(mesh0.points - closest_points, axis=1)
 
@@ -73,8 +74,8 @@ class TestPyvistaDistances(unittest.TestCase):
         assert d_exact[0] > 5
 
     def test_calc_distance_345_line(self):
-        origin = pv.PolyData([0, 0, 0], force_float=False)
-        surface = pv.PolyData([[3, 0, 4], [3, 1, 4]], force_float=False)
+        origin = pyvista.PolyData([0, 0, 0], force_float=False)
+        surface = pyvista.PolyData([[3, 0, 4], [3, 1, 4]], force_float=False)
 
         closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
         d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
@@ -84,8 +85,8 @@ class TestPyvistaDistances(unittest.TestCase):
         assert d_exact[0] == 5
 
     def test_calc_distance_345_surface(self):
-        origin = pv.PolyData([0, 0, 0], force_float=False)
-        surface = pv.PolyData([[3, 0, 4], [15, 0, 4], [15, 1, 10], [3, 1, 10]], force_float=False)
+        origin = pyvista.PolyData([0, 0, 0], force_float=False)
+        surface = pyvista.PolyData([[3, 0, 4], [15, 0, 4], [15, 1, 10], [3, 1, 10]], force_float=False)
         closest_cells, closest_points = surface.find_closest_cell(origin.points, return_closest_point=True)
         d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
 
