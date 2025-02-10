@@ -26,6 +26,13 @@ def test_subsections_for_ruptures(filter_subsection_ids):
     assert filter_subsection_ids.for_rupture_ids([10]) == set(range(12))
 
 
+def test_subsection_filter_for_named_fault_names(tiny_crustal_solution_fixture):
+    filter_subsection_ids = FilterSubsectionIds(tiny_crustal_solution_fixture)
+
+    assert filter_subsection_ids.for_named_fault_names(['Ohariu']) == set([1365, 1366, 1367, 1368, 1369, 1370, 1371])
+    assert set(filter_subsection_ids.for_named_fault_names(['Alpine: Jacksons to Kaniere'])) == set(range(41, 62))
+
+
 def test_subsection_filter_for_parent_fault_names(filter_subsection_ids):
     assert filter_subsection_ids.for_parent_fault_names(['Alpine Jacksons to Kaniere']) == set(range(31))
     assert filter_subsection_ids.for_parent_fault_names(['Vernon 4']) == set(range(83, 86))

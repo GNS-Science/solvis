@@ -34,6 +34,7 @@ import shapely.geometry
 
 import solvis.solution
 
+from ..solution import named_fault
 from ..solution.typing import InversionSolutionProtocol, SetOperationEnum
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
@@ -70,7 +71,11 @@ class FilterRuptureIds(ChainableSetBase):
         result = set(self._solution.solution_file.ruptures['Rupture Index'].to_list())
         return self.new_chainable_set(result, self._solution)
 
-    def for_named_faults(self, named_fault_names: Set[str]) -> ChainableSetBase:
+    def for_named_fault_names(
+        self,
+        named_fault_names: Iterable[str],
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> ChainableSetBase:
         """Find ruptures that occur on any of the given named_fault names.
 
         Args:
@@ -82,9 +87,10 @@ class FilterRuptureIds(ChainableSetBase):
         Raises:
             ValueError: If any `named_fault_names` argument is not valid.
         """
-        ### get the parent_fault_names from the mapping
-        ### return self.ids_for_parent_faults(parent_fault_names)
-        raise NotImplementedError()
+        parent_fault_ids: Iterable[int] = []
+        for nf_name in named_fault_names:
+            parent_fault_ids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
+        return self.for_parent_fault_ids(parent_fault_ids=parent_fault_ids, join_prior=join_prior)
 
     def for_parent_fault_names(
         self,

@@ -180,6 +180,12 @@ def crustal_small_fss_fixture(request):
     yield FaultSystemSolution.from_branch_solutions(branch_solutions(fslt, archive=archive))
 
 
+@pytest.fixture(scope='session')
+def tiny_crustal_solution_fixture(request):
+    filepath = folder / "fixtures" / "TinyInversionSolution" / "TinyInversionSolution.zip"
+    yield InversionSolution.from_archive(filepath)
+
+
 # HIK fixtures
 
 

@@ -33,6 +33,7 @@
  - a simple rupture grouping algorithm (can this be a different type of filter??);
  - `pandera` library for dataframe model validations and better docs
  - ChainableSet now supports set.symmetric_difference
+ - named_fault support in filtering and solution participation.
 
 ## Removed
  - deprecated `solvis.solvis` functions removed.

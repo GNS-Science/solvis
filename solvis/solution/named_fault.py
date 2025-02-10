@@ -1,33 +1,52 @@
-# flake8: noqa  this is WIP
-# type: ignore
-# named_fault.py
-"""
-A module to produce a named_fault for use with filtering crustal ruptures.
+"""A module to produce a named_fault for use with filtering crustal ruptures.
 
-for NSHM_V.1 the Crustal Rupture Sets all use the same Fault Model (form the NZ CFM) 
-
+for NSHM_V1.* the Crustal Rupture Sets all use the same Fault Model (form the NZ CFM)
 """
 
 import csv
-from typing import Protocol, Set
+from functools import lru_cache
+from typing import TYPE_CHECKING, Optional
 
 import pandas as pd
 
-# from solvis.inversion_solution import FaultSystemSolution, InversionSolution
-from solvis.solution.typing import InversionSolutionProtocol
+if TYPE_CHECKING:
+    from pandera.typing import DataFrame  # noqa
+
+    from solvis.solution import dataframe_models  # noqa
 
 CFM_1_0A_DOM_SANSTVZ_MAP = 'resources/named_faults/cfm_1_0A_no_tvz.xml.FaultsByNameAlt.txt'
 
-csv_rows = csv.reader(open(CFM_1_0A_DOM_SANSTVZ_MAP, mode='r', encoding='utf-8-sig'), delimiter='\t')
-df = pd.DataFFrame(csv_rows)
+
+@lru_cache
+def named_fault_table() -> pd.DataFrame:
+    """Build a dataframe from the resoource file."""
+    csv_rows = csv.reader(open(CFM_1_0A_DOM_SANSTVZ_MAP, mode='r', encoding='utf-8-sig'), delimiter='\t')
+
+    def reform(row):
+        return (row[0], [int(x) for x in row[1:]])
+
+    reformed = [reform(row) for row in csv_rows]
+    return pd.DataFrame(reformed, columns=['named_fault_name', 'parent_fault_ids']).set_index('named_fault_name')
 
 
-def ids_for_parent_fault_names(self, named_faults: Set[str]) -> Set[int]:
+@lru_cache
+def named_fault_for_parent_ids_table():
+    return named_fault_table().explode('parent_fault_ids').reset_index().set_index('parent_fault_ids')
+
+
+@lru_cache
+def get_named_fault_for_parent(parent_fault_id: int) -> Optional[str]:
+    """Get a named fault name, given a parent_fault_id.
+
+    Args:
+        parent_fault_id: the id of the parent fault,
+
+    Returns:
+        named_fault_name: the named fault name.
     """
-    get the fault_section.ids for the given named_faults.
-    """
-    df0 = self._fss.fault_sections
-    # print("fault_sections")
-    # print(df0[["ParentID", "ParentName"]])
-    ids = df0[df0['ParentName'].isin(list(fault_names))]['ParentID'].tolist()
-    return set([int(id) for id in ids])
+    df0 = named_fault_for_parent_ids_table()
+    try:
+        res = df0.loc[parent_fault_id]
+        return res.named_fault_name
+    except KeyError:
+        return None

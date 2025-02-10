@@ -35,6 +35,7 @@ def test_parent_fault_participation_rate(crustal_small_fss_fixture, fault_name, 
 
     parent_rate = df2.groupby(["ParentID", "Rupture Index"]).agg('first').groupby("ParentID").agg('sum')[RATE_COLUMN]
     print(parent_rate)
+
     assert pytest.approx(parent_rate) == expected_rate  # the original test value
 
     rates = SolutionParticipation(solution).fault_participation_rates([fault_name])
