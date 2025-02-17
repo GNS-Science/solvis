@@ -6,7 +6,8 @@ See notes about FaultSystemSolution and OpenSHA InversionSolution archive format
 
 import logging
 import zipfile
-from typing import TYPE_CHECKING, Optional
+from functools import cache
+from typing import TYPE_CHECKING, Optional, cast
 
 import geopandas as gpd
 import pandas as pd
@@ -18,7 +19,7 @@ from ..inversion_solution import InversionSolutionFile, data_to_zip_direct
 if TYPE_CHECKING:
     from pandera.typing import DataFrame
 
-    from .dataframe_models import RuptureRateSchema
+    from ..dataframe_models import RuptureRateSchema
 
 log = logging.getLogger(__name__)
 
@@ -113,8 +114,9 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         return df.set_index(["fault_system", "Rupture Index"], drop=False)
 
     @property
+    @cache
     def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
-        return self.aggregate_rates
+        return cast('DataFrame[RuptureRateSchema]', self.aggregate_rates)
 
     @property
     def fast_indices(self) -> gpd.GeoDataFrame:

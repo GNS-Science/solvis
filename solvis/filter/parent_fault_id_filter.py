@@ -25,13 +25,16 @@ Examples:
     ```
 """
 
-from typing import Iterable, Iterator, NamedTuple, Set, Union
+from typing import TYPE_CHECKING, Iterable, Iterator, NamedTuple, Set, Union
 
 import shapely.geometry
 
 from ..solution import named_fault
-from ..solution.typing import InversionSolutionProtocol, SetOperationEnum
+from ..solution.typing import SetOperationEnum
 from .chainable_set_base import ChainableSetBase
+
+if TYPE_CHECKING:
+    from solvis import InversionSolution
 
 
 class ParentFaultMapping(NamedTuple):
@@ -42,7 +45,7 @@ class ParentFaultMapping(NamedTuple):
 
 
 def parent_fault_name_id_mapping(
-    solution: InversionSolutionProtocol, parent_fault_ids: Iterable[int]
+    solution: 'InversionSolution', parent_fault_ids: Iterable[int]
 ) -> Iterator[ParentFaultMapping]:
     """For each unique parent_fault_id yield a ParentFaultMapping object.
 
@@ -93,7 +96,7 @@ class FilterParentFaultIds(ChainableSetBase):
         ```
     """
 
-    def __init__(self, solution: InversionSolutionProtocol):
+    def __init__(self, solution: 'InversionSolution'):
         """Instantiate a new filter.
 
         Args:

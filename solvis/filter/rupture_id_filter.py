@@ -27,7 +27,7 @@ Examples:
     ```
 """
 
-from typing import Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Set, Union
 
 import geopandas as gpd
 import shapely.geometry
@@ -35,10 +35,16 @@ import shapely.geometry
 import solvis.solution
 
 from ..solution import named_fault
-from ..solution.typing import InversionSolutionProtocol, SetOperationEnum
+from ..solution.typing import SetOperationEnum
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 from .subsection_id_filter import FilterSubsectionIds
+
+if TYPE_CHECKING:
+    import pandas as pd
+    import pandera
+
+    from solvis import InversionSolution
 
 
 class FilterRuptureIds(ChainableSetBase):
@@ -46,7 +52,7 @@ class FilterRuptureIds(ChainableSetBase):
 
     def __init__(
         self,
-        solution: InversionSolutionProtocol,
+        solution: 'InversionSolution',
         drop_zero_rates: bool = True,
     ):
         """Instantiate a new filter.
@@ -128,7 +134,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         subsection_ids = self._filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
-        df0 = self._solution.model.rupture_sections
+        df0: pd.DataFrame = self._solution.model.rupture_sections
 
         # TODO: this is needed because the rupture rate concept differs between IS and FSS classes
         rate_column = (
@@ -199,7 +205,7 @@ class FilterRuptureIds(ChainableSetBase):
         """
         index = "Rupture Index"
         if self._drop_zero_rates:
-            df0 = self._solution.model.ruptures_with_rupture_rates
+            df0: pd.DataFrame = self._solution.model.ruptures_with_rupture_rates
         else:
             df0 = self._ruptures_with_and_without_rupture_rates()
 
@@ -234,7 +240,7 @@ class FilterRuptureIds(ChainableSetBase):
         """
         index = "Rupture Index"
         if self._drop_zero_rates:
-            df0 = self._solution.model.ruptures_with_rupture_rates
+            df0: pd.DataFrame = self._solution.model.ruptures_with_rupture_rates
         else:
             df0 = self._ruptures_with_and_without_rupture_rates()
 
@@ -300,12 +306,12 @@ class FilterRuptureIds(ChainableSetBase):
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
         """
-        df0 = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
+        df0: pandera.typing.pandas.DataFrame[Any] = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
         df0 = df0[df0['geometry'].intersects(polygon)]
 
         if self._drop_zero_rates:
             index = "Rupture Index"
-            df1 = self._solution.model.rs_with_rupture_rates
+            df1: pandera.typing.pandas.DataFrame[Any] = self._solution.model.rs_with_rupture_rates
         else:
             index = "rupture"
             df1 = self._solution.model.rupture_sections

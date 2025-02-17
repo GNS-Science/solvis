@@ -22,12 +22,10 @@ import pandas as pd
 
 from solvis.dochelper import inherit_docstrings
 
-from ..typing import InversionSolutionFileProtocol
-
 if TYPE_CHECKING:
     from pandera.typing import DataFrame
 
-    from .dataframe_models import FaultSectionSchema, RuptureRateSchema, RuptureSchema
+    from ..dataframe_models import FaultSectionSchema, RuptureRateSchema, RuptureSchema
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +62,7 @@ def reindex_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 @inherit_docstrings
-class InversionSolutionFile(InversionSolutionFileProtocol):
+class InversionSolutionFile:
     """
     Class to handle the OpenSHA modular archive file form.
 
@@ -86,17 +84,14 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
     DATAFRAMES = [RATES_PATH, RUPTS_PATH, INDICES_PATH, AVG_SLIPS_PATH]
 
     def __init__(self) -> None:
-        # self._init_props()
+        """Initializes the InversionSolutionFile object."""
         self._rates: Optional[pd.DataFrame] = None
         self._ruptures: Optional[pd.DataFrame] = None
         self._rupture_props = None
         self._indices: Optional[pd.DataFrame] = None
         self._section_target_slip_rates = None
-        # self._fast_indices = None
-        ## self._rs_with_rupture_rates: Optional[pd.DataFrame] = None
         self._fs_with_rates: Optional[pd.DataFrame] = None
         self._fs_with_soln_rates: Optional[pd.DataFrame] = None
-        ## self._ruptures_with_rupture_rates: Optional[pd.DataFrame] = None
         self._average_slips: Optional[pd.DataFrame] = None
         self._logic_tree_branch: List[Any] = []
         self._fault_regime: str = ''
@@ -104,11 +99,14 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         self._rupture_sections: Optional[gpd.GeoDataFrame] = None
         self._archive_path: Optional[Path] = None
         self._archive: Optional[io.BytesIO] = None
-        # self._surface_builder: SolutionSurfacesBuilder
 
     def _write_dataframes(self, zip_archive: zipfile.ZipFile, reindex: bool = False):
-        # write out the `self` dataframes
-        # log.info("%s write_dataframes with fast_indices: %s" % (type(self), self._fast_indices is not None))
+        """
+        Writes the dataframes to a zip archive.
+
+        :param zip_archive: The zip archive to write to.
+        :param reindex: Whether or not to reindex the dataframes before writing them.
+        """
         rates = reindex_dataframe(self.rupture_rates) if reindex else self.rupture_rates
         rupts = reindex_dataframe(self.ruptures) if reindex else self.ruptures
         indices = reindex_dataframe(self.indices) if reindex else self.indices
@@ -165,10 +163,27 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
 
     @property
     def archive_path(self) -> Optional[Path]:
+        """
+        Get the path to the current archive file.
+
+        Returns:
+            The path to the archive file, or None if the archive is in a buffer.
+        """
         return self._archive_path
 
     @property
     def archive(self) -> zipfile.ZipFile:
+        """
+        Open and cache the zip archive.
+
+        This property opens the zip archive from the specified path or buffer,
+        caches it in memory for efficient access, and returns a `zipfile.ZipFile`
+        object. If the archive is already cached, it simply returns the cached
+        version.
+
+        Returns:
+            A `zipfile.ZipFile` object representing the open archive.
+        """
         log.debug('archive path: %s archive: %s ' % (self._archive_path, self._archive))
         if self._archive is None:
             if self._archive_path is None:  # pragma: no cover  (this should never happen)
@@ -182,6 +197,17 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         return zipfile.ZipFile(self._archive)
 
     def _dataframe_from_csv(self, prop, path, dtype=None):
+        """
+        Load a dataframe from a CSV file in the archive.
+
+        Args:
+            prop: The property or variable to store the loaded dataframe.
+            path: The path to the CSV file within the archive.
+            dtype: A dictionary specifying data types for specific columns (optional).
+
+        Returns:
+            The loaded dataframe.
+        """
         log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))
         if not isinstance(prop, pd.DataFrame):
             tic = time.perf_counter()
@@ -195,37 +221,55 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         return prop
 
     @property
+    @cache
     def fault_sections(self) -> 'DataFrame[FaultSectionSchema]':
-        if self._fault_sections is not None:
-            return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
+        """
+        Get the fault sections with target slip rates.
 
+        Returns:
+            A DataFrame containing fault section data with target slip rates.
+        """
         tic = time.perf_counter()
-        self._fault_sections = gpd.read_file(self.archive.open(self.FAULTS_PATH))
-        self._fault_sections = self._fault_sections.join(self.section_target_slip_rates)
-        self._fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
+        fault_sections = gpd.read_file(self.archive.open(self.FAULTS_PATH))
+        fault_sections = fault_sections.join(self.section_target_slip_rates)
+        fault_sections.drop(columns=["SlipRate", "SlipRateStdDev", "Section Index"], inplace=True)
         mapper = {
             "Slip Rate (m/yr)": "Target Slip Rate",
             "Slip Rate Standard Deviation (m/yr)": "Target Slip Rate StdDev",
         }
-        self._fault_sections.rename(columns=mapper, inplace=True)
+        fault_sections.rename(columns=mapper, inplace=True)
         toc = time.perf_counter()
         log.debug('fault_sections: time to load fault_sections: %2.3f seconds' % (toc - tic))
-        return cast('DataFrame[FaultSectionSchema]', self._fault_sections)
+        return cast('DataFrame[FaultSectionSchema]', fault_sections)
 
     @property
-    def logic_tree_branch(self) -> list:
-        if not self._logic_tree_branch:
-            ltb = json.load(self.archive.open(self.LOGIC_TREE_PATH))
-            if isinstance(ltb, list):
-                self._logic_tree_branch = ltb
-            elif isinstance(ltb.get('values'), list):
-                self._logic_tree_branch = ltb.get('values')
-            else:  # pragma: no cover
-                raise ValueError(f"unhandled logic_tree_branch: {ltb}")
-        return self._logic_tree_branch
+    @cache
+    def logic_tree_branch(self) -> List[Any]:
+        """
+        Get the logic tree branches from the archive.
+
+        Returns:
+            A list of logic tree branch data.
+        """
+        ltb = json.load(self.archive.open(self.LOGIC_TREE_PATH))
+        if isinstance(ltb, list):
+            logic_tree_branch = ltb
+        elif isinstance(ltb.get('values'), list):
+            logic_tree_branch = ltb.get('values')
+        else:  # pragma: no cover
+            raise ValueError(f"unhandled logic_tree_branch: {ltb}")
+        return logic_tree_branch
 
     @property
+    @cache
     def fault_regime(self) -> str:
+        """
+        Get the fault regime from the logic tree branches.
+
+        Returns:
+            The fault regime name as a string `CRUSTAL` or `SUBDUCTION` respectively.
+        """
+
         def get_regime() -> str:
             for obj in self.logic_tree_branch:  # .get('values'):
                 val = obj.get('value')
@@ -237,25 +281,32 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
                 f"expected Fault Regime missing in solution logic tree, see {self.LOGIC_TREE_PATH}."
             )  # pragma: no cover
 
-        if not self._fault_regime:
-            self._fault_regime = get_regime()
-        return self._fault_regime
+        return get_regime()
 
     @property
     def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
+        """
+        Get the rupture rates from the archive.
+
+        Returns:
+            A DataFrame containing rupture rate data.
+        """
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
-        # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
         dtypes["fault_system"] = pd.CategoricalDtype()
-        # dtypes["Annual Rate"] = 'Float32' # pd.Float32Dtype()
-        # return pd.read_csv(zipfile.Path(self._archive_path, at=self.RATES_PATH).open(), dtype=dtypes)
         df = self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
         return cast('DataFrame[RuptureRateSchema]', df)
 
     @property
+    @cache
     def ruptures(self) -> 'DataFrame[RuptureSchema]':
+        """
+        Get the ruptures from the archive.
+
+        Returns:
+            A DataFrame containing rupture data.
+        """
         dtypes: defaultdict = defaultdict(lambda: 'Float32')
-        # dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'
         df = self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH, dtypes)
         return cast('DataFrame[RuptureSchema]', df)
@@ -263,18 +314,38 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
     @property
     @cache
     def indices(self) -> gpd.GeoDataFrame:
+        """
+        Get the rupture indices from the archive.
+
+        Returns:
+            A GeoDataFrame containing rupture index data.
+        """
         dtypes: defaultdict = defaultdict(lambda: 'Int32')
         return self._dataframe_from_csv(self._indices, self.INDICES_PATH, dtypes)
 
     @property
+    @cache
     def average_slips(self) -> gpd.GeoDataFrame:
+        """
+        Get the average slips from the archive.
+
+        Returns:
+            A GeoDataFrame containing average slip data.
+        """
         # dtypes: defaultdict = defaultdict(np.float64)
         dtypes = {}
         dtypes["Rupture Index"] = 'UInt32'
         return self._dataframe_from_csv(self._average_slips, self.AVG_SLIPS_PATH)  # , dtypes)
 
     @property
+    @cache
     def section_target_slip_rates(self) -> gpd.GeoDataFrame:
+        """
+        Get the section target slip rates from the archive.
+
+        Returns:
+            A GeoDataFrame containing section target slip rate data.
+        """
         # dtypes: defaultdict = defaultdict(np.float32)
         dtypes = {}
         dtypes["Section Index"] = 'UInt32'
@@ -288,6 +359,16 @@ class InversionSolutionFile(InversionSolutionFileProtocol):
         fault_sections: pd.DataFrame,
         average_slips: pd.DataFrame,
     ):
+        """
+        Set the properties for this object.
+
+        Args:
+            rates: A DataFrame containing rupture rate data.
+            ruptures: A DataFrame containing rupture data.
+            indices: A DataFrame containing rupture index data.
+            fault_sections: A DataFrame containing fault section data with target slip rates.
+            average_slips: A GeoDataFrame containing average slip data.
+        """
         self._rates = rates
         self._ruptures = ruptures
         self._fault_sections = fault_sections

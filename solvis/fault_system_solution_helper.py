@@ -1,8 +1,6 @@
 """Provides a simple rupture grouping feature."""
 
-from typing import Dict, Iterator, List, Optional
-
-from solvis.solution.typing import InversionSolutionProtocol
+from typing import TYPE_CHECKING, Dict, Iterator, List, Optional
 
 """
 NAMES
@@ -12,10 +10,12 @@ NAMES
     - `named_fault` => Opensha:NamedFault => CFM: ??
     - `rupture`      => Opensha:Rupture => CFM: n/a
 """
+if TYPE_CHECKING:
+    from solvis import InversionSolution
 
 
 def build_rupture_groups(
-    solution: InversionSolutionProtocol, rupture_ids: Optional[List[int]] = None, min_overlap: float = 0.8
+    solution: 'InversionSolution', rupture_ids: Optional[List[int]] = None, min_overlap: float = 0.8
 ) -> Iterator[Dict]:
     """Group ruptures that are similar.
 

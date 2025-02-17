@@ -9,14 +9,15 @@ import pandas as pd
 from solvis.filter import FilterParentFaultIds, FilterSubsectionIds
 from solvis.solution import named_fault
 
-from .typing import InversionSolutionProtocol
-
 if TYPE_CHECKING:
     from pandera.typing import DataFrame
 
     from solvis.solution import dataframe_models
 
 log = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from solvis import InversionSolution
 
 
 class SolutionParticipation:
@@ -40,7 +41,7 @@ class SolutionParticipation:
         named_fault_participation_rates: get rates for named faults
     """
 
-    def __init__(self, solution: InversionSolutionProtocol):
+    def __init__(self, solution: 'InversionSolution'):
         """Instantiate a new instance.
 
         Args:

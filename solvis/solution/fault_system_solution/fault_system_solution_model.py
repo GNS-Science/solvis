@@ -10,8 +10,6 @@ from typing import TYPE_CHECKING, Optional, cast
 
 from pandera.typing import DataFrame
 
-from solvis.dochelper import inherit_docstrings
-
 from ..dataframe_models import RuptureSectionSchema
 from ..inversion_solution import InversionSolutionModel
 from .fault_system_solution_file import FaultSystemSolutionFile
@@ -24,8 +22,9 @@ if TYPE_CHECKING:
     # from numpy.typing import NDArray
     import pandas as pd
 
+    from solvis.solution import dataframe_models
 
-@inherit_docstrings
+
 class FaultSystemSolutionModel(InversionSolutionModel):
     """For analysis of FaultSystemSolutions."""
 
@@ -33,10 +32,6 @@ class FaultSystemSolutionModel(InversionSolutionModel):
         self._fast_indices: Optional[pd.DataFrame] = None
         self._solution_file: FaultSystemSolutionFile = solution_file
         super().__init__(solution_file)
-
-    # @property
-    # def indices(self):
-    #     return self._solution_file.indices
 
     @property
     def composite_rates(self):
@@ -58,10 +53,7 @@ class FaultSystemSolutionModel(InversionSolutionModel):
                 # TODO: this smells bad ....
                 self._solution_file._fast_indices = self._fast_indices
 
-        if self._rupture_sections is None:
-            self._rupture_sections = self._fast_indices
-
-        return cast(DataFrame[RuptureSectionSchema], self._rupture_sections)
+        return cast('DataFrame[dataframe_models.RuptureSectionSchema]', self._fast_indices)
 
     def enable_fast_indices(self) -> bool:
         """Ensure that the fast_indices dataframe is available."""
