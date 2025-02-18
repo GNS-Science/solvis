@@ -179,7 +179,6 @@ class InversionSolution:
     def scale_rupture_rates(
         solution: 'InversionSolution',
         scale: float,
-        max_magnitude: Optional[float] = None,
         rupture_ids: Optional[Iterable[int]] = None,
     ) -> 'InversionSolution':
         """
@@ -188,38 +187,38 @@ class InversionSolution:
         Args:
             solution (InversionSolution): The input inversion solution.
             scale (float): The scaling factor to apply to the rupture rates.
-            max_magnitude (Optional[float]): Maximum magnitude for which to apply the scaling. If provided,
-                only ruptures with magnitudes less than or equal to this value will be scaled.
-            rupture_ids (Optional[Iterable[int]]): Optional collection of specific rupture ids to scale.
-                If provided, only these ruptures will be scaled.
+            rupture_ids (Optional[Iterable[int]], optional): Optional collection of specific rupture ids to scale.
+                If provided, only these ruptures will be scaled. Defaults to None.
 
         Returns:
             InversionSolution: A new instance of InversionSolution with the scaled rupture rates.
         """
-        rr = solution.solution_file.ruptures
-        ra = solution.solution_file.rupture_rates
-        ri = solution.solution_file.indices
-        fs = solution.solution_file.fault_sections
-        av = solution.solution_file.average_slips
+        # Retrieve the current rupture rates
+        rr = solution.solution_file.rupture_rates.copy()
 
-        ruptures = rr.copy()
-        rates = ra.copy()
-        indices = ri.copy()
-        fault_sections = fs.copy()
-        average_slips = av.copy()
-
-        if max_magnitude:
-            mag_ind = rr['Magnitude'] <= max_magnitude
-            rates.loc[mag_ind, 'Annual Rate'] = rates[mag_ind]['Annual Rate'] * scale
+        # If specific rupture ids are provided, filter the data before scaling
+        if rupture_ids is not None:
+            rr_filter = rr["Rupture Index"].isin(rupture_ids)
+            rr.loc[rr_filter, 'Annual Rate'] = rr[rr_filter]['Annual Rate'] * scale
         else:
-            rates['Annual Rate'] = rates['Annual Rate'] * scale
+            rr['Annual Rate'] = rr['Annual Rate'] * scale
 
-        scaled_soln = InversionSolution()
-        scaled_soln.solution_file.set_props(rates, ruptures, indices, fault_sections, average_slips)
+        # Create a new InversionSolution instance
+        new_solution = InversionSolution()
 
-        # TODO: cleanup this _archive_path madness for this and other methods
-        scaled_soln.solution_file._archive_path = solution.solution_file.archive_path
-        return scaled_soln
+        # Update the rupture rates in the new solution
+        new_solution.solution_file.set_props(
+            rates=rr,
+            ruptures=solution.solution_file.ruptures.copy(),
+            indices=solution.solution_file.indices.copy(),
+            fault_sections=solution.solution_file.fault_sections.copy(),
+            average_slips=solution.solution_file.average_slips.copy(),
+        )
+
+        # Set the archive path for the new solution
+        new_solution.solution_file._archive_path = solution.solution_file.archive_path
+
+        return new_solution
 
 
 class BranchInversionSolution(InversionSolution):

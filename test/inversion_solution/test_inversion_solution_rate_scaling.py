@@ -26,39 +26,78 @@ def test_scale_rupture_rates_uniformly(puysegur_small_fixture, scale):
 def test_scale_rupture_rates_below_magnitude(puysegur_small_fixture, magnitude):
     sol = puysegur_small_fixture
     scale = 0.5
-    new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale, max_magnitude=magnitude)
 
-    # print(sol.solution_file.rupture_rates.head())
-    # print()
-    # print(new_sol.solution_file.rupture_rates.head())
+    rupture_ids = FilterRuptureIds(sol, drop_zero_rates=True).for_magnitude(max_mag=magnitude)
+    new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale, rupture_ids=list(rupture_ids))
 
     if magnitude < 5:
-        # no rates should be below this magniture, so no scaling should apply
+        # no ruptures below this magnitude (in inversion solutions), so no scaling should apply
         assert (
             new_sol.solution_file.rupture_rates["Annual Rate"].sum()
             == sol.solution_file.rupture_rates["Annual Rate"].sum()
         )
-    elif magnitude < 9.5:
-        # scaling will be partial
-        assert (new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale).sum() > sol.solution_file.rupture_rates[
-            "Annual Rate"
-        ].sum()
-    else:
+    elif magnitude > 9.5:
         # all ruptures should be below this magnitude, so we should scale everything
         assert (
             new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale
         ).sum() == sol.solution_file.rupture_rates["Annual Rate"].sum()
+    else:
+        # otherwise, scaling will be partial
+        assert (new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale).sum() > sol.solution_file.rupture_rates[
+            "Annual Rate"
+        ].sum()
 
 
-@pytest.mark.skip('WIP')
-def test_scale_rupture_rates_for_polygon(crustal_solution_fixture):
+@pytest.mark.parametrize("scale", [0.1, 1.5])
+def test_scale_rupture_rates_for_polygon(crustal_solution_fixture, scale):
+
+    sol = crustal_solution_fixture
+    # scale = 0.5
 
     WLG = location_by_id('WLG')
     polygon = circle_polygon(5e4, WLG['latitude'], WLG['longitude'])  # 50km circle around WLG
-    rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=False).for_polygon(polygon)
-    all_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=False).all()
+    rupture_ids = list(
+        FilterRuptureIds(sol, drop_zero_rates=True).for_polygon(polygon)
+    )  # TODO: this is returning zero rate ruptures!!!
+    new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale, rupture_ids=rupture_ids)
 
-    assert all_rupture_ids.issuperset(rupture_ids)
+    # overall, the scaling will be partial
+    assert (new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale).sum() != sol.solution_file.rupture_rates[
+        "Annual Rate"
+    ].sum()
 
-    # TODO: added test coverage and implmenent the feature
-    assert 0
+    # but in wellington should all be scaled
+    nrr = new_sol.solution_file.rupture_rates.copy()
+    nrr_filter = nrr["Rupture Index"].isin(rupture_ids)
+
+    orr = sol.solution_file.rupture_rates.copy()
+    orr_filter = orr["Rupture Index"].isin(rupture_ids)
+
+    assert (orr[orr_filter]["Annual Rate"] * scale).sum() == nrr[nrr_filter]["Annual Rate"].sum()
+
+
+def test_scale_rupture_rates_for_all_rupture_ids(puysegur_small_fixture):
+
+    sol = puysegur_small_fixture
+    scale = 0.5
+
+    rupture_ids = FilterRuptureIds(sol, drop_zero_rates=True).all()
+    new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale, rupture_ids=list(rupture_ids))
+
+    # so everythong is scaled
+    assert (new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale).sum() == sol.solution_file.rupture_rates[
+        "Annual Rate"
+    ].sum()
+
+
+def test_scale_rupture_rates_for_no_rupture_ids(puysegur_small_fixture):
+
+    sol = puysegur_small_fixture
+    scale = 0.5
+
+    new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale, rupture_ids=[])
+
+    # so nothing is scaled
+    assert (new_sol.solution_file.rupture_rates["Annual Rate"]).sum() == sol.solution_file.rupture_rates[
+        "Annual Rate"
+    ].sum()
