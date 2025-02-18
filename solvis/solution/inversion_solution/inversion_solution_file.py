@@ -276,7 +276,6 @@ class InversionSolutionFile:
         return get_regime()
 
     @property
-    @cache
     def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
         """
         Get the rupture rates from the archive.
@@ -337,7 +336,6 @@ class InversionSolutionFile:
         return self._average_slips
 
     @property
-    @cache
     def section_target_slip_rates(self) -> gpd.GeoDataFrame:
         """
         Get the section target slip rates from the archive.

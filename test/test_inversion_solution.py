@@ -68,6 +68,12 @@ class TestInversionSolution(object):
         assert "SlipRateStdDev" not in sol.solution_file.fault_sections.columns
         assert "Section Index" not in sol.solution_file.fault_sections.columns
 
+    def test_section_target_slip_rates(self, crustal_solution_fixture):
+        sol = crustal_solution_fixture
+        tss = sol.solution_file.section_target_slip_rates
+        assert tss is not None
+        assert tss.shape == sol.solution_file.section_target_slip_rates.shape
+
     def test_crustal_filter_solution(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
 
@@ -81,7 +87,7 @@ class TestInversionSolution(object):
     @pytest.mark.skip('placeholder for a future ticket')
     def test_crustal_filter_solution_trimmed(self, crustal_solution_fixture):
         # a trimmed sdolution has all the extra solution data (geojson etc) trimmed to match the ruptures changes,
-        #    let's list them here
+        #  let's list them here
 
         sol = crustal_solution_fixture
 
