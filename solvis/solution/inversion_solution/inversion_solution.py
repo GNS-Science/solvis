@@ -214,9 +214,10 @@ class InversionSolution:
         else:
             rates['Annual Rate'] = rates['Annual Rate'] * scale
 
-        # all other props are derived from these
         scaled_soln = InversionSolution()
         scaled_soln.solution_file.set_props(rates, ruptures, indices, fault_sections, average_slips)
+
+        # TODO: cleanup this _archive_path madness for this and other methods
         scaled_soln.solution_file._archive_path = solution.solution_file.archive_path
         return scaled_soln
 
