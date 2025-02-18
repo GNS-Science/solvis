@@ -175,6 +175,51 @@ class InversionSolution:
         new_solution.solution_file._archive_path = solution.solution_file.archive_path
         return new_solution
 
+    @staticmethod
+    def scale_rupture_rates(
+        solution: 'InversionSolution',
+        scale: float,
+        max_magnitude: Optional[float] = None,
+        rupture_ids: Optional[Iterable[int]] = None,
+    ) -> 'InversionSolution':
+        """
+        Scale the rupture rates by a given factor.
+
+        Args:
+            solution (InversionSolution): The input inversion solution.
+            scale (float): The scaling factor to apply to the rupture rates.
+            max_magnitude (Optional[float]): Maximum magnitude for which to apply the scaling. If provided,
+                only ruptures with magnitudes less than or equal to this value will be scaled.
+            rupture_ids (Optional[Iterable[int]]): Optional collection of specific rupture ids to scale.
+                If provided, only these ruptures will be scaled.
+
+        Returns:
+            InversionSolution: A new instance of InversionSolution with the scaled rupture rates.
+        """
+        rr = solution.solution_file.ruptures
+        ra = solution.solution_file.rupture_rates
+        ri = solution.solution_file.indices
+        fs = solution.solution_file.fault_sections
+        av = solution.solution_file.average_slips
+
+        ruptures = rr.copy()
+        rates = ra.copy()
+        indices = ri.copy()
+        fault_sections = fs.copy()
+        average_slips = av.copy()
+
+        if max_magnitude:
+            mag_ind = rr['Magnitude'] <= max_magnitude
+            rates.loc[mag_ind, 'Annual Rate'] = rates[mag_ind]['Annual Rate'] * scale
+        else:
+            rates['Annual Rate'] = rates['Annual Rate'] * scale
+
+        # all other props are derived from these
+        scaled_soln = InversionSolution()
+        scaled_soln.solution_file.set_props(rates, ruptures, indices, fault_sections, average_slips)
+        scaled_soln.solution_file._archive_path = solution.solution_file.archive_path
+        return scaled_soln
+
 
 class BranchInversionSolution(InversionSolution):
     """Extend InversionSolution with the branch attributes.

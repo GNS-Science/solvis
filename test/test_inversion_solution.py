@@ -134,3 +134,42 @@ class TestSmallPuyInversionSolution(object):
         sol = puysegur_small_fixture
         assert isinstance(sol, InversionSolution)
         assert sol.fault_regime == 'SUBDUCTION'
+
+
+class TestRateScaling(object):
+
+    @pytest.mark.parametrize("scale", [0.1, 0.55, 0.89, 1.5])
+    def test_scale_rupture_rates_uniformly(self, puysegur_small_fixture, scale):
+        sol = puysegur_small_fixture
+        # scale = 0.5
+        new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale)
+
+        # print(sol.solution_file.rupture_rates.head())
+        # print()
+        # print(new_sol.solution_file.rupture_rates.head())
+
+        assert (
+            new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale
+        ).sum() == sol.solution_file.rupture_rates["Annual Rate"].sum()
+
+    @pytest.mark.parametrize("magnitude", [1.5, 4.2, 6.5, 7.25])
+    def test_scale_rupture_rates_below_magniture(self, puysegur_small_fixture, magnitude):
+        sol = puysegur_small_fixture
+        scale = 0.5
+        new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale, max_magnitude=magnitude)
+
+        # print(sol.solution_file.rupture_rates.head())
+        # print()
+        # print(new_sol.solution_file.rupture_rates.head())
+
+        if magnitude < 5:
+            # no rates are below this, so no scaling should apply
+            assert (
+                new_sol.solution_file.rupture_rates["Annual Rate"].sum()
+                == sol.solution_file.rupture_rates["Annual Rate"].sum()
+            )
+        else:
+            # scaling will be partial
+            assert (
+                new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale
+            ).sum() > sol.solution_file.rupture_rates["Annual Rate"].sum()
