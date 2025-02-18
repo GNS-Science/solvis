@@ -87,16 +87,9 @@ class InversionSolutionFile:
         """Initializes the InversionSolutionFile object."""
         self._rates: Optional[pd.DataFrame] = None
         self._ruptures: Optional[pd.DataFrame] = None
-        self._rupture_props = None
         self._indices: Optional[pd.DataFrame] = None
-        self._section_target_slip_rates = None
-        self._fs_with_rates: Optional[pd.DataFrame] = None
-        self._fs_with_soln_rates: Optional[pd.DataFrame] = None
+        self._section_target_slip_rates: Optional[pd.DataFrame] = None
         self._average_slips: Optional[pd.DataFrame] = None
-        self._logic_tree_branch: List[Any] = []
-        self._fault_regime: str = ''
-        self._fault_sections: Optional[pd.DataFrame] = None
-        self._rupture_sections: Optional[gpd.GeoDataFrame] = None
         self._archive_path: Optional[Path] = None
         self._archive: Optional[io.BytesIO] = None
 
@@ -196,29 +189,28 @@ class InversionSolutionFile:
 
         return zipfile.ZipFile(self._archive)
 
-    def _dataframe_from_csv(self, prop, path, dtype=None):
+    def _dataframe_from_csv(self, path, dtype=None):
         """
         Load a dataframe from a CSV file in the archive.
 
         Args:
-            prop: The property or variable to store the loaded dataframe.
             path: The path to the CSV file within the archive.
             dtype: A dictionary specifying data types for specific columns (optional).
 
         Returns:
             The loaded dataframe.
         """
-        log.debug('_dataframe_from_csv( %s, %s, %s )' % (prop, path, dtype))
-        if not isinstance(prop, pd.DataFrame):
-            tic = time.perf_counter()
-            data = self.archive.open(path)
-            toc = time.perf_counter()
-            log.debug('dataframe_from_csv() time to open datafile %s %2.3f seconds' % (path, toc - tic))
-            tic = time.perf_counter()
-            prop = pd.read_csv(data, dtype=dtype)
-            toc = time.perf_counter()
-            log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
-        return prop
+        log.debug('_dataframe_from_csv( %s, %s )' % (path, dtype))
+
+        tic = time.perf_counter()
+        data = self.archive.open(path)
+        toc = time.perf_counter()
+        log.debug('dataframe_from_csv() time to open datafile %s %2.3f seconds' % (path, toc - tic))
+        tic = time.perf_counter()
+        df0 = pd.read_csv(data, dtype=dtype)
+        toc = time.perf_counter()
+        log.debug('dataframe_from_csv() time to load dataframe %s %2.3f seconds' % (path, toc - tic))
+        return df0
 
     @property
     @cache
@@ -284,6 +276,7 @@ class InversionSolutionFile:
         return get_regime()
 
     @property
+    @cache
     def rupture_rates(self) -> 'DataFrame[RuptureRateSchema]':
         """
         Get the rupture rates from the archive.
@@ -291,11 +284,12 @@ class InversionSolutionFile:
         Returns:
             A DataFrame containing rupture rate data.
         """
-        dtypes: defaultdict = defaultdict(lambda: 'Float32')
-        dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
-        dtypes["fault_system"] = pd.CategoricalDtype()
-        df = self._dataframe_from_csv(self._rates, self.RATES_PATH, dtypes)
-        return cast('DataFrame[RuptureRateSchema]', df)
+        if self._rates is None:
+            dtypes: defaultdict = defaultdict(lambda: 'Float32')
+            dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
+            dtypes["fault_system"] = pd.CategoricalDtype()
+            self._rates = self._dataframe_from_csv(self.RATES_PATH, dtypes)
+        return cast('DataFrame[RuptureRateSchema]', self._rates)
 
     @property
     @cache
@@ -306,10 +300,11 @@ class InversionSolutionFile:
         Returns:
             A DataFrame containing rupture data.
         """
-        dtypes: defaultdict = defaultdict(lambda: 'Float32')
-        dtypes["Rupture Index"] = 'UInt32'
-        df = self._dataframe_from_csv(self._ruptures, self.RUPTS_PATH, dtypes)
-        return cast('DataFrame[RuptureSchema]', df)
+        if self._ruptures is None:
+            dtypes: defaultdict = defaultdict(lambda: 'Float32')
+            dtypes["Rupture Index"] = 'UInt32'
+            self._ruptures = self._dataframe_from_csv(self.RUPTS_PATH, dtypes)
+        return cast('DataFrame[RuptureSchema]', self._ruptures)
 
     @property
     @cache
@@ -320,8 +315,10 @@ class InversionSolutionFile:
         Returns:
             A GeoDataFrame containing rupture index data.
         """
-        dtypes: defaultdict = defaultdict(lambda: 'Int32')
-        return self._dataframe_from_csv(self._indices, self.INDICES_PATH, dtypes)
+        if self._indices is None:
+            dtypes: defaultdict = defaultdict(lambda: 'Int32')
+            self._indices = self._dataframe_from_csv(self.INDICES_PATH, dtypes)
+        return self._indices
 
     @property
     @cache
@@ -333,9 +330,11 @@ class InversionSolutionFile:
             A GeoDataFrame containing average slip data.
         """
         # dtypes: defaultdict = defaultdict(np.float64)
-        dtypes = {}
-        dtypes["Rupture Index"] = 'UInt32'
-        return self._dataframe_from_csv(self._average_slips, self.AVG_SLIPS_PATH)  # , dtypes)
+        if self._average_slips is None:
+            dtypes = {}
+            dtypes["Rupture Index"] = 'UInt32'
+            self._average_slips = self._dataframe_from_csv(self.AVG_SLIPS_PATH, dtypes)
+        return self._average_slips
 
     @property
     @cache
@@ -347,9 +346,11 @@ class InversionSolutionFile:
             A GeoDataFrame containing section target slip rate data.
         """
         # dtypes: defaultdict = defaultdict(np.float32)
-        dtypes = {}
-        dtypes["Section Index"] = 'UInt32'
-        return self._dataframe_from_csv(self._section_target_slip_rates, self.SECT_SLIP_RATES_PATH)
+        if self._section_target_slip_rates is None:
+            dtypes = {}
+            dtypes["Section Index"] = 'UInt32'
+            self._section_target_slip_rates = self._dataframe_from_csv(self.SECT_SLIP_RATES_PATH, dtypes)
+        return self._section_target_slip_rates
 
     def set_props(
         self,

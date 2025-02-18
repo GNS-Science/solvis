@@ -74,7 +74,7 @@ class FaultSystemSolutionFile(InversionSolutionFile):
         self._aggregate_rates = aggregate_rates
 
         # Now we need a rates table, structured correctly, with weights from the aggregate_rates
-        rates = self.aggregate_rates.drop(columns=['rate_max', 'rate_min', 'rate_count', 'fault_system']).rename(
+        rates = aggregate_rates.drop(columns=['rate_max', 'rate_min', 'rate_count', 'fault_system']).rename(
             columns={"rate_weighted_mean": "Annual Rate"}
         )
         # print(self.aggregate_rates.info())
@@ -97,21 +97,25 @@ class FaultSystemSolutionFile(InversionSolutionFile):
     @property
     def composite_rates(self) -> gpd.GeoDataFrame:
         # dtypes: defaultdict = defaultdict(pd.Float32Dtype)
-        dtypes = {}
-        dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
-        dtypes["fault_system"] = 'category'  # pd.CategoricalDtype()
-        df = self._dataframe_from_csv(self._composite_rates, self.COMPOSITE_RATES_PATH, dtypes)
-        return df.set_index(["solution_id", "Rupture Index"], drop=False)
+        if self._composite_rates is None:
+            dtypes = {}
+            dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
+            dtypes["fault_system"] = 'category'  # pd.CategoricalDtype()
+            self._composite_rates = self._dataframe_from_csv(self.COMPOSITE_RATES_PATH, dtypes)
+        df0 = self._composite_rates.set_index(["solution_id", "Rupture Index"], drop=False)
+        return df0
 
     @property
     def aggregate_rates(self) -> gpd.GeoDataFrame:
         # dtypes: defaultdict = defaultdict(np.float32)
-        dtypes = {}
-        dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
-        dtypes["fault_system"] = 'category'  # pd.CategoricalDtype()
-        dtypes["Annual Rate"] = 'Float32'  # pd.Float32Dtype()
-        df = self._dataframe_from_csv(self._aggregate_rates, self.AGGREGATE_RATES_PATH, dtypes)
-        return df.set_index(["fault_system", "Rupture Index"], drop=False)
+        if self._aggregate_rates is None:
+            dtypes = {}
+            dtypes["Rupture Index"] = 'UInt32'  # pd.UInt32Dtype()
+            dtypes["fault_system"] = 'category'  # pd.CategoricalDtype()
+            dtypes["Annual Rate"] = 'Float32'  # pd.Float32Dtype()
+            self._aggregate_rates = self._dataframe_from_csv(self.AGGREGATE_RATES_PATH, dtypes)
+        df0 = self._aggregate_rates.set_index(["fault_system", "Rupture Index"], drop=False)
+        return df0
 
     @property
     @cache

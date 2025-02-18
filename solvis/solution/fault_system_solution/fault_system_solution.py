@@ -173,6 +173,7 @@ class FaultSystemSolution(InversionSolution):
             solution.solution_file.fault_regime,
             solution.solution_file.average_slips.copy(),
         )
+
         fss_file._archive_path = solution.solution_file.archive_path
 
         new_fss = FaultSystemSolution(fss_file)
