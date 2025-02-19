@@ -133,19 +133,16 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         subsection_ids = self._filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
+
         df0: pd.DataFrame = self._solution.model.rupture_sections
 
-        # TODO: this is needed because the rupture rate concept differs between IS and FSS classes
-        rate_column = (
-            "rate_weighted_mean"
-            if isinstance(self._solution.model, solvis.solution.fault_system_solution.FaultSystemSolutionModel)
-            else "Annual Rate"
-        )
+        rate_column = self._solution.model.rate_column_name()
         if self._drop_zero_rates:
-            df0 = df0.join(
-                self._solution.solution_file.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner'
-            )[[rate_column, "rupture", "section"]]
-            df0 = df0[df0[rate_column] > 0]
+            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+            df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
+                [rate_column, "rupture", "section"]
+            ]
+            # df0 = df0[df0[rate_column] > 0]
 
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
         result = set([int(id) for id in ids])
@@ -172,8 +169,9 @@ class FilterRuptureIds(ChainableSetBase):
 
     def _ruptures_with_and_without_rupture_rates(self, drop_zero_rates: bool = False):
         if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
-            df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates\
-                .drop(columns=["Rupture Index", "fault_system"])
+            df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates.drop(
+                columns=["Rupture Index", "fault_system"]
+            )
             df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
         else:
             df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
@@ -183,9 +181,7 @@ class FilterRuptureIds(ChainableSetBase):
             nonzero = df_rr[rate_column] > 0
             df_rr = df_rr[nonzero]
 
-        return self._solution.solution_file.ruptures.join(
-            df_rr, on="Rupture Index", rsuffix='_r', how='inner'
-        )
+        return self._solution.solution_file.ruptures.join(df_rr, on="Rupture Index", rsuffix='_r', how='inner')
 
     def for_rupture_rate(
         self,
