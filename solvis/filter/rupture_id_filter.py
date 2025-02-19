@@ -306,12 +306,12 @@ class FilterRuptureIds(ChainableSetBase):
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
         """
-        df0: pandera.typing.pandas.DataFrame[Any] = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
+        df0: pd.DataFrame = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
         df0 = df0[df0['geometry'].intersects(polygon)]
 
         if self._drop_zero_rates:
             index = "Rupture Index"
-            df1: pandera.typing.pandas.DataFrame[Any] = self._solution.model.rs_with_rupture_rates
+            df1: pd.DataFrame = self._solution.model.rs_with_rupture_rates
         else:
             index = "rupture"
             df1 = self._solution.model.rupture_sections
