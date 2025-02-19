@@ -35,7 +35,7 @@
  - `pandera` library for dataframe model validations and better docs
  - ChainableSet now supports set.symmetric_difference
  - named_fault support in filtering and solution participation.
- - new scale_rupture_rates() method on IversionSolution
+ - new scale_rupture_rates() method on InversionSolution
 
 ## Removed
  - deprecated `solvis.solvis` functions removed.
