@@ -142,7 +142,6 @@ class FilterRuptureIds(ChainableSetBase):
             df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
                 [rate_column, "rupture", "section"]
             ]
-            # df0 = df0[df0[rate_column] > 0]
 
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
         result = set([int(id) for id in ids])
@@ -209,17 +208,8 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
-        if self._drop_zero_rates:
-            df0: pd.DataFrame = self._solution.model.ruptures_with_rupture_rates
-        else:
-            df0 = self._ruptures_with_and_without_rupture_rates()
-        # df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+        df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
-        # rate_column = (
-        #     "rate_weighted_mean"
-        #     if isinstance(self._model, solvis.solution.FaultSystemSolution)
-        #     else "Annual Rate"
-        # )
         rate_column = self._solution.model.rate_column_name()
 
         # rate col is different for InversionSolution
