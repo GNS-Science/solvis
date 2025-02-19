@@ -299,16 +299,22 @@ class FilterRuptureIds(ChainableSetBase):
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
         """
-        df0: pd.DataFrame = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
-        df0 = df0[df0['geometry'].intersects(polygon)]
+        fault_sections_df: pd.DataFrame = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
 
-        if self._drop_zero_rates:
-            index = "Rupture Index"
-            df1: pd.DataFrame = self._solution.model.rs_with_rupture_rates
-        else:
-            index = "rupture"
-            df1 = self._solution.model.rupture_sections
+        # filter fault sections using the polygon geometry
+        filtered_fault_sections_df = fault_sections_df[fault_sections_df['geometry'].intersects(polygon)]
 
-        df2 = df1.join(df0, 'section', how='inner')
-        result = set(df2[index].tolist())
+        # filter ruptures by drop_zero_rates
+        ruptures_df = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+
+        # join filtered ruptures with rupture_sections
+        rupture_sections_df = self._solution.model.rupture_sections
+        rate_column = self._solution.model.rate_column_name()
+        filtered_rupture_sections_df = rupture_sections_df.join(ruptures_df.set_index("Rupture Index"), on='rupture', how='inner')[
+            [rate_column, "rupture", "section"]
+        ]
+
+        # join filtered rupture sections  and fault sections
+        geom_flt_df = filtered_rupture_sections_df.join(filtered_fault_sections_df, 'section', how='inner')
+        result = set(geom_flt_df["rupture"].tolist())
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
