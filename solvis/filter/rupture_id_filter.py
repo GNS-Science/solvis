@@ -65,6 +65,22 @@ class FilterRuptureIds(ChainableSetBase):
         self._filter_subsection_ids = FilterSubsectionIds(solution)
         self._filter_parent_fault_ids = FilterParentFaultIds(solution)
 
+    def _ruptures_with_and_without_rupture_rates(self, drop_zero_rates: bool = False):
+        if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
+            df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates.drop(
+                columns=["Rupture Index", "fault_system"]
+            )
+            df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
+        else:
+            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
+
+        if drop_zero_rates:
+            rate_column = self._solution.model.rate_column_name()
+            nonzero = df_rr[rate_column] > 0
+            df_rr = df_rr[nonzero]
+
+        return self._solution.solution_file.ruptures.join(df_rr, on="Rupture Index", rsuffix='_r', how='inner')
+
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution ruptures.
 
@@ -166,29 +182,15 @@ class FilterRuptureIds(ChainableSetBase):
         rate_column = self._solution.model.rate_column_name()
         if self._drop_zero_rates:
             df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
-            df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
+            df2 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
                 [rate_column, "rupture", "section"]
             ]
+            ids = df2[df2.section.isin(list(fault_section_ids))].rupture.tolist()
+        else:
+            ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
 
-        ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
-
-    def _ruptures_with_and_without_rupture_rates(self, drop_zero_rates: bool = False):
-        if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
-            df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates.drop(
-                columns=["Rupture Index", "fault_system"]
-            )
-            df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
-        else:
-            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
-
-        if drop_zero_rates:
-            rate_column = self._solution.model.rate_column_name()
-            nonzero = df_rr[rate_column] > 0
-            df_rr = df_rr[nonzero]
-
-        return self._solution.solution_file.ruptures.join(df_rr, on="Rupture Index", rsuffix='_r', how='inner')
 
     def for_rupture_rate(
         self,
@@ -310,9 +312,9 @@ class FilterRuptureIds(ChainableSetBase):
         # join filtered ruptures with rupture_sections
         rupture_sections_df = self._solution.model.rupture_sections
         rate_column = self._solution.model.rate_column_name()
-        filtered_rupture_sections_df = rupture_sections_df.join(ruptures_df.set_index("Rupture Index"), on='rupture', how='inner')[
-            [rate_column, "rupture", "section"]
-        ]
+        filtered_rupture_sections_df = rupture_sections_df.join(
+            ruptures_df.set_index("Rupture Index"), on='rupture', how='inner'
+        )[[rate_column, "rupture", "section"]]
 
         # join filtered rupture sections  and fault sections
         geom_flt_df = filtered_rupture_sections_df.join(filtered_fault_sections_df, 'section', how='inner')
