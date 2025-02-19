@@ -27,7 +27,7 @@ Examples:
     ```
 """
 
-from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Iterable, List, Optional, Set, Union
 
 import geopandas as gpd
 import shapely.geometry
@@ -42,7 +42,6 @@ from .subsection_id_filter import FilterSubsectionIds
 
 if TYPE_CHECKING:
     import pandas as pd
-    import pandera
 
     from solvis import InversionSolution
 

@@ -1,8 +1,7 @@
 """This module defines type classes for the `inversion_solution` package."""
 
 from enum import Enum
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Protocol
+from typing import Any, List, Optional, Protocol
 
 
 class ModelLogicTreeBranch(Protocol):
@@ -16,6 +15,7 @@ class ModelLogicTreeBranch(Protocol):
         inversion_solution_id: An optional string identifier for the inversion solution.
         inversion_solution_type: An optional string specifying the type of inversion solution.
     """
+
     values: List[Any]
     weight: float
     onfault_nrml_id: Optional[str] = ""
@@ -33,6 +33,7 @@ class SetOperationEnum(Enum):
         DIFFERENCE (int): Represents the difference operation.
         SYMMETRIC_DIFFERENCE (int): Represents the symmetric difference operation.
     """
+
     UNION = 1
     INTERSECTION = 2
     DIFFERENCE = 3
