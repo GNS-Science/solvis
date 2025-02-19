@@ -13,7 +13,7 @@ from solvis.solution.typing import SetOperationEnum
 
 def test_top_level_import(crustal_solution_fixture):
     flt = importlib.import_module('solvis.filter')
-    assert {0, 1, 2}.issubset(flt.FilterRuptureIds(crustal_solution_fixture).for_subsection_ids([1]))
+    assert {0, 1, 2}.issubset(flt.FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=False).for_subsection_ids([1]))
 
 
 def test_filter_inversion_solution_or_model(crustal_solution_fixture):
@@ -34,10 +34,11 @@ def test_ruptures_all(filter_rupture_ids, crustal_solution_fixture):
     assert len(all_ruptures) == crustal_solution_fixture.solution_file.ruptures.shape[0]
 
 
-def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
+def test_ruptures_for_subsections(crustal_solution_fixture, filter_subsection_ids):
     ruptures = set([2, 3])
-    all_rupts = filter_rupture_ids.for_subsection_ids(filter_subsection_ids.for_rupture_ids(ruptures))
-
+    all_rupts = FilterRuptureIds(crustal_solution_fixture, False)\
+        .for_subsection_ids(filter_subsection_ids.for_rupture_ids(ruptures))
+ 
     print(all_rupts, ruptures)
     assert all_rupts.issuperset(ruptures)
 
