@@ -46,6 +46,19 @@ def test_ruptures_for_subsections(crustal_solution_fixture, filter_subsection_id
     assert all_rupts.issuperset(ruptures)
 
 
+@pytest.mark.parametrize("drop_zero_rates, len_sects, len_rupts", [(True, 5, 126), (False, 5, 380)])
+def test_ruptures_for_subsections_with_drop_zero_rates(
+    crustal_solution_fixture, filter_subsection_ids, drop_zero_rates, len_sects, len_rupts
+):
+    ruptures = set([2, 3])
+    ssids = list(filter_subsection_ids.for_rupture_ids(ruptures))
+    rupt_ids = list(
+        FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates).for_subsection_ids(ssids)
+    )
+    assert len(ssids) == len_sects
+    assert len(rupt_ids) == len_rupts
+
+
 def test_ruptures_for_parent_fault_ids(filter_rupture_ids, filter_parent_fault_ids, crustal_solution_fixture):
     fault_ids = filter_parent_fault_ids.for_parent_fault_names(['Vernon 4'])
     rupt_ids_with_rate = filter_rupture_ids.for_parent_fault_ids(fault_ids)
