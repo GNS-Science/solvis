@@ -18,19 +18,22 @@ Examples:
     ```
 """
 
-from typing import Iterable, Union
+from typing import TYPE_CHECKING, Iterable, Union
 
-from solvis.solution.typing import InversionSolutionProtocol, SetOperationEnum
+from solvis.solution.typing import SetOperationEnum
 
 from ..solution import named_fault
 from .chainable_set_base import ChainableSetBase
 from .parent_fault_id_filter import FilterParentFaultIds
 
+if TYPE_CHECKING:
+    from solvis import InversionSolution
+
 
 class FilterSubsectionIds(ChainableSetBase):
     """A helper class to filter subsections, returning qualifying section_ids."""
 
-    def __init__(self, solution: InversionSolutionProtocol):
+    def __init__(self, solution: 'InversionSolution'):
         """Instantiate a new filter.
 
         Args:

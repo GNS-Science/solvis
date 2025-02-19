@@ -112,6 +112,15 @@ class TestSmallDataFrames(object):
         sol = puysegur_small_fss_fixture
         assert sol.solution_file.rupture_rates.shape == (7, RATE_COLUMNS_A)  # no 0 rates
 
+    def test_solution_file_rupture_sections(self, crustal_small_fss_fixture):
+        fss = crustal_small_fss_fixture
+        assert fss.model.enable_fast_indices()
+
+        df0 = fss.model.rupture_sections
+        print(df0.info())
+        assert df0.rupture.dtype == 'int64'
+        assert df0.section.dtype == pd.Int32Dtype()
+
     def test_rates_no_missing_aggregates(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
         print(sol.solution_file.rupture_rates.info())

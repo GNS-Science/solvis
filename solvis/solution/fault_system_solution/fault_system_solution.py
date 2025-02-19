@@ -19,33 +19,31 @@ import io
 import logging
 import zipfile
 from pathlib import Path
-from typing import Iterable, Optional, Union, cast
+from typing import TYPE_CHECKING, Iterable, Optional, Union, cast
 
 # import geopandas as gpd
 import nzshm_model as nm
 import pandas as pd
 
-from solvis.dochelper import inherit_docstrings
-
 from ..inversion_solution import InversionSolution
 
 # from ..solution_surfaces_builder import SolutionSurfacesBuilder
-from ..typing import BranchSolutionProtocol, InversionSolutionProtocol, ModelLogicTreeBranch
+from ..typing import ModelLogicTreeBranch
 from .fault_system_solution_file import FaultSystemSolutionFile
 from .fault_system_solution_model import FaultSystemSolutionModel
 
 log = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from ..inversion_solution import BranchInversionSolution
 
-@inherit_docstrings
+
 class FaultSystemSolution(InversionSolution):
     """A class that aggregates InversionSolution instances sharing a common OpenSHA RuptureSet.
 
     The class is largely interchangeable with InversionSolution, as only rupture rates
     are  affected by the aggregation.
     """
-
-    # Docstrings for most methods are found in the `InversionSolutionProtocol` class.
 
     def __init__(self, solution_file: Optional[FaultSystemSolutionFile] = None):
         self._solution_file: FaultSystemSolutionFile = solution_file or FaultSystemSolutionFile()
@@ -83,7 +81,7 @@ class FaultSystemSolution(InversionSolution):
         return FaultSystemSolution(new_solution_file)
 
     @staticmethod
-    def filter_solution(solution: 'InversionSolutionProtocol', rupture_ids: Iterable) -> 'FaultSystemSolution':
+    def filter_solution(solution: 'InversionSolution', rupture_ids: Iterable) -> 'FaultSystemSolution':
         # this method  is not actually used, and maybe deprecated in a future release
 
         solution = cast(FaultSystemSolution, solution)
@@ -136,7 +134,7 @@ class FaultSystemSolution(InversionSolution):
         return FaultSystemSolution(new_solution_file)
 
     @staticmethod
-    def new_solution(solution: BranchSolutionProtocol, composite_rates_df: pd.DataFrame) -> 'FaultSystemSolution':
+    def new_solution(solution: 'BranchInversionSolution', composite_rates_df: pd.DataFrame) -> 'FaultSystemSolution':
         # build a new fault system solution, taking solution template properties, and composite_rates_df
         composite_rates_df = composite_rates_df[composite_rates_df["Annual Rate"] > 0]
         composite_rates_df.insert(
@@ -175,6 +173,7 @@ class FaultSystemSolution(InversionSolution):
             solution.solution_file.fault_regime,
             solution.solution_file.average_slips.copy(),
         )
+
         fss_file._archive_path = solution.solution_file.archive_path
 
         new_fss = FaultSystemSolution(fss_file)
@@ -207,7 +206,7 @@ class FaultSystemSolution(InversionSolution):
         return inversion_solution_id
 
     @staticmethod
-    def from_branch_solutions(solutions: Iterable[BranchSolutionProtocol]) -> 'FaultSystemSolution':
+    def from_branch_solutions(solutions: Iterable['BranchInversionSolution']) -> 'FaultSystemSolution':
 
         # combine the rupture rates from all solutions
         composite_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
