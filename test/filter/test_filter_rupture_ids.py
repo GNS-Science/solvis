@@ -267,3 +267,11 @@ def test_filter_invalid_polygon_join_raises(filter_rupture_ids):
         filter_rupture_ids.for_polygons([polyA], join_polygons='bad')
 
     assert "Unsupported set operation `bad` for `join_polygons` argument" in str(exc)
+
+
+def test_ruptures_filtered_with_vs_without_drop_zero(crustal_solution_fixture):
+    M = 5.7
+    rupture_ids_0 = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=False).for_magnitude(min_mag=M)
+    rupture_ids_1 = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=True).for_magnitude(min_mag=M)
+
+    assert (len(list(rupture_ids_0.symmetric_difference(rupture_ids_1)))) > 0

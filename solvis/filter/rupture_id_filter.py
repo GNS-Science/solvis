@@ -170,19 +170,21 @@ class FilterRuptureIds(ChainableSetBase):
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
-    def _ruptures_with_and_without_rupture_rates(self):
-        """Helper method.
-
-        TODO: this dataframe could be cached?? And used by above??
-        """
-        print(self._solution.solution_file.rupture_rates.info())
+    def _ruptures_with_and_without_rupture_rates(self, drop_zero_rates: bool = False):
         if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
-            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index", "fault_system"])
+            df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates\
+                .drop(columns=["Rupture Index", "fault_system"])
             df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
         else:
             df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
+
+        if drop_zero_rates:
+            rate_column = self._solution.model.rate_column_name()
+            nonzero = df_rr[rate_column] > 0
+            df_rr = df_rr[nonzero]
+
         return self._solution.solution_file.ruptures.join(
-            df_rr, on=self._solution.solution_file.ruptures["Rupture Index"], rsuffix='_r'
+            df_rr, on="Rupture Index", rsuffix='_r', how='inner'
         )
 
     def for_rupture_rate(
@@ -207,6 +209,7 @@ class FilterRuptureIds(ChainableSetBase):
             df0: pd.DataFrame = self._solution.model.ruptures_with_rupture_rates
         else:
             df0 = self._ruptures_with_and_without_rupture_rates()
+        # df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
         # rate_column = (
         #     "rate_weighted_mean"
@@ -238,10 +241,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
-        if self._drop_zero_rates:
-            df0: pd.DataFrame = self._solution.model.ruptures_with_rupture_rates
-        else:
-            df0 = self._ruptures_with_and_without_rupture_rates()
+        df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
         df0 = df0 if not max_mag else df0[df0.Magnitude <= max_mag]
         df0 = df0 if not min_mag else df0[df0.Magnitude > min_mag]
