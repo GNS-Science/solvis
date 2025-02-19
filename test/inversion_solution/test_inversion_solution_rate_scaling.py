@@ -49,28 +49,30 @@ def test_scale_rupture_rates_below_magnitude(puysegur_small_fixture, magnitude):
 
 
 @pytest.mark.parametrize("scale", [0.1, 1.5])
-def test_scale_rupture_rates_for_polygon(crustal_solution_fixture, scale):
+@pytest.mark.parametrize("location", ['WLG', 'CHC', 'AKL'])
+def test_scale_rupture_rates_for_polygon(crustal_solution_fixture, scale, location):
 
     sol = crustal_solution_fixture
-    # scale = 0.5
 
-    WLG = location_by_id('WLG')
-    polygon = circle_polygon(5e4, WLG['latitude'], WLG['longitude'])  # 50km circle around WLG
-    rupture_ids = list(
-        FilterRuptureIds(sol, drop_zero_rates=True).for_polygon(polygon)
-    )  # TODO: this is returning zero rate ruptures!!!
+    locn = location_by_id(location)
+
+    polygon = circle_polygon(5e4, locn['latitude'], locn['longitude'])  # 50km circle around WLG
+    rupture_ids = list(FilterRuptureIds(sol, drop_zero_rates=True).for_polygon(polygon))
     new_sol = InversionSolution.scale_rupture_rates(solution=sol, scale=scale, rupture_ids=rupture_ids)
 
     # overall, the scaling will be partial
-    assert (new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale).sum() != sol.solution_file.rupture_rates[
-        "Annual Rate"
-    ].sum()
+    new_sum_of_rates_check = (new_sol.solution_file.rupture_rates["Annual Rate"] * 1 / scale).sum()
+    old_sum_of_rates_check = sol.solution_file.rupture_rates["Annual Rate"].sum()
+    if scale < 1.0:
+        assert new_sum_of_rates_check > old_sum_of_rates_check
+    else:
+        assert new_sum_of_rates_check < old_sum_of_rates_check
 
-    # but in wellington should all be scaled
-    nrr = new_sol.solution_file.rupture_rates.copy()
+    # but in target location, all rates must be scaled
+    nrr = new_sol.solution_file.rupture_rates
     nrr_filter = nrr["Rupture Index"].isin(rupture_ids)
 
-    orr = sol.solution_file.rupture_rates.copy()
+    orr = sol.solution_file.rupture_rates
     orr_filter = orr["Rupture Index"].isin(rupture_ids)
 
     assert (orr[orr_filter]["Annual Rate"] * scale).sum() == nrr[nrr_filter]["Annual Rate"].sum()
