@@ -163,6 +163,14 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         df0 = self._solution.model.rupture_sections
+
+        rate_column = self._solution.model.rate_column_name()
+        if self._drop_zero_rates:
+            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+            df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
+                [rate_column, "rupture", "section"]
+            ]
+
         ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
