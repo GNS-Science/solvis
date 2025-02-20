@@ -175,6 +175,51 @@ class InversionSolution:
         new_solution.solution_file._archive_path = solution.solution_file.archive_path
         return new_solution
 
+    @staticmethod
+    def scale_rupture_rates(
+        solution: 'InversionSolution',
+        scale: float,
+        rupture_ids: Optional[Iterable[int]] = None,
+    ) -> 'InversionSolution':
+        """
+        Scale the rupture rates by a given factor.
+
+        Args:
+            solution (InversionSolution): The input inversion solution.
+            scale (float): The scaling factor to apply to the rupture rates.
+            rupture_ids (Optional[Iterable[int]], optional): Optional collection of specific rupture ids to scale.
+                If provided, only these ruptures will be scaled. Defaults to None.
+
+        Returns:
+            InversionSolution: A new instance of InversionSolution with the scaled rupture rates.
+        """
+        # Retrieve the current rupture rates
+        rr = solution.solution_file.rupture_rates.copy()
+
+        # If specific rupture ids are provided, filter the data before scaling
+        if rupture_ids is not None:
+            rr_filter = rr["Rupture Index"].isin(rupture_ids)
+            rr.loc[rr_filter, 'Annual Rate'] = rr[rr_filter]['Annual Rate'] * scale
+        else:
+            rr['Annual Rate'] = rr['Annual Rate'] * scale
+
+        # Create a new InversionSolution instance
+        new_solution = InversionSolution()
+
+        # Update the rupture rates in the new solution
+        new_solution.solution_file.set_props(
+            rates=rr,
+            ruptures=solution.solution_file.ruptures.copy(),
+            indices=solution.solution_file.indices.copy(),
+            fault_sections=solution.solution_file.fault_sections.copy(),
+            average_slips=solution.solution_file.average_slips.copy(),
+        )
+
+        # Set the archive path for the new solution
+        new_solution.solution_file._archive_path = solution.solution_file.archive_path
+
+        return new_solution
+
 
 class BranchInversionSolution(InversionSolution):
     """Extend InversionSolution with the branch attributes.

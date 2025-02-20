@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.13.0] 2024-*
+## [1.0.0-alpha] 2025-02-20
 
 ## Changed
  - drop_zero_rate differentiates between FSS and IS;
@@ -23,6 +23,7 @@
  - refactored participation methods into module/class.
  - use valid NSHM fault names in docstring examples.
  - `FilterParentFaultIds` class is now chainable, like the other filters.
+ - fix for #77 (drop_zero_rates is ignored)
 
 ## Added
  - new filter package providing classes for filtering solutions
@@ -34,6 +35,7 @@
  - `pandera` library for dataframe model validations and better docs
  - ChainableSet now supports set.symmetric_difference
  - named_fault support in filtering and solution participation.
+ - new scale_rupture_rates() method on InversionSolution
 
 ## Removed
  - deprecated `solvis.solvis` functions removed.

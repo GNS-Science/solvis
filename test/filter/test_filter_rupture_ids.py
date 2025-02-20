@@ -13,7 +13,9 @@ from solvis.solution.typing import SetOperationEnum
 
 def test_top_level_import(crustal_solution_fixture):
     flt = importlib.import_module('solvis.filter')
-    assert {0, 1, 2}.issubset(flt.FilterRuptureIds(crustal_solution_fixture).for_subsection_ids([1]))
+    assert {0, 1, 2}.issubset(
+        flt.FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=False).for_subsection_ids([1])
+    )
 
 
 def test_filter_inversion_solution_or_model(crustal_solution_fixture):
@@ -34,12 +36,27 @@ def test_ruptures_all(filter_rupture_ids, crustal_solution_fixture):
     assert len(all_ruptures) == crustal_solution_fixture.solution_file.ruptures.shape[0]
 
 
-def test_ruptures_for_subsections(filter_rupture_ids, filter_subsection_ids):
+def test_ruptures_for_subsections(crustal_solution_fixture, filter_subsection_ids):
     ruptures = set([2, 3])
-    all_rupts = filter_rupture_ids.for_subsection_ids(filter_subsection_ids.for_rupture_ids(ruptures))
+    all_rupts = FilterRuptureIds(crustal_solution_fixture, False).for_subsection_ids(
+        filter_subsection_ids.for_rupture_ids(ruptures)
+    )
 
     print(all_rupts, ruptures)
     assert all_rupts.issuperset(ruptures)
+
+
+@pytest.mark.parametrize("drop_zero_rates, len_sects, len_rupts", [(True, 5, 126), (False, 5, 380)])
+def test_ruptures_for_subsections_with_drop_zero_rates(
+    crustal_solution_fixture, filter_subsection_ids, drop_zero_rates, len_sects, len_rupts
+):
+    ruptures = set([2, 3])
+    ssids = list(filter_subsection_ids.for_rupture_ids(ruptures))
+    rupt_ids = list(
+        FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates).for_subsection_ids(ssids)
+    )
+    assert len(ssids) == len_sects
+    assert len(rupt_ids) == len_rupts
 
 
 def test_ruptures_for_parent_fault_ids(filter_rupture_ids, filter_parent_fault_ids, crustal_solution_fixture):
@@ -267,3 +284,11 @@ def test_filter_invalid_polygon_join_raises(filter_rupture_ids):
         filter_rupture_ids.for_polygons([polyA], join_polygons='bad')
 
     assert "Unsupported set operation `bad` for `join_polygons` argument" in str(exc)
+
+
+def test_ruptures_filtered_with_vs_without_drop_zero(crustal_solution_fixture):
+    M = 5.7
+    rupture_ids_0 = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=False).for_magnitude(min_mag=M)
+    rupture_ids_1 = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=True).for_magnitude(min_mag=M)
+
+    assert (len(list(rupture_ids_0.symmetric_difference(rupture_ids_1)))) > 0

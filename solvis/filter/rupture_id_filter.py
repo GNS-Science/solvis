@@ -27,7 +27,7 @@ Examples:
     ```
 """
 
-from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Iterable, List, Optional, Set, Union
 
 import geopandas as gpd
 import shapely.geometry
@@ -42,7 +42,6 @@ from .subsection_id_filter import FilterSubsectionIds
 
 if TYPE_CHECKING:
     import pandas as pd
-    import pandera
 
     from solvis import InversionSolution
 
@@ -65,6 +64,22 @@ class FilterRuptureIds(ChainableSetBase):
         self._drop_zero_rates = drop_zero_rates
         self._filter_subsection_ids = FilterSubsectionIds(solution)
         self._filter_parent_fault_ids = FilterParentFaultIds(solution)
+
+    def _ruptures_with_and_without_rupture_rates(self, drop_zero_rates: bool = False):
+        if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
+            df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates.drop(
+                columns=["Rupture Index", "fault_system"]
+            )
+            df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
+        else:
+            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
+
+        if drop_zero_rates:
+            rate_column = self._solution.model.rate_column_name()
+            nonzero = df_rr[rate_column] > 0
+            df_rr = df_rr[nonzero]
+
+        return self._solution.solution_file.ruptures.join(df_rr, on="Rupture Index", rsuffix='_r', how='inner')
 
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution ruptures.
@@ -134,19 +149,15 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         subsection_ids = self._filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
+
         df0: pd.DataFrame = self._solution.model.rupture_sections
 
-        # TODO: this is needed because the rupture rate concept differs between IS and FSS classes
-        rate_column = (
-            "rate_weighted_mean"
-            if isinstance(self._solution.model, solvis.solution.fault_system_solution.FaultSystemSolutionModel)
-            else "Annual Rate"
-        )
+        rate_column = self._solution.model.rate_column_name()
         if self._drop_zero_rates:
-            df0 = df0.join(
-                self._solution.solution_file.rupture_rates.set_index("Rupture Index"), on='rupture', how='inner'
-            )[[rate_column, "rupture", "section"]]
-            df0 = df0[df0[rate_column] > 0]
+            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+            df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
+                [rate_column, "rupture", "section"]
+            ]
 
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
         result = set([int(id) for id in ids])
@@ -167,24 +178,19 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         df0 = self._solution.model.rupture_sections
-        ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
+
+        rate_column = self._solution.model.rate_column_name()
+        if self._drop_zero_rates:
+            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+            df2 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
+                [rate_column, "rupture", "section"]
+            ]
+            ids = df2[df2.section.isin(list(fault_section_ids))].rupture.tolist()
+        else:
+            ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
+
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
-
-    def _ruptures_with_and_without_rupture_rates(self):
-        """Helper method.
-
-        TODO: this dataframe could be cached?? And used by above??
-        """
-        print(self._solution.solution_file.rupture_rates.info())
-        if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
-            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index", "fault_system"])
-            df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
-        else:
-            df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
-        return self._solution.solution_file.ruptures.join(
-            df_rr, on=self._solution.solution_file.ruptures["Rupture Index"], rsuffix='_r'
-        )
 
     def for_rupture_rate(
         self,
@@ -204,16 +210,8 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
-        if self._drop_zero_rates:
-            df0: pd.DataFrame = self._solution.model.ruptures_with_rupture_rates
-        else:
-            df0 = self._ruptures_with_and_without_rupture_rates()
+        df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
-        # rate_column = (
-        #     "rate_weighted_mean"
-        #     if isinstance(self._model, solvis.solution.FaultSystemSolution)
-        #     else "Annual Rate"
-        # )
         rate_column = self._solution.model.rate_column_name()
 
         # rate col is different for InversionSolution
@@ -239,10 +237,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
-        if self._drop_zero_rates:
-            df0: pd.DataFrame = self._solution.model.ruptures_with_rupture_rates
-        else:
-            df0 = self._ruptures_with_and_without_rupture_rates()
+        df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
         df0 = df0 if not max_mag else df0[df0.Magnitude <= max_mag]
         df0 = df0 if not min_mag else df0[df0.Magnitude > min_mag]
@@ -306,16 +301,22 @@ class FilterRuptureIds(ChainableSetBase):
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
         """
-        df0: pandera.typing.pandas.DataFrame[Any] = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
-        df0 = df0[df0['geometry'].intersects(polygon)]
+        fault_sections_df: pd.DataFrame = gpd.GeoDataFrame(self._solution.solution_file.fault_sections)
 
-        if self._drop_zero_rates:
-            index = "Rupture Index"
-            df1: pandera.typing.pandas.DataFrame[Any] = self._solution.model.rs_with_rupture_rates
-        else:
-            index = "rupture"
-            df1 = self._solution.model.rupture_sections
+        # filter fault sections using the polygon geometry
+        filtered_fault_sections_df = fault_sections_df[fault_sections_df['geometry'].intersects(polygon)]
 
-        df2 = df1.join(df0, 'section', how='inner')
-        result = set(df2[index].tolist())
+        # filter ruptures by drop_zero_rates
+        ruptures_df = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+
+        # join filtered ruptures with rupture_sections
+        rupture_sections_df = self._solution.model.rupture_sections
+        rate_column = self._solution.model.rate_column_name()
+        filtered_rupture_sections_df = rupture_sections_df.join(
+            ruptures_df.set_index("Rupture Index"), on='rupture', how='inner'
+        )[[rate_column, "rupture", "section"]]
+
+        # join filtered rupture sections  and fault sections
+        geom_flt_df = filtered_rupture_sections_df.join(filtered_fault_sections_df, 'section', how='inner')
+        result = set(geom_flt_df["rupture"].tolist())
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)

@@ -40,7 +40,7 @@ class TestNewInversionSolutionSubduction(unittest.TestCase):
         ruptures = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-7))
         print(ruptures)
 
-        ruptures_all = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=0))
+        ruptures_all = list(FilterRuptureIds(sol, False).for_rupture_rate(min_rate=0))
         ruptures_small = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-15))
         ruptures_med = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-10))
         ruptures_big = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-6))
@@ -71,7 +71,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
     def test_rupt_ids_above_rate(self):
 
         sol = TestNewInversionSolutionCrustal.original_solution
-        ruptures_all = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=0))
+        ruptures_all = list(FilterRuptureIds(sol, False).for_rupture_rate(min_rate=0))
         ruptures_small = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-15))
         ruptures_med = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-10))
         ruptures_big = list(FilterRuptureIds(sol).for_rupture_rate(min_rate=1e-6))
