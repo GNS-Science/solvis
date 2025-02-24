@@ -18,7 +18,7 @@ Examples:
     ```
 """
 
-from typing import TYPE_CHECKING, Iterable, Union
+from typing import TYPE_CHECKING, Iterable, List, Union
 
 from solvis.solution.typing import SetOperationEnum
 
@@ -52,6 +52,15 @@ class FilterSubsectionIds(ChainableSetBase):
         """
         result = set(self._solution.solution_file.fault_sections.index.to_list())
         return self.new_chainable_set(result, self._solution)
+
+    def tolist(self) -> List[int]:
+        """
+        Returns the fault subsection id as a list of integers.
+
+        Returns:
+            A list of integers representing the filtered fault subsection ids.
+        """
+        return list(self)
 
     def for_named_fault_names(
         self,

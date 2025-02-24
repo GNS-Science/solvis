@@ -81,6 +81,17 @@ class FilterRuptureIds(ChainableSetBase):
 
         return self._solution.solution_file.ruptures.join(df_rr, on="Rupture Index", rsuffix='_r', how='inner')
 
+    def _get_rupture_ids_for_subsection_ids(self, subsection_ids: Iterable[int]) -> Set[int]:
+        df0: pd.DataFrame = self._solution.model.rupture_sections
+        rate_column = self._solution.model.rate_column_name()
+        if self._drop_zero_rates:
+            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+            df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
+                [rate_column, "rupture", "section"]
+            ]
+        ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
+        return set([int(id) for id in ids])
+
     def tolist(self) -> List[int]:
         """
         Returns the filtered rupture ids as a list of integers.
@@ -160,17 +171,8 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         subsection_ids = self._filter_subsection_ids.for_parent_fault_ids([parent_fault_id])
-        df0: pd.DataFrame = self._solution.model.rupture_sections
-        rate_column = self._solution.model.rate_column_name()
-        if self._drop_zero_rates:
-            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
-            df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
-                [rate_column, "rupture", "section"]
-            ]
-
-        ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
-        result = set([int(id) for id in ids])
-        return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
+        rupture_ids = self._get_rupture_ids_for_subsection_ids(subsection_ids)
+        return self.new_chainable_set(rupture_ids, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
     def for_parent_fault_ids(
         self,
@@ -178,12 +180,12 @@ class FilterRuptureIds(ChainableSetBase):
         join_type: Union[SetOperationEnum, str] = 'union',
         join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> ChainableSetBase:
-        """Find ruptures that occur on any of the given parent_fault ids.
+        """Find ruptures that occur on the given parent_fault ids.
 
         Args:
             parent_fault_ids: A list of one or more `parent_fault` ids.
             join_type: The type of set operation to perform when combining results from multiple parent_fault_ids.
-                Options are 'union' and 'intersection'. Default is 'union'.
+                Options are 'union' and 'intersection'.
             join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
@@ -207,6 +209,7 @@ class FilterRuptureIds(ChainableSetBase):
     def for_subsection_ids(
         self,
         fault_section_ids: Iterable[int],
+        join_type: Union[SetOperationEnum, str] = 'union',
         join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> ChainableSetBase:
         """Find ruptures that occur on any of the given fault_section_ids.
@@ -215,25 +218,26 @@ class FilterRuptureIds(ChainableSetBase):
 
         Args:
             fault_section_ids: A list of one or more fault_section ids.
+            join_type: The type of set operation to perform when combining results from multiple fault_section_ids.
+                Options are 'union' and 'intersection'.
             join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter.
         """
-        df0 = self._solution.model.rupture_sections
+        if isinstance(join_type, str):
+            join_type = SetOperationEnum.__members__[join_type.upper()]
 
-        rate_column = self._solution.model.rate_column_name()
-        if self._drop_zero_rates:
-            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
-            df2 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
-                [rate_column, "rupture", "section"]
-            ]
-            ids = df2[df2.section.isin(list(fault_section_ids))].rupture.tolist()
+        rupture_id_sets: List[Set[int]] = []
+        for fault_section_id in fault_section_ids:
+            rupture_id_sets.append(self._get_rupture_ids_for_subsection_ids([fault_section_id]))
+        if join_type == SetOperationEnum.INTERSECTION:
+            rupture_ids = set.intersection(*rupture_id_sets)
+        elif join_type == SetOperationEnum.UNION:
+            rupture_ids = set.union(*rupture_id_sets)
         else:
-            ids = df0[df0.section.isin(list(fault_section_ids))].rupture.tolist()
-
-        result = set([int(id) for id in ids])
-        return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
+            raise ValueError("Only INTERSECTION and UNION operations are supported for option 'join_type'")
+        return self.new_chainable_set(rupture_ids, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
     def for_rupture_rate(
         self,

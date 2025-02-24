@@ -344,3 +344,34 @@ def test_ruptures_for_parent_fault_ids_unsupported_set_operation(crustal_solutio
     with pytest.raises((ValueError, KeyError)) as exc:
         _ = FilterRuptureIds(crustal_solution_fixture).for_parent_fault_ids([4, 5, 6], join_type=intersection_join)
     print(exc)
+
+
+@pytest.mark.parametrize("intersection_join", ['intersection', SetOperationEnum.INTERSECTION])
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_ruptures_for_fault_section_ids_set_operations(
+    filter_subsection_ids, crustal_solution_fixture, drop_zero_rates, intersection_join
+):
+
+    subsection_ids = filter_subsection_ids.for_parent_fault_names(['Vernon 4', 'Alpine Jacksons to Kaniere']).tolist()
+    print(subsection_ids)
+
+    filter_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates)
+
+    rupt_ids_union = filter_rupture_ids.for_subsection_ids(subsection_ids, join_type='union')
+    rupt_ids_intersection = filter_rupture_ids.for_subsection_ids(subsection_ids, join_type=intersection_join)
+
+    print(rupt_ids_intersection.tolist())
+    print(rupt_ids_union.tolist())
+
+    assert rupt_ids_union != rupt_ids_intersection
+    assert rupt_ids_union.issuperset(rupt_ids_intersection)
+    # assert 0
+
+
+@pytest.mark.parametrize(
+    "intersection_join", [None, 'intersplunk', SetOperationEnum.DIFFERENCE, SetOperationEnum.SYMMETRIC_DIFFERENCE, 45]
+)
+def test_ruptures_for_fault_section_ids_unsupported_set_operation(crustal_solution_fixture, intersection_join):
+    with pytest.raises((ValueError, KeyError)) as exc:
+        _ = FilterRuptureIds(crustal_solution_fixture).for_subsection_ids([4, 5, 6], join_type=intersection_join)
+    print(exc)
