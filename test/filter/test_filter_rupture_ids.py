@@ -5,7 +5,7 @@ import pytest
 from nzshm_common.location.location import location_by_id
 
 from solvis import circle_polygon
-from solvis.filter.rupture_id_filter import FilterRuptureIds
+from solvis.filter.rupture_id_filter import FilterRuptureIds, FilterSubsectionIds
 from solvis.solution.typing import SetOperationEnum
 
 # TODO: these tests should also cover InversionSolution, not just FSS
@@ -374,4 +374,64 @@ def test_ruptures_for_fault_section_ids_set_operations(
 def test_ruptures_for_fault_section_ids_unsupported_set_operation(crustal_solution_fixture, intersection_join):
     with pytest.raises((ValueError, KeyError)) as exc:
         _ = FilterRuptureIds(crustal_solution_fixture).for_subsection_ids([4, 5, 6], join_type=intersection_join)
+    print(exc)
+
+
+@pytest.mark.parametrize("intersection_join", ['intersection', SetOperationEnum.INTERSECTION])
+@pytest.mark.parametrize("drop_zero_rates", [False, True])
+def test_ruptures_for_named_fault_names_set_operations(
+    tiny_crustal_solution_fixture, crustal_solution_fixture, drop_zero_rates, intersection_join
+):
+    named_fault_names = ['Wellington: Wellington-Hutt Valley', 'Wairarapa']
+    subsection_ids = (
+        FilterSubsectionIds(tiny_crustal_solution_fixture).for_named_fault_names(named_fault_names).tolist()
+    )
+    print(subsection_ids)
+
+    filter_rupture_ids = FilterRuptureIds(tiny_crustal_solution_fixture, drop_zero_rates=drop_zero_rates)
+
+    rupt_ids_union = filter_rupture_ids.for_named_fault_names(named_fault_names, join_type='union')
+    rupt_ids_intersection = filter_rupture_ids.for_named_fault_names(named_fault_names, join_type=intersection_join)
+
+    print(rupt_ids_intersection.tolist())
+    print(rupt_ids_union.tolist())
+
+    assert rupt_ids_union != rupt_ids_intersection
+    assert rupt_ids_union.issuperset(rupt_ids_intersection)
+
+
+@pytest.mark.parametrize(
+    "intersection_join", [None, 'intersplunk', SetOperationEnum.DIFFERENCE, SetOperationEnum.SYMMETRIC_DIFFERENCE, 45]
+)
+def test_ruptures_for_named_fault_names_unsupported_set_operation(tiny_crustal_solution_fixture, intersection_join):
+    with pytest.raises((ValueError, KeyError)) as exc:
+        _ = FilterRuptureIds(tiny_crustal_solution_fixture).for_named_fault_names(
+            ['Wairarapa'], join_type=intersection_join
+        )
+    print(exc)
+
+
+@pytest.mark.parametrize("intersection_join", ['intersection', SetOperationEnum.INTERSECTION])
+@pytest.mark.parametrize("drop_zero_rates", [True, False])
+def test_ruptures_for_parent_fault_names_set_operations(
+    filter_parent_fault_ids, crustal_solution_fixture, drop_zero_rates, intersection_join
+):
+    filter_rupture_ids = FilterRuptureIds(crustal_solution_fixture, drop_zero_rates=drop_zero_rates)
+    fault_names = ['Vernon 4', 'Alpine Jacksons to Kaniere']
+    # fault_ids = filter_parent_fault_ids.for_parent_fault_names().tolist()
+
+    rupt_ids_union = filter_rupture_ids.for_parent_fault_names(fault_names, join_type='union')
+    rupt_ids_intersection = filter_rupture_ids.for_parent_fault_names(fault_names, join_type=intersection_join)
+
+    print(rupt_ids_intersection.tolist())
+    assert rupt_ids_union != rupt_ids_intersection
+    assert rupt_ids_union.issuperset(rupt_ids_intersection)
+
+
+@pytest.mark.parametrize(
+    "intersection_join", [None, 'intersplunk', SetOperationEnum.DIFFERENCE, SetOperationEnum.SYMMETRIC_DIFFERENCE, 45]
+)
+def test_ruptures_for_parent_fault_names_unsupported_set_operation(crustal_solution_fixture, intersection_join):
+    with pytest.raises((ValueError, KeyError)) as exc:
+        _ = FilterRuptureIds(crustal_solution_fixture).for_parent_fault_names(["$%^"], join_type=intersection_join)
     print(exc)

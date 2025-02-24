@@ -2,7 +2,7 @@ r"""
 This module provides a class for filtering solution ruptures.
 
 Classes:
- FilterRuptureIds: a chainable filter for ruptures, returning qualifying rupture ids.
+    FilterRuptureIds: a chainable filter for ruptures, returning qualifying rupture ids.
 
 Examples:
     ```py
@@ -64,8 +64,19 @@ class FilterRuptureIds(ChainableSetBase):
         self._drop_zero_rates = drop_zero_rates
         self._filter_subsection_ids = FilterSubsectionIds(solution)
         self._filter_parent_fault_ids = FilterParentFaultIds(solution)
+        self.__rupture_sections: Optional['pd.DataFrame'] = None
 
-    def _ruptures_with_and_without_rupture_rates(self, drop_zero_rates: bool = False):
+    def _ruptures_with_or_without_rupture_rates(self, drop_zero_rates: bool = False) -> 'pd.DataFrame':
+        """Get ruptures with or without rupture rates.
+
+        Catering for the difference in rates structure of InversionSolution subclasses.
+
+        Args:
+            drop_zero_rates: If True, exclude ruptures with zero rupture rate.
+
+        Returns:
+            DataFrame containing ruptures with and without rupture rates.
+        """
         if isinstance(self._solution, solvis.solution.fault_system_solution.FaultSystemSolution):
             df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates.drop(
                 columns=["Rupture Index", "fault_system"]
@@ -81,14 +92,38 @@ class FilterRuptureIds(ChainableSetBase):
 
         return self._solution.solution_file.ruptures.join(df_rr, on="Rupture Index", rsuffix='_r', how='inner')
 
-    def _get_rupture_ids_for_subsection_ids(self, subsection_ids: Iterable[int]) -> Set[int]:
+    def _adapted_rupture_sections(self) -> 'pd.DataFrame':
+        """Get adapted rupture sections based on the drop_zero_rates flag.
+
+        The adaption caches for better performance in client functions
+
+        Returns:
+            DataFrame containing adapted rupture sections.
+        """
+        if self.__rupture_sections is not None:
+            return self.__rupture_sections
+
         df0: pd.DataFrame = self._solution.model.rupture_sections
         rate_column = self._solution.model.rate_column_name()
         if self._drop_zero_rates:
-            df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+            df1 = self._ruptures_with_or_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
             df0 = df0.join(df1.set_index("Rupture Index"), on='rupture', how='inner')[
                 [rate_column, "rupture", "section"]
             ]
+
+        self.__rupture_sections = df0
+        return self.__rupture_sections
+
+    def _get_rupture_ids_for_subsection_ids(self, subsection_ids: Iterable[int]) -> Set[int]:
+        """Get rupture ids for given subsection ids.
+
+        Args:
+            subsection_ids (Iterable[int]): A collection of subsection ids.
+
+        Returns:
+            Set[int]: A set containing the rupture ids that correspond to the provided subsection ids.
+        """
+        df0 = self._adapted_rupture_sections()
         ids = df0[df0['section'].isin(list(subsection_ids))]['rupture'].tolist()
         return set([int(id) for id in ids])
 
@@ -115,23 +150,47 @@ class FilterRuptureIds(ChainableSetBase):
     def for_named_fault_names(
         self,
         named_fault_names: Iterable[str],
+        join_type: Union[SetOperationEnum, str] = 'union',
         join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> ChainableSetBase:
-        """Find ruptures that occur on any of the given named_fault names.
+        """Filter rupture ids based on named fault names.
+
+        This method filters the rupture ids for given named fault names. It supports
+        both intersection and union operations to combine results from multiple named
+        faults. The `join_type` parameter determines how the sets of rupture ids are
+        combined, while the `join_prior` parameter specifies how these sets are combined
+        with any existing filters.
 
         Args:
-            named_fault_names: A list of one or more `named_fault` names.
+            named_fault_names (Iterable[str]): A collection of named fault names.
+            join_type (Union[SetOperationEnum, str], optional): The type of set operation to use for
+                combining results from multiple named faults. It can be either 'union' or 'intersection'.
+            join_prior (Union[SetOperationEnum, str], optional): The type of set operation to use when
+                combining the filtered rupture ids with any existing filters. It can be either 'intersection'
+                or 'difference'.
 
         Returns:
-            The rupture_ids matching the filter.
+            ChainableSetBase: A chainable set containing the filtered rupture ids.
 
         Raises:
-            ValueError: If any `named_fault_names` argument is not valid.
+            ValueError: If an unsupported join_type is provided.
         """
-        parent_fault_ids: Iterable[int] = []
-        for nf_name in named_fault_names:
-            parent_fault_ids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
-        return self.for_parent_fault_ids(parent_fault_ids=parent_fault_ids, join_prior=join_prior)
+        if isinstance(join_type, str):
+            join_type = SetOperationEnum.__members__[join_type.upper()]
+
+        rupture_id_sets: List[Set[int]] = []
+        for named_fault_name in named_fault_names:
+            parent_fault_ids = named_fault.named_fault_table().loc[named_fault_name].parent_fault_ids
+            rupture_ids = self.for_parent_fault_ids(parent_fault_ids, join_prior=join_prior).chained_set
+            rupture_id_sets.append(rupture_ids)
+
+        if join_type == SetOperationEnum.INTERSECTION:
+            rupture_ids = set.intersection(*rupture_id_sets)
+        elif join_type == SetOperationEnum.UNION:
+            rupture_ids = set.union(*rupture_id_sets)
+        else:
+            raise ValueError("Only INTERSECTION and UNION operations are supported for option 'join_type'")
+        return self.new_chainable_set(rupture_ids, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
     def for_parent_fault_names(
         self,
@@ -139,19 +198,31 @@ class FilterRuptureIds(ChainableSetBase):
         join_type: Union[SetOperationEnum, str] = 'union',
         join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> ChainableSetBase:
-        """Find ruptures that occur on any of the given parent_fault names.
+        """Filter rupture ids based on parent fault names.
+
+        This method filters the rupture ids for given parent fault names. It supports
+        both intersection and union operations to combine results from multiple parent
+        faults. The `join_type` parameter determines how the sets of rupture ids are
+        combined, while the `join_prior` parameter specifies how these sets are combined
+        with any existing filters.
 
         Args:
-            parent_fault_names: A list of one or more `parent_fault` names.
-            drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
-            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
+            parent_fault_names (Iterable[str]): A collection of parent fault names.
+            join_type (Union[SetOperationEnum, str], optional): The type of set operation to use for
+                combining results from multiple parent faults. It can be either 'union' or 'intersection'.
+            join_prior (Union[SetOperationEnum, str], optional): The type of set operation to use when
+                combining the filtered rupture ids with any existing filters. It can be either 'intersection'
+                or 'difference'.
 
         Returns:
-            A chainable set of rupture_ids matching the filter.
+            ChainableSetBase: A chainable set containing the filtered rupture ids.
 
         Raises:
-            ValueError: If any `parent_fault_names` argument is not valid.
+            ValueError: If an unsupported join_type is provided.
         """
+        if isinstance(join_type, str):
+            join_type = SetOperationEnum.__members__[join_type.upper()]
+
         parent_fault_ids = self._filter_parent_fault_ids.for_parent_fault_names(parent_fault_names)
         return self.for_parent_fault_ids(parent_fault_ids=parent_fault_ids, join_type=join_type, join_prior=join_prior)
 
@@ -257,7 +328,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
-        df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+        df0 = self._ruptures_with_or_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
         rate_column = self._solution.model.rate_column_name()
 
@@ -284,7 +355,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter arguments.
         """
         index = "Rupture Index"
-        df0 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+        df0 = self._ruptures_with_or_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
         df0 = df0 if not max_mag else df0[df0.Magnitude <= max_mag]
         df0 = df0 if not min_mag else df0[df0.Magnitude > min_mag]
@@ -354,7 +425,7 @@ class FilterRuptureIds(ChainableSetBase):
         filtered_fault_sections_df = fault_sections_df[fault_sections_df['geometry'].intersects(polygon)]
 
         # filter ruptures by drop_zero_rates
-        ruptures_df = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
+        ruptures_df = self._ruptures_with_or_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
 
         # join filtered ruptures with rupture_sections
         rupture_sections_df = self._solution.model.rupture_sections
