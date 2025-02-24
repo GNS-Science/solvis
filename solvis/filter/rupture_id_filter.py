@@ -294,39 +294,39 @@ class FilterRuptureIds(ChainableSetBase):
     def for_polygons(
         self,
         polygons: Iterable[shapely.geometry.Polygon],
-        join_polygons: Union[SetOperationEnum, str] = SetOperationEnum.UNION,
+        join_type: Union[SetOperationEnum, str] = SetOperationEnum.UNION,
         join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> ChainableSetBase:
         """Find ruptures involving several polygon areas.
 
         Each polygon will return a set of matching rupture ids, so the user may choose to override the
-        default set operation (UNION) between these using the `join_polygons' argument.
+        default set operation (UNION) between these using the `join_type' argument.
 
         This method
 
         Args:
             polygons: Polygons defining the areas of interest.
-            join_polygons: How to join the polygon results (default = 'union').
+            join_type: How to join the polygon results (default = 'union').
             join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
         """
-        if isinstance(join_polygons, str):
+        if isinstance(join_type, str):
             try:
-                join_polygons = SetOperationEnum.__members__[join_polygons.upper()]
+                join_type = SetOperationEnum.__members__[join_type.upper()]
             except KeyError:
-                raise ValueError(f'Unsupported set operation `{join_polygons}` for `join_polygons` argument.')
+                raise ValueError(f'Unsupported set operation `{join_type}` for `join_type` argument.')
 
         rupture_id_sets: List[Set[int]] = []
         for polygon in polygons:
             rupture_id_sets.append(self.for_polygon(polygon, join_prior=join_prior).chained_set)
 
-        if join_polygons == SetOperationEnum.INTERSECTION:
+        if join_type == SetOperationEnum.INTERSECTION:
             rupture_ids = set.intersection(*rupture_id_sets)
-        elif join_polygons == SetOperationEnum.UNION:
+        elif join_type == SetOperationEnum.UNION:
             rupture_ids = set.union(*rupture_id_sets)
-        elif join_polygons == SetOperationEnum.DIFFERENCE:
+        elif join_type == SetOperationEnum.DIFFERENCE:
             rupture_ids = set.difference(*rupture_id_sets)
         else:
             raise ValueError(

@@ -117,15 +117,15 @@ def test_ruptures_for_polygons_join_iterable(crustal_solution_fixture, filter_ru
 
     # intersection
     assert filter_rupture_ids.for_polygons(
-        [polyA, polyB], join_polygons=SetOperationEnum.INTERSECTION
+        [polyA, polyB], join_type=SetOperationEnum.INTERSECTION
     ) == ridsA.intersection(ridsB)
 
     # union
-    assert filter_rupture_ids.for_polygons([polyA, polyB], join_polygons=SetOperationEnum.UNION) == ridsA.union(ridsB)
+    assert filter_rupture_ids.for_polygons([polyA, polyB], join_type=SetOperationEnum.UNION) == ridsA.union(ridsB)
 
     # difference
     assert filter_rupture_ids.for_polygons(
-        [polyA, polyB], join_polygons='difference'  # SetOperationEnum.DIFFERENCE'
+        [polyA, polyB], join_type='difference'  # SetOperationEnum.DIFFERENCE'
     ) == ridsA.difference(ridsB)
 
 
@@ -304,9 +304,9 @@ def test_filter_invalid_polygon_join_raises(filter_rupture_ids):
     polyA = circle_polygon(1e5, WLG['latitude'], WLG['longitude'])  # 100km circle around WLG
 
     with pytest.raises(ValueError) as exc:
-        filter_rupture_ids.for_polygons([polyA], join_polygons='bad')
+        filter_rupture_ids.for_polygons([polyA], join_type='bad')
 
-    assert "Unsupported set operation `bad` for `join_polygons` argument" in str(exc)
+    assert "Unsupported set operation `bad` for `join_type` argument" in str(exc)
 
 
 def test_ruptures_filtered_with_vs_without_drop_zero(crustal_solution_fixture):
