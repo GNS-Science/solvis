@@ -81,6 +81,15 @@ class FilterRuptureIds(ChainableSetBase):
 
         return self._solution.solution_file.ruptures.join(df_rr, on="Rupture Index", rsuffix='_r', how='inner')
 
+    def tolist(self) -> List[int]:
+        """
+        Returns the filtered rupture ids as a list of integers.
+
+        Returns:
+            A list of integers representing the filtered rupture ids.
+        """
+        return list(self)
+
     def all(self) -> ChainableSetBase:
         """Convenience method returning ids for all solution ruptures.
 
@@ -116,6 +125,7 @@ class FilterRuptureIds(ChainableSetBase):
     def for_parent_fault_names(
         self,
         parent_fault_names: Iterable[str],
+        join_type: Union[SetOperationEnum, str] = 'union',
         join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> ChainableSetBase:
         """Find ruptures that occur on any of the given parent_fault names.
@@ -123,7 +133,7 @@ class FilterRuptureIds(ChainableSetBase):
         Args:
             parent_fault_names: A list of one or more `parent_fault` names.
             drop_zero_rates: Exclude ruptures with rupture_rate == 0 (default=True)
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter.
@@ -132,26 +142,25 @@ class FilterRuptureIds(ChainableSetBase):
             ValueError: If any `parent_fault_names` argument is not valid.
         """
         parent_fault_ids = self._filter_parent_fault_ids.for_parent_fault_names(parent_fault_names)
-        return self.for_parent_fault_ids(parent_fault_ids=parent_fault_ids, join_prior=join_prior)
+        return self.for_parent_fault_ids(parent_fault_ids=parent_fault_ids, join_type=join_type, join_prior=join_prior)
 
-    def for_parent_fault_ids(
+    def for_parent_fault_id(
         self,
-        parent_fault_ids: Iterable[int],
+        parent_fault_id: int,
         join_prior: Union[SetOperationEnum, str] = 'intersection',
     ) -> ChainableSetBase:
-        """Find ruptures that occur on any of the given parent_fault ids.
+        """
+        Find ruptures that occur on the given parent fault id.
 
         Args:
-            parent_fault_ids: A list of one or more `parent_fault` ids.
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+            parent_fault_id: The parent fault id to filter by.
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter.
         """
-        subsection_ids = self._filter_subsection_ids.for_parent_fault_ids(parent_fault_ids)
-
+        subsection_ids = self._filter_subsection_ids.for_parent_fault_ids([parent_fault_id])
         df0: pd.DataFrame = self._solution.model.rupture_sections
-
         rate_column = self._solution.model.rate_column_name()
         if self._drop_zero_rates:
             df1 = self._ruptures_with_and_without_rupture_rates(drop_zero_rates=self._drop_zero_rates)
@@ -163,6 +172,41 @@ class FilterRuptureIds(ChainableSetBase):
         result = set([int(id) for id in ids])
         return self.new_chainable_set(result, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
+    def for_parent_fault_ids(
+        self,
+        parent_fault_ids: Iterable[int],
+        join_type: Union[SetOperationEnum, str] = 'union',
+        join_prior: Union[SetOperationEnum, str] = 'intersection',
+    ) -> ChainableSetBase:
+        """Find ruptures that occur on any of the given parent_fault ids.
+
+        Args:
+            parent_fault_ids: A list of one or more `parent_fault` ids.
+            join_type: The type of set operation to perform when combining results from multiple parent_fault_ids.
+                Options are 'union' and 'intersection'. Default is 'union'.
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
+
+        Returns:
+            A chainable set of rupture_ids matching the filter.
+        """
+        if isinstance(join_type, str):
+            join_type = SetOperationEnum.__members__[join_type.upper()]
+
+        first = True
+        rupture_ids: Set[int]
+        for fault_id in parent_fault_ids:
+            fault_rupture_ids = self.for_parent_fault_id(fault_id, join_prior=join_prior)
+            if first:
+                rupture_ids = set(fault_rupture_ids)
+                first = False
+            if join_type == SetOperationEnum.INTERSECTION:
+                rupture_ids = rupture_ids.intersection(fault_rupture_ids)
+            elif join_type == SetOperationEnum.UNION:
+                rupture_ids = rupture_ids.union(fault_rupture_ids)
+            else:
+                raise ValueError("Only INTERSECTION and UNION operations are supported for option 'join_type'")
+        return self.new_chainable_set(rupture_ids, self._solution, self._drop_zero_rates, join_prior=join_prior)
+
     def for_subsection_ids(
         self,
         fault_section_ids: Iterable[int],
@@ -170,9 +214,11 @@ class FilterRuptureIds(ChainableSetBase):
     ) -> ChainableSetBase:
         """Find ruptures that occur on any of the given fault_section_ids.
 
+        Return the Union of all rupture ids involvcedin te `fault_section_ids`.
+
         Args:
             fault_section_ids: A list of one or more fault_section ids.
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter.
@@ -203,7 +249,7 @@ class FilterRuptureIds(ChainableSetBase):
         Args:
             min_rate: The minumum rupture _rate bound.
             max_rate: The maximum rupture _rate bound.
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
 
         Returns:
@@ -231,7 +277,7 @@ class FilterRuptureIds(ChainableSetBase):
         Args:
             min_mag: The minumum rupture magnitude bound.
             max_mag: The maximum rupture magnitude bound.
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
@@ -260,7 +306,7 @@ class FilterRuptureIds(ChainableSetBase):
         Args:
             polygons: Polygons defining the areas of interest.
             join_polygons: How to join the polygon results (default = 'union').
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
@@ -296,7 +342,7 @@ class FilterRuptureIds(ChainableSetBase):
 
         Args:
             polygon: The polygon defining the area of intersection.
-            join_prior: How to join this methods' result with the prior chain (if any) (default = 'intersection').
+            join_prior: How to join this result with the prior chain (if any) (default = 'intersection').
 
         Returns:
             A chainable set of rupture_ids matching the filter arguments.
