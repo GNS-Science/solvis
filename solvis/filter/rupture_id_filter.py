@@ -192,19 +192,16 @@ class FilterRuptureIds(ChainableSetBase):
         if isinstance(join_type, str):
             join_type = SetOperationEnum.__members__[join_type.upper()]
 
-        first = True
-        rupture_ids: Set[int]
+        rupture_id_sets: List[Set[int]] = []
         for fault_id in parent_fault_ids:
-            fault_rupture_ids = self.for_parent_fault_id(fault_id, join_prior=join_prior)
-            if first:
-                rupture_ids = set(fault_rupture_ids)
-                first = False
-            if join_type == SetOperationEnum.INTERSECTION:
-                rupture_ids = rupture_ids.intersection(fault_rupture_ids)
-            elif join_type == SetOperationEnum.UNION:
-                rupture_ids = rupture_ids.union(fault_rupture_ids)
-            else:
-                raise ValueError("Only INTERSECTION and UNION operations are supported for option 'join_type'")
+            rupture_id_sets.append(self.for_parent_fault_id(fault_id, join_prior=join_prior).chained_set)
+
+        if join_type == SetOperationEnum.INTERSECTION:
+            rupture_ids = set.intersection(*rupture_id_sets)
+        elif join_type == SetOperationEnum.UNION:
+            rupture_ids = set.union(*rupture_id_sets)
+        else:
+            raise ValueError("Only INTERSECTION and UNION operations are supported for option 'join_type'")
         return self.new_chainable_set(rupture_ids, self._solution, self._drop_zero_rates, join_prior=join_prior)
 
     def for_subsection_ids(
@@ -319,7 +316,7 @@ class FilterRuptureIds(ChainableSetBase):
 
         rupture_id_sets: List[Set[int]] = []
         for polygon in polygons:
-            rupture_id_sets.append(self.for_polygon(polygon).chained_set)
+            rupture_id_sets.append(self.for_polygon(polygon, join_prior=join_prior).chained_set)
 
         if join_polygons == SetOperationEnum.INTERSECTION:
             rupture_ids = set.intersection(*rupture_id_sets)
