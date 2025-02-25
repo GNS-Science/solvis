@@ -176,7 +176,7 @@ class FilterRuptureIds(ChainableSetBase):
             ValueError: If an unsupported join_type is provided.
         """
         if isinstance(join_type, str):
-            join_type = SetOperationEnum.__members__[join_type.upper()]
+            join_type = SetOperationEnum[join_type.upper()]
 
         rupture_id_sets: List[Set[int]] = []
         for named_fault_name in named_fault_names:
@@ -221,7 +221,7 @@ class FilterRuptureIds(ChainableSetBase):
             ValueError: If an unsupported join_type is provided.
         """
         if isinstance(join_type, str):
-            join_type = SetOperationEnum.__members__[join_type.upper()]
+            join_type = SetOperationEnum[join_type.upper()]
 
         parent_fault_ids = self._filter_parent_fault_ids.for_parent_fault_names(parent_fault_names)
         return self.for_parent_fault_ids(parent_fault_ids=parent_fault_ids, join_type=join_type, join_prior=join_prior)
@@ -263,7 +263,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         if isinstance(join_type, str):
-            join_type = SetOperationEnum.__members__[join_type.upper()]
+            join_type = SetOperationEnum[join_type.upper()]
 
         rupture_id_sets: List[Set[int]] = []
         for fault_id in parent_fault_ids:
@@ -297,7 +297,7 @@ class FilterRuptureIds(ChainableSetBase):
             A chainable set of rupture_ids matching the filter.
         """
         if isinstance(join_type, str):
-            join_type = SetOperationEnum.__members__[join_type.upper()]
+            join_type = SetOperationEnum[join_type.upper()]
 
         rupture_id_sets: List[Set[int]] = []
         for fault_section_id in fault_section_ids:
@@ -385,7 +385,7 @@ class FilterRuptureIds(ChainableSetBase):
         """
         if isinstance(join_type, str):
             try:
-                join_type = SetOperationEnum.__members__[join_type.upper()]
+                join_type = SetOperationEnum[join_type.upper()]
             except KeyError:
                 raise ValueError(f'Unsupported set operation `{join_type}` for `join_type` argument.')
 
