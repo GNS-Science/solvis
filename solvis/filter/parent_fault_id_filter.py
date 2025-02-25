@@ -25,7 +25,7 @@ Examples:
     ```
 """
 
-from typing import TYPE_CHECKING, Iterable, Iterator, NamedTuple, Set, Union
+from typing import TYPE_CHECKING, Iterable, Iterator, List, NamedTuple, Set, Union
 
 import shapely.geometry
 
@@ -114,6 +114,15 @@ class FilterParentFaultIds(ChainableSetBase):
         """
         result = set(self._solution.solution_file.fault_sections['ParentID'].tolist())
         return self.new_chainable_set(result, self._solution)
+
+    def tolist(self) -> List[int]:
+        """
+        Returns the filtered parent fault ids as a list of integers.
+
+        Returns:
+            A list of integers representing the filtered parent fault ids.
+        """
+        return list(self)
 
     def for_named_fault_names(
         self, named_fault_names: Iterable[str], join_prior: Union[SetOperationEnum, str] = 'intersection'
