@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0-beta] 2025-02-25
+## [1.0.0-beta-0] 2025-02-25
 ## Added
  - `join_type` argument as needed in `FilterRutpureId` methods.
 
