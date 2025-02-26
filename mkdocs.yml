@@ -31,15 +31,14 @@ nav:
           - api/solution/fault_system_solution/fault_system_solution.md
           - api/solution/fault_system_solution/fault_system_solution_file.md
           - api/solution/fault_system_solution/fault_system_solution_model.md
-
         - composite_solution: api/solution/composite_solution.md
         - solution participation: api/solution/solution_participation.md
         - dataframe_models: api/solution/dataframe_models.md
         - solution_surfaces_builder: api/solution/solution_surfaces_builder.md
         - typing: api/solution/typing.md
-      - config [module]: api/solvis/config.md
-      - geometry [module]: api/solvis/geometry.md
-      - solvis [module]: api/solvis/solvis.md
+      - config: api/solvis/config.md
+      - geometry: api/solvis/geometry.md
+      - solvis: api/solvis/solvis.md
   - Development and Contributing:
     - contributing.md
     - Testing: testing.md
