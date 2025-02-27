@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 from shapely.geometry import LineString
 
-from solvis import circle_polygon
+from solvis.geometry import circle_polygon
 
 
 class TestCirclePoly(unittest.TestCase):

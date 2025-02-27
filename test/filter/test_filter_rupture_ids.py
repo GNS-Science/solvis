@@ -4,8 +4,8 @@ import importlib
 import pytest
 from nzshm_common.location.location import location_by_id
 
-from solvis import circle_polygon
 from solvis.filter.rupture_id_filter import FilterRuptureIds, FilterSubsectionIds
+from solvis.geometry import circle_polygon
 from solvis.solution.typing import SetOperationEnum
 
 # TODO: these tests should also cover InversionSolution, not just FSS

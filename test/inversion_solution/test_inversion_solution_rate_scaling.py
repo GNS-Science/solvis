@@ -3,8 +3,9 @@
 import pytest
 from nzshm_common.location.location import location_by_id
 
-from solvis import InversionSolution, circle_polygon
+from solvis import InversionSolution
 from solvis.filter.rupture_id_filter import FilterRuptureIds
+from solvis.geometry import circle_polygon
 
 
 @pytest.mark.parametrize("scale", [0.1, 0.55, 0.89, 1.5])
