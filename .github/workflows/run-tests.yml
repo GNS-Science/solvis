@@ -22,14 +22,16 @@ jobs:
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-versions }}
 
       - name: Install and configure Poetry
         uses: GNS-Science/install-poetry@main
+        # uses: snok/install-poetry@v1
         with:
+          version: 1.8.4
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
@@ -39,7 +41,7 @@ jobs:
       #----------------------------------------------
       - name: Load cached venv
         id: cached-poetry-dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}-run-tests
@@ -49,8 +51,12 @@ jobs:
       #----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: |
+        run:
           poetry install --no-interaction --no-root --with dev --all-extras
+
+      - name: Install tox-gh-actions
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run:
           poetry add tox-gh-actions
 
       - name: test with tox (uses tox-gh-actions to select correct environment)
@@ -61,7 +67,7 @@ jobs:
         run: ls -l .
 
       - name: Submit coverage report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./coverage.xml # optional
           flags: unittests # optional

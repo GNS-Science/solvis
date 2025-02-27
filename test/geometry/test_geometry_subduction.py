@@ -27,7 +27,7 @@ class TestSubductionSurface(unittest.TestCase):
 
         filename = pathlib.PurePath(TEST_FOLDER, HIK_ARCHIVE)
         self.solution = solvis.InversionSolution().from_archive(filename)
-        self.fault_sections = deepcopy(self.solution.fault_sections)
+        self.fault_sections = deepcopy(self.solution.solution_file.fault_sections)
 
     @unittest.skip('use to write out some files')
     def test_write_surface_geojson(self):

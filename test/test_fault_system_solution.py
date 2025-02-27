@@ -5,59 +5,69 @@ import pytest
 from pandas.api.types import infer_dtype
 
 import solvis
-from solvis.inversion_solution.fault_system_solution import FaultSystemSolution
+from solvis.filter.rupture_id_filter import FilterRuptureIds
+from solvis.solution.fault_system_solution import FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
-slt = current_model.source_logic_tree
-fslt = slt.fault_system_lts[0]  # PUY is used always , just for the 3 solution_ids
+fslt = current_model.source_logic_tree.branch_sets[0]  # PUY is used always , just for the 3 solution_ids
 
-FSR_COLUMNS_A = 26
+FSR_COLUMNS_A = 26  # see how this flies: 26
 FSR_COLUMNS_B = 25  # HIK
 
-RATE_COLUMNS_A = 6
+RATE_COLUMNS_A = 6  # see how this flies:6
 COMPOSITE_RATE_COLUMNS = 6
 
 
 def test_from_puy_branch_solutions(puy_branch_solutions):
     print(fslt.branches)
-    composite = FaultSystemSolution.from_branch_solutions(puy_branch_solutions)
-    print(composite.fault_sections_with_rupture_rates)
+    composite = FaultSystemSolution.from_branch_solutions(puy_branch_solutions).model
+    print(composite.fault_sections_with_rupture_rates.info())
     assert composite.fault_sections_with_rupture_rates.shape == (148394, FSR_COLUMNS_A)
 
 
 class TestSmallCrustal(object):
     def test_rates_shape(self, crustal_small_fss_fixture):
-        rates = crustal_small_fss_fixture.rupture_rates
+        rates = crustal_small_fss_fixture.solution_file.rupture_rates
         assert rates.shape == (5, RATE_COLUMNS_A)  # no 0 rates
 
     def test_check_indexes(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture
-        assert sol.ruptures.index == sol.ruptures["Rupture Index"]
-        assert sol.indices.index.all() == sol.indices["Rupture Index"].all()
+        # assert sol.ruptures.index == sol.ruptures["Rupture Index"]
+        assert sol.solution_file.indices.index.all() == sol.solution_file.indices["Rupture Index"].all()
+        assert sol.solution_file.indices["Rupture Index"].dtype == pd.Int32Dtype()
 
-        print(sol.composite_rates.index.names)
-        assert sol.composite_rates.index.names == ['solution_id', 'Rupture Index']
+        print(sol.model.composite_rates.index.names)
+        assert sol.model.composite_rates.index.names == ['solution_id', 'Rupture Index']
 
-        assert sol.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
-        assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
-        # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
+        print(sol.solution_file.rupture_rates.info())
+        assert sol.solution_file.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
+        assert sol.solution_file.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
 
     def test_check_types(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture
         assert isinstance(sol, FaultSystemSolution)
         assert sol.fault_regime == 'CRUSTAL'
 
-        assert infer_dtype(sol.rupture_rates["fault_system"]) == "string"
-        assert sol.rupture_rates["rate_weighted_mean"].dtype == 'float32'
-        assert infer_dtype(sol.indices["Num Sections"]) == "integer"
-        # assert sol.indices["Num Sections"].dtype == pd.UInt16Dtype()
-        # assert sol.indices["# 1"].dtype == pd.UInt16Dtype()
+        assert infer_dtype(sol.solution_file.rupture_rates["fault_system"]) == "string"
+        assert sol.solution_file.rupture_rates["rate_weighted_mean"].dtype == 'float32'
+        assert infer_dtype(sol.solution_file.indices["Num Sections"]) == "integer"
+        assert sol.solution_file.indices["Num Sections"].dtype == "Int32"  # pd.UInt16Dtype()
+        assert sol.solution_file.indices["# 1"].dtype == "Int32"  # pd.UInt16Dtype()
 
+    # @pytest.mark.skip('remove deprecated')
     def test_filter_solution_ruptures(self, crustal_small_fss_fixture):
         sol = crustal_small_fss_fixture
-        ruptures = solvis.rupt_ids_above_rate(sol, 1e-7, rate_column="rate_weighted_mean")
-        new_sol = solvis.FaultSystemSolution.filter_solution(sol, ruptures)
-        assert ruptures.shape[0] == new_sol.ruptures.shape[0]
+        rupture_ids = list(FilterRuptureIds(sol, drop_zero_rates=True).for_rupture_rate(min_rate=1e-7))
+
+        new_sol = solvis.FaultSystemSolution.filter_solution(sol, rupture_ids)
+        assert len(rupture_ids) == new_sol.solution_file.ruptures.shape[0]
+
+        # model = new_sol.model
+        assert infer_dtype(new_sol.solution_file.rupture_rates["fault_system"]) == "string"
+        assert new_sol.solution_file.rupture_rates["rate_weighted_mean"].dtype == 'float32'
+        assert infer_dtype(new_sol.solution_file.indices["Num Sections"]) == "integer"
+        assert new_sol.solution_file.indices["Num Sections"].dtype == "Int32"  # pd.UInt16Dtype()
+        assert new_sol.solution_file.indices["# 1"].dtype == "Int32"  # pd.UInt16Dtype()
 
 
 # @pytest.mark.slow
@@ -100,36 +110,53 @@ class TestSmallCrustal(object):
 class TestSmallDataFrames(object):
     def test_rates_shape(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
-        assert sol.rupture_rates.shape == (7, RATE_COLUMNS_A)  # no 0 rates
+        assert sol.solution_file.rupture_rates.shape == (7, RATE_COLUMNS_A)  # no 0 rates
+
+    def test_solution_file_rupture_sections(self, crustal_small_fss_fixture):
+        fss = crustal_small_fss_fixture
+        assert fss.model.enable_fast_indices()
+
+        df0 = fss.model.rupture_sections
+        print(df0.info())
+        assert df0.rupture.dtype == 'int64'
+        assert df0.section.dtype == pd.Int32Dtype()
 
     def test_rates_no_missing_aggregates(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
-        print(sol.rupture_rates.info())
-        assert sol.rupture_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
-        print(sol.ruptures_with_rupture_rates.info())
-        assert sol.ruptures_with_rupture_rates["rate_weighted_mean"].count() == sol.rupture_rates.shape[0]
-        assert sol.ruptures_with_rupture_rates["rate_weighted_mean"].shape[0] == sol.rupture_rates.shape[0]
+        print(sol.solution_file.rupture_rates.info())
+        assert sol.solution_file.rupture_rates["rate_weighted_mean"].count() == sol.solution_file.rupture_rates.shape[0]
+        print(sol.model.ruptures_with_rupture_rates.info())
+        assert (
+            sol.model.ruptures_with_rupture_rates["rate_weighted_mean"].count()
+            == sol.solution_file.rupture_rates.shape[0]
+        )
+        assert (
+            sol.model.ruptures_with_rupture_rates["rate_weighted_mean"].shape[0]
+            == sol.solution_file.rupture_rates.shape[0]
+        )
 
     def test_ruptures_with_rupture_rates(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
-        print(sol.ruptures_with_rupture_rates.info())
+        print(sol.model.ruptures_with_rupture_rates.info())
         print()
-        print(sol.ruptures_with_rupture_rates)
-        assert sol.ruptures_with_rupture_rates.shape[0] == sol.rupture_rates.shape[0]
+        print(sol.model.ruptures_with_rupture_rates)
+        assert sol.model.ruptures_with_rupture_rates.shape[0] == sol.solution_file.rupture_rates.shape[0]
 
     def test_rs_with_rupture_rates(self, puysegur_small_fss_fixture):
         sol = puysegur_small_fss_fixture
-        print(sol.rs_with_rupture_rates.info())
+        print(sol.model.rs_with_rupture_rates.info())
         print()
-        print(sol.rs_with_rupture_rates)
-        assert len(sol.rs_with_rupture_rates["Rupture Index"].unique()) == sol.rupture_rates.shape[0]
+        print(sol.model.rs_with_rupture_rates)
+        assert (
+            len(sol.model.rs_with_rupture_rates["Rupture Index"].unique()) == sol.solution_file.rupture_rates.shape[0]
+        )
 
     def test_fault_sections_with_rupture_rates_shape(self, puysegur_small_fss_fixture):
-        sol = puysegur_small_fss_fixture
-        print(sol.fault_sections_with_rupture_rates.info())
+        model = puysegur_small_fss_fixture.model
+        print(model.fault_sections_with_rupture_rates.info())
         print()
-        print(sol.fault_sections_with_rupture_rates)
-        assert puysegur_small_fss_fixture.fault_sections_with_rupture_rates.shape == (83, FSR_COLUMNS_A)
+        print(model.fault_sections_with_rupture_rates)
+        assert puysegur_small_fss_fixture.model.fault_sections_with_rupture_rates.shape == (83, FSR_COLUMNS_A)
 
 
 class TestPuysegurSmallSurfaces(object):
@@ -153,7 +180,7 @@ class TestPuysegurSmallSurfaces(object):
 @pytest.mark.slow
 class TestHikurangi(object):
     def test_fault_sections_with_rupture_rates_shape(self, hikurangi_fixture):
-        assert hikurangi_fixture.fault_sections_with_rupture_rates.shape == (42403, FSR_COLUMNS_B)
+        assert hikurangi_fixture.model.fault_sections_with_rupture_rates.shape == (42403, FSR_COLUMNS_B)
 
     def test_fault_surfaces(self, hikurangi_fixture):
         surfaces = hikurangi_fixture.fault_surfaces()
@@ -169,7 +196,7 @@ class TestHikurangi(object):
         assert surface.shape == (6, FSR_COLUMNS_B)
 
     def test_rates_shape(self, hikurangi_fixture):
-        rates = hikurangi_fixture.rupture_rates
+        rates = hikurangi_fixture.solution_file.rupture_rates
         assert rates.shape == (1172, RATE_COLUMNS_A)  # no 0 rates
 
 
@@ -177,8 +204,8 @@ class TestHikurangi(object):
 class TestSmallHikurangi(object):
     @pytest.mark.TODO_check_values
     def test_fault_sections_with_rupture_rates_shape(self, hikurangi_small_fss_fixture):
-        print(hikurangi_small_fss_fixture.fault_sections_with_rupture_rates)
-        assert hikurangi_small_fss_fixture.fault_sections_with_rupture_rates.shape == (20, FSR_COLUMNS_B)
+        print(hikurangi_small_fss_fixture.model.fault_sections_with_rupture_rates)
+        assert hikurangi_small_fss_fixture.model.fault_sections_with_rupture_rates.shape == (20, FSR_COLUMNS_B)
 
     @pytest.mark.TODO_check_values
     def test_fault_surfaces(self, hikurangi_small_fss_fixture):
@@ -196,7 +223,7 @@ class TestSmallHikurangi(object):
         assert surface.shape == (9, FSR_COLUMNS_B)
 
     def test_rates_shape(self, hikurangi_small_fss_fixture):
-        rates = hikurangi_small_fss_fixture.rupture_rates
+        rates = hikurangi_small_fss_fixture.solution_file.rupture_rates
         assert rates.shape == (3, RATE_COLUMNS_A)  # no 0 rates
 
     # def test_write_read_archive_filtered_incompatible(self, crustal_fixture):

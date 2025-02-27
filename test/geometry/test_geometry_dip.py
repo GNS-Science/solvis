@@ -83,14 +83,14 @@ class TestDipDirection(unittest.TestCase):
                 return refine_dip_direction(
                     Point(points[1][0], points[0][0]), Point(points[1][-1], points[0][-1]), section["DipDir"]
                 )
-            except (ValueError) as err:
+            except ValueError as err:
                 print(err)
                 # raise
 
         original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
         original_solution = solvis.InversionSolution().from_archive(original_archive)
 
-        fault_sections = deepcopy(original_solution.fault_sections)
+        fault_sections = deepcopy(original_solution.solution_file.fault_sections)
 
         gt_n_degrees = 0
         for i, section in fault_sections.iterrows():
@@ -147,7 +147,7 @@ class TestDipDirectionCrustal(unittest.TestCase):
         # original_archive = pathlib.PurePath(folder,
         #    "fixtures/NZSHM22_ScaledInversionSolution-QXV0b21hdGlvblRhc2s6MTEzMTQz.zip")
         original_solution = solvis.InversionSolution().from_archive(original_archive)
-        self.fault_sections = deepcopy(original_solution.fault_sections)
+        self.fault_sections = deepcopy(original_solution.solution_file.fault_sections)
 
     def test_fault_section_maxima(self):
 

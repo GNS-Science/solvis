@@ -1,5 +1,59 @@
 # Changelog
 
+## [1.0.0] 2025-02-27
+ - version update for v1.0.0 release
+
+## [1.0.0-beta-0] 2025-02-27
+## Changed
+ - 'refactored the usage docs
+
+## Added
+ - `join_type` argument as needed in `FilterRutpureId` methods.
+
+# Removed
+ - methods are no longer exported from the top-level package.
+
+## [1.0.0-alpha] 2025-02-20
+
+## Changed
+ - drop_zero_rate differentiates between FSS and IS;
+ - faster testing (~3 times faster)
+ - documentation improvements
+ - fix many deprecation warnings
+ - updated dependencies: geopandas, pandas, numpy, pyvista libs
+ - read_csv dtype configuration improvements
+ - many old functions are deprecated/migrated to new filter package
+ - refactor dataframe dtypes
+ - standardise participation functions API and return columns
+ - refactor `solvis.inversion_solution` package to `solvis.solution` and collect modules into packages
+ - new packages `solvis.solution.inversion_solution` and  `solvis.solution.fault_system_solution`
+ - improved test coverage
+ - refactored to/from archive code to reinstate some skipped tests
+ - doc/typing improvements
+ - fixes to the dynamic docstrings helper class & setup
+ - API simplifications
+ - updated flake8 and applied many docstring fixes.
+ - refactored participation methods into module/class.
+ - use valid NSHM fault names in docstring examples.
+ - `FilterParentFaultIds` class is now chainable, like the other filters.
+ - fix for #77 (drop_zero_rates is ignored)
+
+## Added
+ - new filter package providing classes for filtering solutions
+ - support for 3d geometry (thanks @voj)
+ - simplify FSS participation using rate_weighted_mean
+ - participation performance testing;
+ - added participation methods to fault_system_solution
+ - a simple rupture grouping algorithm (can this be a different type of filter??);
+ - `pandera` library for dataframe model validations and better docs
+ - ChainableSet now supports set.symmetric_difference
+ - named_fault support in filtering and solution participation.
+ - new scale_rupture_rates() method on InversionSolution
+
+## Removed
+ - deprecated `solvis.solvis` functions removed.
+ - deprecated `solvis.inversion_solution.*` functions/methods removed.
+
 ## [0.12.3] 2024-07-04
 bump version to verify new pypi workflow
 

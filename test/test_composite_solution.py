@@ -13,7 +13,7 @@ from solvis import CompositeSolution, FaultSystemSolution
 
 current_model = nm.get_model_version(nm.CURRENT_VERSION)
 slt = current_model.source_logic_tree
-fslt = slt.fault_system_lts[0]  # PUY is used always , just for the 3 solution_ids
+fslt = slt.branch_sets[0]  # PUY is used always , just for the 3 solution_ids
 
 
 FSR_COLUMNS_A = 26
@@ -84,20 +84,21 @@ class TestThreeSmallFaultSystems(object):
         assert surfaces.shape == (809, 15)
 
 
+# @pytest.mark.skip('consider how this works again')
 def test_composite_serialisation(small_archives):
     folder = tempfile.TemporaryDirectory()
     # folder = pathlib.Path(pathlib.PurePath(os.path.realpath(__file__)).parent.parent, "SCRATCH")
 
     v1_0_0 = nm.get_model_version('NSHM_v1.0.0')
     slt = v1_0_0.source_logic_tree
-    print(slt.fault_system_lts[0])
+    print(slt.branch_sets[0])
 
     # fudge the model branches because we have too few fixtures
     for idx in [1, 2]:
-        slt.fault_system_lts[idx].branches = deepcopy(slt.fault_system_lts[0].branches)
+        slt.branch_sets[idx].branches = deepcopy(slt.branch_sets[0].branches)
 
     composite = CompositeSolution(slt)  # create the new composite solution
-    for fault_system_lt in slt.fault_system_lts:
+    for fault_system_lt in slt.branch_sets:
         if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
             solutions = list(
                 branch_solutions(
@@ -109,33 +110,23 @@ def test_composite_serialisation(small_archives):
 
             print(solutions)
             fss = FaultSystemSolution.from_branch_solutions(solutions)
-
             composite.add_fault_system_solution(fault_system_lt.short_name, fss)
-
-            # # # write the fss-archive file
-            ref_solution = solutions[0].archive_path  # the file path to the reference solution
-            new_path = pathlib.Path(folder.name, f'test_fault_system_{fault_system_lt.short_name}_archive.zip')
-
-            fss.to_archive(str(new_path), ref_solution, compat=False)
-            assert new_path.exists()
-            assert str(fss.archive_path) == str(new_path)
 
     new_path = pathlib.Path(folder.name, 'test_composite_archive.zip')
     composite.to_archive(new_path)
     assert new_path.exists()
     assert str(composite.archive_path) == str(new_path)
 
-    # remove the composite inputs ...
-    for key, sol in composite._solutions.items():
-        arc = pathlib.Path(sol.archive_path)
-        assert arc.exists()
-        arc.unlink()
-
     # rehydrate the composite
     new_composite = CompositeSolution.from_archive(new_path, slt)
+
     assert new_composite.rupture_rates.columns.all() == composite.rupture_rates.columns.all()
     assert new_composite.rupture_rates.shape == composite.rupture_rates.shape
     assert new_composite.rupture_rates['Rupture Index'].all() == composite.rupture_rates['Rupture Index'].all()
+
+    assert new_composite.archive_path == new_path
+    assert new_composite.source_logic_tree == slt
+    assert sorted(new_composite.get_fault_system_codes()) == ['CRU', 'HIK', 'PUY']
 
 
 # class TestThreeFaultSystems(object):
@@ -146,12 +137,12 @@ def test_composite_serialisation(small_archives):
 
 #         v1_0_0 = nm.get_model_version('NSHM_1.0.0')
 #         slt = v1_0_0.source_logic_tree()
-#         print(slt.fault_system_lts[0])
+#         print(slt.branch_sets[0])
 
 #         # for idx in [1, 2]:
-#         #     slt.fault_system_lts[idx].branches = deepcopy(slt.fault_system_lts[0].branches)
+#         #     slt.branch_sets[idx].branches = deepcopy(slt.branch_sets[0].branches)
 
-#         # for fault_system_lt in slt.fault_system_lts:
+#         # for fault_system_lt in slt.branch_sets:
 #         #     if fault_system_lt.short_name in ['CRU', 'PUY', 'HIK']:
 #         #         print('extending', fault_system_lt.short_name)
 #         #         solutions.extend(

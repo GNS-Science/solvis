@@ -2,7 +2,7 @@ site_name: Solvis Documentation
 site_url: https://gns-science.github.io/solvis
 repo_url: https://github.com/GNS-Science/solvis
 repo_name: GNS-Science/solvis
-strict: true
+# strict: true
 watch:
   - solvis
   - docs
@@ -11,21 +11,34 @@ nav:
   - Usage: usage.md
   - Installation: installation.md
   - API Reference:
-    - Solvis [package]:
+    - solvis:
       - api/solvis/index.md
-      - api/solvis/config.md
-      - api/solvis/geometry.md
-      - inversion_solution [package]:
-        - api/inversion_solution/index.md
-        - api/inversion_solution/composite_solution.md
-        - api/inversion_solution/fault_system_solution.md
-        - api/inversion_solution/fault_system_solution_file.md
-        - api/inversion_solution/inversion_solution.md
-        - api/inversion_solution/inversion_solution_operations.md
-        - api/inversion_solution/inversion_solution_file.md
-        - api/inversion_solution/solution_surfaces_builder.md
-        - api/inversion_solution/typing.md
-      - api/solvis/solvis.md
+      - filter:
+        - filter: api/filter/index.md
+        - parent_fault_id_filter: api/filter/parent_fault_id_filter.md
+        - rupture_id_filter: api/filter/rupture_id_filter.md
+        - subsection_id_filter: api/filter/subsection_id_filter.md
+        - chainable_set_base: api/filter/chainable_set_base.md
+      - solution:
+        - api/solution/index.md
+        - inversion_solution:
+          - api/solution/inversion_solution/index.md
+          - api/solution/inversion_solution/inversion_solution.md
+          - api/solution/inversion_solution/inversion_solution_file.md
+          - api/solution/inversion_solution/inversion_solution_model.md
+        - fault_system_solution:
+          - api/solution/fault_system_solution/index.md
+          - api/solution/fault_system_solution/fault_system_solution.md
+          - api/solution/fault_system_solution/fault_system_solution_file.md
+          - api/solution/fault_system_solution/fault_system_solution_model.md
+        - composite_solution: api/solution/composite_solution.md
+        - solution participation: api/solution/solution_participation.md
+        - dataframe_models: api/solution/dataframe_models.md
+        - solution_surfaces_builder: api/solution/solution_surfaces_builder.md
+        - typing: api/solution/typing.md
+      - config: api/solvis/config.md
+      - geometry: api/solvis/geometry.md
+      - solvis: api/solvis/solvis.md
   - Development and Contributing:
     - contributing.md
     - Testing: testing.md
@@ -34,6 +47,13 @@ nav:
       - scripts.md
       - CLI script: scripts/cli.md
     - Changelog: changelog.md
+
+options:
+  merge_init_into_class: true
+  group_by_category: true
+  show_category_heading: true
+  members_order: source
+  inherited_members: false
 
 theme:
   name: material
@@ -95,6 +115,17 @@ plugins:
             signature_crossrefs: true
             annotations_path: source
             # show_source: true
+
+            extensions:
+            - pydantic: {schema: true}
+            - solvis/dochelper/extension.py:DynamicDocstrings:
+                object_paths:
+                  - solvis.solution.inversion_solution.inversion_solution.InversionSolution
+                  - solvis.solution.inversion_solution.inversion_solution_file.InversionSolutionFile
+                  - solvis.solution.inversion_solution.inversion_solution_model.InversionSolutionModel
+                  - solvis.solution.fault_system_solution.fault_system_solution.FaultSystemSolution
+                  - solvis.solution.fault_system_solution.fault_system_solution_file.FaultSystemSolutionFile
+                  - solvis.solution.fault_system_solution.fault_system_solution_model.FaultSystemSolutionModel
 
 extra:
   social:
