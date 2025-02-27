@@ -1,7 +1,8 @@
 # Changelog
 
-## [1.0.0] 2025-02-27
+## [1.0.0] 2025-02-28
  - version update for v1.0.0 release
+ - updated `nzshm-model` dependency to use pypi
 
 ## [1.0.0-beta-0] 2025-02-27
 ## Changed
