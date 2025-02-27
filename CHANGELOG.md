@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.0.0] 2025-02-27
+ - version update for v1.0.0 release
 
 ## [1.0.0-beta-0] 2025-02-27
 ## Changed
