@@ -5,7 +5,8 @@ The code examples below can be run sequentially to provide a quick demo of some 
 A typical Solvis investigation starts with reading an archive (a zip file) into a solution object.
 
 Composite solutions require selecting an NSHM model version (usually 1.0.4), and constructing a
-solution from its source logic tree.
+solution from its source logic tree. A CompositeSolution archive contains the multiple 
+FaultSystemSolutions of the complete model.
 
 ```py
 from pathlib import Path
@@ -31,8 +32,8 @@ Depending on the archive type, you will need to use one of:
 
 ## Manipulating solutions
 
-The Solvis API is consistent over both solution classes (InversonSolution and FaultSystemSolution) 
-e.g. Filters, Participation calculations, exporting.
+The Solvis API is consistent over both solution classes (InversionSolution and FaultSystemSolution) 
+e.g. Filters, Participation calculations, exporting. 
 
 ### Filtering solutions
 Solvis provides several **Filter** classes with useful methods for selecting subsets of solutions data.
