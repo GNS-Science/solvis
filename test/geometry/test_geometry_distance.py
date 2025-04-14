@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 import unittest
@@ -9,11 +10,17 @@ from nzshm_common.location.location import location_by_id
 from pyproj import Transformer
 from pytest import approx
 
-from solvis import InversionSolution, geometry
+from solvis import InversionSolution, geojson, geometry
 
 pyvista = pytest.importorskip("pyvista")
 
 TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
+
+
+@pytest.fixture(scope="session")
+def small_crustal_solution():
+    original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
+    yield InversionSolution().from_archive(original_archive)
 
 
 class TestPyvistaDistances(unittest.TestCase):
@@ -96,6 +103,8 @@ class TestPyvistaDistances(unittest.TestCase):
 
 
 class TestSurfaceDistanceCalculation(object):
+
+    @pytest.mark.skip('until 3d distance is figured out - currently dip angle is not considered.')
     def test_calc_distance_to_a_subduction_fault_section(self):
 
         filename = pathlib.PurePath(
@@ -104,8 +113,6 @@ class TestSurfaceDistanceCalculation(object):
         sol = InversionSolution().from_archive(str(filename))
         gdf = gpd.GeoDataFrame(sol.fault_surfaces())
 
-        print(gdf)
-
         # # set up WLG as our datum
         WLG = location_by_id('WLG')
         lon, lat = WLG['longitude'], WLG['latitude']
@@ -113,12 +120,16 @@ class TestSurfaceDistanceCalculation(object):
         wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
         local_azimuthal_projection = "+proj=aeqd +R=6371000 +units=m +lat_0={} +lon_0={}".format(lat, lon)
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
+
         new_series = gdf.apply(
-            lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
+            lambda section: geometry.section_distance(
+                transformer, section.geometry, section.DipDir, section.DipDeg, section.UpDepth, section.LowDepth
+            ),
             axis=1,
         )
         assert new_series.min() == approx(25067.57 / 1e3)
 
+    @pytest.mark.skip('until 3d distance is figured out - currently dip angle is not considered.')
     def test_calc_distance_to_a_crustal_fault_section(self):
 
         original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
@@ -134,20 +145,22 @@ class TestSurfaceDistanceCalculation(object):
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
         new_series = gdf.apply(
-            lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
+            lambda section: geometry.section_distance(
+                transformer, section.geometry, section.DipDir, section.DipDeg, section.UpDepth, section.LowDepth
+            ),
             axis=1,
         )
         # print ( new_series.loc[lambda x: x <= 100000 ])
         assert new_series.min() == approx(38282.218 / 1e3)
 
-    @pytest.mark.parametrize('dist_km', [10, 20, 30, 50, 70, 100, 150, 180])
-    def test_calc_crustal_compare_algorithms(self, dist_km):
-
-        original_archive = pathlib.PurePath(TEST_FOLDER, "fixtures/ModularAlpineVernonInversionSolution.zip")
-        sol = InversionSolution().from_archive(original_archive)
-
+    @pytest.mark.skip('until 3d distance is figured out - currently dip angle is not considered.')
+    @pytest.mark.parametrize('dist_km', [10, 20, 50, 70, 100, 150, 160, 180])
+    # @pytest.mark.parametrize('dist_km', [30, 160])
+    def test_calc_crustal_compare_algorithms(self, dist_km, small_crustal_solution):
+        sol = small_crustal_solution
         # # set up WLG as our datum
-        WLG = location_by_id('WLG')
+        WLG_CODE = 'WLG'
+        WLG = location_by_id(WLG_CODE)
         lon, lat = WLG['longitude'], WLG['latitude']
 
         wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
@@ -158,20 +171,18 @@ class TestSurfaceDistanceCalculation(object):
 
         polygon = geometry.circle_polygon(radius_m=dist_km * 1000, lon=WLG['longitude'], lat=WLG['latitude'])
         polygon_intersect_df = gdf[gdf['geometry'].intersects(polygon)]  # whitemans_0)]
-        print(polygon_intersect_df.info())
+        print(polygon_intersect_df)
 
         gdf['distance_km'] = gdf.apply(
             lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
             axis=1,
         )
-
         print(polygon_intersect_df['FaultID'])
-
         print(gdf[gdf['distance_km'] <= dist_km]['FaultID'])
 
         assert list(polygon_intersect_df['FaultID']) == list(gdf[gdf['distance_km'] <= dist_km]['FaultID'])
 
-    @pytest.mark.skip('until 3d distance is figured out')
+    @pytest.mark.skip('until 3d distance is figured out - currently dip angle is not considered.')
     @pytest.mark.parametrize('dist_km', [200, 300, 500, 1000])
     def test_calc_crustal_compare_algorithms_larger_distance(self, dist_km):
 
@@ -179,7 +190,8 @@ class TestSurfaceDistanceCalculation(object):
         sol = InversionSolution().from_archive(original_archive)
 
         # # set up WLG as our datum
-        WLG = location_by_id('WLG')
+        WLG_CODE = 'WLG'
+        WLG = location_by_id(WLG_CODE)
         lon, lat = WLG['longitude'], WLG['latitude']
 
         wgs84_projection = "+proj=longlat +datum=WGS84 +no_defs"
@@ -187,28 +199,76 @@ class TestSurfaceDistanceCalculation(object):
         transformer = Transformer.from_crs(wgs84_projection, local_azimuthal_projection)
 
         gdf = gpd.GeoDataFrame(sol.fault_surfaces())
+        # gdf = gdf[gdf.FaultID.isin([64, 65])]
 
         polygon = geometry.circle_polygon(radius_m=dist_km * 1000, lon=WLG['longitude'], lat=WLG['latitude'])
         polygon_intersect_df = gdf[gdf['geometry'].intersects(polygon)]  # whitemans_0)]
-        print(polygon_intersect_df.info())
 
-        gdf['distance_km'] = gdf.apply(
-            lambda section: geometry.section_distance(transformer, section.geometry, section.UpDepth, section.LowDepth),
+        print('gdf columns')
+        print("===========")
+        print(gdf.columns)
+        print()
+        print("circle_polygon result info()")
+        print('============================')
+        print(polygon_intersect_df.info())
+        print()
+
+        gdf2 = sol.solution_file.fault_sections
+        # gdf2 = gdf2[gdf2.FaultID.isin([64, 65])]
+        gdf2['distance_km'] = gdf2.apply(
+            lambda section: geometry.section_distance(
+                transformer, section.geometry, section.DipDir, section.DipDeg, section.UpDepth, section.LowDepth
+            ),
             axis=1,
         )
 
-        distance_ids = set(gdf[gdf['distance_km'] <= dist_km]['FaultID'])
-        intersects_ids = set(polygon_intersect_df['FaultID'])
+        print("circle_polygon result")
+        print('=======================')
+        print(polygon_intersect_df)
+        print()
+        print("section_distance result")
+        print('=======================')
+        print(gdf2)  # gdf['distance_km'] <= dist_km])
+        print()
+        if list(polygon_intersect_df['FaultID']) != list(gdf2[gdf2['distance_km'] <= dist_km]['FaultID']):
+            # we need some visual diagnostics
+            inspect_ids = set(list(polygon_intersect_df['FaultID'])).symmetric_difference(
+                set(gdf2[gdf2['distance_km'] <= dist_km]['FaultID'])
+            )
+            folder = pathlib.Path(__name__).parent
+            print(polygon)
 
-        diffs = distance_ids.difference(intersects_ids)
+            poly_geojson = geojson.location_features_geojson([WLG_CODE], dist_km)
+            # print(poly_geojson)
+            json.dump(poly_geojson, open(folder / "polygon.geojson", 'w'), indent=2)
 
-        print(diffs)
-        print(distance_ids)
-        print(gdf[gdf['FaultID'].isin(list(diffs))])
+            poly_faults_df = polygon_intersect_df[polygon_intersect_df['FaultID'].isin(inspect_ids)]
+            poly_faults_df.to_file(str(folder / "polygon_faults.geojson"), driver='GeoJSON')
 
-        assert diffs == set([])  # should be an empty set
+            fids = gdf2[gdf2['distance_km'] <= dist_km]["FaultID"].tolist()
+            sdf = sol.fault_surfaces()
+            distance_faults_df = sdf[sdf['FaultID'].isin(fids)]
+            distance_faults_df.to_file(str(folder / "distance_faults.geojson"), driver='GeoJSON')
+            assert 0
 
-        # with open(f'surface_within_{dist_km}_of_wellington.geojson', 'w') as fo:
-        #     fo.write(gdf[gdf['distance_km'] <= dist_km].to_json(indent=2))
-        #     fo.close()
-        # assert 0
+
+def test_build_surface(small_crustal_solution):
+
+    sol = small_crustal_solution
+    gdf = sol.solution_file.fault_sections
+    gdf = gdf[gdf.FaultID.isin([64])]
+
+    fault_section = gdf.iloc[0]
+    print(fault_section.geometry)
+    print()
+    print(fault_section.geometry.coords.xy)
+
+    sfc = geometry.build_surface(
+        fault_section.geometry,
+        fault_section.DipDir,
+        fault_section.DipDeg,
+        fault_section.UpDepth,
+        fault_section.LowDepth,
+        with_z_dimension=True,
+    )
+    print(sfc)

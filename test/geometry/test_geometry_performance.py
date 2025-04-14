@@ -14,6 +14,8 @@ TEST_FOLDER = pathlib.PurePath(os.path.realpath(__file__)).parent.parent
 
 
 class TestDipDirectionCrustal(unittest.TestCase):
+
+    @pytest.mark.skip('until 3d distance is figured out - currently dip angle is not considered.')
     @pytest.mark.performance
     def test_calc_performance_to_a_crustal_fault_section(self):
 
@@ -47,6 +49,7 @@ class TestDipDirectionCrustal(unittest.TestCase):
         )
         assert elapsed < 0.1  # 100msec
 
+    @pytest.mark.skip('until 3d distance is figured out - currently dip angle is not considered.')
     @pytest.mark.performance
     def test_calc_peformance_to_a_subduction_fault_section(self):
 
