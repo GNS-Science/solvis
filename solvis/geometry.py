@@ -7,7 +7,7 @@ These functions require [Shapely](https://shapely.readthedocs.io/en/stable/index
 import logging
 import math
 from functools import partial
-from typing import Tuple, Union
+from typing import List, Tuple, Union
 
 import numpy as np
 from pyproj import Transformer
@@ -140,6 +140,7 @@ def fault_surface_3d(
     Returns:
         the fault surface coordinates
     """
+    # log.debug(f"fault_surface_3d dip_deg {dip_deg}")
     return build_surface(trace, dip_dir, dip_deg, upper_depth, lower_depth, with_z_dimension=True)
 
 
@@ -160,6 +161,9 @@ def build_surface(
         surface: a Polygon object in 2D or 3D.
     """
     trace = LineString(get_coordinates(trace))
+
+    # log.debug(f"build_surface dip_deg {dip_deg} with_z_dim: {with_z_dimension}")
+
     depth = lower_depth - upper_depth
     width = depth / math.tan(math.radians(dip_deg))
     transformation = partial(translate_horizontally, dip_dir, width)
@@ -305,6 +309,17 @@ def dip_direction(point_a: Point, point_b: Point) -> float:
     return dip_dir + 360 if dip_dir < 0 else dip_dir
 
 
+def _polygon_from(lons: List[float], lats: List[float]):
+    # Add 360 to all negative longitudes
+    points = []
+    for i in range(len(lons)):
+        lon = lons[i]
+        if lon < 0:
+            lon += 360
+        points.append(Point(lon, lats[i]))
+    return Polygon(points)
+
+
 def circle_polygon(radius_m: float, lat: float, lon: float) -> Polygon:
     """Creates a circular `Polygon` at a given radius in metres around the `lat, lon` coordinate.
 
@@ -351,21 +366,14 @@ def circle_polygon(radius_m: float, lat: float, lon: float) -> Polygon:
     # Get polygon with lat lon coordinates
     transformer2 = Transformer.from_crs(local_azimuthal_projection, wgs84_projection)
     lons, lats = transformer2.transform(*buffer.exterior.xy)
-
-    # Add 360 to all negative longitudes
-    points = []
-    for i in range(len(lons)):
-        lon = lons[i]
-        if lon < 0:
-            lon += 360
-        points.append(Point(lon, lats[i]))
-
-    return Polygon(points)
+    return _polygon_from(lons, lats)
 
 
 def section_distance(
     transformer: Transformer,
-    surface_geometry: Union[Polygon, LineString],
+    surface_geometry: LineString,
+    dip_dir: float,
+    dip_deg: float,
     upper_depth: float,
     lower_depth: float,
 ) -> float:
@@ -380,7 +388,7 @@ def section_distance(
         transformer: typically from WGS84 to azimuthal
         surface_geometry: the surface projection of the fault plane (`Polygon` or `LineString`)
         upper_depth: the upper depth in km
-        upper_depth: the lower depth in km
+        lower_depth: the lower depth in km
 
     Returns:
         distance in meters
@@ -388,28 +396,57 @@ def section_distance(
     Raises:
         ValueError: The `surface_geometry` was of an unsupported type.
     """
-    # print(f'trace coords: {surface_geometry.exterior.coords.xy}')
+    assert isinstance(surface_geometry, LineString), "Got an unhandled geometry type."
+    # assert 0
     if isinstance(surface_geometry, Polygon):
-        trace = transformer.transform(*surface_geometry.exterior.coords.xy)
+        log.debug(f'Polygon coords: {surface_geometry.exterior.coords.xy}')
+        trace_transformed = transformer.transform(*surface_geometry.exterior.coords.xy)
+        # trace_transformed.append([lower_depth * -1000 for i in range(len(trace_transformed[0]))])
     elif isinstance(surface_geometry, LineString):
-        trace = transformer.transform(*surface_geometry.coords.xy)
+        # log.debug(surface_geometry.coords)
+        log.debug(f'LineString coords: {surface_geometry.coords.xy}')
+        trace_transformed = transformer.transform(*surface_geometry.coords.xy)
     else:
         raise ValueError(f'unable to handle geometry: {surface_geometry}')  # pragma: no cover
 
-    # print(f'trace offsets: {trace} (in metres relative to datum)')
-    origin = pv.PolyData([[0.0, 0.0, 0.0]], force_float=False)
-    surface = pv.PolyData(
-        [
-            [float(trace[0][0]), float(trace[1][0]), float(upper_depth * 1000)],  # OK
-            [float(trace[0][1]), float(trace[1][1]), float(upper_depth * 1000)],  # OK
-            [float(trace[0][0]), float(trace[1][0]), float(lower_depth * 1000)],  # nope, but ok for basic test
-            [float(trace[0][1]), float(trace[1][1]), float(lower_depth * 1000)],  # nope
-        ]
-    )
+    log.debug(f'trace offsets: {trace_transformed} (in metres relative to datum)')
 
+    def linestring_from(lons: List[float], lats: List[float]):
+        # Add 360 to all negative longitudes
+        points = []
+        for i in range(len(lons)):
+            lon = lons[i]
+            if lon < 0:
+                lon += 360
+            points.append(Point(lon, lats[i]))
+        return LineString(points)
+
+    surface_transformed = linestring_from(*trace_transformed)
+
+    surface_polygon = fault_surface_3d(surface_transformed, dip_dir, dip_deg, upper_depth, lower_depth * -1000)
+
+    log.debug(f'surface_polygon: {surface_polygon}')
+
+    log.debug(f'surface_polygon: {get_coordinates(surface_polygon, include_z=True)}')
+
+    # assert 0
+    # zobj = zip(trace_transformed[0], trace_transformed[1], trace_transformed[2])
+    # assert 0
+    # trace = LineString(trace_transformed)
+    # surface = pv.PolyData(surface_polygon.exterior.coords.xy)
+    # # build_surface(trace, dip_dir, dip_deg, upper_depth, lower_depth, with_z_dimension=True)
+
+    origin = pv.PolyData([[0.0, 0.0, 0.0]], force_float=False)
+    surface = pv.PolyData(get_coordinates(surface_polygon, include_z=True))
     closest_cells, closest_points = surface.find_closest_cell(
         origin.points,
         return_closest_point=True,
     )  # type: ignore[misc]
+
+    log.debug(f"closest_cells: {closest_cells}")
+    log.debug(f"closest_points: {closest_points}")
+
     d_exact = np.linalg.norm(origin.points - closest_points, axis=1)
+
+    log.info(f"d_exact: {d_exact}")
     return d_exact[0] / 1000
