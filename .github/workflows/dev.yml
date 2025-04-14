@@ -9,9 +9,10 @@ on:
 
 jobs:
   call-test-workflow:
-    uses: GNS-Science/nshm-github-actions/.github/workflows/python-run-tests.yml@feature/create-test-workflow
-    with:
-      operating-systems: "['ubuntu-latest', 'windows-latest']" # "['ubuntu-latest', 'macos-latest', 'windows.latest']"
+    uses: GNS-Science/nshm-github-actions/.github/workflows/python-run-tests.yml@main
+      #re-enable macos after https://github.com/GNS-Science/solvis/issues/89
+      #re-enable windows after https://github.com/GNS-Science/solvis/issues/90
+      operating-systems: "['ubuntu-latest']" # "['ubuntu-latest', 'macos-latest', 'windows.latest']"
       python-versions: "['3.9', '3.10', '3.11']"
       poetry-version: 1.8.4
     secrets: inherit
