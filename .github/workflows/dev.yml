@@ -10,6 +10,7 @@ on:
 jobs:
   call-test-workflow:
     uses: GNS-Science/nshm-github-actions/.github/workflows/python-run-tests.yml@main
+    with:
       #re-enable macos after https://github.com/GNS-Science/solvis/issues/89
       #re-enable windows after https://github.com/GNS-Science/solvis/issues/90
       operating-systems: "['ubuntu-latest']" # "['ubuntu-latest', 'macos-latest', 'windows.latest']"
