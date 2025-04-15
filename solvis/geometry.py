@@ -373,6 +373,9 @@ def section_distance(
 
     Where that surface is the surface projection of the fault.
 
+    WARNING: this function does not consider dip angle, assuming all faults to have dip = 90. For
+    now, use the surface projection method to approximate 3D distances.
+
     Args:
         transformer: typically from WGS84 to azimuthal
         surface_geometry: the surface projection of the fault plane (`Polygon` or `LineString`)
