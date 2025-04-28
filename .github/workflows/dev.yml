@@ -9,6 +9,9 @@ on:
 
 jobs:
   call-test-workflow:
-    #https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
-    uses: ./.github/workflows/run-tests.yml
+    uses: GNS-Science/nshm-github-actions/.github/workflows/python-run-tests.yml@main
+    with:
+      operating-systems:  "['ubuntu-latest', 'macos-latest', 'windows-latest']"
+      python-versions: "['3.9', '3.10', '3.11']"
+      poetry-version: 2.1.2
     secrets: inherit
