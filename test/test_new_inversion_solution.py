@@ -29,7 +29,7 @@ class TestNewInversionSolutionSubduction(unittest.TestCase):
             folder, "fixtures", "AveragedHikurangiInversionSolution-QXV0b21hdGlvblRhc2s6MTA3MzMy.zip"
         )
 
-        global temp_dir
+        global temp_dir  # noqa: F824
         cls.temp_dir = temp_dir
         cls.original_solution = solvis.InversionSolution().from_archive(str(cls.original_archive))
 
@@ -64,7 +64,7 @@ class TestNewInversionSolutionCrustal(unittest.TestCase):
         folder = pathlib.PurePath(os.path.realpath(__file__)).parent
         cls.original_archive = pathlib.PurePath(folder, "fixtures/ModularAlpineVernonInversionSolution.zip")
 
-        global temp_dir
+        global temp_dir   # noqa: F824
         cls.temp_dir = temp_dir
         cls.original_solution = solvis.InversionSolution.from_archive(str(cls.original_archive))
 
