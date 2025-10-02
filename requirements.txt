@@ -3,7 +3,7 @@ certifi==2021.10.8
 click==8.0.3
 click-plugins==1.1.1
 cligj==0.7.2
-Fiona==1.8.20
+Fiona==1.10b2
 geopandas==0.10.2
 munch==2.5.0
 numpy==1.21.4
