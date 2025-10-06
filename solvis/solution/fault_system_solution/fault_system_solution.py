@@ -35,6 +35,9 @@ from .fault_system_solution_model import FaultSystemSolutionModel
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from pandera.typing import DataFrame
+
+    from ..dataframe_models import RuptureRateSchema
     from ..inversion_solution import BranchInversionSolution
 
 
@@ -209,17 +212,30 @@ class FaultSystemSolution(InversionSolution):
     def from_branch_solutions(solutions: Iterable['BranchInversionSolution']) -> 'FaultSystemSolution':
 
         # combine the rupture rates from all solutions
-        composite_rates_df = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
+        # composite_rates_df: pd.DataFrame = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
+        solution_frames = []  # composite_rates_df]
         for branch_solution in solutions:
             inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(branch_solution.branch)
 
-            solution_df = branch_solution.solution_file.rupture_rates.copy()
+            solution_df: DataFrame[RuptureRateSchema] = branch_solution.solution_file.rupture_rates.copy()
             solution_df.insert(
                 0, 'solution_id', inversion_solution_id
             )  # CategoricalDtype(categories=['PUY'], ordered=False)
             solution_df.insert(0, 'rupture_set_id', branch_solution.rupture_set_id)
             solution_df.insert(0, 'weight', branch_solution.branch.weight)
             solution_df.insert(0, 'fault_system', branch_solution.fault_system)
-            composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
+            solution_frames.append(solution_df)
+
+        # more efficient to do this once, outside the loop
+        composite_rates_df: pd.DataFrame = pd.concat(solution_frames, verify_integrity=True, ignore_index=True)
+
+        """
+        test/test_fault_system_solution.py: 4 warnings
+        fault_system_solution.py:223: FutureWarning: The behavior of DataFrame concatenation with
+        empty or all-NA entries is deprecated.
+        In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes.
+        To retain the old behavior, exclude the relevant entries before the concat operation.
+        composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
+        """
 
         return FaultSystemSolution.new_solution(solution=branch_solution, composite_rates_df=composite_rates_df)
