@@ -2,8 +2,9 @@
 
 ### Environment setup
 
- - clone the repo
+- clone the repo
 - setup python env
+
 ```
 pyenv local 3.10
 poetry env use 3.10
