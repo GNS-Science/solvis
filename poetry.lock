@@ -5881,4 +5881,4 @@ vtk = ["pyvista"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">3.10,<4.0"
-content-hash = "3d19ab66df2ffaaf840868f3cc92f5fca481b684bb0c9f4706945982fe8f73bf"
+content-hash = "e398c0fa002dd92172917dc5476d143e8b27d4d3f0434ef66a1c660a8d3855ff"
