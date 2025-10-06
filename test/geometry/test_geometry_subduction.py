@@ -89,13 +89,13 @@ class TestSubductionSurface(unittest.TestCase):
         solution = solvis.InversionSolution().from_archive(str(filename))
 
         rupture_id = 101
-        t0 = dt.utcnow()
+        t0 = dt.now()
         solution.rupture_surface(rupture_id)
-        uncached_time = dt.utcnow() - t0
+        uncached_time = dt.now() - t0
 
-        t1 = dt.utcnow()
+        t1 = dt.now()
         solution.rupture_surface(rupture_id)
-        cached_time = dt.utcnow() - t1
+        cached_time = dt.now() - t1
 
         print(cached_time, uncached_time)
         assert cached_time < uncached_time

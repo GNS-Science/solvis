@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0] 2025-10-06
+### Changed
+ - updates python packages with security warnings.
+
+### Added
+ - pip-audit and safety to dev tools for security audits.
+
+### Removed
+ - drop support for python 3.9 to resolve typing issues with pandas. 
+
 ## [1.0.0] 2025-02-28
  - version update for v1.0.0 release
  - updated `nzshm-model` dependency to use pypi
