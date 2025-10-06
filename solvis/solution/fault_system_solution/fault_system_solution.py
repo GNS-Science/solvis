@@ -212,8 +212,7 @@ class FaultSystemSolution(InversionSolution):
     def from_branch_solutions(solutions: Iterable['BranchInversionSolution']) -> 'FaultSystemSolution':
 
         # combine the rupture rates from all solutions
-        # composite_rates_df: pd.DataFrame = pd.DataFrame(columns=['Rupture Index'])  # , 'Magnitude'])
-        solution_frames = []  # composite_rates_df]
+        solution_frames = []
         for branch_solution in solutions:
             inversion_solution_id = FaultSystemSolution.get_branch_inversion_solution_id(branch_solution.branch)
 
@@ -228,14 +227,5 @@ class FaultSystemSolution(InversionSolution):
 
         # more efficient to do this once, outside the loop
         composite_rates_df: pd.DataFrame = pd.concat(solution_frames, verify_integrity=True, ignore_index=True)
-
-        """
-        test/test_fault_system_solution.py: 4 warnings
-        fault_system_solution.py:223: FutureWarning: The behavior of DataFrame concatenation with
-        empty or all-NA entries is deprecated.
-        In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes.
-        To retain the old behavior, exclude the relevant entries before the concat operation.
-        composite_rates_df = pd.concat([composite_rates_df, solution_df], ignore_index=True)
-        """
 
         return FaultSystemSolution.new_solution(solution=branch_solution, composite_rates_df=composite_rates_df)
