@@ -1,6 +1,6 @@
 [project]
 name = "solvis"
-version = "1.1.0"
+version = "1.1.1"
 description = "analysis of opensha modular solution files."
 readme = "README.md"
 license = "AGPL-3.0-or-later"
