@@ -24,4 +24,5 @@ jobs:
     uses:  GNS-Science/nshm-github-actions/.github/workflows/python-deploy-docs.yml@main
     with:
       python-version:  '3.12'
+      optional-dependency-groups: 'doc'
     secrets: inherit
