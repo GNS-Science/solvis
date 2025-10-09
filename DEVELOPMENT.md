@@ -8,6 +8,7 @@
 ```
 pyenv local 3.10
 poetry env use 3.10
+poetry sync --all-groups
 ```
 
 ## Auditing requirements packages

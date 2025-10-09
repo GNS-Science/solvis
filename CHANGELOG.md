@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.1] 2025-10-09
+### Changed
+ - CI/CD workflows updated.
+ - migrated `pyproject.toml` to [PEP 508](https://peps.python.org/pep-0508) as per poetry v2.2 docs.
+
 ## [1.1.0] 2025-10-06
 ### Changed
  - updates python packages with security warnings.
