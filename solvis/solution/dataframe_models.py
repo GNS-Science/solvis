@@ -10,7 +10,7 @@
 from typing import TYPE_CHECKING
 
 import pandas as pd
-import pandera as pda
+import pandera.pandas as pda
 from pandera.typing import Index, Series
 
 if TYPE_CHECKING:
