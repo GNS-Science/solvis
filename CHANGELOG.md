@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1] 2025-14-09
+### Changed
+ - move pandera to main dependency group
+ - new style pandera import statement
+
+### Removed
+ - failing performance test
+
 ## [1.1.1] 2025-10-09
 ### Changed
  - CI/CD workflows updated.
