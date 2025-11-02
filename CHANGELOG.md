@@ -1,8 +1,8 @@
 # Changelog
-## [1.2.1] 2025-11-04
+## [1.2.1] 2025-11-03
 ### Changed
  - added `audit` to tox config
- 
+
 ### Removed
  - unused `mkdocs-with-pdf` dependency
 
