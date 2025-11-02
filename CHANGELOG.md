@@ -1,6 +1,12 @@
 # Changelog
+## [1.2.1] 2025-11-04
+### Changed
+ - added `audit` to tox config
+ 
+### Removed
+ - unused `mkdocs-with-pdf` dependency
 
-## [1.2.0] 2025-14-09
+## [1.2.0] 2025-09-14
 ### Changed
  - move pandera to main dependency group
  - new style pandera import statement
