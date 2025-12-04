@@ -11,7 +11,7 @@ import geopandas as gpd
 import pandas as pd
 
 
-def mfd_hist(ruptures_df: pd.DataFrame, rate_column: str = "Annual Rate"):
+def mfd_hist(ruptures_df: pd.DataFrame, rate_column: str = "Annual Rate") -> pd.Series:
     # https://stackoverflow.com/questions/45273731/binning-a-column-with-python-pandas
     bins = [round(x / 100, 2) for x in range(500, 1000, 10)]
     # Added observed=True in advance of default change (from False) as advised in pandas FutureWarning
