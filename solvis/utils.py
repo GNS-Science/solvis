@@ -1,4 +1,3 @@
-#!python3
 """
 Some original solvis API helper functions are defined in this module.
 
