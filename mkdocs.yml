@@ -38,7 +38,7 @@ nav:
         - typing: api/solution/typing.md
       - config: api/solvis/config.md
       - geometry: api/solvis/geometry.md
-      - solvis: api/solvis/solvis.md
+      - utils: api/solvis/utils.md
   - Development and Contributing:
     - contributing.md
     - Testing: testing.md
