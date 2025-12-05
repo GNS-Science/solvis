@@ -1,4 +1,10 @@
 # Changelog
+
+## [1.3.0] 2025-12-04
+### Changed
+ - updated documentation on how to generate and plot MFD
+ - changed name of solvis module to utils and hoisted to top level namespace
+
 ## [1.2.1] 2025-11-03
 ### Changed
  - added `audit` to tox config

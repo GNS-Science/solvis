@@ -106,40 +106,41 @@ filtered_rates_df.to_csv("filtered_rupture_rates.csv" )
 Magnitude-Frequency Distribution (MFD) histogram data can also be
 generated and saved:
 
-## Calculate an MFD with Pandas
-
-```py
-import pandas as pd
-bins = [round(x / 100, 2) for x in range(500, 1000, 10)]
-mfd = filtered_rates_df.groupby(
-    pd.cut(
-        filtered_rates_df.Magnitude,
-        bins=bins,
-    ))["rate_weighted_mean"].sum(numeric_only=False)
-mfd.to_csv( "NSHM_filtered_mfd.csv")
-```
-
-## Plot it using Matplotlib
-
+## Calculate and plot an MFD
+This example will generate the incremental MFD from an inversion solution, calculate the cumulative MFD and plot them.
 ```py
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
-def plot_mfd(mfd: pd.DataFrame, title: str = "Title"):
+from solvis.solution.inversion_solution import InversionSolution
+from solvis.utils import mfd_hist
+
+solution = InversionSolution.from_archive("InversionSolution.zip")
+mfd = mfd_hist(solution.model.ruptures_with_rupture_rates)
+
+
+def plot_mfd(mfd: pd.DataFrame, ax):
+
+    full_index = pd.CategoricalIndex(mfd.index.categories)
+    full_mfd = pd.Series(index=full_index, data=0)
+    mfd_cumulative = full_mfd + mfd
+    mfd_cumulative.fillna(0, inplace=True)
+
+    mfd_cumulative = mfd_cumulative.loc[::-1].cumsum().loc[::-1]
     mag = [a.mid for a in mfd.index]
+    mag_cumulative = [a.mid for a in mfd_cumulative.index]
+    dmag = mag[1] - mag[0]
     rate = np.asarray(mfd)
     rate[rate == 0] = 1e-20  # set minimum rate for log plots
-    fig = plt.figure()
-    fig.set_facecolor("white")
-    plt.title(title)
-    plt.ylabel("Incremental Rate ($yr^-1$)")
-    plt.xlabel("Magnitude")
-    plt.semilogy(mag, rate, color="red")
-    plt.axis([6.0, 9.0, 0.000001, 1.0])
-    plt.grid(True)
-    return plt
+    ax.set_yscale('log')
+    ax.bar(x=mag, height=rate, width=0.8 * dmag)
+    ax.plot(mag_cumulative, mfd_cumulative)
+    ax.set_ylim([1e-10, 1])
 
-plot = plot_mfd(mfd, title="A Filtered MFD")
-plot.savefig("A filtered MFD plot.png")
-plot.close()
+
+fig = plt.figure()
+ax = plt.gca()
+plot_mfd(mfd, ax)
+plt.show()
 ```

@@ -16,7 +16,7 @@ from solvis import CompositeSolution, FaultSystemSolution
 from solvis.geometry import circle_polygon
 from solvis.get_secret import get_secret
 from solvis.solution.inversion_solution import BranchInversionSolution, InversionSolution
-from solvis.solvis import export_geojson
+from solvis.utils import export_geojson
 
 # Get API key from AWS secrets manager
 API_URL = os.getenv('NZSHM22_TOSHI_API_URL', "http://127.0.0.1:5000/graphql")
