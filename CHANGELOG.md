@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.1] 2026-01-20
+
+### Changed
+ - update dependencies for new advisories
+ - updated `pyproject.toml` metadata for better PyPI handling.
+
 ## [1.3.0] 2025-12-04
 ### Changed
  - updated documentation on how to generate and plot MFD
