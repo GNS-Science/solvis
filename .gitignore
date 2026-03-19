@@ -115,3 +115,5 @@ ENV/
 
 # mkdocs build dir
 site/
+audit.txt
+.claude/settings.local.json

@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Changed
+ - Pandas 3 is explicitly not supported yet
  - batch upgrade patch dependencies: numpy 2.4.1→2.4.3, nzshm-common 0.9.0→0.9.2, geopandas 1.1.2→1.1.3, nzshm-model 0.14.0→0.14.2, charset-normalizer 3.4.4→3.4.6, pillow 12.1.0→12.1.1, pyparsing 3.3.1→3.3.2, cryptography 46.0.3→46.0.5, authlib 1.6.6→1.6.9, nltk 3.9.2→3.9.3
  - upgrade black 26.1.0→26.3.1 (CVE-2026-32274)
  - upgrade certifi 2026.1.4→2026.2.25
