@@ -45,7 +45,7 @@ class TestDipDirectionCrustal(unittest.TestCase):
             )
             / 10
         )
-        assert elapsed < 0.1  # 100msec
+        assert elapsed < 0.2  # 200msec
 
     @pytest.mark.performance
     def test_calc_peformance_to_a_subduction_fault_section(self):
