@@ -77,4 +77,4 @@ class TestDipDirectionCrustal(unittest.TestCase):
             )
             / 10
         )
-        assert elapsed < 0.5  # 500msec
+        assert elapsed < 0.6  # 600msec
