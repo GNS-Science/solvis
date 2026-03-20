@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.2] 2026-03-20
+
+### Changed
+ - Pandas 3 is explicitly not supported yet
+ - upgraded a number of dependencies
+
 ## [1.3.1] 2026-01-20
 
 ### Changed
