@@ -12,10 +12,10 @@ on:
 
 jobs:
   call-test-workflow:
-    uses: GNS-Science/nshm-github-actions/.github/workflows/python-run-tests.yml@main
+    uses: GNS-Science/nshm-github-actions/.github/workflows/python-run-tests-uv.yml@main
     with:
       operating-systems:  "['ubuntu-latest', 'macos-latest', 'windows-latest']"
       python-versions: "['3.10', '3.11', '3.12']"
-      delete-poetry-lock: ${{ github.event_name == 'schedule' }} # the scheduled build tests against newer dependencies
+      delete-uv-lock: ${{ github.event_name == 'schedule' }} # the scheduled build tests against newer dependencies
       optional-dependency-groups: dev
     secrets: inherit
