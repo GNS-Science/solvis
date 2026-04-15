@@ -11,23 +11,22 @@ Solvis is a Python library for analysis of OpenSHA Modular Fault System Solution
 ### Setup
 ```
 pyenv local 3.10
-poetry env use 3.10
-poetry sync --all-groups
+uv sync --all-groups
 ```
 
 ### Testing
-- `poetry run pytest` — run all tests
-- `poetry run pytest test/<file>.py` — run a single test file
-- `poetry run pytest -k <keyword>` — filter tests by name
-- `poetry run tox` — full QA suite (tests across Python 3.10/3.11/3.12, lint, format)
-- `poetry run tox -e py310` — tests with coverage for a specific Python version
+- `uv run pytest` — run all tests
+- `uv run pytest test/<file>.py` — run a single test file
+- `uv run pytest -k <keyword>` — filter tests by name
+- `uv run tox` — full QA suite (tests across Python 3.10/3.11/3.12, lint, format)
+- `uv run tox -e py310` — tests with coverage for a specific Python version
 
 ### Code Quality
-- `poetry run tox -e format` — apply formatting (black + isort)
-- `poetry run tox -e lint` — lint and type checking (flake8 + mypy)
-- `poetry run black solvis test` — format code (line-length 120, skip string normalization)
-- `poetry run isort solvis test` — sort imports
-- `poetry run mypy solvis test` — type checking (uses pandera plugin)
+- `uv run tox -e format` — apply formatting (black + isort)
+- `uv run tox -e lint` — lint and type checking (flake8 + mypy)
+- `uv run black solvis test` — format code (line-length 120, skip string normalization)
+- `uv run isort solvis test` — sort imports
+- `uv run mypy solvis test` — type checking (uses pandera plugin)
 
 ### Documentation
 - `mkdocs serve` — preview docs locally
