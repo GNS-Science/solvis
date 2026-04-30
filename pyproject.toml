@@ -77,6 +77,8 @@ include = ["solvis", "test"]
 
 [tool.uv]
 exclude-newer = "1 week"
+exclude-newer-package = {"nzshm-common" = false, "nzshm-model" = false, "nshm-toshi-client" = false, "solvis" = false}
+
 
 [tool.black]
 line-length = 120

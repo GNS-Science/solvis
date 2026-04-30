@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased] 2026-04-30
+### Changed
+- upgraded dependencies
+
 ## [1.3.3] 2026-04-14
 ### Changed
 - Migrated build tooling from Poetry to uv
