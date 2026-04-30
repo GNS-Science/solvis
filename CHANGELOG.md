@@ -2,9 +2,7 @@
 
 ## [Unreleased] 2026-04-30
 ### Changed
-- deps: patch upgrades — authlib 1.6.9→1.7.0, cryptography 46.0.6→46.0.7, pytest 9.0.2→9.0.3, pip 25.0.1→26.0.1 (3 vuln fixes)
-- deps: minor upgrades — lxml 6.0.2→6.1.0 (1 vuln fix)
-- deps: major — pip 25.0.1→26.0.1 already covered in patch stage (side effect)
+- upgraded dependencies
 
 ## [1.3.3] 2026-04-14
 ### Changed
