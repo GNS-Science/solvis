@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.3.3] 2026-07-15
+### Changed
+- upgraded dependencies
+
 ## [1.3.3] 2026-04-30
 ### Changed
 - upgraded dependencies
