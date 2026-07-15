@@ -11,6 +11,5 @@ Classes:
 """
 
 from . import utils
+from ._version import __version__
 from .solution import CompositeSolution, FaultSystemSolution, InversionSolution
-
-__version__ = '1.3.3'
