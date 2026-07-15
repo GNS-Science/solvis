@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+### Changed
+- deps: patch (click, joserfc, pymdown-extensions, authlib)
+- deps: minor (idna, msgpack, pillow, urllib3, pip)
+- deps: major: cryptography 46.0.7 → 48.0.1 (transitive)
+- deps: skipped nltk 3.9.4 → 3.10.0 (blocked by 1-week age cutoff)
+
 ## [1.3.3] 2026-04-30
 ### Changed
 - upgraded dependencies
