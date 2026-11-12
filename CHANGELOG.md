@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.3.5] 2026-11-12
 ### Changed
 - deps: major (transitive): cryptography 48→50, filelock 3.25→3.32, pillow 13 (py>=3.11), pip 26.3, pymdown-extensions 10→12; minor/patch: all in-range upgrades via `uv lock --upgrade`
 
