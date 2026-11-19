@@ -193,30 +193,30 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.43.124"
+version = "1.44.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/06/fc/71d0afe1c7bad85524c292bcfb53d89acd5d05a944992a10066eb8e7ecd3/boto3-1.43.124.tar.gz", hash = "sha256:7f330e53e274a0b8e5982ed3dd4cec9e7e932cf48306c08db8b9e880d09c5c63", size = 112680, upload-time = "2026-11-04T21:22:36.001Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/91/02/d46523af0a933c35604e2bbb33e4ca8f69a00f9990af6d6b29ed84db64aa/boto3-1.44.1.tar.gz", hash = "sha256:c81dfdaab894cbcba78aa3773fe3fb27a13b576f49ff5552b91190072fc7dac0", size = 112740, upload-time = "2026-11-11T21:11:18.611Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/04/7a7c75e465b063d40d63b6fc5217e312793400fb43411d3064a5ba9174cc/boto3-1.43.124-py3-none-any.whl", hash = "sha256:62edd40fdeef6523ee2f73f4ccbe754fde79200ad0763bd86f4422e8125b2735", size = 140042, upload-time = "2026-11-04T21:22:33.566Z" },
+    { url = "https://files.pythonhosted.org/packages/36/5a/8af6cf092d9212091b8fc9bbf559bd04916094883a3c79a2464e715a1adf/boto3-1.44.1-py3-none-any.whl", hash = "sha256:1342653b8af9dc89f182cb5c0dfd5fa10f430d757c0ebd00326c053a6270d2c4", size = 140152, upload-time = "2026-11-11T21:11:15.904Z" },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.43.124"
+version = "1.44.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/1e/c0abe23b9495414dc79e3faeb6e96e2336053fd8cae7d80cc6bbe4bd02f3/botocore-1.43.124.tar.gz", hash = "sha256:6df80235995e2926e0768e7ad270e774adcd6ff0307da7ab87ffb8c384edb578", size = 16509340, upload-time = "2026-11-04T21:22:30.041Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/61/07918ec258ab7131dd601cb1aaffcd7fa008fa8bb0143fd195ecc4b4435d/botocore-1.44.1.tar.gz", hash = "sha256:e71f6249be2a7324899ba81c5958ac1809a78498ea2c8f60e00fc0e62262ab83", size = 16596239, upload-time = "2026-11-11T21:11:12.562Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/a4/77409b07ba0b5520dbc591c33b305c5fe4c186036d881ca894a597c0dfba/botocore-1.43.124-py3-none-any.whl", hash = "sha256:4651bac68d1aef78d42c8aefb514a6cd86fda07971b8348652a9d24f21b07965", size = 16209102, upload-time = "2026-11-04T21:22:22.159Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/45/ea4a91a51d6cafd6a7f7b0b8b88767c6d7054dc588ffcb7d1e11e9402e69/botocore-1.44.1-py3-none-any.whl", hash = "sha256:7a741074a78e28187c88d9f7f91db18731ea91725455873d863ae63ea35e75f3", size = 16295147, upload-time = "2026-11-11T21:11:08.108Z" },
 ]
 
 [[package]]
@@ -1999,16 +1999,16 @@ wheels = [
 
 [[package]]
 name = "nshm-toshi-client"
-version = "1.3.3"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
     { name = "gql", extra = ["requests"] },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/32/2c/9c926496fd3df68cb87e0e334d8fdc0de3cbe6ccda98cab7d6c1cf382a52/nshm_toshi_client-1.3.3.tar.gz", hash = "sha256:7a3db5773491aac75232e95fe56d1d9c1be68ff7736ecbe64772f105d6e413b9", size = 45258, upload-time = "2026-11-09T22:12:23.938Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/5c/b5569c215215145552ae13b7e01b394580fc4d8da01b6d5b217564b3d2e4/nshm_toshi_client-1.4.0.tar.gz", hash = "sha256:81ec557adbb1c6b8b770b7f8c109179cb2e0fdb573509d18fe12b896dfb8bfa0", size = 45145, upload-time = "2026-11-18T22:28:53.325Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e2/ce/f7e16a40794ca46316aa05e43b6fa3a41bf61e6650720f86c34d14d8b399/nshm_toshi_client-1.3.3-py3-none-any.whl", hash = "sha256:395aa0f7f3a88077910943cf4d100c9a4c315663978bd02e7ad70cf3529fa03e", size = 37531, upload-time = "2026-11-09T22:12:22.843Z" },
+    { url = "https://files.pythonhosted.org/packages/76/4f/e5059de705fa7c4475a79d85de09f7c20ab5acd7f1d2ee9cfff47e9d3f50/nshm_toshi_client-1.4.0-py3-none-any.whl", hash = "sha256:1f79dcff495ceb7e07b54ae0c7cca60f3023ed26e929ce19def98aff8ea5d6f9", size = 37518, upload-time = "2026-11-18T22:28:52.157Z" },
 ]
 
 [[package]]
