@@ -27,7 +27,7 @@ Examples:
     ```
 """
 
-from typing import TYPE_CHECKING, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Iterable, List, Optional, Set, Union, cast
 
 import geopandas as gpd
 import shapely.geometry
@@ -81,7 +81,8 @@ class FilterRuptureIds(ChainableSetBase):
             df_rr: pd.DataFrame = self._solution.solution_file.rupture_rates.drop(
                 columns=["Rupture Index", "fault_system"]
             )
-            df_rr.index = df_rr.index.droplevel(0)  # so we're indexed by "Rupture Index" without " ault_system"
+            # so we're indexed by "Rupture Index" without "fault_system"
+            df_rr.index = cast("pd.MultiIndex", df_rr.index).droplevel(0)
         else:
             df_rr = self._solution.solution_file.rupture_rates.drop(columns=["Rupture Index"])
 

@@ -89,14 +89,14 @@ class InversionSolutionModel:
         tic0 = time.perf_counter()
 
         # convert to relational table, turning headings index into plain column
-        df2 = df_table.stack().reset_index()
+        df2 = df_table.stack().dropna().reset_index()
 
         tic1 = time.perf_counter()
         log.debug('rupture_sections(): time to convert indiced to table: %2.3f seconds' % (tic1 - tic0))
 
         # remove the headings column
         df2.drop(df2.iloc[:, 1:2], inplace=True, axis=1)
-        df2 = df2.set_axis(['rupture', 'section'], axis='columns', copy=False)
+        df2 = df2.set_axis(['rupture', 'section'], axis='columns')
 
         toc = time.perf_counter()
         log.debug('rupture_sections(): time to load and conform rupture_sections: %2.3f seconds' % (toc - tic))

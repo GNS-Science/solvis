@@ -148,7 +148,7 @@ class FaultSystemSolution(InversionSolution):
 
         aggregate_rates_df = composite_rates_df.pivot_table(
             index=['fault_system', 'Rupture Index'],
-            aggfunc={"Annual Rate": ['min', 'max', 'count'], "weighted_rate": 'sum'},
+            aggfunc={"Annual Rate": ['min', 'max', 'count'], "weighted_rate": 'sum'},  # type: ignore[dict-item]
         )
 
         # print(aggregate_rates_df.columns)
