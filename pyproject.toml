@@ -8,7 +8,7 @@ authors = [
     { name = "Chris B Chamberlain", email = "chrisbc@artisan.co.nz" },
     { name = "NSHM Compute Working Group", email = "nshm@gns.cri.nz" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12,<4"
 
 dependencies = [
     "geopandas>=1.0.1",
@@ -54,7 +54,6 @@ dev = [
     "pytest-cov>=2.12.0",
     "pytest-xdist>=3.5.0",
     "pyvista>=0.44.1",
-    "safety>=3.6.2",
     "tox>=4.4.4",
 ]
 scripts = [
@@ -88,7 +87,7 @@ exclude-newer-package = {"nzshm-common" = false, "nzshm-model" = false, "nshm-to
 [tool.black]
 line-length = 120
 skip-string-normalization = true
-target-version = ['py311', 'py310', 'py38', 'py39']
+target-version = ['py312', 'py313', 'py314']
 include = '\.pyi?$'
 exclude = '''
 /(

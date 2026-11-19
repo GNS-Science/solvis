@@ -10,7 +10,7 @@ Solvis is a Python library for analysis of OpenSHA Modular Fault System Solution
 
 ### Setup
 ```
-pyenv local 3.10
+pyenv local 3.12
 uv sync --all-groups
 ```
 
@@ -18,8 +18,8 @@ uv sync --all-groups
 - `uv run pytest` — run all tests
 - `uv run pytest test/<file>.py` — run a single test file
 - `uv run pytest -k <keyword>` — filter tests by name
-- `uv run tox` — full QA suite (tests across Python 3.10/3.11/3.12, lint, format)
-- `uv run tox -e py310` — tests with coverage for a specific Python version
+- `uv run tox` — full QA suite (tests across Python 3.12/3.13/3.14, lint, format)
+- `uv run tox -e py312` — tests with coverage for a specific Python version
 
 ### Code Quality
 - `uv run tox -e format` — apply formatting (black + isort)
