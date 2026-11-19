@@ -12,8 +12,8 @@ requires-python = ">=3.12,<4"
 
 dependencies = [
     "geopandas>=1.0.1",
-    "nzshm-common>=0.8.1",
-    "nzshm-model>=0.13.5",
+    "nzshm-common>=0.11.0",
+    "nzshm-model>=0.16.0",
     "pandas>=2.3.0,<3",
     "pyproj>=3.3",
     "python-dateutil>=2.8.2",

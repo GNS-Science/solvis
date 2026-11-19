@@ -2105,16 +2105,16 @@ wheels = [
 
 [[package]]
 name = "nzshm-common"
-version = "0.10.1"
+version = "0.11.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a1/92/1c41ce7ae36020ca0cd9271bbad8cf4a4e9c3841140ba09450fa14a3ad30/nzshm_common-0.10.1.tar.gz", hash = "sha256:3b93943adecc052070bff1e94be3b1c49b649c6ae305e79308ae3c9d4f690c80", size = 268193, upload-time = "2026-11-09T01:27:31.624Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/c8/564f6c068f1646cd2fc9b31933d31f6d59b62afff350183a9aa2e83d1898/nzshm_common-0.11.0.tar.gz", hash = "sha256:757e28c70cb31dd9f597a93b6d95659c6af01d0d97d65e3bea55c482c271ce82", size = 268196, upload-time = "2026-11-18T01:29:32.202Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/a8/9cafbf1e5268f36fdb8166ab11fa3da7947e297ea698945c938a3cb48219/nzshm_common-0.10.1-py3-none-any.whl", hash = "sha256:3b84592a3e2fa49cf7e677397b8b0010fcde9fd1944b33fccfdcb501ea75b4cc", size = 290184, upload-time = "2026-11-09T01:27:30.306Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/28/0ac859101488acd101a4942537b9ad965fa369ce7a5a1b067b36195de946/nzshm_common-0.11.0-py3-none-any.whl", hash = "sha256:aa8506fa7b08fb2de92d18d8bfd644e2f373bd52761aa6318ee137acef980c27", size = 290184, upload-time = "2026-11-18T01:29:31.013Z" },
 ]
 
 [[package]]
 name = "nzshm-model"
-version = "0.15.6"
+version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dacite" },
@@ -2122,9 +2122,9 @@ dependencies = [
     { name = "nshm-toshi-client" },
     { name = "nzshm-common" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a5/47/7b47019566463dfd197867aff2fcb411926354017300be70ec9aba6b55a5/nzshm_model-0.15.6.tar.gz", hash = "sha256:11b702d994eba10c5057d9a7b9bab19e7853ba066c9461b4e0b6c06bd4c25b66", size = 88213, upload-time = "2026-11-11T02:13:39.846Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2e/24/45b25c790f6053f7239935228e2a41511f605bf29c61b5e082804ac98a3b/nzshm_model-0.16.0.tar.gz", hash = "sha256:2f6dab3eecb15c9790663ba30d810998438f1e1ae91864f84b6cb2a309129536", size = 88251, upload-time = "2026-11-19T19:47:04.546Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/24/1c54542e8b2ee465f92660ce9abad2a7350debaef0df7a81b875b21ef3f4/nzshm_model-0.15.6-py3-none-any.whl", hash = "sha256:25d9c2e8429c160eb610d377a8892adb0c5ff87227f456b269bea0cb72515083", size = 100676, upload-time = "2026-11-11T02:13:38.529Z" },
+    { url = "https://files.pythonhosted.org/packages/ba/9a/c651689837e80f847fcc0a0b1f72241f827fe39bcedd012aefaf0db3a4fa/nzshm_model-0.16.0-py3-none-any.whl", hash = "sha256:6ebf4e8991a9b56c16dd94aed52ac73b8d5d17dd7d8681a30bfa1f211ded2024", size = 100677, upload-time = "2026-11-19T19:47:03.421Z" },
 ]
 
 [[package]]
@@ -3345,8 +3345,8 @@ scripts = [
 [package.metadata]
 requires-dist = [
     { name = "geopandas", specifier = ">=1.0.1" },
-    { name = "nzshm-common", specifier = ">=0.8.1" },
-    { name = "nzshm-model", specifier = ">=0.13.5" },
+    { name = "nzshm-common", specifier = ">=0.11.0" },
+    { name = "nzshm-model", specifier = ">=0.16.0" },
     { name = "pandas", specifier = ">=2.3.0,<3" },
     { name = "pandera", specifier = ">=0.26.0" },
     { name = "pyproj", specifier = ">=3.3" },
