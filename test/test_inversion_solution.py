@@ -21,8 +21,8 @@ class TestInversionSolution(object):
     def test_check_indexes(self, crustal_solution_fixture):
         sol = crustal_solution_fixture
         assert sol.solution_file.indices.index.all() == sol.solution_file.indices["Rupture Index"].all()
-        assert sol.solution_file.rupture_rates.index == sol.solution_file.rupture_rates["Rupture Index"]
-        assert sol.solution_file.ruptures.index == sol.solution_file.ruptures["Rupture Index"]
+        assert (sol.solution_file.rupture_rates.index == sol.solution_file.rupture_rates["Rupture Index"]).all()
+        assert (sol.solution_file.ruptures.index == sol.solution_file.ruptures["Rupture Index"]).all()
         assert sol.solution_file.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
         assert sol.solution_file.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
         # assert sol.indices["Rupture Index"].dtype == pd.UInt32Dtype()
@@ -114,8 +114,8 @@ class TestSmallPuyInversionSolution(object):
 
     def test_check_indexes(self, puysegur_small_fixture):
         sol = puysegur_small_fixture
-        assert sol.solution_file.rupture_rates.index == sol.solution_file.rupture_rates["Rupture Index"]
-        assert sol.solution_file.ruptures.index == sol.solution_file.ruptures["Rupture Index"]
+        assert (sol.solution_file.rupture_rates.index == sol.solution_file.rupture_rates["Rupture Index"]).all()
+        assert (sol.solution_file.ruptures.index == sol.solution_file.ruptures["Rupture Index"]).all()
         assert sol.solution_file.indices.index.all() == sol.solution_file.indices["Rupture Index"].all()
         # assert sol.rupture_rates["Rupture Index"].dtype == pd.UInt32Dtype()
         # assert sol.ruptures["Rupture Index"].dtype == pd.UInt32Dtype()
