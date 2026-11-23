@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.4.0] 2026-11-24
 ### Changed
 - python: requires >=3.12,<4 (dropped 3.10, 3.11); test matrix 3.12, 3.13, 3.14
 - deps: pandas 2→3 (pandas-stubs 3.1), nzshm-common 0.10→0.11, nzshm-model 0.15→0.16, pandera 0.35→0.36, mkdocstrings-python 1→2
