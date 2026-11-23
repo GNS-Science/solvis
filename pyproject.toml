@@ -8,17 +8,17 @@ authors = [
     { name = "Chris B Chamberlain", email = "chrisbc@artisan.co.nz" },
     { name = "NSHM Compute Working Group", email = "nshm@gns.cri.nz" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12,<4"
 
 dependencies = [
     "geopandas>=1.0.1",
-    "nzshm-common>=0.8.1",
-    "nzshm-model>=0.13.5",
-    "pandas>=2.3.0,<3",
+    "nzshm-common>=0.11.0",
+    "nzshm-model>=0.16.0",
+    "pandas>=3.1.1,<4",
     "pyproj>=3.3",
     "python-dateutil>=2.8.2",
     "pytz>=2025.1",
-    "pandera>=0.26.0",
+    "pandera>=0.36.0",
 ]
 
 [project.scripts]
@@ -39,7 +39,7 @@ doc = [
     "mkdocs-material-extensions>=1.3.1",
     "mkdocs-pymdownx-material-extras>=2.5.6",
     "mkdocstrings>=0.26.2",
-    "mkdocstrings-python>=1.18.2,<2.0.0",
+    "mkdocstrings-python>=2.0.10,<3.0.0",
 ]
 dev = [
     "black>=24.10.0",
@@ -49,12 +49,11 @@ dev = [
     "isort>=5.13.2",
     "matplotlib>=3.6.3",
     "mypy>=1.18.2",
-    "pandas-stubs==2.3.0.250703.*",
+    "pandas-stubs==3.1.0.261029.*",
     "pip-audit>=2.9.0",
     "pytest-cov>=2.12.0",
     "pytest-xdist>=3.5.0",
     "pyvista>=0.44.1",
-    "safety>=3.6.2",
     "tox>=4.4.4",
 ]
 scripts = [
@@ -88,7 +87,7 @@ exclude-newer-package = {"nzshm-common" = false, "nzshm-model" = false, "nshm-to
 [tool.black]
 line-length = 120
 skip-string-normalization = true
-target-version = ['py311', 'py310', 'py38', 'py39']
+target-version = ['py312', 'py313', 'py314']
 include = '\.pyi?$'
 exclude = '''
 /(

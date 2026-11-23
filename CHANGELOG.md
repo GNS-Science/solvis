@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0] 2026-11-24
+### Changed
+- python: requires >=3.12,<4 (dropped 3.10, 3.11); test matrix 3.12, 3.13, 3.14
+- deps: pandas 2→3 (pandas-stubs 3.1), nzshm-common 0.10→0.11, nzshm-model 0.15→0.16, pandera 0.35→0.36, mkdocstrings-python 1→2
+- deps: minor/patch and transitive upgrades
+
+### Fixed
+- `rupture_sections` drops empty section slots explicitly (pandas 3 `stack()` keeps NA values)
+
+### Removed
+- deps: safety
+
 ## [1.3.5] 2026-11-12
 ### Changed
 - deps: major (transitive): cryptography 48→50, filelock 3.25→3.32, pillow 13 (py>=3.11), pip 26.3, pymdown-extensions 10→12; minor/patch: all in-range upgrades via `uv lock --upgrade`

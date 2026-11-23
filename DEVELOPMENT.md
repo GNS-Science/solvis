@@ -6,7 +6,7 @@
 - setup python env
 
 ```
-pyenv local 3.10
+pyenv local 3.12
 uv sync --all-groups
 ```
 
@@ -18,11 +18,6 @@ uv run pip-audit -r audit.txt -s pypi --require-hashes
 uv run pip-audit -r audit.txt -s osv --require-hashes
 
 uv run pip show {package-name}
-```
-
-### `safety` requires a user login registration
-```
-uv run safety scan
 ```
 
 ## Testing 
@@ -37,5 +32,5 @@ Or individual steps...
 
  - `uv run tox -e format` to apply formatting rules.
  - `uv run tox -e lint` to run lint checks (style and typing).
- - `uv run tox -e py310` to run tests with coverage report.
+ - `uv run tox -e py312` to run tests with coverage report.
  

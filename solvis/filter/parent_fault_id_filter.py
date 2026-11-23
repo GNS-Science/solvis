@@ -139,9 +139,9 @@ class FilterParentFaultIds(ChainableSetBase):
         Raises:
             ValueError: If any `named_fault_names` value is not valid.
         """
-        pids: Iterable[int] = []
+        pids: list[int] = []
         for nf_name in named_fault_names:
-            pids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
+            pids.extend(named_fault.named_fault_table().loc[nf_name].parent_fault_ids)
         return self.new_chainable_set(set(pids), self._solution, join_prior=join_prior)
 
     def for_parent_fault_names(

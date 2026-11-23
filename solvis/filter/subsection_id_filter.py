@@ -78,9 +78,9 @@ class FilterSubsectionIds(ChainableSetBase):
         Raises:
             ValueError: If any `named_fault_names` argument is not valid.
         """
-        parent_fault_ids: Iterable[int] = []
+        parent_fault_ids: list[int] = []
         for nf_name in named_fault_names:
-            parent_fault_ids += named_fault.named_fault_table().loc[nf_name].parent_fault_ids
+            parent_fault_ids.extend(named_fault.named_fault_table().loc[nf_name].parent_fault_ids)
         return self.for_parent_fault_ids(parent_fault_ids, join_prior=join_prior)
 
     def for_parent_fault_names(
